@@ -133,4 +133,21 @@ pterodactyl/       Pterodactyl egg
 5. **Images on the server:** commit them to `public/assets/` in the repo (recommended, so they arrive with updates), or upload them with the panel's File Manager into `public/assets/<folder>/`. Uploaded files sit outside git and survive updates. Don't upload a file with the same name as one that's also committed to the repo, or `git pull` will refuse to update.
 6. **Backups:** back up the `data/` folder, which holds all accounts and saves. The panel's Backups feature works for this.
 
-**HTTPS / domain (optional):** put nginx, Caddy or Cloudflare in front of the port and proxy both HTTP and WebSocket (`/ws`) traffic. Set *Trust Proxy* to `true`.
+### Own subdomain + HTTPS
+
+Ready-made configs are in `deploy/` (`nginx-ashenvale.conf` and `Caddyfile`).
+
+1. **DNS:** at your domain provider, add an **A record**: name `play` (or whatever subdomain you want), value = the public IP of the machine running Wings / the game server. (If you use Cloudflare, set it to *DNS only* / grey cloud while getting the certificate.)
+2. **Reverse proxy on that machine** (nginx is usually already installed there if the Panel runs on it too):
+   ```bash
+   sudo cp deploy/nginx-ashenvale.conf /etc/nginx/sites-available/ashenvale.conf
+   sudo nano /etc/nginx/sites-available/ashenvale.conf      # set your subdomain + allocation port
+   sudo ln -s /etc/nginx/sites-available/ashenvale.conf /etc/nginx/sites-enabled/
+   sudo nginx -t && sudo systemctl reload nginx
+   sudo apt install -y certbot python3-certbot-nginx         # if not installed yet
+   sudo certbot --nginx -d play.example.com                  # free HTTPS certificate, auto-renews
+   ```
+3. In the Pterodactyl panel set the server variable **Trust Proxy** to `true` and restart.
+4. Players open **https://play.example.com**. WebSockets automatically switch to `wss://`.
+
+Ports 80 and 443 must be open in your firewall (`sudo ufw allow 80,443/tcp`).

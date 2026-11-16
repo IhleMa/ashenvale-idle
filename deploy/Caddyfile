@@ -1,0 +1,5 @@
+# Alternative to nginx: Caddy gets and renews HTTPS certificates automatically.
+# Replace the subdomain and the allocation IP:port, then: sudo systemctl reload caddy
+play.example.com {
+    reverse_proxy 127.0.0.1:25565
+}
