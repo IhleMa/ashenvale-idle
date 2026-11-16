@@ -1,0 +1,377 @@
+// Player state model and all validated player actions (pure game logic, no networking).
+import crypto from 'node:crypto';
+import { CONFIG, rarityIndex } from '../shared/config.js';
+import { CLASSES, CLASS_IDS, TRAITS } from '../shared/data/classes.js';
+import { ABILITIES } from '../shared/data/abilities.js';
+import { ZONES } from '../shared/data/zones.js';
+import { ACHIEVEMENTS } from '../shared/data/achievements.js';
+import { SLOT_IDS, generateItem, canEquip, itemSellValue, ITEM_BASES } from '../shared/data/items.js';
+import { createCharacter, unlockAbility, upgradeAbility, addXp, autoSpendAttributes, autoLearnAbilities, abilitySlots, respecCost, cloneRule } from '../shared/character.js';
+import { sanitizeRule } from '../shared/rules.js';
+import { ATTR_IDS } from '../shared/stats.js';
+import { createRng, randomSeed } from '../shared/rng.js';
+
+const NAMES = ['Aldric', 'Brienna', 'Cassian', 'Dagna', 'Elowen', 'Fenris', 'Gwyn', 'Halvard', 'Isolde', 'Jorah', 'Kael', 'Liora', 'Merrick', 'Nyx', 'Orin', 'Perrin', 'Quill', 'Rowan', 'Sable', 'Thane', 'Ulric', 'Vesna', 'Wren', 'Xander', 'Yara', 'Zephyr', 'Ashka', 'Bram', 'Corin', 'Delia', 'Edda', 'Faelan', 'Garrick', 'Hesper', 'Ivo', 'Juniper', 'Kestrel', 'Lysa', 'Mordecai', 'Nessa', 'Oswin', 'Petra', 'Ronan', 'Selka', 'Tamsin', 'Vale'];
+
+export class GameError extends Error {}
+const fail = msg => { throw new GameError(msg); };
+const uid = () => crypto.randomBytes(6).toString('hex');
+
+export function newPlayer(account) {
+  return {
+    id: account.id, name: account.username, createdAt: Date.now(), lastActive: Date.now(),
+    heroId: null, characters: {}, gold: 0, inventory: [],
+    parties: Array.from({ length: CONFIG.party.presets }, (_, i) => ({ name: `Party ${i + 1}`, members: [] })),
+    activeParty: 0, zone: 'whispering_woods', unlockedZones: ['whispering_woods'], bossKills: {},
+    recruitment: { offers: [], refreshedAt: 0 },
+    stats: { kills: 0, bossKills: 0, recruited: 0, epicFound: 0, legendaryFound: 0, coopWins: 0, heroLevel: 1, zonesUnlocked: 1, fights: 0 },
+    achievements: {},
+    settings: { autoSellBelow: null, autoDevelopRecruits: true, autoDevelopHero: false },
+    coopChars: [],
+  };
+}
+
+// Fills defaults for players saved by older versions (keeps saves forward-compatible)
+export function migratePlayer(p) {
+  const base = newPlayer({ id: p.id, username: p.name });
+  for (const k of Object.keys(base)) if (p[k] === undefined) p[k] = base[k];
+  p.stats = { ...base.stats, ...p.stats };
+  p.settings = { ...base.settings, ...p.settings };
+  while (p.parties.length < CONFIG.party.presets) p.parties.push({ name: `Party ${p.parties.length + 1}`, members: p.heroId ? [p.heroId] : [] });
+  for (const ch of Object.values(p.characters)) {
+    for (const s of SLOT_IDS) if (!(s in ch.equipment)) ch.equipment[s] = null;
+    // drop abilities that no longer exist
+    for (const a of Object.keys(ch.abilities)) if (!ABILITIES[a]) { delete ch.abilities[a]; delete ch.rules[a]; }
+    ch.loadout = ch.loadout.filter(a => ch.abilities[a]);
+  }
+  return p;
+}
+
+export function hero(p) { return p.heroId ? p.characters[p.heroId] : null; }
+export function getChar(p, id) { return p.characters[id] || fail('Character not found'); }
+export function activePartyChars(p) {
+  return (p.parties[p.activeParty]?.members || []).map(id => p.characters[id]).filter(Boolean);
+}
+
+// --------------------------------------------------------------------------- hero creation
+export function createHero(p, { name, classId, portrait }, assetIndex) {
+  if (p.heroId) fail('Hero already created');
+  if (typeof name !== 'string' || !/^[A-Za-z][A-Za-z' -]{1,15}$/.test(name.trim())) fail('Name must be 2-16 letters');
+  if (!CLASSES[classId]) fail('Unknown class');
+  if (portrait != null && (typeof portrait !== 'string' || !assetIndex[`portraits/${portrait}`])) portrait = null;
+  const id = uid();
+  const ch = createCharacter({ id, name: name.trim(), classId, isMain: true, portrait });
+  p.characters[id] = ch;
+  p.heroId = id;
+  for (const party of p.parties) party.members = [id];
+  p.gold = 150;
+  // starter gear
+  const rng = createRng(randomSeed());
+  const starter = { warrior: ['sword', 'leather_chest'], mage: ['staff', 'robe'], rogue: ['dagger', 'leather_chest'], cleric: ['mace', 'robe'], ranger: ['bow', 'leather_chest'] }[classId] || [];
+  for (const baseId of starter) {
+    const item = generateItem(rng, 1, { baseId, rarity: 'common' });
+    ch.equipment[item.slot] = item;
+  }
+  refreshRecruits(p, true, assetIndex);
+  return ch;
+}
+
+// --------------------------------------------------------------------------- attributes / abilities
+export function allocateAttribute(p, { charId, attr, amount = 1 }) {
+  const ch = getChar(p, charId);
+  if (!ATTR_IDS.includes(attr)) fail('Unknown attribute');
+  amount = Math.floor(Number(amount));
+  if (!(amount >= 1 && amount <= ch.unspentAttributePoints)) fail('Not enough attribute points');
+  ch.attributes[attr] += amount;
+  ch.unspentAttributePoints -= amount;
+}
+
+export function resetAttributes(p, { charId }) {
+  const ch = getChar(p, charId);
+  const cost = respecCost(ch);
+  if (p.gold < cost) fail(`Respec costs ${cost} gold`);
+  p.gold -= cost;
+  for (const a of ATTR_IDS) { ch.unspentAttributePoints += ch.attributes[a]; ch.attributes[a] = 0; }
+}
+
+export function doUnlockAbility(p, { charId, abilityId }) {
+  try { unlockAbility(getChar(p, charId), abilityId); } catch (e) { fail(e.message); }
+}
+export function doUpgradeAbility(p, { charId, abilityId }) {
+  try { upgradeAbility(getChar(p, charId), abilityId); } catch (e) { fail(e.message); }
+}
+
+export function setLoadout(p, { charId, loadout }) {
+  const ch = getChar(p, charId);
+  if (!Array.isArray(loadout)) fail('Invalid loadout');
+  const clean = [...new Set(loadout)].filter(a => typeof a === 'string');
+  if (clean.length > abilitySlots(ch)) fail(`Only ${abilitySlots(ch)} ability slots`);
+  for (const a of clean) if (!ch.abilities[a]) fail('Ability not unlocked');
+  ch.loadout = clean;
+}
+
+export function setRule(p, { charId, abilityId, rule }) {
+  const ch = getChar(p, charId);
+  if (!ch.abilities[abilityId]) fail('Ability not unlocked');
+  try { ch.rules[abilityId] = sanitizeRule(rule, ABILITIES[abilityId]); } catch (e) { fail(e.message); }
+}
+
+export function resetRule(p, { charId, abilityId }) {
+  const ch = getChar(p, charId);
+  if (!ch.abilities[abilityId]) fail('Ability not unlocked');
+  ch.rules[abilityId] = cloneRule(ABILITIES[abilityId].defaultRule);
+}
+
+export function setRole(p, { charId, role }) {
+  const ch = getChar(p, charId);
+  if (!CONFIG.roles[role]) fail('Unknown role');
+  ch.role = role;
+}
+
+// --------------------------------------------------------------------------- equipment
+function findItem(p, itemUid) {
+  const idx = p.inventory.findIndex(i => i.uid === itemUid);
+  if (idx < 0) fail('Item not found');
+  return idx;
+}
+
+export function equip(p, { charId, itemUid }) {
+  const ch = getChar(p, charId);
+  const idx = findItem(p, itemUid);
+  const item = p.inventory[idx];
+  if (!canEquip(item, ch)) fail(item.requiredLevel > ch.level ? `Requires level ${item.requiredLevel}` : `${CLASSES[ch.classId].name}s cannot use this`);
+  p.inventory.splice(idx, 1);
+  const old = ch.equipment[item.slot];
+  ch.equipment[item.slot] = item;
+  if (old) p.inventory.push(old);
+}
+
+export function unequip(p, { charId, slot }) {
+  const ch = getChar(p, charId);
+  if (!SLOT_IDS.includes(slot)) fail('Invalid slot');
+  const item = ch.equipment[slot];
+  if (!item) fail('Nothing equipped');
+  if (p.inventory.length >= CONFIG.inventory.limit) fail('Inventory is full');
+  ch.equipment[slot] = null;
+  p.inventory.push(item);
+}
+
+export function sellItem(p, { itemUid }) {
+  const idx = findItem(p, itemUid);
+  if (p.inventory[idx].locked) fail('Item is locked');
+  const [item] = p.inventory.splice(idx, 1);
+  const v = itemSellValue(item);
+  p.gold += v;
+  return v;
+}
+
+export function sellByRarity(p, { maxRarity }) {
+  const max = rarityIndex(maxRarity);
+  let total = 0, n = 0;
+  p.inventory = p.inventory.filter(i => {
+    if (i.locked || rarityIndex(i.rarity) > max) return true;
+    total += itemSellValue(i); n++; return false;
+  });
+  p.gold += total;
+  return { count: n, gold: total };
+}
+
+export function toggleLock(p, { itemUid }) {
+  const item = p.inventory[findItem(p, itemUid)];
+  item.locked = !item.locked;
+}
+
+export function setSettings(p, s) {
+  if ('autoSellBelow' in s) p.settings.autoSellBelow = s.autoSellBelow === null || CONFIG.rarities.some(r => r.id === s.autoSellBelow) ? s.autoSellBelow : null;
+  if ('autoDevelopRecruits' in s) p.settings.autoDevelopRecruits = !!s.autoDevelopRecruits;
+  if ('autoDevelopHero' in s) p.settings.autoDevelopHero = !!s.autoDevelopHero;
+}
+
+// Adds an item (auto-sell rules & capacity respected). Returns 'kept' | 'sold'
+export function receiveItem(p, item) {
+  const r = rarityIndex(item.rarity);
+  if (r >= 3) p.stats.epicFound++;
+  if (r >= 4) p.stats.legendaryFound++;
+  const below = p.settings.autoSellBelow;
+  if ((below && r <= rarityIndex(below)) || p.inventory.length >= CONFIG.inventory.limit) {
+    p.gold += itemSellValue(item);
+    return 'sold';
+  }
+  p.inventory.push(item);
+  return 'kept';
+}
+
+// --------------------------------------------------------------------------- recruitment
+export function recruitCost(p, offer) {
+  if (p.stats.recruited === 0) return 0; // first companion is free
+  return CONFIG.recruitment.costBase + CONFIG.recruitment.costPerLevel * offer.level;
+}
+
+export function refreshRecruits(p, free = false, assetIndex = {}) {
+  const h = hero(p);
+  const lvl = h ? h.level : 1;
+  if (!free) {
+    const cost = CONFIG.recruitment.refreshCostPerLevel * lvl;
+    if (p.gold < cost) fail(`Refreshing costs ${cost} gold`);
+    p.gold -= cost;
+  }
+  const rng = createRng(randomSeed());
+  const offers = [];
+  const classes = [...CLASS_IDS];
+  // first offer set guarantees complementary classes for a new hero
+  for (let i = 0; i < CONFIG.recruitment.offers; i++) {
+    const classId = classes.length ? classes.splice(rng.int(0, classes.length - 1), 1)[0] : rng.pick(CLASS_IDS);
+    const portraits = Object.keys(assetIndex).filter(k => k.startsWith(`portraits/${classId}`)).map(k => k.slice(10));
+    offers.push({
+      offerId: uid(), name: rng.pick(NAMES), classId, trait: rng.pick(Object.keys(TRAITS)),
+      level: Math.max(1, lvl - rng.int(0, 2)), portrait: portraits.length ? rng.pick(portraits) : null,
+    });
+  }
+  p.recruitment = { offers, refreshedAt: Date.now() };
+}
+
+export function maybeAutoRefreshRecruits(p, assetIndex) {
+  if (Date.now() - p.recruitment.refreshedAt > CONFIG.recruitment.refreshSeconds * 1000) {
+    refreshRecruits(p, true, assetIndex);
+    return true;
+  }
+  return false;
+}
+
+export function recruit(p, { offerId }) {
+  if (!p.heroId) fail('Create your hero first');
+  const idx = p.recruitment.offers.findIndex(o => o.offerId === offerId);
+  if (idx < 0) fail('Recruit no longer available');
+  const recruits = Object.values(p.characters).filter(c => !c.isMain).length;
+  if (recruits >= CONFIG.party.rosterLimit) fail('Your roster is full');
+  const offer = p.recruitment.offers[idx];
+  const cost = recruitCost(p, offer);
+  if (p.gold < cost) fail(`Costs ${cost} gold`);
+  p.gold -= cost;
+  const ch = createCharacter({ id: uid(), name: offer.name, classId: offer.classId, level: offer.level, portrait: offer.portrait, trait: offer.trait });
+  p.characters[ch.id] = ch;
+  p.recruitment.offers.splice(idx, 1);
+  p.stats.recruited++;
+  // put new recruit into the active party if there is space
+  const party = p.parties[p.activeParty];
+  if (party.members.length < CONFIG.party.size) party.members.push(ch.id);
+  return ch;
+}
+
+export function dismiss(p, { charId }) {
+  const ch = getChar(p, charId);
+  if (ch.isMain) fail('Your hero cannot be dismissed');
+  for (const item of Object.values(ch.equipment)) if (item) receiveItem(p, item);
+  delete p.characters[charId];
+  for (const party of p.parties) party.members = party.members.filter(id => id !== charId);
+  p.coopChars = p.coopChars.filter(id => id !== charId);
+}
+
+export function renameCharacter(p, { charId, name }) {
+  const ch = getChar(p, charId);
+  if (typeof name !== 'string' || !/^[A-Za-z][A-Za-z' -]{1,15}$/.test(name.trim())) fail('Name must be 2-16 letters');
+  ch.name = name.trim();
+}
+
+// --------------------------------------------------------------------------- parties
+export function setParty(p, { index, members }) {
+  const party = p.parties[index] || fail('Invalid party');
+  if (!Array.isArray(members)) fail('Invalid members');
+  const clean = [...new Set(members)];
+  if (clean.length > CONFIG.party.size) fail(`Party size is limited to ${CONFIG.party.size}`);
+  for (const id of clean) getChar(p, id);
+  if (!clean.includes(p.heroId)) fail('Your hero must be in every party');
+  party.members = clean;
+}
+
+export function renameParty(p, { index, name }) {
+  const party = p.parties[index] || fail('Invalid party');
+  if (typeof name !== 'string' || name.trim().length < 1 || name.length > 24) fail('Invalid name');
+  party.name = name.trim().replace(/[<>]/g, '');
+}
+
+export function activateParty(p, { index }) {
+  if (!p.parties[index]) fail('Invalid party');
+  if (!p.parties[index].members.includes(p.heroId)) fail('Party is empty');
+  p.activeParty = index;
+}
+
+export function setCoopChars(p, { charIds }) {
+  if (!Array.isArray(charIds)) fail('Invalid selection');
+  const clean = [...new Set(charIds)].filter(id => p.characters[id] && id !== p.heroId);
+  p.coopChars = clean.slice(0, CONFIG.coop.charactersPerPlayer - 1);
+}
+
+export function coopCharacters(p) {
+  // default to companions from the active party when nothing was chosen
+  const picks = p.coopChars.length ? p.coopChars : (p.parties[p.activeParty]?.members || []).filter(id => id !== p.heroId);
+  return [p.heroId, ...picks].map(id => p.characters[id]).filter(Boolean).slice(0, CONFIG.coop.charactersPerPlayer);
+}
+
+// --------------------------------------------------------------------------- zones
+export function setZone(p, { zoneId }) {
+  if (!ZONES[zoneId]) fail('Unknown zone');
+  if (!p.unlockedZones.includes(zoneId)) fail('Zone locked — defeat the previous zone boss');
+  p.zone = zoneId;
+}
+
+export function onBossDefeated(p, zoneId) {
+  p.bossKills[zoneId] = (p.bossKills[zoneId] || 0) + 1;
+  const unlocked = [];
+  for (const z of Object.values(ZONES)) {
+    if (z.unlock === zoneId && !p.unlockedZones.includes(z.id)) { p.unlockedZones.push(z.id); unlocked.push(z); }
+  }
+  p.stats.zonesUnlocked = p.unlockedZones.length;
+  return unlocked;
+}
+
+// --------------------------------------------------------------------------- rewards & achievements
+// chars: characters who participated. Returns { levelUps: [{name, level}], sold, kept }
+export function applyRewards(p, chars, rewards) {
+  const levelUps = [];
+  for (const ch of chars) {
+    if (!p.characters[ch.id]) continue;
+    const bonus = ch.isMain ? CONFIG.mainCharacter.xpBonus : 0;
+    const traitXp = ch.trait ? TRAITS[ch.trait]?.bonus?.xpPct || 0 : 0;
+    const gained = addXp(ch, rewards.xp * (1 + bonus + traitXp));
+    if (gained) {
+      levelUps.push({ name: ch.name, level: ch.level, charId: ch.id });
+      if ((ch.isMain && p.settings.autoDevelopHero) || (!ch.isMain && p.settings.autoDevelopRecruits)) {
+        autoSpendAttributes(ch);
+        autoLearnAbilities(ch);
+      }
+    }
+  }
+  p.gold += rewards.gold;
+  let sold = 0, kept = 0;
+  for (const it of rewards.items) (receiveItem(p, it) === 'sold' ? sold++ : kept++);
+  p.stats.kills += rewards.kills || 0;
+  const h = hero(p);
+  if (h) p.stats.heroLevel = h.level;
+  return { levelUps, sold, kept };
+}
+
+export function checkAchievements(p) {
+  const granted = [];
+  for (const a of Object.values(ACHIEVEMENTS)) {
+    if (p.achievements[a.id]) continue;
+    if ((p.stats[a.stat] || 0) >= a.goal) {
+      p.achievements[a.id] = Date.now();
+      p.gold += a.reward.gold || 0;
+      granted.push(a);
+    }
+  }
+  return granted;
+}
+
+// --------------------------------------------------------------------------- client view
+export function publicPlayer(p) {
+  return {
+    id: p.id, name: p.name, heroId: p.heroId, characters: p.characters, gold: p.gold, inventory: p.inventory,
+    parties: p.parties, activeParty: p.activeParty, zone: p.zone, unlockedZones: p.unlockedZones, bossKills: p.bossKills,
+    recruitment: { ...p.recruitment, costs: Object.fromEntries(p.recruitment.offers.map(o => [o.offerId, recruitCost(p, o)])) },
+    stats: p.stats, achievements: p.achievements, settings: p.settings, coopChars: p.coopChars,
+  };
+}
+
+export { ITEM_BASES };

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ashenvale Idle</title>
+  <meta name="theme-color" content="#120d0b">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div id="auth" class="auth-screen" hidden>
+    <div class="auth-card">
+      <h1 class="logo big" data-logo>Ashenvale <span>Idle</span></h1>
+      <p class="muted center">Build your party. Script their tactics. Conquer together.</p>
+      <div class="tabs auth-tabs">
+        <button class="tab active" data-auth-tab="login">Log in</button>
+        <button class="tab" data-auth-tab="register">Create account</button>
+      </div>
+      <form id="auth-form" autocomplete="on">
+        <label>Username<input name="username" autocomplete="username" required minlength="3" maxlength="16" pattern="[A-Za-z0-9_]+"></label>
+        <label>Password<input name="password" type="password" autocomplete="current-password" required minlength="6" maxlength="128"></label>
+        <button class="btn primary wide" type="submit" id="auth-submit">Log in</button>
+        <p class="error" id="auth-error"></p>
+      </form>
+    </div>
+  </div>
+
+  <div id="game" hidden>
+    <header class="topbar">
+      <button class="icon-btn menu-toggle" id="menu-toggle" aria-label="Menu">☰</button>
+      <div class="logo" data-logo>Ashenvale <span>Idle</span></div>
+      <div class="topbar-hero" id="topbar-hero"></div>
+      <div class="topbar-activity" id="topbar-activity"></div>
+      <div class="topbar-right">
+        <div class="gold" id="topbar-gold" title="Gold">0</div>
+        <div class="conn" id="conn-status" title="Connection"></div>
+      </div>
+    </header>
+    <nav class="sidebar" id="sidebar"></nav>
+    <main id="view" class="view"></main>
+  </div>
+
+  <div id="toasts"></div>
+  <div id="modal-root"></div>
+  <script type="module" src="/js/main.js"></script>
+</body>
+</html>

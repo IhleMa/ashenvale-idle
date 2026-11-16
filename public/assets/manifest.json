@@ -1,0 +1,4 @@
+{
+  "_comment": "Optional: map an asset key to a custom file path (relative to public/assets) or a full https URL. Example: \"enemies/wolf\": \"packs/forest/wolf_final.webp\"",
+  "_example_items/sword": "items/my-cool-sword.png"
+}

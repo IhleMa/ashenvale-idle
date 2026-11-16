@@ -1,0 +1,103 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2026-11-16T17:00:00+01:00",
+    "name": "Ashenvale Idle",
+    "author": "admin@ashenvale.local",
+    "description": "Ashenvale Idle - a multiplayer idle RPG played in the browser. Node.js server with WebSocket multiplayer. Players connect with their browser to http://<server-ip>:<port>.",
+    "features": null,
+    "docker_images": {
+        "Node.js 22": "ghcr.io/parkervcp/yolks:nodejs_22",
+        "Node.js 20": "ghcr.io/parkervcp/yolks:nodejs_20"
+    },
+    "file_denylist": [],
+    "startup": "if [[ -d .git ]] && [[ \"${AUTO_UPDATE}\" == \"1\" ]]; then git pull --ff-only || echo 'git pull failed - starting with current files'; fi; npm install --omit=dev --no-audit --no-fund; node server/index.js",
+    "config": {
+        "files": "{}",
+        "startup": "{\r\n    \"done\": \"listening on\"\r\n}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!/bin/bash\r\n# Ashenvale Idle - Pterodactyl install script\r\n# Runs in a temporary container; the server files live in /mnt/server\r\nset -e\r\napt-get update -qq\r\napt-get install -y -qq git ca-certificates > /dev/null\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\nGIT_ADDRESS=\"${GIT_ADDRESS:-https://github.com/IhleMa/ashenvale-idle}\"\r\nBRANCH=\"${BRANCH:-main}\"\r\n[[ \"${GIT_ADDRESS}\" != *.git ]] && GIT_ADDRESS=\"${GIT_ADDRESS}.git\"\r\n\r\n# Private repositories: use a GitHub username + personal access token\r\nif [[ -n \"${USERNAME}\" && -n \"${ACCESS_TOKEN}\" ]]; then\r\n  GIT_ADDRESS=\"https://${USERNAME}:${ACCESS_TOKEN}@$(echo -e \"${GIT_ADDRESS}\" | cut -d/ -f3-)\"\r\nfi\r\n\r\nif [[ -d .git ]]; then\r\n  echo \"Existing installation found - updating\"\r\n  git remote set-url origin \"${GIT_ADDRESS}\"\r\n  git fetch origin \"${BRANCH}\"\r\n  git reset --hard \"origin/${BRANCH}\"\r\nelif [[ -n \"$(ls -A /mnt/server 2>/dev/null)\" ]]; then\r\n  echo \"Folder not empty - cloning into a temp folder and copying (player data in ./data is kept)\"\r\n  rm -rf /tmp/ashenvale\r\n  git clone --branch \"${BRANCH}\" --single-branch \"${GIT_ADDRESS}\" /tmp/ashenvale\r\n  cp -a /tmp/ashenvale/. /mnt/server/\r\nelse\r\n  git clone --branch \"${BRANCH}\" --single-branch \"${GIT_ADDRESS}\" .\r\nfi\r\n\r\nnpm install --omit=dev --no-audit --no-fund\r\nmkdir -p data public/assets\r\necho \"-----------------------------------------\"\r\necho \" Ashenvale Idle installed successfully!\"\r\necho \"-----------------------------------------\"\r\n",
+            "container": "node:22-bookworm-slim",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Git Repository",
+            "description": "GitHub repository to install the game from.",
+            "env_variable": "GIT_ADDRESS",
+            "default_value": "https://github.com/IhleMa/ashenvale-idle",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Branch",
+            "description": "Git branch to install and update from.",
+            "env_variable": "BRANCH",
+            "default_value": "main",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+        },
+        {
+            "name": "Auto Update",
+            "description": "Pull the latest code from GitHub on every start (1 = yes, 0 = no).",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Git Username",
+            "description": "Only needed if the repository is PRIVATE: your GitHub username.",
+            "env_variable": "USERNAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Git Access Token",
+            "description": "Only needed if the repository is PRIVATE: a GitHub personal access token with read access to the repo.",
+            "env_variable": "ACCESS_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Allow Registration",
+            "description": "Allow new players to create accounts (true/false).",
+            "env_variable": "ALLOW_REGISTRATION",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+        },
+        {
+            "name": "Trust Proxy",
+            "description": "Set to true only if the game runs behind a reverse proxy (nginx, Cloudflare) so login rate-limiting sees real player IPs.",
+            "env_variable": "TRUST_PROXY",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+        }
+    ]
+}
