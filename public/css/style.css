@@ -401,15 +401,15 @@ ul.plus li::marker { content: '+ '; color: var(--good); } ul.minus li::marker { 
 .result-banner b { display: block; font-family: var(--display); font-size: 26px; color: var(--good); }
 .result-banner.defeat b { color: var(--danger); }
 @keyframes pop { from { transform: translate(-50%, -50%) scale(.7); opacity: 0; } }
-.combat-bottom { display: grid; grid-template-columns: minmax(0, 2fr) minmax(240px, 1fr); gap: 16px; }
-.combat-log .log-lines { height: 260px; overflow-y: auto; font-size: 12px; background: #120d0c; border-radius: 8px; padding: 8px; font-variant-numeric: tabular-nums; }
+.combat-bottom { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.combat-log .log-lines { height: 380px; overflow-y: auto; font-size: 12px; background: #120d0c; border-radius: 8px; padding: 8px; font-variant-numeric: tabular-nums; }
 .log-line { padding: 1px 0; }
 .log-t { color: var(--faint); font-size: 10px; margin-right: 4px; }
 .log-name.ally { color: #8fd3ff; } .log-name.foe { color: #ff9e7a; }
 .log-dmg { color: #ffd2c4; font-weight: 600; } .log-heal { color: #8dff9b; font-weight: 600; } .log-crit { color: #ffcf3a; font-weight: 700; }
 .log-death { color: #ff7a6b; } .log-phase { color: var(--gold); font-weight: 600; } .log-win { color: var(--good); font-weight: 700; } .log-loss { color: var(--danger); font-weight: 700; }
 .log-sep { color: var(--accent2); font-family: var(--display); }
-.results-list { display: flex; flex-direction: column; gap: 6px; max-height: 290px; overflow-y: auto; }
+.results-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 6px; max-height: 260px; overflow-y: auto; }
 .result-row { padding: 6px 8px; background: #120d0c; border-radius: 6px; border-left: 3px solid var(--good); }
 .result-row.defeat { border-left-color: var(--danger); }
 .lvlup { color: var(--gold); font-weight: 600; }
@@ -512,3 +512,48 @@ ul.plus li::marker { content: '+ '; color: var(--good); } ul.minus li::marker { 
   .tree-canvas { height: 62vh; }
   .tree-side { max-height: none; }
 }
+
+/* ---------- combat log filters ---------- */
+.log-cats { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }
+.chip-toggle { font: 600 11px var(--font); padding: 3px 9px; border-radius: 12px; border: 1px solid var(--line2); background: transparent; color: var(--faint); cursor: pointer; }
+.chip-toggle.on { color: var(--text); background: #2a201c; border-color: var(--accent); }
+.chip-toggle.on.c-hit, .chip-toggle.on.c-auto, .chip-toggle.on.c-dot { border-color: #c2563e; }
+.chip-toggle.on.c-heal, .chip-toggle.on.c-hot { border-color: #3da35a; }
+.chip-toggle.on.c-event { border-color: var(--gold); }
+.log-filters { margin-bottom: 8px; font-size: 12px; }
+.log-filters select { padding: 4px 6px; font-size: 12px; max-width: 170px; }
+.log-filters input[type=number] { width: 70px; padding: 4px 6px; }
+.log-search { flex: 1; min-width: 120px; padding: 4px 8px; font-size: 12px; }
+.log-buff { color: #8fd3ff; } .log-debuff { color: #e7a6ff; }
+.log-line.k-dot, .log-line.k-hot, .log-line.k-auto, .log-line.k-status, .log-line.k-miss { opacity: .75; }
+
+/* ---------- damage meter ---------- */
+.meter-tabs { display: flex; gap: 4px; margin-bottom: 8px; }
+.tab.small { padding: 5px 10px; font-size: 12px; }
+.meter-summary { display: flex; flex-wrap: wrap; gap: 4px 14px; color: var(--muted); margin-bottom: 8px; }
+.meter-summary b { color: var(--text); }
+.meter-rows { display: flex; flex-direction: column; gap: 3px; max-height: 300px; overflow-y: auto; }
+.meter-row { position: relative; display: flex; align-items: center; gap: 8px; padding: 5px 8px; border: 1px solid transparent; border-radius: 6px; cursor: pointer; text-align: left; color: var(--text); font: 12px var(--font);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--cc) 38%, transparent) var(--pct), #120d0c var(--pct)); }
+.meter-row:hover { border-color: var(--line2); }
+.meter-row.active { border-color: var(--accent); }
+.meter-row.mine .mr-name { text-decoration: underline dotted var(--accent2); }
+.mr-rank { width: 16px; color: var(--muted); font-weight: 700; text-align: right; }
+.mr-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; text-shadow: 0 1px 2px #000; }
+.mr-val { text-align: right; white-space: nowrap; text-shadow: 0 1px 2px #000; }
+.mr-val small { color: var(--muted); margin-left: 4px; }
+.meter-detail { margin-top: 10px; border-top: 1px solid var(--line); padding-top: 10px; }
+.meter-detail h4 { margin: 12px 0 6px; }
+.meter-chips { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 6px; margin-top: 8px; }
+.meter-chips span { display: flex; flex-direction: column; background: #120d0c; border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; }
+.meter-chips small { color: var(--faint); font-size: 10px; text-transform: uppercase; letter-spacing: .05em; }
+.meter-chips b { font-size: 15px; }
+.meter-chips i { font-style: normal; color: var(--muted); font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.meter-table { width: 100%; border-collapse: collapse; font-size: 12px; font-variant-numeric: tabular-nums; }
+.meter-table th { text-align: left; color: var(--faint); font-weight: 600; font-size: 10px; text-transform: uppercase; letter-spacing: .04em; padding: 4px 6px; border-bottom: 1px solid var(--line); }
+.meter-table td { padding: 4px 6px; border-bottom: 1px solid #241b18; }
+.meter-table td:first-child { position: relative; }
+.cellbar { position: absolute; left: 0; bottom: 0; height: 2px; background: var(--accent); border-radius: 1px; max-width: 100%; }
+.meter-table .num { text-align: right; white-space: nowrap; }
+.ab-cell { display: inline-flex; align-items: center; gap: 6px; }
+@media (max-width: 1100px) { .combat-bottom { grid-template-columns: 1fr; } }

@@ -9,12 +9,19 @@ import { ZONES, COOP_ENCOUNTERS } from '/shared/data/zones.js';
 import { ENEMIES } from '/shared/data/enemies.js';
 import { CLASSES } from '/shared/data/classes.js';
 import { rarityById } from '/shared/config.js';
+import { createMeter, recordEvent, seedUnits, mergeMeter } from '../meter.js';
+import { LOG_CATEGORIES, PRESETS, loadFilter, saveFilter, makeEntry, passes } from '../combatlog.js';
+import { renderMeterPanel, meterUI } from './combat-meter.js';
 
 const battles = { solo: null, coop: null };
 const results = { solo: [], coop: [] };
+const meters = { solo: { last: null, session: createMeter('Session') }, coop: { last: null, session: createMeter('Session') } };
 let root = null;
-let logFilter = 'all';
-const MAX_LOG = 160;
+let filter = loadFilter();
+let meterDirty = true;
+let meterTimer = null;
+const MAX_LOG = 800;
+const MAX_LOG_DOM = 400;
 
 function makeBattle(snapshot) {
   const b = { meta: snapshot.meta, time: snapshot.time, wave: snapshot.wave, waves: snapshot.waves, state: snapshot.state, units: new Map(), log: [] };
@@ -27,8 +34,11 @@ const shown = () => (battles.coop ? 'coop' : 'solo');
 bus.on('msg:battle_start', m => {
   const prevLog = battles[m.k]?.log || [];
   battles[m.k] = makeBattle(m.battle);
-  battles[m.k].log = prevLog.slice(-40);
-  addLog(battles[m.k], `<span class="log-sep">— ${esc(m.battle.meta?.title || 'Battle')} —</span>`, 'sep');
+  battles[m.k].log = prevLog.slice(-300);
+  battles[m.k].meter = createMeter(m.battle.meta?.title || 'Battle');
+  seedUnits(battles[m.k].meter, battles[m.k].units);
+  meterDirty = true;
+  addLog(battles[m.k], { cat: 'sep', t: m.battle.time || 0, html: `<span class="log-sep">— ${esc(m.battle.meta?.title || 'Battle')} —</span>` });
   state.battles[m.k] = battles[m.k];
   if (root && shown() === m.k) build();
   updateActivity();
@@ -47,10 +57,14 @@ bus.on('msg:bt', m => {
       for (const u of ev.units) b.units.set(u.uid, u);
       structural = true;
     }
-    logEvent(b, ev);
+    if (ev.type === 'spawn' || ev.type === 'wave') seedUnits(b.meter, b.units);
+    recordEvent(b.meter, b.units, ev, m.time);
+    const entry = makeEntry(b.units, ev, ev.t ?? m.time);
+    if (entry) addLog(b, entry);
     if (visible && !structural) floatEvent(ev);
   }
-  if (visible) { if (structural) build(); else update(); }
+  meterDirty = true;
+  if (visible) { if (structural) { buildField(); refreshSources(); } update(); }
 });
 bus.on('msg:battle_end', m => {
   const b = battles[m.k];
@@ -59,10 +73,17 @@ bus.on('msg:battle_end', m => {
   results[m.k].length = Math.min(results[m.k].length, 8);
   if (b) {
     b.state = s.result;
+    if (b.meter && !b.meter.done) {
+      b.meter.done = true;
+      b.meter.result = s.result;
+      meters[m.k].last = b.meter;
+      mergeMeter(meters[m.k].session, b.meter);
+      meterDirty = true;
+    }
     if (s.result === 'victory') {
       const items = s.items?.length ? ` · ${s.items.length} item${s.items.length > 1 ? 's' : ''}` : '';
-      addLog(b, `<span class="log-win">Victory! +${fmt(s.xp)} XP, +${fmt(s.gold)} gold${items}</span>`, 'important');
-    } else addLog(b, `<span class="log-loss">Defeat… your party regroups.</span>`, 'important');
+      addLog(b, { cat: 'event', t: b.time, html: `<span class="log-win">Victory! +${fmt(s.xp)} XP, +${fmt(s.gold)} gold${items}</span>` });
+    } else addLog(b, { cat: 'event', t: b.time, html: '<span class="log-loss">Defeat… your party regroups.</span>' });
   }
   if (m.k === 'coop') setTimeout(() => { battles.coop = null; state.battles.coop = null; if (root) build(); updateActivity(); }, 4000);
   if (root && shown() === m.k) { update(); renderResults(); showBanner(s); }
@@ -88,57 +109,95 @@ function updateActivity() {
 }
 
 // ------------------------------------------------------------------ combat log
-function nameOf(b, uid) {
-  const u = b.units.get(uid);
-  if (!u) return '?';
-  return `<span class="log-name ${u.side === 'A' ? 'ally' : 'foe'}">${esc(u.name)}</span>`;
-}
-function addLog(b, html, kind = 'detail') {
-  b.log.push({ html, kind, t: b.time });
+const myId = () => state.player?.id;
+function addLog(b, entry) {
+  b.log.push(entry);
   if (b.log.length > MAX_LOG) b.log.splice(0, b.log.length - MAX_LOG);
-  if (root && battles[shown()] === b) appendLogLine(b.log[b.log.length - 1]);
+  if (root && battles[shown()] === b) appendLogLine(entry);
 }
-function logEvent(b, ev) {
-  const ab = ev.ability ? ABILITIES[ev.ability]?.name : null;
-  switch (ev.type) {
-    case 'ability': {
-      const a = ABILITIES[ev.ability];
-      if (a && a.effects.some(e => e.kind === 'damage' || e.kind === 'heal')) return; // the hit/heal lines describe these
-      const tg = ev.tgts.length > 1 ? 'the party' : nameOf(b, ev.tgts[0]);
-      addLog(b, `${nameOf(b, ev.src)} uses <b>${esc(a?.name)}</b>${ev.tgts[0] === ev.src ? '' : ` on ${tg}`}.`, 'ability');
-      break;
-    }
-    case 'damage': {
-      const how = ev.dot ? `${esc(STATUSES[ev.dot]?.name)} deals` : ab ? `<b>${esc(ab)}</b> hits` : 'hits';
-      const crit = ev.crit ? ' <span class="log-crit">CRIT!</span>' : '';
-      const abs = ev.absorbed ? ` <span class="muted">(${fmt(ev.absorbed)} absorbed)</span>` : '';
-      addLog(b, `${ev.dot ? '' : nameOf(b, ev.src) + "'s "}${how} ${nameOf(b, ev.tgt)} for <span class="log-dmg">${fmt(ev.amount)}</span>${crit}${abs}`, ev.dot ? 'dot' : ab ? 'ability' : 'detail');
-      break;
-    }
-    case 'heal':
-      if (ev.amount <= 0) return;
-      addLog(b, `${nameOf(b, ev.src)}'s ${ev.hot ? esc(STATUSES[ev.hot]?.name) : `<b>${esc(ab || 'heal')}</b>`} heals ${nameOf(b, ev.tgt)} for <span class="log-heal">${fmt(ev.amount)}</span>${ev.crit ? ' <span class="log-crit">CRIT!</span>' : ''}`, ev.hot ? 'dot' : 'ability');
-      break;
-    case 'miss': addLog(b, `${nameOf(b, ev.tgt)} dodges ${nameOf(b, ev.src)}'s attack.`, 'detail'); break;
-    case 'death': addLog(b, `<span class="log-death">☠ ${nameOf(b, ev.tgt)} has fallen.</span>`, 'important'); break;
-    case 'phase': addLog(b, `<span class="log-phase">⚠ ${esc(ev.message)}</span>`, 'important'); break;
-    case 'spawn': addLog(b, `${esc(ev.unit.name)} joins the fight!`, 'important'); break;
-    case 'wave': if (ev.total > 1) addLog(b, `<span class="log-phase">Wave ${ev.wave} of ${ev.total}</span>`, 'important'); break;
-    case 'cleanse': addLog(b, `${nameOf(b, ev.src)} removes ${esc(STATUSES[ev.status]?.name)} from ${nameOf(b, ev.tgt)}.`, 'ability'); break;
-    default: break;
-  }
-}
-const FILTERS = { all: () => true, abilities: k => k !== 'detail' && k !== 'dot', important: k => k === 'important' || k === 'sep' };
-function appendLogLine(entry) {
-  const el = root?.querySelector('.combat-log .log-lines');
-  if (!el || !FILTERS[logFilter](entry.kind)) return;
-  const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 40;
+function lineEl(e) {
   const d = document.createElement('div');
-  d.className = `log-line k-${entry.kind}`;
-  d.innerHTML = `<span class="log-t">${entry.t.toFixed(1)}</span> ${entry.html}`;
-  el.appendChild(d);
-  while (el.children.length > MAX_LOG) el.firstChild.remove();
-  if (atBottom) el.scrollTop = el.scrollHeight;
+  d.className = `log-line k-${e.cat}`;
+  d.innerHTML = `<span class="log-t">${e.t.toFixed(1)}</span> ${e.html}`;
+  return d;
+}
+function appendLogLine(entry) {
+  const el = root?.querySelector('.log-lines');
+  if (!el) return;
+  updateLogCount();
+  if (!passes(entry, filter, myId())) return;
+  const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 40;
+  el.appendChild(lineEl(entry));
+  while (el.children.length > MAX_LOG_DOM) el.firstChild.remove();
+  if (filter.autoscroll && atBottom) el.scrollTop = el.scrollHeight;
+}
+function rebuildLog() {
+  const el = root?.querySelector('.log-lines');
+  if (!el) return;
+  const b = battles[shown()];
+  el.innerHTML = '';
+  if (b) {
+    const frag = document.createDocumentFragment();
+    const shownEntries = b.log.filter(e => passes(e, filter, myId())).slice(-MAX_LOG_DOM);
+    for (const e of shownEntries) frag.appendChild(lineEl(e));
+    el.appendChild(frag);
+  }
+  el.scrollTop = el.scrollHeight;
+  updateLogCount();
+}
+let countTimer = null;
+function updateLogCount() {
+  if (countTimer) return;
+  countTimer = setTimeout(() => {
+    countTimer = null;
+    const b = battles[shown()];
+    const el = root?.querySelector('.log-count');
+    if (!el || !b) return;
+    const shownN = b.log.filter(e => passes(e, filter, myId())).length;
+    el.textContent = `${shownN} / ${b.log.length} lines`;
+  }, 300);
+}
+function sourceOptions(b) {
+  const opts = [['all', 'Everyone'], ['party', 'My side'], ['enemies', 'Enemies']];
+  if (b?.meta?.kind === 'coop') opts.push(['mine', 'My characters']);
+  const units = b ? [...b.units.values()] : [];
+  return `${opts.map(([v, l]) => `<option value="${v}" ${filter.source === v ? 'selected' : ''}>${l}</option>`).join('')}
+    ${units.length ? `<optgroup label="Involving unit">${units.map(u => { const k = `u:${unitKeyOf(u)}`; return `<option value="${esc(k)}" ${filter.source === k ? 'selected' : ''}>${esc(u.name)}${u.side === 'B' ? ' (enemy)' : ''}</option>`; }).join('')}</optgroup>` : ''}`;
+}
+function logPanelHtml(b) {
+  return `<div class="panel combat-log">
+    <div class="panel-head"><h3>Combat log <span class="muted small log-count"></span></h3>
+      <div class="row gap">${Object.entries(PRESETS).map(([id, p]) => `<button class="btn tiny ghost" data-preset="${id}">${esc(p.label)}</button>`).join('')}</div>
+    </div>
+    <div class="log-cats">${Object.entries(LOG_CATEGORIES).map(([id, c]) => `<button class="chip-toggle ${filter.cats[id] ? 'on' : ''} c-${id}" data-cat="${id}" ${tipAttr(esc(c.tip))}>${esc(c.label)}</button>`).join('')}</div>
+    <div class="log-filters row gap wrap">
+      <select data-log-source title="Whose actions to show">${sourceOptions(b)}</select>
+      <label class="inline small"><input type="checkbox" data-crits ${filter.critsOnly ? 'checked' : ''}> Crits only</label>
+      <label class="inline small">Min <input type="number" data-min min="0" step="10" value="${filter.minAmount || 0}"></label>
+      <input class="log-search" data-log-search placeholder="Search log…" value="${esc(filter.search)}">
+      <label class="inline small" title="Keep the log scrolled to the newest line"><input type="checkbox" data-autoscroll ${filter.autoscroll ? 'checked' : ''}> Follow</label>
+    </div>
+    <div class="log-lines"></div>
+  </div>`;
+}
+function unitKeyOf(u) { return u.side === 'A' ? `A:${u.ownerId || ''}:${u.charId || u.name}` : `B:${u.defId}#${u.uid}`; }
+
+function currentMeter() {
+  const k = shown();
+  const b = battles[k];
+  if (meterUI.scope === 'session') return meters[k].session;
+  if (meterUI.scope === 'last') return meters[k].last || b?.meter || null;
+  return b?.meter || meters[k].last || null;
+}
+function renderMeter() {
+  const host = root?.querySelector('.meter-host');
+  if (!host) return;
+  if (document.activeElement?.tagName === 'SELECT' && host.contains(document.activeElement)) return; // don't close an open dropdown
+  meterDirty = false;
+  const scroll = host.querySelector('.meter-rows')?.scrollTop || 0;
+  renderMeterPanel(host, currentMeter(), { myId: myId(), coop: shown() === 'coop', running: battles[shown()]?.state === 'running' });
+  const rows = host.querySelector('.meter-rows');
+  if (rows) rows.scrollTop = scroll;
 }
 
 // ------------------------------------------------------------------ rendering
@@ -182,37 +241,47 @@ function build() {
   if (!root) return;
   const k = shown();
   const b = battles[k];
+  if (!root.querySelector('.combat-bottom')) {
+    root.innerHTML = `
+      <div class="combat-header"></div>
+      <div class="battlefield"></div>
+      <div class="combat-bottom">
+        <div class="panel meter-panel"><div class="meter-host"></div></div>
+        ${logPanelHtml(b)}
+      </div>
+      <div class="panel results"><div class="panel-head"><h3>Recent fights</h3></div><div class="results-list"></div></div>`;
+  }
+  buildField();
+  refreshSources();
+  rebuildLog();
+  renderMeter();
+  renderResults();
+  update();
+}
+
+// Header + battlefield only (used when units appear mid-fight)
+function buildField() {
+  if (!root) return;
+  const k = shown();
+  const b = battles[k];
   const zoneId = b?.meta?.zoneId || state.player?.zone;
   const bg = k === 'coop' ? backgroundStyle(`encounters/${b?.meta?.encounterId}`, 'zones/coop') : backgroundStyle(`zones/${zoneId}`);
   const allies = b ? [...b.units.values()].filter(u => u.side === 'A').sort((x, y) => x.position - y.position) : [];
   const foes = b ? [...b.units.values()].filter(u => u.side === 'B' && (u.alive || !u.summoned)).sort((x, y) => x.position - y.position) : [];
-  root.innerHTML = `
-    <div class="combat-header">${headerHtml(k, b)}</div>
-    <div class="battlefield" style="${bg}">
-      <div class="bf-status"><span class="bf-wave"></span><span class="bf-time"></span></div>
-      <div class="side allies">${allies.map(u => unitCard(u, k)).join('') || '<div class="muted center pad">Your party is resting…</div>'}</div>
-      <div class="side enemies">${foes.map(u => unitCard(u, k)).join('')}</div>
-      <div class="result-banner" hidden></div>
-    </div>
-    <div class="combat-bottom">
-      <div class="panel combat-log">
-        <div class="panel-head"><h3>Combat log</h3>
-          <select data-log-filter>${[['all', 'Everything'], ['abilities', 'Abilities & events'], ['important', 'Key events only']].map(([v, l]) => `<option value="${v}" ${v === logFilter ? 'selected' : ''}>${l}</option>`).join('')}</select>
-        </div>
-        <div class="log-lines"></div>
-      </div>
-      <div class="panel results"><div class="panel-head"><h3>Recent fights</h3></div><div class="results-list"></div></div>
-    </div>`;
-  const lines = root.querySelector('.log-lines');
-  if (b) for (const e of b.log) if (FILTERS[logFilter](e.kind)) {
-    const d = document.createElement('div');
-    d.className = `log-line k-${e.kind}`;
-    d.innerHTML = `<span class="log-t">${e.t.toFixed(1)}</span> ${e.html}`;
-    lines.appendChild(d);
-  }
-  lines.scrollTop = lines.scrollHeight;
-  renderResults();
-  update();
+  const header = root.querySelector('.combat-header');
+  if (document.activeElement?.closest?.('.combat-header') == null) header.innerHTML = headerHtml(k, b);
+  const field = root.querySelector('.battlefield');
+  field.setAttribute('style', bg);
+  field.innerHTML = `
+    <div class="bf-status"><span class="bf-wave"></span><span class="bf-time"></span></div>
+    <div class="side allies">${allies.map(u => unitCard(u, k)).join('') || '<div class="muted center pad">Your party is resting…</div>'}</div>
+    <div class="side enemies">${foes.map(u => unitCard(u, k)).join('')}</div>
+    <div class="result-banner" hidden></div>`;
+}
+
+function refreshSources() {
+  const sel = root?.querySelector('[data-log-source]');
+  if (sel && document.activeElement !== sel) sel.innerHTML = sourceOptions(battles[shown()]);
 }
 
 function update() {
@@ -312,16 +381,51 @@ export const combatView = {
   id: 'combat', label: 'Combat', icon: '⚔',
   mount(el) {
     root = el;
+    const changed = () => { saveFilter(filter); rebuildLog(); };
     el.addEventListener('change', async e => {
-      if (e.target.matches('[data-zone]')) await run(act('set_zone', { zoneId: e.target.value }));
-      if (e.target.matches('[data-log-filter]')) { logFilter = e.target.value; build(); }
+      const t = e.target;
+      if (t.matches('[data-zone]')) await run(act('set_zone', { zoneId: t.value }));
+      else if (t.matches('[data-log-source]')) { filter.source = t.value; changed(); }
+      else if (t.matches('[data-crits]')) { filter.critsOnly = t.checked; changed(); }
+      else if (t.matches('[data-autoscroll]')) { filter.autoscroll = t.checked; saveFilter(filter); }
+      else if (t.matches('[data-min]')) { filter.minAmount = Math.max(0, Number(t.value) || 0); changed(); }
+      else if (t.matches('[data-meter-scope]')) { meterUI.scope = t.value; renderMeter(); }
+      else if (t.matches('[data-meter-side]')) { meterUI.side = t.value; renderMeter(); }
+    });
+    el.addEventListener('input', e => {
+      if (e.target.matches('[data-log-search]')) { filter.search = e.target.value.trim().toLowerCase(); rebuildLog(); }
     });
     el.addEventListener('click', async e => {
-      if (e.target.closest('[data-boss]')) await run(act('challenge_boss', { zoneId: state.player.zone }), 'Boss challenge accepted!');
+      if (e.target.closest('[data-boss]')) { await run(act('challenge_boss', { zoneId: state.player.zone }), 'Boss challenge accepted!'); return; }
+      const cat = e.target.closest('[data-cat]');
+      if (cat) {
+        filter.cats[cat.dataset.cat] = !filter.cats[cat.dataset.cat];
+        cat.classList.toggle('on', filter.cats[cat.dataset.cat]);
+        changed();
+        return;
+      }
+      const pre = e.target.closest('[data-preset]');
+      if (pre) {
+        const cats = PRESETS[pre.dataset.preset].cats;
+        for (const c of Object.keys(filter.cats)) filter.cats[c] = cats.includes(c);
+        filter.critsOnly = false; filter.minAmount = 0; filter.source = 'all'; filter.search = '';
+        saveFilter(filter);
+        const host = root.querySelector('.combat-log');
+        host.outerHTML = logPanelHtml(battles[shown()]);
+        rebuildLog();
+        return;
+      }
+      const mode = e.target.closest('[data-meter-mode]');
+      if (mode) { meterUI.mode = mode.dataset.meterMode; renderMeter(); return; }
+      const row = e.target.closest('[data-meter-unit]');
+      if (row) { meterUI.selected = meterUI.selected === row.dataset.meterUnit ? null : row.dataset.meterUnit; renderMeter(); return; }
+      if (e.target.closest('[data-meter-reset]')) { meters[shown()].session = createMeter('Session'); renderMeter(); return; }
+      if (e.target.closest('[data-meter-close]')) { meterUI.selected = null; renderMeter(); }
     });
+    meterTimer = setInterval(() => { if (meterDirty && root) renderMeter(); }, 500);
     build();
   },
-  unmount() { root = null; },
+  unmount() { root = null; clearInterval(meterTimer); },
   render() {
     // Only the header depends on player state; units update via battle ticks.
     const h = root?.querySelector('.combat-header');
