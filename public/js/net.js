@@ -7,6 +7,7 @@ let nextId = 1;
 const pending = new Map();
 let reconnectDelay = 1000;
 let manualClose = false;
+let restartingUntil = 0; // during a server restart, retry quickly instead of backing off
 
 export function getToken() { try { return localStorage.getItem(TOKEN_KEY); } catch { return null; } }
 export function setToken(t) { try { t ? localStorage.setItem(TOKEN_KEY, t) : localStorage.removeItem(TOKEN_KEY); } catch { /* ignore */ } }
@@ -30,6 +31,7 @@ export function connect() {
   ws.onmessage = ev => {
     let msg;
     try { msg = JSON.parse(ev.data); } catch { return; }
+    if (msg.t === 'server_restart') { restartingUntil = Date.now() + 180_000; reconnectDelay = 1000; }
     if (msg.t === 'result') {
       const p = pending.get(msg.id);
       if (p) { pending.delete(msg.id); msg.ok ? p.resolve(msg.result) : p.reject(new Error(msg.error)); }
@@ -41,12 +43,16 @@ export function connect() {
     for (const p of pending.values()) p.reject(new Error('Connection lost'));
     pending.clear();
     if (manualClose) return;
-    bus.emit('connection', 'offline');
-    const retry = () => { setTimeout(connect, reconnectDelay); reconnectDelay = Math.min(reconnectDelay * 2, 15000); };
+    bus.emit('connection', Date.now() < restartingUntil ? 'restarting' : 'offline');
+    const retry = () => {
+      setTimeout(connect, reconnectDelay);
+      reconnectDelay = Date.now() < restartingUntil ? 1500 : Math.min(reconnectDelay * 2, 15000);
+    };
     if (!opened) {
       // Server reachable but socket refused → the session token is invalid: back to login
-      fetch('/api/health').then(r => {
-        if (r.ok) { setToken(null); bus.emit('logout'); } else retry();
+      fetch('/api/health', { cache: 'no-store' }).then(r => {
+        // server is up but refused our session → token invalid (never during a restart window)
+        if (r.ok && Date.now() >= restartingUntil) { setToken(null); bus.emit('logout'); } else retry();
       }).catch(retry);
       return;
     }

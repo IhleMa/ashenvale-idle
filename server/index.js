@@ -7,6 +7,8 @@ import { WebSocketServer } from 'ws';
 import { Store } from './store.js';
 import { AssetIndex } from './assets.js';
 import { Game } from './game.js';
+import { computeBuildId } from './version.js';
+import { execFile } from 'node:child_process';
 import { createAccount, verifyLogin, issueToken, accountFromToken, revokeToken, RateLimiter } from './auth.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -22,7 +24,8 @@ const TRUST_PROXY = process.env.TRUST_PROXY === 'true';
 const log = (...a) => console.log(new Date().toISOString(), ...a);
 const store = new Store(DATA_DIR);
 const assets = new AssetIndex(ASSETS_DIR);
-const game = new Game({ store, assets, log });
+const game = new Game({ store, assets, log, buildId: computeBuildId(ROOT) });
+game.loadGroups();
 const authLimiter = new RateLimiter(20, 60_000);
 
 const MIME = {
@@ -139,7 +142,8 @@ setInterval(() => {
 
 game.start();
 server.listen(PORT, HOST, () => {
-  log(`Ashenvale Idle server listening on http://${HOST}:${PORT} (data: ${DATA_DIR})`);
+  log(`Ashenvale Idle server listening on http://${HOST}:${PORT} (data: ${DATA_DIR}, build ${game.buildId})`);
+  log('Type "help" for console commands (e.g. "update" to pull a new version).');
 });
 
 let stopping = false;
@@ -147,13 +151,65 @@ function shutdown(sig) {
   if (stopping) return;
   stopping = true;
   log(`${sig} received, saving and shutting down...`);
+  try { game.broadcast({ t: 'server_restart' }); } catch { /* ignore */ }
   try { game.stop(); } catch (e) { log('Error while saving', e); }
-  for (const ws of wss.clients) ws.close(1001, 'Server restarting');
+  for (const ws of wss.clients) ws.close(1012, 'Server restarting');
   server.close(() => process.exit(0));
   setTimeout(() => process.exit(0), 2000).unref();
 }
 process.on('SIGINT', () => shutdown('SIGINT'));
 process.on('SIGTERM', () => shutdown('SIGTERM'));
-// Pterodactyl "stop" command support: typing "stop" in the console
-process.stdin.on('data', d => { if (d.toString().trim().toLowerCase() === 'stop') shutdown('stop'); });
+// ------------------------------------------------------------------ console commands (Pterodactyl console / terminal)
+const git = args => new Promise((resolve, reject) => execFile('git', args, { cwd: ROOT, timeout: 120_000 }, (err, out, errOut) => (err ? reject(new Error((errOut || err.message).trim())) : resolve(out.trim()))));
+let updating = false;
+
+async function runUpdate() {
+  if (updating) return log('Update already running');
+  updating = true;
+  try {
+    const before = await git(['rev-parse', 'HEAD']);
+    log('Pulling latest version from git...');
+    await git(['pull', '--ff-only']);
+    const after = await git(['rev-parse', 'HEAD']);
+    if (before === after) return log('Already up to date.');
+    const changed = (await git(['diff', '--name-only', before, after])).split('\n').filter(Boolean);
+    const serverSide = changed.filter(f => /^(server|shared)\//.test(f) || /^package(-lock)?\.json$/.test(f));
+    log(`Updated ${before.slice(0, 7)} -> ${after.slice(0, 7)} (${changed.length} file(s) changed)`);
+    if (serverSide.length) {
+      log(`Server-side files changed (${serverSide.slice(0, 5).join(', ')}${serverSide.length > 5 ? ', ...' : ''}).`);
+      log('>>> A RESTART is required to apply them. Players reconnect automatically after the restart.');
+      game.broadcast({ t: 'toast', kind: 'info', text: 'A game update is ready — the server will restart briefly soon. You will reconnect automatically.' });
+    } else {
+      game.buildId = computeBuildId(ROOT);
+      game.broadcast({ t: 'client_update', buildId: game.buildId });
+      log('Client-only update applied live — no restart needed. Open game pages refresh themselves.');
+    }
+  } catch (e) {
+    log('Update failed:', e.message);
+  } finally {
+    updating = false;
+  }
+}
+
+const COMMANDS = {
+  help: () => log('Commands: update | reload-clients | players | say <message> | stop'),
+  stop: () => shutdown('stop'),
+  update: () => runUpdate(),
+  'reload-clients': () => { game.buildId = computeBuildId(ROOT); game.broadcast({ t: 'client_update', buildId: game.buildId, force: true }); log('Told all open pages to refresh.'); },
+  players: () => log(`${game.sessions.size} online: ${[...game.sessions.values()].map(s => s.player.name).join(', ') || '-'}`),
+  say: text => { if (text) { game.broadcast({ t: 'toast', kind: 'info', text: `[Server] ${text}` }); log('Broadcast sent.'); } },
+};
+let stdinBuf = '';
+process.stdin.on('data', d => {
+  stdinBuf += d.toString();
+  let i;
+  while ((i = stdinBuf.indexOf('\n')) >= 0) {
+    const line = stdinBuf.slice(0, i).trim();
+    stdinBuf = stdinBuf.slice(i + 1);
+    if (!line) continue;
+    const [cmd, ...rest] = line.split(' ');
+    const fn = COMMANDS[cmd.toLowerCase()];
+    if (fn) fn(rest.join(' ').trim()); else log(`Unknown command "${cmd}". Type "help".`);
+  }
+});
 process.stdin.on('error', () => {});

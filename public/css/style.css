@@ -170,7 +170,7 @@ label.inline input, label.inline select { display: inline-block; width: auto; ma
 .gold { font-weight: 700; color: var(--gold); font-size: 15px; }
 .gold::before { content: '◉ '; }
 .conn { width: 10px; height: 10px; border-radius: 50%; background: #777; }
-.conn.online { background: var(--good); box-shadow: 0 0 8px var(--good); } .conn.offline { background: var(--danger); } .conn.connecting { background: var(--gold); }
+.conn.online { background: var(--good); box-shadow: 0 0 8px var(--good); } .conn.offline { background: var(--danger); } .conn.connecting, .conn.restarting { background: var(--gold); }
 .menu-toggle { display: none; font-size: 20px; }
 .sidebar { background: rgba(20, 14, 12, .85); border-right: 1px solid var(--line); padding: 12px 8px; overflow-y: auto; }
 .sidebar a { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; color: var(--muted); font-weight: 600; margin-bottom: 2px; position: relative; }
@@ -557,3 +557,11 @@ ul.plus li::marker { content: '+ '; color: var(--good); } ul.minus li::marker { 
 .meter-table .num { text-align: right; white-space: nowrap; }
 .ab-cell { display: inline-flex; align-items: center; gap: 6px; }
 @media (max-width: 1100px) { .combat-bottom { grid-template-columns: 1fr; } }
+
+/* ---------- connection / update banner ---------- */
+#game { grid-template-rows: var(--topbar-h) auto 1fr; }
+.status-banner { grid-column: 1 / -1; padding: 8px 16px; text-align: center; font-size: 13px; font-weight: 600; display: flex; gap: 10px; align-items: center; justify-content: center; }
+.status-banner.warn { background: #4a3510; color: #ffe2a8; border-bottom: 1px solid #7a5a1a; }
+.status-banner.good { background: #1d4a26; color: #c8f5ce; border-bottom: 1px solid #2f7a3a; }
+.status-banner.info { background: var(--panel2); }
+.topbar { grid-row: 1; } .status-banner { grid-row: 2; } .sidebar, .view { grid-row: 3; }

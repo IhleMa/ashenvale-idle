@@ -132,8 +132,40 @@ function setBadge(id, text) {
 document.getElementById('menu-toggle').addEventListener('click', () => document.getElementById('sidebar').classList.toggle('open'));
 
 // ------------------------------------------------------------------ server messages
+// ------------------------------------------------------------------ connection banner & live updates
+let buildId = null;
+let wasOnline = false;
+function banner(html, kind = 'info') {
+  const el = document.getElementById('status-banner');
+  if (!html) { el.hidden = true; return; }
+  el.className = `status-banner ${kind}`;
+  el.innerHTML = html;
+  el.hidden = false;
+}
+function reloadSoon(reason) {
+  banner(`${reason} <button class="btn tiny" onclick="location.reload()">Refresh now</button>`, 'good');
+  const tryReload = () => {
+    const a = document.activeElement;
+    // don't throw away something the player is typing — wait until they're done
+    if (a && /INPUT|TEXTAREA/.test(a.tagName) && a.value) return setTimeout(tryReload, 2000);
+    location.reload();
+  };
+  setTimeout(tryReload, 1500);
+}
+bus.on('msg:welcome', m => {
+  if (buildId && m.buildId && m.buildId !== buildId) return reloadSoon('The game was updated — refreshing…');
+  buildId = m.buildId;
+});
+bus.on('msg:client_update', m => {
+  if (m.force || (m.buildId && m.buildId !== buildId)) reloadSoon('A new version of the game is available — refreshing…');
+});
+bus.on('msg:server_restart', () => banner('⟳ The server is restarting for an update. You will reconnect automatically — your progress is saved.', 'warn'));
+
 bus.on('connection', s => {
   state.connection = s;
+  if (s === 'online') { if (wasOnline || !document.getElementById('status-banner').hidden) banner(null); wasOnline = true; }
+  else if (s === 'restarting') banner('⟳ The server is restarting for an update. Reconnecting automatically…', 'warn');
+  else if (s === 'offline' && wasOnline) banner('Connection lost — reconnecting…', 'warn');
   const el = document.getElementById('conn-status');
   el.className = `conn ${s}`;
   el.title = s === 'online' ? 'Connected' : s === 'connecting' ? 'Connecting…' : 'Disconnected — reconnecting';

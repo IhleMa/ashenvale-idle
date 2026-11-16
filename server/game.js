@@ -1,5 +1,7 @@
 // Game server: sessions, action dispatch, server-authoritative battle loop, offline progression, groups.
 import crypto from 'node:crypto';
+import fs from 'node:fs';
+import path from 'node:path';
 import { CONFIG } from '../shared/config.js';
 import { ZONES, COOP_ENCOUNTERS } from '../shared/data/zones.js';
 import { generateItem, itemSellValue } from '../shared/data/items.js';
@@ -13,7 +15,8 @@ const { GameError } = L;
 const fail = m => { throw new GameError(m); };
 
 export class Game {
-  constructor({ store, assets, log = console.log }) {
+  constructor({ store, assets, buildId = 'dev', log = console.log }) {
+    this.buildId = buildId;
     this.store = store;
     this.assets = assets;
     this.log = log;
@@ -36,6 +39,30 @@ export class Game {
     const now = Date.now();
     for (const s of this.sessions.values()) { s.player.lastActive = now; this.store.savePlayerSoon(s.player); }
     this.store.flush();
+    this.saveGroups();
+  }
+
+  // Groups survive restarts (battles and pending invites do not)
+  get groupsFile() { return path.join(this.store.dataDir, 'groups.json'); }
+  saveGroups() {
+    const data = [...this.groups.values()].map(g => ({ id: g.id, leaderId: g.leaderId, members: g.members, chat: g.chat.slice(-30) }));
+    try { fs.writeFileSync(this.groupsFile, JSON.stringify(data)); } catch (e) { this.log('Could not save groups', e.message); }
+  }
+  loadGroups() {
+    let data = [];
+    try { data = JSON.parse(fs.readFileSync(this.groupsFile, 'utf8')); } catch { return; }
+    for (const g of data) {
+      if (!Array.isArray(g.members) || !g.members.length) continue;
+      const group = { id: g.id, leaderId: g.members.includes(g.leaderId) ? g.leaderId : g.members[0], members: g.members, invites: new Map(), battle: null, chat: g.chat || [] };
+      this.groups.set(group.id, group);
+      for (const m of group.members) this.playerGroup.set(m, group.id);
+    }
+    if (data.length) this.log(`Restored ${data.length} group(s)`);
+  }
+
+  broadcast(msg) {
+    const data = JSON.stringify(msg);
+    for (const s of this.sessions.values()) for (const ws of s.sockets) if (ws.readyState === 1) ws.send(data);
   }
 
   save() {
@@ -55,8 +82,9 @@ export class Game {
       s = { player, sockets: new Set(), solo: null, stateDirty: true, actionTokens: 40, lastRefill: Date.now() };
       this.sessions.set(player.id, s);
     }
+    if (s.graceTimer) { clearTimeout(s.graceTimer); s.graceTimer = null; } // reconnected within the grace period
     s.sockets.add(ws);
-    this.send(ws, { t: 'welcome', playerId: player.id, name: player.name, serverTime: Date.now(), config: { version: CONFIG.version } });
+    this.send(ws, { t: 'welcome', playerId: player.id, name: player.name, serverTime: Date.now(), buildId: this.buildId, config: { version: CONFIG.version } });
     if (first) this.handleOffline(s);
     L.maybeAutoRefreshRecruits(player, this.assets.get());
     s.stateDirty = true;
@@ -75,13 +103,19 @@ export class Game {
     const s = this.sessions.get(playerId);
     if (!s) return;
     s.sockets.delete(ws);
-    if (s.sockets.size === 0) {
-      s.player.lastActive = Date.now();
-      this.store.savePlayerSoon(s.player);
-      this.sessions.delete(playerId);
-      this.onlineDirty = true;
-      const g = this.groupOf(playerId);
-      if (g) this.broadcastGroup(g);
+    if (s.sockets.size === 0 && !s.graceTimer) {
+      // Keep the session (and its running fight) alive briefly so page reloads and
+      // short connection drops don't interrupt anything.
+      s.graceTimer = setTimeout(() => {
+        s.graceTimer = null;
+        if (s.sockets.size > 0) return;
+        s.player.lastActive = Date.now();
+        this.store.savePlayerSoon(s.player);
+        this.sessions.delete(playerId);
+        this.onlineDirty = true;
+        const g = this.groupOf(playerId);
+        if (g) this.broadcastGroup(g);
+      }, 30_000);
     }
   }
 

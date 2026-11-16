@@ -121,7 +121,14 @@ pterodactyl/       Pterodactyl egg
    - Allocate one port. That's the game's web port.
    - **Git Repository** defaults to `https://github.com/IhleMa/ashenvale-idle`. If the repository is **private**, also fill in **Git Username** and **Git Access Token**. The token needs read access to the repository; for a fine-grained token, that's "Contents: Read-only".
 3. Start the server. Once the console shows `listening on`, players can open **`http://<your-server-ip>:<port>`** in a browser.
-4. **Updates:** with *Auto Update = 1*, every restart runs `git pull` to fetch the latest code. Player data in `data/` is never touched.
+4. **Updates without kicking players.** Type `update` in the server **console**. It pulls the newest version from GitHub and tells you what to do:
+   - *"Client-only update applied live"*: only browser files changed (the UI in `public/`). Nothing restarts. Every open game page refreshes itself within a second or two and players keep fighting.
+   - *"A RESTART is required"*: server or game-rule files changed (`server/`, `shared/`). Press **Restart** in the panel when it suits you. Players see a short "server is updating" banner, reconnect automatically when it's back (usually 5–15 s), and the page reloads to the new version. They don't need to log in again, their groups are kept, and no progress is lost.
+   - New **images** never need either: just upload them and players see them after a refresh.
+
+   With *Auto Update = 1*, every restart also runs `git pull`. Player data in `data/` is never touched.
+
+   Other console commands: `players` (who is online), `say <message>` (in-game announcement, e.g. `say Restarting in 2 minutes!`), `reload-clients` (refresh every open page), `help`.
 5. **Images on the server:** commit them to `public/assets/` in the repo (recommended, so they arrive with updates), or upload them with the panel's File Manager into `public/assets/<folder>/`. Uploaded files sit outside git and survive updates. Don't upload a file with the same name as one that's also committed to the repo, or `git pull` will refuse to update.
 6. **Backups:** back up the `data/` folder, which holds all accounts and saves. The panel's Backups feature works for this.
 
