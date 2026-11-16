@@ -9,6 +9,7 @@ import { hasAbilityAction } from '/shared/character.js';
 import { combatView } from './views/combat.js';
 import { characterView } from './views/character.js';
 import { abilitiesView } from './views/abilities.js';
+import { skilltreeView } from './views/skilltree.js';
 import { partyView } from './views/party.js';
 import { recruitmentView } from './views/recruitment.js';
 import { inventoryView } from './views/inventory.js';
@@ -16,7 +17,7 @@ import { multiplayerView } from './views/multiplayer.js';
 import { progressionView } from './views/progression.js';
 import { createView } from './views/create.js';
 
-const VIEWS = [combatView, characterView, abilitiesView, partyView, recruitmentView, inventoryView, multiplayerView, progressionView];
+const VIEWS = [combatView, characterView, skilltreeView, abilitiesView, partyView, recruitmentView, inventoryView, multiplayerView, progressionView];
 const viewEl = () => document.getElementById('view');
 let current = null;
 let root = null; // per-view container (listeners attached to it die with it)
@@ -118,10 +119,8 @@ function renderTopbar() {
   const cls = CLASSES[h.classId];
   el.innerHTML = `${portrait(h, 'xs')}<div><div class="name">${esc(h.name)} <span class="muted">Lv ${h.level} ${esc(cls.name)}</span></div>${bar(h.xp, xpToNext(h.level), 'xp thin', '')}</div>`;
   // badges for unspent points
-  const unspent = Object.values(p.characters).some(c => c.unspentAttributePoints > 0);
-  const abilityPts = Object.values(p.characters).some(hasAbilityAction);
-  setBadge('character', unspent ? '!' : '');
-  setBadge('abilities', abilityPts ? '!' : '');
+  const treePts = Object.values(p.characters).filter(hasAbilityAction).length;
+  setBadge('skilltree', treePts ? '!' : '');
   setBadge('multiplayer', state.invites.length ? String(state.invites.length) : '');
   setBadge('recruitment', p.stats.recruited === 0 ? '!' : '');
 }

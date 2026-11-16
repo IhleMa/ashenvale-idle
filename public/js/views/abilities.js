@@ -10,7 +10,9 @@ import { ABILITIES, classAbilities } from '/shared/data/abilities.js';
 import { STATUSES } from '/shared/data/statuses.js';
 import { ENEMIES } from '/shared/data/enemies.js';
 import { CONDITIONS, TARGET_CONDITIONS, SELECTORS, selectorsForAbility, describeCondition } from '/shared/rules.js';
-import { abilitySlots, upgradeCost } from '/shared/character.js';
+import { abilitySlots, abilityNodeId } from '/shared/character.js';
+import { pathTo, availablePoints } from '/shared/skilltree.js';
+import { focusTreeNode } from './skilltree.js';
 
 let selectedAbility = null;
 const drafts = new Map(); // `${charId}:${abilityId}` -> rule draft
@@ -167,8 +169,7 @@ export const abilitiesView = {
       if (!t) return;
       const d = t.dataset;
       if (d.selectAbility) { selectedAbility = d.selectAbility; this.render(root); return; }
-      if (d.unlock) { await run(act('unlock_ability', { charId: ch.id, abilityId: d.unlock }), `${ABILITIES[d.unlock].name} unlocked!`); return; }
-      if (d.upgrade) { await run(act('upgrade_ability', { charId: ch.id, abilityId: d.upgrade }), `${ABILITIES[d.upgrade].name} upgraded!`); return; }
+      if (d.treeGoto) { focusTreeNode(ch.id, d.treeGoto); return; }
       if (d.equipAb) {
         if (ch.loadout.length >= abilitySlots(ch)) return toast('All ability slots are full — remove one first.', 'error');
         await run(act('set_loadout', { charId: ch.id, loadout: [...ch.loadout, d.equipAb] }));
@@ -264,7 +265,8 @@ export const abilitiesView = {
             ${unequipped.length ? `<div class="unequipped"><span class="muted small">Not equipped:</span> ${unequipped.map(a => `<button class="btn tiny" data-equip-ab="${a}">${esc(ABILITIES[a].name)} +</button>`).join(' ')}</div>` : ''}
           </section>
           <section class="panel">
-            <div class="panel-head"><h3>${esc(CLASSES[ch.classId].name)} abilities</h3><span class="points">${ch.abilityPoints} ability point${ch.abilityPoints === 1 ? '' : 's'}</span></div>
+            <div class="panel-head"><h3>${esc(CLASSES[ch.classId].name)} abilities</h3>${availablePoints(ch) ? `<a class="points" href="#/skilltree">${availablePoints(ch)} skill point${availablePoints(ch) === 1 ? '' : 's'}</a>` : ''}</div>
+            <p class="muted small">Abilities are learned and empowered through the <a href="#/skilltree">passive skill tree</a>.</p>
             <div class="ability-book">${all.map(a => abilityCard(ch, a)).join('')}</div>
           </section>
         </div>
@@ -277,13 +279,13 @@ function abilityCard(ch, a) {
   const rank = ch.abilities[a.id] || 0;
   const unlocked = rank > 0;
   const cls = CLASSES[ch.classId];
-  const nextReq = a.unlockLevel + rank * 4;
-  let action = '';
-  if (!unlocked) action = ch.level >= a.unlockLevel ? `<button class="btn tiny primary" data-unlock="${a.id}" ${ch.abilityPoints < 1 ? 'disabled' : ''}>Unlock (1 pt)</button>` : `<span class="muted small">Unlocks at Lv ${a.unlockLevel}</span>`;
-  else if (rank < CONFIG.maxAbilityRank) action = ch.level >= nextReq ? `<button class="btn tiny" data-upgrade="${a.id}" ${ch.abilityPoints < upgradeCost(rank) ? 'disabled' : ''}>Upgrade (${upgradeCost(rank)} pt)</button>` : `<span class="muted small">Next rank at Lv ${nextReq}</span>`;
-  else action = '<span class="muted small">Max rank</span>';
+  const nodeId = abilityNodeId(ch.classId, a.id);
+  const dist = unlocked ? 0 : pathTo(ch, nodeId).length;
+  const action = unlocked
+    ? `<span class="muted small">Rank ${rank}/${CONFIG.maxAbilityRank}</span>${rank < CONFIG.maxAbilityRank ? `<button class="btn tiny ghost" data-tree-goto="${nodeId}">Empower in tree</button>` : ''}`
+    : `<button class="btn tiny ${dist <= availablePoints(ch) ? 'primary' : ''}" data-tree-goto="${nodeId}">Skill tree · ${dist} pt${dist === 1 ? '' : 's'}</button>`;
   const meta = [a.cost ? `${a.cost} ${cls.resource.name}` : 'No cost', `${a.cooldown}s cooldown`, a.area ? 'Area' : a.target === 'self' ? 'Self' : a.target === 'ally' ? 'Ally' : 'Enemy'].join(' · ');
-  const tip = `<b>${esc(a.name)}</b><br>${esc(a.description)}<br><span class='muted'>${esc(meta)}</span><br>Each rank: +${Math.round(CONFIG.abilityRankBonus * 100)}% effect`;
+  const tip = `<b>${esc(a.name)}</b><br>${esc(a.description)}<br><span class='muted'>${esc(meta)}</span><br>Each rank: +${Math.round(CONFIG.abilityRankBonus * 100)}% effect (ranks come from Empowered nodes in the skill tree)`;
   return `<div class="ability-card ${unlocked ? '' : 'locked'} ${a.id === selectedAbility ? 'active' : ''}" ${unlocked ? `data-select-ability="${a.id}"` : ''} ${tipAttr(tip)}>
     ${abilityIcon(a.id, 'md')}
     <div class="grow"><b>${esc(a.name)}</b> <span class="type-tag t-${a.type}">${a.type}</span>
@@ -291,6 +293,6 @@ function abilityCard(ch, a) {
       <div class="small faint">${esc(meta)}</div>
       <div class="ranks">${Array.from({ length: CONFIG.maxAbilityRank }, (_, i) => `<span class="pip ${i < rank ? 'on' : ''}"></span>`).join('')}</div>
     </div>
-    <div class="ability-action">${action}</div>
+    <div class="ability-action col">${action}</div>
   </div>`;
 }

@@ -86,8 +86,17 @@ try {
   check(res.ok, 'valid rule accepted');
   await sleep(200);
   check(a.state.characters[heroId].rules.heroic_strike.conditions[0].value === 100, 'rule values clamped');
-  res = await a.act('allocate_attribute', { charId: heroId, attr: 'str', amount: 99 });
-  check(!res.ok, 'cannot over-spend attribute points');
+  res = await a.act('allocate_nodes', { charId: heroId, nodeIds: ['b0r3n0'] });
+  check(!res.ok, 'cannot allocate a disconnected tree node');
+  res = await a.act('allocate_nodes', { charId: heroId, nodeIds: ['b0r1n0', 'b0r2n0'] });
+  check(!res.ok, 'cannot spend more tree points than available');
+  res = await a.act('allocate_nodes', { charId: heroId, nodeIds: ['b0r1n0'] });
+  check(res.ok, 'allocate first tree node (Taunt)');
+  await sleep(200);
+  check(a.state.characters[heroId].abilities.taunt === 1, 'tree node grants ability');
+  check(a.state.characters[heroId].loadout.includes('taunt'), 'new ability added to loadout');
+  res = await a.act('refund_node', { charId: heroId, nodeId: 'start' });
+  check(!res.ok, 'origin cannot be refunded');
 
   await sleep(2500);
   check(a.count('battle_start') >= 1, 'idle battle started');

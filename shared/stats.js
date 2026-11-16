@@ -1,6 +1,7 @@
 // Single source of truth for character statistics — used by server (combat) and client (display).
 import { CONFIG } from './config.js';
 import { CLASSES, TRAITS, classTier } from './data/classes.js';
+import { treeStats } from './skilltree.js';
 
 export const ATTRIBUTES = {
   str: { label: 'Strength', short: 'STR' },
@@ -16,6 +17,7 @@ function collectBonuses(ch) {
   const cls = CLASSES[ch.classId];
   for (const t of cls.tiers) if (ch.level >= t.level && (!t.mainOnly || ch.isMain)) add(t.bonus);
   if (ch.trait && TRAITS[ch.trait]) add(TRAITS[ch.trait].bonus);
+  if (ch.tree) add(treeStats(ch)); // skill tree: flat attributes (str/int/dex/vit) and % bonuses
   return bonus;
 }
 
@@ -38,7 +40,7 @@ export function computeStats(ch) {
   const attributes = {};
   for (const a of ATTR_IDS) {
     const natural = (cls.baseAttributes[a] + cls.growth[a] * (ch.level - 1)) * mainMult;
-    const raw = natural + (ch.attributes?.[a] || 0) + (gear[a] || 0);
+    const raw = natural + (bonus[a] || 0) + (gear[a] || 0);
     attributes[a] = Math.round(raw * (1 + (bonus[a + 'Pct'] || 0) + allPct));
   }
   const conv = key => {
@@ -51,7 +53,7 @@ export function computeStats(ch) {
 
   const s = {
     attributes,
-    maxHp: Math.round((40 + 8 * ch.level + conv('hp') + (gear.hp || 0)) * (1 + allPct)),
+    maxHp: Math.round((40 + 8 * ch.level + conv('hp') + (gear.hp || 0)) * (1 + allPct + (bonus.hpPct || 0))),
     physPower: Math.round((conv('physPower') + (gear.physPower || 0)) * pctMul('physPower')),
     magPower: Math.round((conv('magPower') + (gear.magPower || 0)) * pctMul('magPower')),
     healPower: Math.round((conv('healPower') + (gear.healPower || 0)) * pctMul('healPower')),
@@ -62,6 +64,10 @@ export function computeStats(ch) {
     dodge: 0,
     resourceMax: cls.resource.max,
     xpBonus: (bonus.xpPct || 0) + (ch.isMain ? CONFIG.mainCharacter.xpBonus : 0),
+    // combat modifiers from the skill tree
+    damagePct: bonus.damagePct || 0,
+    healingPct: bonus.healingPct || 0,
+    damageTakenPct: bonus.damageTakenPct || 0,
   };
   return s;
 }

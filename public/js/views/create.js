@@ -3,7 +3,8 @@ import { act } from '../net.js';
 import { esc, run } from '../ui.js';
 import { classIcon, assetKeys, assetUrl } from '../assets.js';
 import { CLASSES, CLASS_IDS } from '/shared/data/classes.js';
-import { classAbilities } from '/shared/data/abilities.js';
+import { classAbilities, ABILITIES } from '/shared/data/abilities.js';
+import { TREE_SPECS } from '/shared/data/skilltree.js';
 import { computeStats, ATTRIBUTES } from '/shared/stats.js';
 import { createCharacter } from '/shared/character.js';
 import { CONFIG } from '/shared/config.js';
@@ -27,7 +28,7 @@ export const createView = {
   },
   render(root) {
     const cls = CLASSES[draft.classId];
-    const preview = computeStats(createCharacter({ id: 'x', name: 'x', classId: draft.classId, isMain: true }));
+    const preview = computeStats(createCharacter({ id: 'x', name: 'x', classId: draft.classId, isMain: true, autoTree: false }));
     const portraits = assetKeys('portraits/').map(k => k.slice(10)).filter(k => k.startsWith(draft.classId) || k.startsWith('any') || !CLASS_IDS.some(c => k.startsWith(c)));
     root.innerHTML = `
     <div class="create-screen">
@@ -48,8 +49,10 @@ export const createView = {
             <div><h4>Strengths</h4><ul class="plus">${cls.strengths.map(s => `<li>${esc(s)}</li>`).join('')}</ul></div>
             <div><h4>Weaknesses</h4><ul class="minus">${cls.weaknesses.map(s => `<li>${esc(s)}</li>`).join('')}</ul></div>
           </div>
-          <h4>Starting abilities</h4>
-          <div class="muted small">${classAbilities(draft.classId).map(a => `${esc(a.name)} <span class="faint">(Lv ${a.unlockLevel})</span>`).join(' · ')}</div>
+          <h4>Abilities</h4>
+          <div class="muted small">Starts with <b>${esc(ABILITIES[TREE_SPECS[draft.classId].start].name)}</b>. Learn the rest in the passive skill tree: ${classAbilities(draft.classId).filter(a => a.id !== TREE_SPECS[draft.classId].start).map(a => esc(a.name)).join(' · ')}</div>
+          <h4>Skill tree paths</h4>
+          <div class="muted small">${TREE_SPECS[draft.classId].branches.map(b => `<b>${esc(b.name)}</b>`).join(' · ')}</div>
         </div>
         <div class="create-right">
           <h4>Starting attributes</h4>

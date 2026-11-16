@@ -46,6 +46,8 @@ md += section('Zone backgrounds', 'zones', [...Object.values(ZONES).map(z => [z.
   'Wide images (e.g. 1920×1080). Darkened automatically so units stay readable.');
 md += section('Co-op encounter art', 'encounters', Object.values(COOP_ENCOUNTERS).map(e => [e.id, e.name]), 'Wide images used as encounter card and combat background.');
 md += section('Achievements', 'achievements', Object.values(ACHIEVEMENTS).map(a => [a.id, a.name]));
+md += section('Skill tree nodes (optional)', 'skilltree', [['keystone', 'Keystone node icon'], ['notable', 'Notable node icon'], ['rank', 'Ability-rank node icon (falls back to the ability icon)']],
+  'Ability nodes use the ability icons above. Small attribute nodes are drawn as plain dots.');
 md += section('Interface', 'ui', [['logo', 'Game logo (top bar & login screen)'], ['background', 'Full-page background image']]);
 
 const header = `# Asset checklist

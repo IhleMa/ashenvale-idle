@@ -1,6 +1,6 @@
 // Balance simulator: node tools/simulate.js [level] [zone] [fights]
 // Runs the real combat engine headlessly to check win rates and fight lengths.
-import { createCharacter, autoLearnAbilities } from '../shared/character.js';
+import { createCharacter } from '../shared/character.js';
 import { buildPartyUnits } from '../shared/party.js';
 import { createBattle, runToEnd } from '../shared/combat.js';
 import { idleWaves, bossWaves, computeRewards } from '../shared/encounters.js';
@@ -17,7 +17,6 @@ const gear = process.argv[6] !== 'nogear';
 const rng = createRng(42);
 const party = comp.map((cls, i) => {
   const ch = createCharacter({ id: 'c' + i, name: cls, classId: cls, isMain: i === 0, level });
-  autoLearnAbilities(ch);
   if (gear) {
     // give level-appropriate uncommon gear that fits the class
     for (const slot of Object.keys(ch.equipment)) {

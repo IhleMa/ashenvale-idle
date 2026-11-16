@@ -138,10 +138,10 @@ export class Game {
       this.toast(s.player.id, `Welcome to Ashenvale, ${ch.name}! Your first companion is free — visit Recruitment.`, 'success');
       this.onlineDirty = true;
     },
-    allocate_attribute(s, d) { L.allocateAttribute(s.player, d); },
-    reset_attributes(s, d) { L.resetAttributes(s.player, d); },
-    unlock_ability(s, d) { L.doUnlockAbility(s.player, d); },
-    upgrade_ability(s, d) { L.doUpgradeAbility(s.player, d); },
+    allocate_nodes(s, d) { L.allocateNodes(s.player, d); this.liveUpdateChar(s.player, d.charId); },
+    refund_node(s, d) { const r = L.refundNode(s.player, d); this.liveUpdateChar(s.player, d.charId); return r; },
+    reset_tree(s, d) { const r = L.resetTree(s.player, d); this.liveUpdateChar(s.player, d.charId); return r; },
+    auto_tree(s, d) { L.autoTree(s.player, d); this.liveUpdateChar(s.player, d.charId); },
     set_loadout(s, d) { L.setLoadout(s.player, d); this.liveUpdateChar(s.player, d.charId); },
     set_rule(s, d) { L.setRule(s.player, d); this.liveUpdateChar(s.player, d.charId); },
     reset_rule(s, d) { L.resetRule(s.player, d); this.liveUpdateChar(s.player, d.charId); },

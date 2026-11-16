@@ -18,17 +18,17 @@ export const CONFIG = {
   mainCharacter: {
     attributeBonus: 0.08, // +8% to all base attributes
     extraAbilitySlots: 1, // main has one more ability slot than recruits
-    extraAttributePointsPerLevel: 1,
-    bonusAbilityPointEvery: 5, // +1 ability point every N levels
+    bonusSkillPointEvery: 5, // +1 extra skill tree point every N levels
     xpBonus: 0.10,
     leadershipAura: { unlockLevel: 10, damagePct: 0.04 }, // party-wide damage aura
   },
 
-  attributePointsPerLevel: 2,
-  abilityPointsPerLevel: 1,
+  skillPointsPerLevel: 1,   // passive skill tree points per level (see shared/data/skilltree.js)
+  treeNodeRefundCostPerLevel: 5,  // gold per character level to refund a single node
+  treeResetCostPerLevel: 40,      // gold per character level to reset the whole tree
   baseAbilitySlots: 4,
-  maxAbilityRank: 5,
-  abilityRankBonus: 0.15, // +15% effect per rank above 1
+  maxAbilityRank: 3,        // rank 1 from the ability node, +1 per "Empowered" node
+  abilityRankBonus: 0.2,    // +20% effect per rank above 1
 
   roles: {
     tank:    { label: 'Tank',          threatMult: 3.0, damageTakenPct: -0.05 },

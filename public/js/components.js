@@ -11,7 +11,7 @@ export function charPicker(selectedId) {
     <button class="char-chip ${c.id === selectedId ? 'active' : ''}" data-pick-char="${c.id}" title="${esc(c.name)}">
       ${portrait(c, 'xs')}
       <span class="chip-text"><b>${esc(c.name)}${c.isMain ? ' <span class="hero-star" title="Hero">★</span>' : ''}</b><small>Lv ${c.level} ${esc(CLASSES[c.classId].name)}</small></span>
-      ${c.unspentAttributePoints > 0 || hasAbilityAction(c) ? '<span class="dot" title="Unspent points"></span>' : ''}
+      ${hasAbilityAction(c) ? '<span class="dot" title="Unspent skill points"></span>' : ''}
     </button>`).join('')}</div>`;
 }
 

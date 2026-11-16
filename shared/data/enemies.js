@@ -2,7 +2,7 @@
 // Images: assets/enemies/<enemyId>.png
 // phases (bosses): triggered once when health drops below hpBelow (%). effects use the same format as abilities.
 // enrageAfter: seconds until the boss enrages.
-const STD = { hp: 0.27, power: 0.22, defense: 0.18 };
+const STD = { hp: 0.30, power: 0.235, defense: 0.18 };
 // Global tuning knobs for enemy strength
 export const ENEMY_TUNING = { hp: 10, damage: 2.0, bossHp: 6, bossDamage: 1.9 };
 

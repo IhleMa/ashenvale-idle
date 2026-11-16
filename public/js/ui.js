@@ -38,7 +38,9 @@ export function modal(innerHtml, { onClose, wide = false } = {}) {
   const wrap = document.createElement('div');
   wrap.className = 'modal-backdrop';
   wrap.innerHTML = `<div class="modal ${wide ? 'wide' : ''}" role="dialog"><button class="modal-x" data-close aria-label="Close">✕</button>${innerHtml}</div>`;
-  const close = () => { wrap.remove(); onClose?.(); };
+  const onKey = e => { if (e.key === 'Escape') close(); };
+  const close = () => { wrap.remove(); document.removeEventListener('keydown', onKey); onClose?.(); };
+  document.addEventListener('keydown', onKey);
   wrap.addEventListener('click', e => { if (e.target === wrap || e.target.closest('[data-close]')) close(); });
   root.appendChild(wrap);
   return { el: wrap.querySelector('.modal'), close };

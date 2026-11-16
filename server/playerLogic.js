@@ -6,9 +6,9 @@ import { ABILITIES } from '../shared/data/abilities.js';
 import { ZONES } from '../shared/data/zones.js';
 import { ACHIEVEMENTS } from '../shared/data/achievements.js';
 import { SLOT_IDS, generateItem, canEquip, itemSellValue, ITEM_BASES } from '../shared/data/items.js';
-import { createCharacter, unlockAbility, upgradeAbility, addXp, autoSpendAttributes, autoLearnAbilities, abilitySlots, respecCost, cloneRule } from '../shared/character.js';
+import { createCharacter, addXp, autoDevelop, syncTree, abilitySlots, cloneRule, treeRefundCost, treeResetCost } from '../shared/character.js';
+import { allocateNode as treeAllocate, refundNode as treeRefund, resetTree as treeReset, availablePoints } from '../shared/skilltree.js';
 import { sanitizeRule } from '../shared/rules.js';
-import { ATTR_IDS } from '../shared/stats.js';
 import { createRng, randomSeed } from '../shared/rng.js';
 
 const NAMES = ['Aldric', 'Brienna', 'Cassian', 'Dagna', 'Elowen', 'Fenris', 'Gwyn', 'Halvard', 'Isolde', 'Jorah', 'Kael', 'Liora', 'Merrick', 'Nyx', 'Orin', 'Perrin', 'Quill', 'Rowan', 'Sable', 'Thane', 'Ulric', 'Vesna', 'Wren', 'Xander', 'Yara', 'Zephyr', 'Ashka', 'Bram', 'Corin', 'Delia', 'Edda', 'Faelan', 'Garrick', 'Hesper', 'Ivo', 'Juniper', 'Kestrel', 'Lysa', 'Mordecai', 'Nessa', 'Oswin', 'Petra', 'Ronan', 'Selka', 'Tamsin', 'Vale'];
@@ -40,9 +40,14 @@ export function migratePlayer(p) {
   while (p.parties.length < CONFIG.party.presets) p.parties.push({ name: `Party ${p.parties.length + 1}`, members: p.heroId ? [p.heroId] : [] });
   for (const ch of Object.values(p.characters)) {
     for (const s of SLOT_IDS) if (!(s in ch.equipment)) ch.equipment[s] = null;
-    // drop abilities that no longer exist
-    for (const a of Object.keys(ch.abilities)) if (!ABILITIES[a]) { delete ch.abilities[a]; delete ch.rules[a]; }
-    ch.loadout = ch.loadout.filter(a => ch.abilities[a]);
+    // v0.1 → skill tree: old attribute/ability points are refunded as tree points
+    if (!ch.tree) {
+      ch.tree = { allocated: ['start'] };
+      delete ch.attributes; delete ch.unspentAttributePoints; delete ch.abilityPoints;
+      ch.abilities = {};
+      if (!ch.isMain) autoDevelop(ch);
+    }
+    syncTree(ch);
   }
   return p;
 }
@@ -60,7 +65,7 @@ export function createHero(p, { name, classId, portrait }, assetIndex) {
   if (!CLASSES[classId]) fail('Unknown class');
   if (portrait != null && (typeof portrait !== 'string' || !assetIndex[`portraits/${portrait}`])) portrait = null;
   const id = uid();
-  const ch = createCharacter({ id, name: name.trim(), classId, isMain: true, portrait });
+  const ch = createCharacter({ id, name: name.trim(), classId, isMain: true, portrait, autoTree: false });
   p.characters[id] = ch;
   p.heroId = id;
   for (const party of p.parties) party.members = [id];
@@ -76,29 +81,47 @@ export function createHero(p, { name, classId, portrait }, assetIndex) {
   return ch;
 }
 
-// --------------------------------------------------------------------------- attributes / abilities
-export function allocateAttribute(p, { charId, attr, amount = 1 }) {
+// --------------------------------------------------------------------------- skill tree
+// nodeIds: one node, or an ordered path of nodes (each must connect to the tree when it is allocated)
+export function allocateNodes(p, { charId, nodeIds }) {
   const ch = getChar(p, charId);
-  if (!ATTR_IDS.includes(attr)) fail('Unknown attribute');
-  amount = Math.floor(Number(amount));
-  if (!(amount >= 1 && amount <= ch.unspentAttributePoints)) fail('Not enough attribute points');
-  ch.attributes[attr] += amount;
-  ch.unspentAttributePoints -= amount;
+  if (!Array.isArray(nodeIds) || nodeIds.length < 1 || nodeIds.length > 80) fail('Invalid nodes');
+  if (nodeIds.length > availablePoints(ch)) fail('Not enough skill points');
+  const backup = [...ch.tree.allocated];
+  try {
+    for (const id of nodeIds) treeAllocate(ch, String(id));
+  } catch (e) {
+    ch.tree.allocated = backup;
+    fail(e.message);
+  }
+  syncTree(ch);
 }
 
-export function resetAttributes(p, { charId }) {
+export function refundNode(p, { charId, nodeId }) {
   const ch = getChar(p, charId);
-  const cost = respecCost(ch);
-  if (p.gold < cost) fail(`Respec costs ${cost} gold`);
+  const cost = treeRefundCost(ch);
+  if (p.gold < cost) fail(`Refunding a node costs ${cost} gold`);
+  try { treeRefund(ch, String(nodeId)); } catch (e) { fail(e.message); }
   p.gold -= cost;
-  for (const a of ATTR_IDS) { ch.unspentAttributePoints += ch.attributes[a]; ch.attributes[a] = 0; }
+  syncTree(ch);
+  return { cost };
 }
 
-export function doUnlockAbility(p, { charId, abilityId }) {
-  try { unlockAbility(getChar(p, charId), abilityId); } catch (e) { fail(e.message); }
+export function resetTree(p, { charId }) {
+  const ch = getChar(p, charId);
+  const cost = treeResetCost(ch);
+  if (ch.tree.allocated.length <= 1) fail('Nothing to reset');
+  if (p.gold < cost) fail(`Resetting the tree costs ${cost} gold`);
+  p.gold -= cost;
+  treeReset(ch);
+  syncTree(ch);
+  return { cost };
 }
-export function doUpgradeAbility(p, { charId, abilityId }) {
-  try { upgradeAbility(getChar(p, charId), abilityId); } catch (e) { fail(e.message); }
+
+export function autoTree(p, { charId }) {
+  const ch = getChar(p, charId);
+  if (availablePoints(ch) < 1) fail('No skill points to spend');
+  autoDevelop(ch);
 }
 
 export function setLoadout(p, { charId, loadout }) {
@@ -337,8 +360,7 @@ export function applyRewards(p, chars, rewards) {
     if (gained) {
       levelUps.push({ name: ch.name, level: ch.level, charId: ch.id });
       if ((ch.isMain && p.settings.autoDevelopHero) || (!ch.isMain && p.settings.autoDevelopRecruits)) {
-        autoSpendAttributes(ch);
-        autoLearnAbilities(ch);
+        autoDevelop(ch);
       }
     }
   }

@@ -28,9 +28,9 @@ export function makeCharacterUnit(ch, { ownerId, ownerName, position, bonuses = 
     basicAttack: cls.basicAttack,
     threatMult: (cls.threatMult || 1) * (role.threatMult || 1),
     bonuses: {
-      damagePct: (role.damagePct || 0) + (bonuses.damagePct || 0),
-      healingPct: (role.healingPct || 0) + (bonuses.healingPct || 0),
-      damageTakenPct: (role.damageTakenPct || 0) + (bonuses.damageTakenPct || 0),
+      damagePct: (role.damagePct || 0) + (bonuses.damagePct || 0) + s.damagePct,
+      healingPct: (role.healingPct || 0) + (bonuses.healingPct || 0) + s.healingPct,
+      damageTakenPct: (role.damageTakenPct || 0) + (bonuses.damageTakenPct || 0) + s.damageTakenPct,
       buffDurationPct: role.buffDurationPct || 0,
       allStatsPct: bonuses.allStatsPct || 0,
     },

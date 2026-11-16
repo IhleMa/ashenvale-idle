@@ -51,13 +51,14 @@ public/assets/
 ├── items/          sword.png, staff.png, plate_chest.png, … (+ optional sword_legendary.png)
 ├── enemies/        wolf.png, goblin_chieftain.png, …
 ├── statuses/       poison.png, shield_wall.png, …
+├── skilltree/      keystone.png, notable.png, rank.png   (optional node icons)
 ├── zones/          whispering_woods.png, …              (combat backgrounds)
 ├── encounters/     ashen_crypt.png, ashen_colossus.png, …
 ├── achievements/   first_blood.png, …
 └── ui/             logo.png, background.png
 ```
 
-**[ASSETS.md](ASSETS.md)** lists all 176 file names, each with a ✅ or ⬜ to show whether it's present. To use a different file name, map it in `public/assets/manifest.json`.
+**[ASSETS.md](ASSETS.md)** lists every file name, each with a ✅ or ⬜ to show whether it's present. To use a different file name, map it in `public/assets/manifest.json`.
 
 ---
 
@@ -65,8 +66,9 @@ public/assets/
 
 | System | Summary |
 |---|---|
-| **Hero** | Permanent main character: +8% attributes, an extra ability slot, +1 attribute point per level, a bonus ability point every 5 levels, +10% XP, a Leadership aura at level 10 and a hero-only class title at level 40. The hero can't be dismissed and is always in the party. |
+| **Hero** | Permanent main character: +8% attributes, an extra ability slot, a bonus skill tree point every 5 levels, +10% XP, a Leadership aura at level 10 and a hero-only class title at level 40. The hero can't be dismissed and is always in the party. |
 | **Classes** | Warrior (tank), Mage, Rogue, Ranger (damage) and Cleric (healer). Each has its own attributes, attribute scaling, resource (Rage/Mana/Energy/Focus), 7 abilities and class titles. |
+| **Passive skill tree** | A Path of Exile-style web for each class. You start at the Origin in the middle, which grants your first ability, and spend 1 point per level on any node connected to your tree. Four themed branches are linked by rings and bridges, so there are many routes. The tree holds every ability (7 per class), "Empowered" nodes that raise ability ranks, attribute nodes, branch masteries, notables and an outer keystone per branch. About 109 nodes per class, roughly 70 points at max level, so you have to choose. Hover a node to preview the path and click to allocate the whole path. Refund single nodes or reset the tree for gold. Companions can auto-allocate. |
 | **Recruitment** | A rotating tavern of recruits with random classes and traits. The roster holds up to 12 companions. |
 | **Party** | 3 saved presets with up to 4 members each. Position affects who enemies target first, and each member has a role (Tank, Healer, Damage, Support). A balanced party and class variety give synergy bonuses. |
 | **Combat behaviour** | Every ability has its own rule: activation conditions (AND/OR, nested groups, NOT), a target selector and target requirements. Abilities are tried in priority order, and changes apply to the fight that's already running. |
@@ -74,7 +76,7 @@ public/assets/
 | **Enemies** | 5 zones, each with a boss. Bosses have phases (summons, defensive shells, enrage) and an enrage timer. Beating a zone's boss unlocks the next zone. |
 | **Idle & offline** | The server runs your fights continuously while you're online. When you come back after being away (up to 8 h), the same combat engine fast-forwards those fights using server time. |
 | **Multiplayer** | Groups of up to 4 players with invitations, leader controls and chat. Co-op encounters: a dungeon, an elite hunt, a challenge and a world boss. Enemies scale with group size and every player gets their own loot. |
-| **Progression** | XP and levels up to 60, attribute points, ability ranks, class titles, 16 achievements and statistics. |
+| **Progression** | XP and levels up to 60, skill tree points, ability ranks, class titles, 16 achievements and statistics. |
 
 ---
 
@@ -84,6 +86,7 @@ public/assets/
 shared/            Game rules, used by both the server and the browser
   config.js        ← all balance numbers in one place
   data/            classes, abilities, statuses, items, enemies, zones, achievements (data-driven)
+  skilltree.js     passive tree rules (allocation, refunds, paths, auto-allocate)
   rules.js         behaviour rule engine (conditions, target selectors, validation)
   combat.js        deterministic combat simulation (no DOM, seeded RNG)
   stats.js         stat calculation (single source of truth)
@@ -99,7 +102,8 @@ pterodactyl/       Pterodactyl egg
 
 ### Adding content
 
-- **New ability:** add an entry to `shared/data/abilities.js` with `effects` and a `defaultRule`. The combat engine and the behaviour editor pick it up automatically.
+- **New ability:** add an entry to `shared/data/abilities.js` with `effects` and a `defaultRule`, then place it in the class's tree in `shared/data/skilltree.js` (`abilities: { ring: 'ability_id' }`). The combat engine, tree and behaviour editor pick it up automatically.
+- **Skill tree:** each class tree is generated from a short spec in `shared/data/skilltree.js` (branches, attribute themes, ability rings, notables/keystones). Ring sizes, links and node values are in `TREE_CONFIG`. Changing the number of rings or branches changes node ids. Existing saves are cleaned up automatically, and points on removed nodes are refunded.
 - **New class:** add an entry to `shared/data/classes.js` and give it abilities with `classId: '<your class>'`.
 - **New enemy/zone/encounter:** add entries to `enemies.js` and `zones.js`.
 - **New behaviour condition or target selector:** add it to the registries in `shared/rules.js`. The editor dropdowns update themselves.

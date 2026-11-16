@@ -8,7 +8,8 @@ import { CONFIG, xpToNext } from '/shared/config.js';
 import { CLASSES, TRAITS } from '/shared/data/classes.js';
 import { SLOTS, SLOT_IDS, canEquip } from '/shared/data/items.js';
 import { computeStats, ATTRIBUTES, powerRating } from '/shared/stats.js';
-import { abilitySlots, respecCost } from '/shared/character.js';
+import { abilitySlots } from '/shared/character.js';
+import { availablePoints, treeStats } from '/shared/skilltree.js';
 
 export const characterView = {
   id: 'character', label: 'Character', icon: '👤',
@@ -19,8 +20,6 @@ export const characterView = {
       const t = e.target.closest('[data-act]');
       if (!t || !ch) return;
       const a = t.dataset.act;
-      if (a === 'attr') await run(act('allocate_attribute', { charId: ch.id, attr: t.dataset.attr, amount: e.shiftKey ? ch.unspentAttributePoints : 1 }));
-      if (a === 'respec' && await confirmBox(`Reset all spent attribute points for ${respecCost(ch)} gold?`, 'Reset')) await run(act('reset_attributes', { charId: ch.id }));
       if (a === 'slot') openSlot(ch, t.dataset.slot);
       if (a === 'rename') {
         const name = prompt('New name', ch.name);
@@ -57,21 +56,23 @@ export const characterView = {
               ${ch.trait ? `<span class="trait" ${tipAttr(esc(TRAITS[ch.trait].description))}>Trait: ${esc(TRAITS[ch.trait].name)}</span>` : ''}
               <span class="muted small">Power ${fmt(powerRating(s))}</span>
             </div>
-            ${ch.isMain ? `<div class="hero-perks small muted">Hero perks: +${Math.round(CONFIG.mainCharacter.attributeBonus * 100)}% attributes · ${abilitySlots(ch)} ability slots · +${CONFIG.mainCharacter.extraAttributePointsPerLevel} attribute point/level · +${Math.round(CONFIG.mainCharacter.xpBonus * 100)}% XP · Leadership aura at Lv ${CONFIG.mainCharacter.leadershipAura.unlockLevel}</div>` : `<div class="row end"><button class="btn small danger ghost" data-act="dismiss">Dismiss</button></div>`}
+            ${ch.isMain ? `<div class="hero-perks small muted">Hero perks: +${Math.round(CONFIG.mainCharacter.attributeBonus * 100)}% attributes · ${abilitySlots(ch)} ability slots · +1 skill point every ${CONFIG.mainCharacter.bonusSkillPointEvery} levels · +${Math.round(CONFIG.mainCharacter.xpBonus * 100)}% XP · Leadership aura at Lv ${CONFIG.mainCharacter.leadershipAura.unlockLevel}</div>` : `<div class="row end"><button class="btn small danger ghost" data-act="dismiss">Dismiss</button></div>`}
           </div>
         </section>
 
         <section class="panel">
-          <div class="panel-head"><h3>Attributes</h3>${ch.unspentAttributePoints ? `<span class="points">${ch.unspentAttributePoints} point${ch.unspentAttributePoints > 1 ? 's' : ''} to spend</span>` : ''}</div>
+          <div class="panel-head"><h3>Attributes</h3>${availablePoints(ch) ? `<a class="points" href="#/skilltree">${availablePoints(ch)} skill point${availablePoints(ch) > 1 ? 's' : ''} to spend →</a>` : '<a class="small" href="#/skilltree">Open skill tree →</a>'}</div>
           <div class="attr-list">
-            ${Object.entries(ATTRIBUTES).map(([k, a]) => `<div class="attr-row">
-              <span class="attr-name" ${tipAttr(attrTip(ch.classId, k))}>${a.label}</span>
-              <b>${s.attributes[k]}</b>
-              <span class="muted small">${ch.attributes[k] ? `(+${ch.attributes[k]} spent)` : ''}</span>
-              ${ch.unspentAttributePoints ? `<button class="btn tiny" data-act="attr" data-attr="${k}" title="Shift-click to spend all">+</button>` : ''}
-            </div>`).join('')}
+            ${Object.entries(ATTRIBUTES).map(([k, a]) => {
+              const fromTree = treeStats(ch)[k] || 0;
+              return `<div class="attr-row">
+                <span class="attr-name" ${tipAttr(attrTip(ch.classId, k))}>${a.label}</span>
+                <b>${s.attributes[k]}</b>
+                <span class="muted small">${fromTree ? `+${fromTree} from skill tree` : ''}</span>
+              </div>`;
+            }).join('')}
           </div>
-          <div class="row between small muted"><span>Shift-click + to spend all points.</span><button class="btn tiny ghost" data-act="respec">Respec (${fmt(respecCost(ch))}g)</button></div>
+          <p class="small muted">Attributes grow with your level and are raised further through the passive skill tree and equipment.</p>
           <h3>Combat stats</h3>
           <div class="stat-grid">
             ${statRow('Health', fmt(s.maxHp))}
