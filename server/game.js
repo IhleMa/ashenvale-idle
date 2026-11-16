@@ -10,14 +10,17 @@ import { buildPartyUnits, partyBonuses } from '../shared/party.js';
 import { idleWaves, bossWaves, coopWaves, coopScale, computeRewards, zoneLevel } from '../shared/encounters.js';
 import { createRng, randomSeed } from '../shared/rng.js';
 import { ABILITIES } from '../shared/data/abilities.js';
+import { Rankings } from './rankings.js';
 import * as L from './playerLogic.js';
 
 const { GameError } = L;
+const READ_ONLY = new Set(['get_rankings', 'inspect_player']);
 const fail = m => { throw new GameError(m); };
 
 export class Game {
   constructor({ store, assets, buildId = 'dev', log = console.log }) {
     this.buildId = buildId;
+    this.rankings = new Rankings(this);
     this.store = store;
     this.assets = assets;
     this.log = log;
@@ -158,7 +161,7 @@ export class Game {
       const p = s.player;
       if (!p.heroId && msg.type !== 'create_hero') fail('Create your hero first');
       const result = handler.call(this, s, payload);
-      this.markDirty(s);
+      if (!READ_ONLY.has(msg.type)) this.markDirty(s);
       this.send(ws, { t: 'result', id: msg.id, ok: true, result: result ?? null });
       this.flushState(s);
     } catch (e) {
@@ -194,6 +197,14 @@ export class Game {
     sell_by_rarity(s, d) { return L.sellByRarity(s.player, d); },
     toggle_lock(s, d) { L.toggleLock(s.player, d); },
     set_settings(s, d) { L.setSettings(s.player, d); },
+    get_rankings(s, d) {
+      return this.rankings.board({ category: String(d.category || 'level'), classId: d.classId ? String(d.classId) : null, search: d.search, limit: Number(d.limit) || 100 }, s.player.id);
+    },
+    inspect_player(s, d) {
+      const prof = this.rankings.inspect(String(d.name || ''));
+      if (!prof) fail('Player not found');
+      return prof;
+    },
     refresh_recruits(s) { L.refreshRecruits(s.player, false, this.assets.get()); },
     recruit(s, d) { const ch = L.recruit(s.player, d); this.toast(s.player.id, `${ch.name} joined your roster!`, 'success'); },
     dismiss(s, d) { this.ensureNotInCoop(s.player.id); L.dismiss(s.player, d); this.abortSolo(s); },

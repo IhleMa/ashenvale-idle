@@ -74,6 +74,7 @@ export const progressionView = {
           <h3>Settings</h3>
           <label class="switch"><input type="checkbox" data-setting="autoDevelopRecruits" ${p.settings.autoDevelopRecruits ? 'checked' : ''}><span></span> Companions spend skill tree points automatically</label>
           <label class="switch"><input type="checkbox" data-setting="autoDevelopHero" ${p.settings.autoDevelopHero ? 'checked' : ''}><span></span> Hero spends skill tree points automatically</label>
+          <label class="switch"><input type="checkbox" data-setting="publicProfile" ${p.settings.publicProfile !== false ? 'checked' : ''}><span></span> Let other players inspect my build (gear, skill tree, behaviour rules)</label>
           <p class="muted small">Offline progress: your active party keeps fighting in the current zone for up to ${CONFIG.offline.maxHours} hours while you're away, using the exact same combat rules (calculated by the server).</p>
           <div class="row gap"><button class="btn small" data-reload-art>Reload artwork</button><button class="btn small ghost danger" data-logout>Log out</button></div>
         </section>

@@ -26,7 +26,7 @@ export function newPlayer(account) {
     recruitment: { offers: [], refreshedAt: 0 },
     stats: { kills: 0, bossKills: 0, recruited: 0, epicFound: 0, legendaryFound: 0, coopWins: 0, heroLevel: 1, zonesUnlocked: 1, fights: 0 },
     achievements: {},
-    settings: { autoSellBelow: null, autoDevelopRecruits: true, autoDevelopHero: false },
+    settings: { autoSellBelow: null, autoDevelopRecruits: true, autoDevelopHero: false, publicProfile: true },
     coopChars: [],
   };
 }
@@ -217,6 +217,7 @@ export function setSettings(p, s) {
   if ('autoSellBelow' in s) p.settings.autoSellBelow = s.autoSellBelow === null || CONFIG.rarities.some(r => r.id === s.autoSellBelow) ? s.autoSellBelow : null;
   if ('autoDevelopRecruits' in s) p.settings.autoDevelopRecruits = !!s.autoDevelopRecruits;
   if ('autoDevelopHero' in s) p.settings.autoDevelopHero = !!s.autoDevelopHero;
+  if ('publicProfile' in s) p.settings.publicProfile = !!s.publicProfile;
 }
 
 // Adds an item (auto-sell rules & capacity respected). Returns 'kept' | 'sold'

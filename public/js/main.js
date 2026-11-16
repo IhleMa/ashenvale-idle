@@ -15,9 +15,10 @@ import { recruitmentView } from './views/recruitment.js';
 import { inventoryView } from './views/inventory.js';
 import { multiplayerView } from './views/multiplayer.js';
 import { progressionView } from './views/progression.js';
+import { rankingsView } from './views/rankings.js';
 import { createView } from './views/create.js';
 
-const VIEWS = [combatView, characterView, skilltreeView, abilitiesView, partyView, recruitmentView, inventoryView, multiplayerView, progressionView];
+const VIEWS = [combatView, characterView, skilltreeView, abilitiesView, partyView, recruitmentView, inventoryView, multiplayerView, rankingsView, progressionView];
 const viewEl = () => document.getElementById('view');
 let current = null;
 let root = null; // per-view container (listeners attached to it die with it)

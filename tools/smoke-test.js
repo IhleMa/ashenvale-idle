@@ -105,6 +105,17 @@ try {
   check(a.count('battle_end') >= 1, 'a battle finished');
   check(a.state.stats.kills > 0 || a.msgs.some(m => m.t === 'battle_end' && m.summary.result === 'defeat'), 'kills recorded (or defeat)');
 
+  // rankings & inspect
+  res = await a.act('get_rankings', { category: 'level' });
+  check(res.ok && res.result.total === 2 && res.result.mine, 'rankings list players and my rank');
+  res = await a.act('inspect_player', { name: 'bob' });
+  check(res.ok && res.result.hero.name === 'Bram' && res.result.hero.equipment && !('gold' in res.result), 'inspect shows build but not gold');
+  await b.act('set_settings', { publicProfile: false });
+  res = await a.act('inspect_player', { name: 'bob' });
+  check(res.ok && res.result.hidden && !res.result.hero.equipment, 'private profile hides build');
+  res = await a.act('inspect_player', { name: 'nobody' });
+  check(!res.ok, 'inspecting unknown player fails');
+
   // groups
   res = await a.act('group_create');
   check(res.ok, 'group created');
