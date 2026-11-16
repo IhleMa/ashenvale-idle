@@ -206,7 +206,7 @@ export const ABILITIES = {
     description: 'Heal all allies for 120% healing power.',
     cost: 35, cooldown: 10, target: 'ally', area: true,
     effects: [{ kind: 'heal', stat: 'healPower', power: 1.2 }],
-    defaultRule: R([{ type: 'allies_below_hp', value: 65, count: 2 }], 'all_allies'),
+    defaultRule: R([{ type: 'allies_below_hp', value: 75, count: 2 }], 'all_allies'),
   },
   power_word_barrier: {
     name: 'Power Word: Barrier', classId: 'cleric', unlockLevel: 15, type: 'buff',
@@ -343,6 +343,17 @@ export const ABILITIES = {
 };
 
 for (const [id, a] of Object.entries(ABILITIES)) a.id = id;
+
+// Default priority (higher = checked earlier). Used to place newly learned abilities in the loadout:
+// emergency/defensive and situational abilities first, cheap "always" fillers last.
+export const DEFAULT_PRIORITY = {
+  shield_wall: 100, taunt: 90, battle_cry: 75, shield_bash: 70, cleave: 65, sunder_armor: 55, heroic_strike: 20,
+  frost_nova: 95, arcane_power: 85, meteor: 80, flame_wave: 65, arcane_missiles: 45, frost_bolt: 40, fireball: 20,
+  evasion: 100, shadow_flurry: 75, expose_weakness: 70, rupture: 60, execute: 50, poison_blade: 35, backstab: 20,
+  prayer_of_healing: 95, heal: 90, divine_blessing: 75, purify: 70, power_word_barrier: 65, renew: 60, smite: 10,
+  rapid_fire: 85, volley: 80, kill_shot: 78, multi_shot: 65, hunters_mark: 55, serpent_sting: 45, aimed_shot: 20,
+};
+export const abilityPriority = id => DEFAULT_PRIORITY[id] ?? 50;
 
 export function classAbilities(classId) {
   return Object.values(ABILITIES).filter(a => a.classId === classId).sort((a, b) => a.unlockLevel - b.unlockLevel);

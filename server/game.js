@@ -9,6 +9,7 @@ import { createBattle, stepBattle, drainEvents, battleSnapshot, dynamicUnit, run
 import { buildPartyUnits, partyBonuses } from '../shared/party.js';
 import { idleWaves, bossWaves, coopWaves, coopScale, computeRewards, zoneLevel } from '../shared/encounters.js';
 import { createRng, randomSeed } from '../shared/rng.js';
+import { ABILITIES } from '../shared/data/abilities.js';
 import * as L from './playerLogic.js';
 
 const { GameError } = L;
@@ -172,7 +173,13 @@ export class Game {
       this.toast(s.player.id, `Welcome to Ashenvale, ${ch.name}! Your first companion is free — visit Recruitment.`, 'success');
       this.onlineDirty = true;
     },
-    allocate_nodes(s, d) { L.allocateNodes(s.player, d); this.liveUpdateChar(s.player, d.charId); },
+    allocate_nodes(s, d) {
+      const r = L.allocateNodes(s.player, d);
+      this.liveUpdateChar(s.player, d.charId);
+      const names = r.notEquipped.map(a => ABILITIES[a]?.name).filter(Boolean);
+      if (names.length) this.toast(s.player.id, `${names.join(', ')} learned — but the loadout is full. Equip it on the Abilities page or it won't be used.`, 'info');
+      return r;
+    },
     refund_node(s, d) { const r = L.refundNode(s.player, d); this.liveUpdateChar(s.player, d.charId); return r; },
     reset_tree(s, d) { const r = L.resetTree(s.player, d); this.liveUpdateChar(s.player, d.charId); return r; },
     auto_tree(s, d) { L.autoTree(s.player, d); this.liveUpdateChar(s.player, d.charId); },

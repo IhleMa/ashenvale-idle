@@ -130,6 +130,8 @@ function editorHtml(ch, abilityId) {
     <div class="row gap small">Use when <select data-rule-mode><option value="all" ${rule.mode !== 'any' ? 'selected' : ''}>ALL</option><option value="any" ${rule.mode === 'any' ? 'selected' : ''}>ANY</option></select> of these are true:</div>
     ${condList(rule.conditions, CONDITIONS, 'c')}
 
+    ${a.cost ? `<label class="switch small" ${tipAttr('When this ability is ready and its conditions are met but you lack ' + esc(cls.resource.name) + ', abilities lower in the loadout wait instead of spending it — so expensive abilities actually get cast.')}><input type="checkbox" data-rule-reserve ${rule.reserve !== false ? 'checked' : ''}><span></span> Save up ${esc(cls.resource.name)} for this ability (lower-priority abilities wait)</label>` : ''}
+
     <h4>2 · Who to target</h4>
     <div class="row gap wrap">
       <select data-rule-selector ${sels.length < 2 ? 'disabled' : ''}>${sels.map(s => `<option value="${s}" ${s === rule.target.selector ? 'selected' : ''}>${esc(SELECTORS[s].label)}</option>`).join('')}</select>
@@ -214,6 +216,7 @@ export const abilitiesView = {
       const rule = getDraft(ch, selectedAbility);
       const t = e.target;
       if (t.matches('[data-rule-enabled]')) rule.enabled = t.checked;
+      else if (t.matches('[data-rule-reserve]')) rule.reserve = t.checked;
       else if (t.matches('[data-rule-mode]')) rule.mode = t.value;
       else if (t.matches('[data-rule-selector]')) { rule.target = { selector: t.value }; if (SELECTORS[t.value].hasParam) rule.target.param = 'boss'; }
       else if (t.matches('[data-rule-param]')) rule.target.param = t.value;
@@ -262,7 +265,11 @@ export const abilitiesView = {
                 <button class="icon-btn small" data-remove-ab="${a}" title="Remove from loadout">✕</button>
               </div>
             </li>`).join('')}${Array.from({ length: slots - ch.loadout.length }, () => '<li class="loadout-item empty"><span class="muted small">Empty slot</span></li>').join('')}</ol>
-            ${unequipped.length ? `<div class="unequipped"><span class="muted small">Not equipped:</span> ${unequipped.map(a => `<button class="btn tiny" data-equip-ab="${a}">${esc(ABILITIES[a].name)} +</button>`).join(' ')}</div>` : ''}
+            ${unequipped.length ? `<div class="notice small unequipped">
+              <div><b>${unequipped.length} learned abilit${unequipped.length > 1 ? 'ies are' : 'y is'} not equipped and will never be used:</b></div>
+              <div class="row gap wrap">${unequipped.map(a => `<button class="btn tiny" data-equip-ab="${a}" ${ch.loadout.length >= slots ? 'disabled' : ''}>${esc(ABILITIES[a].name)} +</button>`).join(' ')}</div>
+              ${ch.loadout.length >= slots ? '<div class="muted">All slots are full — remove an ability (✕) to make room.</div>' : ''}
+            </div>` : ''}
           </section>
           <section class="panel">
             <div class="panel-head"><h3>${esc(CLASSES[ch.classId].name)} abilities</h3>${availablePoints(ch) ? `<a class="points" href="#/skilltree">${availablePoints(ch)} skill point${availablePoints(ch) === 1 ? '' : 's'}</a>` : ''}</div>

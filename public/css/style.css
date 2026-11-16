@@ -264,7 +264,8 @@ ul.plus li::marker { content: '+ '; color: var(--good); } ul.minus li::marker { 
 .loadout-item.empty { border-style: dashed; cursor: default; justify-content: center; }
 .prio { width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: #1a0d05; font-weight: 700; display: grid; place-items: center; font-size: 12px; flex: none; }
 .loadout-btns { display: flex; gap: 2px; flex: none; }
-.unequipped { margin-top: 10px; display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.unequipped { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+.switch.small { font-size: 12px; color: var(--muted); }
 .ability-book { display: flex; flex-direction: column; gap: 8px; }
 .ability-card { display: flex; gap: 10px; align-items: flex-start; padding: 10px; background: #120d0c; border: 1px solid var(--line); border-radius: 8px; cursor: pointer; }
 .ability-card.locked { opacity: .55; cursor: default; }

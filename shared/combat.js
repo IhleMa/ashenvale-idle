@@ -166,11 +166,21 @@ function finish(b, state) {
 // ---------------------------------------------------------------- actions
 function act(b, u) {
   const gcd = C.globalCooldown / effAttackSpeed(u);
+  // Resource pooling: if a higher-priority ability is ready and its conditions are met but it can't be
+  // afforded yet, lower-priority abilities may only spend resource they can spare without delaying it.
+  let reserved = 0;
   for (const abilityId of u.loadout) {
     const ab = ABILITIES[abilityId];
     if (!ab || (u.cooldowns[abilityId] || 0) > 0) continue;
-    if (u.resourceDef && u.resource < ab.cost) continue;
-    const targets = resolveRule(u.rules[abilityId], ab, b, u);
+    const rule = u.rules[abilityId];
+    if (u.resourceDef) {
+      if (u.resource < ab.cost) {
+        if (rule?.reserve !== false && ab.cost > reserved && resolveRule(rule, ab, b, u)) reserved = ab.cost;
+        continue;
+      }
+      if (reserved && u.resource - ab.cost < reserved) continue;
+    }
+    const targets = resolveRule(rule, ab, b, u);
     if (!targets) continue;
     if (u.resourceDef) u.resource -= ab.cost;
     u.cooldowns[abilityId] = ab.cooldown;

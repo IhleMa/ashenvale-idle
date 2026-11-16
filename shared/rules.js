@@ -165,7 +165,7 @@ export function sanitizeRule(raw, ability) {
   const selector = allowed.includes(raw.target?.selector) ? raw.target.selector : allowed[0];
   const target = { selector };
   if (SELECTORS[selector].hasParam) target.param = String(raw.target?.param || 'boss').slice(0, 40);
-  return { enabled: raw.enabled !== false, mode: raw.mode === 'any' ? 'any' : 'all', conditions, target, targetConditions };
+  return { enabled: raw.enabled !== false, mode: raw.mode === 'any' ? 'any' : 'all', reserve: raw.reserve !== false, conditions, target, targetConditions };
 }
 
 function cleanParam(p, v) {

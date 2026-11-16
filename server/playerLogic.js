@@ -2,11 +2,11 @@
 import crypto from 'node:crypto';
 import { CONFIG, rarityIndex } from '../shared/config.js';
 import { CLASSES, CLASS_IDS, TRAITS } from '../shared/data/classes.js';
-import { ABILITIES } from '../shared/data/abilities.js';
+import { ABILITIES, abilityPriority } from '../shared/data/abilities.js';
 import { ZONES } from '../shared/data/zones.js';
 import { ACHIEVEMENTS } from '../shared/data/achievements.js';
 import { SLOT_IDS, generateItem, canEquip, itemSellValue, ITEM_BASES } from '../shared/data/items.js';
-import { createCharacter, addXp, autoDevelop, syncTree, abilitySlots, cloneRule, treeRefundCost, treeResetCost } from '../shared/character.js';
+import { createCharacter, addXp, autoDevelop, autoLoadout, syncTree, abilitySlots, cloneRule, treeRefundCost, treeResetCost } from '../shared/character.js';
 import { allocateNode as treeAllocate, refundNode as treeRefund, resetTree as treeReset, availablePoints } from '../shared/skilltree.js';
 import { sanitizeRule } from '../shared/rules.js';
 import { createRng, randomSeed } from '../shared/rng.js';
@@ -48,6 +48,14 @@ export function migratePlayer(p) {
       if (!ch.isMain) autoDevelop(ch);
     }
     syncTree(ch);
+    // v0.3: companions on auto-develop get their loadout rebuilt by priority, so abilities learned
+    // after the loadout filled up (e.g. Volley) are equipped and sensibly ordered
+    if (!ch.loadoutV2) {
+      ch.loadoutV2 = true;
+      if (!ch.isMain && p.settings?.autoDevelopRecruits !== false) {
+        ch.loadout = autoLoadout(ch);
+      }
+    }
   }
   return p;
 }
@@ -94,7 +102,8 @@ export function allocateNodes(p, { charId, nodeIds }) {
     ch.tree.allocated = backup;
     fail(e.message);
   }
-  syncTree(ch);
+  const notEquipped = syncTree(ch);
+  return { notEquipped };
 }
 
 export function refundNode(p, { charId, nodeId }) {
@@ -361,6 +370,8 @@ export function applyRewards(p, chars, rewards) {
       levelUps.push({ name: ch.name, level: ch.level, charId: ch.id });
       if ((ch.isMain && p.settings.autoDevelopHero) || (!ch.isMain && p.settings.autoDevelopRecruits)) {
         autoDevelop(ch);
+      } else {
+        syncTree(ch); // newly earned points stay unspent; nothing else changes
       }
     }
   }

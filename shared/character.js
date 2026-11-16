@@ -2,9 +2,10 @@
 // Abilities and bonus attributes come from the passive skill tree (shared/skilltree.js).
 import { CONFIG, xpToNext } from './config.js';
 import { CLASSES } from './data/classes.js';
-import { ABILITIES } from './data/abilities.js';
+import { ABILITIES, abilityPriority } from './data/abilities.js';
 import { SLOT_IDS } from './data/items.js';
 import { treeAbilities, availablePoints, autoAllocate, sanitizeTree, getTree } from './skilltree.js';
+import { TREE_SPECS } from './data/skilltree.js';
 
 export function abilitySlots(ch) {
   return CONFIG.baseAbilitySlots + (ch.isMain ? CONFIG.mainCharacter.extraAbilitySlots : 0);
@@ -25,24 +26,51 @@ export function createCharacter({ id, name, classId, isMain = false, level = 1, 
     loadout: [],     // ability ids in priority order
     rules: {},       // abilityId -> behaviour rule
     equipment: Object.fromEntries(SLOT_IDS.map(s => [s, null])),
+    loadoutV2: true,
   };
   if (autoTree) autoAllocate(ch);
   syncTree(ch);
+  if (autoTree) ch.loadout = autoLoadout(ch);
   return ch;
 }
 
+// Inserts an ability into the loadout at its default priority (before the first lower-priority ability)
+function insertByPriority(loadout, a) {
+  const i = loadout.findIndex(x => abilityPriority(x) < abilityPriority(a));
+  if (i < 0) loadout.push(a); else loadout.splice(i, 0, a);
+}
+
 // Recomputes abilities from the tree; keeps loadout & rules consistent. Call after every tree change.
-export function syncTree(ch) {
+// Returns the newly learned abilities that could not be equipped because the loadout is full.
+// manageLoadout: when the loadout is full, swap the lowest-priority ability out for a more important new one
+// (used for auto-developed companions).
+export function syncTree(ch, { manageLoadout = false } = {}) {
   sanitizeTree(ch);
   const before = ch.abilities || {};
   ch.abilities = treeAbilities(ch);
   ch.rules = ch.rules || {};
   ch.loadout = (ch.loadout || []).filter(a => ch.abilities[a]);
-  for (const a of Object.keys(ch.abilities)) {
-    if (!ch.rules[a]) ch.rules[a] = cloneRule(ABILITIES[a].defaultRule);
-    if (!before[a] && !ch.loadout.includes(a) && ch.loadout.length < abilitySlots(ch)) ch.loadout.push(a);
+  const notEquipped = [];
+  const learned = Object.keys(ch.abilities).filter(a => !before[a]).sort((x, y) => abilityPriority(y) - abilityPriority(x));
+  for (const a of Object.keys(ch.abilities)) if (!ch.rules[a]) ch.rules[a] = cloneRule(ABILITIES[a].defaultRule);
+  for (const a of learned) {
+    if (ch.loadout.includes(a)) continue;
+    if (ch.loadout.length < abilitySlots(ch)) { insertByPriority(ch.loadout, a); continue; }
+    if (manageLoadout) {
+      const core = TREE_SPECS[ch.classId]?.start; // the class's bread-and-butter ability always stays
+      const candidates = ch.loadout.filter(x => x !== core);
+      const weakest = candidates.reduce((w, x) => (abilityPriority(x) < abilityPriority(w) ? x : w), candidates[0]);
+      if (weakest && abilityPriority(weakest) < abilityPriority(a)) {
+        ch.loadout = ch.loadout.filter(x => x !== weakest);
+        insertByPriority(ch.loadout, a);
+        notEquipped.push(weakest);
+        continue;
+      }
+    }
+    notEquipped.push(a);
   }
   for (const a of Object.keys(ch.rules)) if (!ch.abilities[a]) delete ch.rules[a];
+  return notEquipped;
 }
 
 export function levelUp(ch) {
@@ -68,7 +96,7 @@ export function addXp(ch, amount) {
 // Spend all free skill points automatically (used for companions with auto-develop on)
 export function autoDevelop(ch) {
   autoAllocate(ch);
-  syncTree(ch);
+  return syncTree(ch, { manageLoadout: true });
 }
 
 // True when the character has unspent skill points (UI hint)
@@ -83,4 +111,12 @@ export function treeResetCost(ch) { return CONFIG.treeResetCostPerLevel * ch.lev
 export function abilityNodeId(classId, abilityId) {
   const t = getTree(classId);
   return Object.values(t.nodes).find(n => n.ability === abilityId)?.id || null;
+}
+
+// Best loadout for an automatically managed character: core ability + highest-priority others, ordered by priority
+export function autoLoadout(ch) {
+  const core = TREE_SPECS[ch.classId]?.start;
+  const others = Object.keys(ch.abilities).filter(a => a !== core).sort((a, b) => abilityPriority(b) - abilityPriority(a));
+  const pick = [...(ch.abilities[core] ? [core] : []), ...others].slice(0, abilitySlots(ch));
+  return pick.sort((a, b) => abilityPriority(b) - abilityPriority(a));
 }
