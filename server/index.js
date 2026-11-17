@@ -9,6 +9,7 @@ import { Game } from './game.js';
 import { CONTENT, replaceContent } from '../shared/content.js';
 import { validateContent } from './content-check.js';
 import { ContentManager } from './content-admin.js';
+import { LevelSimRunner } from './levelSim.js';
 import { BotManager, ARCHETYPES } from './bots.js';
 import { computeBuildId } from './version.js';
 import { TlsManager } from './tls.js';
@@ -62,6 +63,8 @@ function applyContent(fresh) {
   log(`Content updated live (${CONTENT._meta.hash}).`);
 }
 game.content = new ContentManager({ apply: applyContent, usage: id => store.countPlayersMentioning(id) });
+// XP curve test runs (bots on a fast-forwarded clock, in a separate low-priority process)
+game.levelSim = new LevelSimRunner({ dataDir: DATA_DIR, settings: game.settings, log });
 game.loadGroups();
 const authLimiter = new RateLimiter(20, 60_000);
 
@@ -274,6 +277,7 @@ function shutdown(sig) {
   try { store.close(); } catch (e) { log('Error while closing the database', e); }
   for (const ws of wss.clients) ws.close(1012, 'Server restarting');
   tls.stop();
+  game.levelSim.stop();
   listener.close(() => process.exit(0));
   setTimeout(() => process.exit(0), 2000).unref();
 }

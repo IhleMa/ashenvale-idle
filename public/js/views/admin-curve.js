@@ -166,7 +166,91 @@ function html() {
 function draw(part = 'all') {
   if (!host?.isConnected) return;
   if (part === 'chart') { host.querySelector('.xc-chart').innerHTML = chartSvg(); return; }
-  host.innerHTML = html();
+  if (part === 'sim') { host.querySelector('.xc-simbox').innerHTML = simHtml(); return; }
+  host.innerHTML = `<div class="xc-editor">${html()}</div><div class="xc-simbox">${simHtml()}</div>`;
+}
+
+// ---------------------------------------------------------------- test with bots (server/levelSim.js)
+const SIM = { status: null, hours: 24, schedule: 'online', which: 'edited', timer: null };
+const SIM_HOURS = [[3, '3 hours'], [6, '6 hours'], [12, '12 hours'], [24, '1 day'], [48, '2 days'], [72, '3 days'], [168, '1 week']];
+const COLORS = ['#7fb8ff', '#c78bff', '#6fd08c', '#f2c14e', '#ff9f5a', '#ff6b6b', '#5fd3d3', '#e0e0e0'];
+const fmtH = h => {
+  if (h == null) return '—';
+  if (h < 1) return `${Math.max(1, Math.round(h * 60))}m`;
+  if (h < 48) { const H = Math.floor(h), m = Math.round((h - H) * 60); return m ? `${H}h ${m}m` : `${H}h`; }
+  const d = Math.floor(h / 24), H = Math.round(h - d * 24); return H ? `${d}d ${H}h` : `${d}d`;
+};
+const median = a => { const v = [...a].sort((x, y) => x - y); return v.length ? (v.length % 2 ? v[(v.length - 1) / 2] : (v[v.length / 2 - 1] + v[v.length / 2]) / 2) : null; };
+function medianLine(run) {
+  const out = {};
+  const max = Math.max(1, ...run.bots.map(b => b.level));
+  for (let L = 2; L <= max; L++) {
+    const vals = run.bots.map(b => b.levels[L]).filter(v => v != null);
+    if (vals.length >= Math.ceil(run.bots.length / 2)) out[L] = median(vals);
+  }
+  return out;
+}
+
+async function pollSim() {
+  try { SIM.status = await act('admin_levelsim_status'); } catch { /* ignore */ }
+  draw('sim');
+  clearTimeout(SIM.timer);
+  if (SIM.status?.running && host?.isConnected) SIM.timer = setTimeout(pollSim, 2000);
+}
+
+function simChart(run, others) {
+  const w = 920, h = 330, m = { l: 62, r: 20, t: 14, b: 36 };
+  const lines = run.bots.map((b, i) => ({ label: b.label, color: COLORS[i % COLORS.length], pts: Object.entries(b.levels).map(([L, t]) => [Number(L), t]) }));
+  const cmp = others.map(o => ({ label: `#${o.id} ${o.label}`, pts: Object.entries(medianLine(o)).map(([L, t]) => [Number(L), t]) }));
+  const all = [...lines, ...cmp].flatMap(l => l.pts);
+  if (!all.length) return '<p class="muted small">Waiting for the first level-ups…</p>';
+  const maxL = Math.max(10, ...all.map(p => p[0])), maxT = Math.max(run.simHours || 0.5, ...all.map(p => p[1])) * 1.05;
+  const X = L => m.l + ((L - 1) / (maxL - 1)) * (w - m.l - m.r), Y = t => m.t + (1 - t / maxT) * (h - m.t - m.b);
+  const stepT = [0.25, 0.5, 1, 2, 3, 6, 12, 24, 48, 72, 168].find(s => maxT / s <= 7) || 336;
+  const yt = []; for (let t = 0; t <= maxT; t += stepT) yt.push(t);
+  const xt = []; for (let L = 1; L <= maxL; L++) if (L === 1 || L % (maxL > 40 ? 10 : 5) === 0) xt.push(L);
+  const path = pts => [[1, 0], ...pts].map(([L, t], i) => `${i ? 'L' : 'M'}${X(L).toFixed(1)},${Y(t).toFixed(1)}`).join('');
+  return `<svg viewBox="0 0 ${w} ${h}" class="xc-svg">
+    ${yt.map(t => `<line x1="${m.l}" x2="${w - m.r}" y1="${Y(t)}" y2="${Y(t)}" class="xc-grid"/><text x="${m.l - 8}" y="${Y(t) + 4}" class="xc-tick" text-anchor="end">${fmtH(t) === '—' ? '0' : t === 0 ? '0' : fmtH(t)}</text>`).join('')}
+    ${xt.map(L => `<line x1="${X(L)}" x2="${X(L)}" y1="${m.t}" y2="${h - m.b}" class="xc-grid v"/><text x="${X(L)}" y="${h - m.b + 18}" class="xc-tick" text-anchor="middle">${L}</text>`).join('')}
+    <text x="${(m.l + w - m.r) / 2}" y="${h - 4}" class="xc-axis" text-anchor="middle">level reached</text>
+    <text x="14" y="${(m.t + h - m.b) / 2}" class="xc-axis" text-anchor="middle" transform="rotate(-90 14 ${(m.t + h - m.b) / 2})">play time</text>
+    ${cmp.map(c => `<path d="${path(c.pts)}" class="xc-simcmp"><title>${esc(c.label)} (median)</title></path>`).join('')}
+    ${lines.map(l => `<path d="${path(l.pts)}" fill="none" stroke="${l.color}" stroke-width="2.5"/>${l.pts.map(([L, t]) => `<circle cx="${X(L)}" cy="${Y(t)}" r="3" fill="${l.color}"><title>${esc(l.label)}: level ${L} after ${fmtH(t)}</title></circle>`).join('')}`).join('')}
+  </svg>
+  <div class="xc-legend">${lines.map(l => `<span><i style="background:${l.color}"></i>${esc(l.label)}</span>`).join('')}${cmp.map(c => `<span class="faint"><i class="dash"></i>${esc(c.label)} · median</span>`).join('')}</div>`;
+}
+
+function simTable(run) {
+  const max = Math.max(...run.bots.map(b => b.level), 2);
+  const rows = [...new Set([2, 5, 10, 15, 20, 25, 30, 40, 50, 60, max].filter(L => L <= max))].sort((a, b) => a - b);
+  return `<table class="xc-full"><thead><tr><th>Reach level</th>${run.bots.map((b, i) => `<th><i class="xc-dot" style="background:${COLORS[i % COLORS.length]}"></i>${esc(b.label)}</th>`).join('')}<th title="Shown once at least half of the bots reached the level">Median</th></tr></thead><tbody>
+    ${rows.map(L => { const v = run.bots.map(b => b.levels[L]); const got = v.filter(x => x != null); const md = got.length >= Math.ceil(v.length / 2) ? median(got) : null; return `<tr><td>${L}</td>${v.map(x => `<td>${x == null ? '<span class="faint">not yet</span>' : fmtH(x)}</td>`).join('')}<td><b>${md == null ? '—' : fmtH(md)}</b></td></tr>`; }).join('')}
+    <tr class="muted"><td>after ${fmtH(run.simHours)}</td>${run.bots.map(b => `<td>level ${b.level}</td>`).join('')}<td></td></tr>
+  </tbody></table>`;
+}
+
+function simHtml() {
+  const st = SIM.status, run = st?.current, running = !!st?.running;
+  const others = (st?.history || []).filter(r => r.id !== run?.id).slice(0, 2);
+  const estMin = Math.max(1, Math.round((SIM.hours * 5.5) / 60));
+  const pct = run ? Math.min(100, Math.round((run.simHours / run.hours) * 100)) : 0;
+  return `<section class="panel xc">
+    <div class="panel-head"><h3>⏱ Test with bots</h3></div>
+    <p class="muted small">One bot of every play style (Casual → Tryhard) plays a fresh character with the chosen curve on a fast-forwarded clock — on a throw-away copy of the game with your current content and server rates, so real players aren't touched and the game keeps running normally. The chart shows how much play time each bot needed to reach each level.</p>
+    <div class="row gap wrap xc-simctl">
+      <label class="small">Curve <select data-sim="which"><option value="edited" ${SIM.which === 'edited' ? 'selected' : ''}>the curve above${dirty() ? ' (unsaved)' : ''}</option><option value="saved" ${SIM.which === 'saved' ? 'selected' : ''}>what the game uses now</option></select></label>
+      <label class="small">Play time <select data-sim="hours">${SIM_HOURS.map(([v, l]) => `<option value="${v}" ${SIM.hours === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
+      <label class="small">Bots are <select data-sim="schedule"><option value="online" ${SIM.schedule === 'online' ? 'selected' : ''}>online the whole time</option><option value="natural" ${SIM.schedule === 'natural' ? 'selected' : ''}>online like real players (with offline progress)</option></select></label>
+      ${running ? '<button class="btn small ghost danger" data-sim-cancel>Cancel</button>' : `<button class="btn small primary" data-sim-run>▶ Run simulation</button><span class="faint small">takes ≈ ${estMin} min</span>`}
+    </div>
+    ${run ? `
+      <div class="xc-simhead"><b>#${run.id} · ${esc(run.label)}</b> · ${run.hours >= 24 ? fmtH(run.hours) : `${run.hours}h`} · ${run.schedule === 'natural' ? 'real online times' : 'always online'}
+        <span class="${run.status === 'done' ? 'good' : run.status === 'running' ? '' : 'bad'}">${run.status === 'running' ? `— simulated ${fmtH(run.simHours)} of ${fmtH(run.hours)}` : run.status === 'done' ? '— finished' : run.status === 'cancelled' ? '— cancelled' : `— failed: ${esc(run.error || '')}`}</span></div>
+      ${running ? `<div class="tut-bar xc-simbar"><i style="width:${pct}%"></i><span>${pct}%</span></div>` : ''}
+      ${run.bots?.length ? simChart(run, others) + simTable(run) : ''}
+      <p class="faint small">Bots play reasonably but not perfectly; social bots level faster in groups. Use the numbers to compare curves (earlier runs are shown as dashed lines), not as exact predictions.</p>` : ''}
+  </section>`;
 }
 
 // ---------------------------------------------------------------- loading & saving
@@ -259,6 +343,13 @@ function bind(el) {
   el.addEventListener('click', async e => {
     const t = e.target.closest('button');
     if (!t || t.disabled) return;
+    if ('simRun' in t.dataset) {
+      const curve = SIM.which === 'edited' ? sorted(S.pts) : savedCurve();
+      const label = SIM.which === 'edited' ? (dirty() ? 'edited curve' : 'saved curve') : (savedCurve() ? 'saved curve' : 'formula');
+      try { SIM.status = await act('admin_levelsim_start', { curve, hours: SIM.hours, schedule: SIM.schedule, label }); } catch (err) { toast(err.message, 'error'); }
+      return pollSim();
+    }
+    if ('simCancel' in t.dataset) { try { SIM.status = await act('admin_levelsim_cancel'); } catch { /* ignore */ } return pollSim(); }
     if ('xcSave' in t.dataset) return save();
     if ('xcDiscard' in t.dataset) { S.pts = JSON.parse(S.baseJson); S.problems = null; return draw(); }
     if ('xcFormula' in t.dataset) { if (await confirmBox('Remove the XP curve and use the formula (base × level^exponent) again?', 'Use formula')) save(true); return; }
@@ -276,6 +367,7 @@ function bind(el) {
   });
   el.addEventListener('change', e => {
     const t = e.target;
+    if (t.dataset.sim) { const k = t.dataset.sim; SIM[k] = k === 'hours' ? Number(t.value) : t.value; return draw('sim'); }
     if (t.matches('[data-xc-preset]')) { if (t.value) { S.pts = PRESETS[t.value].make(); S.sel = null; draw(); } return; }
     if (t.matches('[data-xc-log]')) { S.logY = t.checked; return draw(); }
     if (t.dataset.xcV) { const i = Number(t.dataset.xcV); S.pts[i] = [S.pts[i][0], Math.max(1, Math.round(Number(t.value) || 1))]; return draw(); }
@@ -295,5 +387,6 @@ export function mountCurveEditor(el) {
   el.appendChild(host);
   bind(host);
   if (S.entry && dirty()) draw(); else load();
+  pollSim();
 }
 export const curveEditorDirty = () => !!dirty();

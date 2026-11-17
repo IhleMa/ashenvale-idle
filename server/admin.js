@@ -101,6 +101,23 @@ export function adminActions(game) {
       admins.audit(s.player.name, 'content_reset', `${d.type}/${d.id}`, '');
       return r;
     },
+    // ---- XP curve test runs (server/levelSim.js)
+    admin_levelsim_status() { return game.levelSim?.status() || { running: false, current: null, history: [] }; },
+    admin_levelsim_start(s, d) {
+      const sim = game.levelSim || fail('Not available');
+      const hours = [3, 6, 12, 24, 48, 72, 168].includes(Number(d.hours)) ? Number(d.hours) : 24;
+      let curve = null;
+      if (Array.isArray(d.curve)) {
+        curve = d.curve.slice(0, 100).map(p => [Math.round(Number(p?.[0])), Math.max(1, Math.round(Number(p?.[1])))]).filter(p => Number.isFinite(p[0]) && Number.isFinite(p[1]) && p[0] >= 1).sort((a, b) => a[0] - b[0]);
+        if (curve.length < 2) fail('The curve needs at least 2 points');
+      }
+      try {
+        const r = sim.start({ curve, hours, schedule: d.schedule === 'natural' ? 'natural' : 'online', label: String(d.label || '').slice(0, 40) }, s.player.name);
+        admins.audit(s.player.name, 'levelsim_start', `${hours}h`, curve ? 'custom curve' : 'saved curve');
+        return r;
+      } catch (e) { fail(e.message); }
+    },
+    admin_levelsim_cancel() { return game.levelSim?.cancel(); },
     // ---- bot players
     admin_bots() {
       const b = game.bots || fail('Bots are not available');
