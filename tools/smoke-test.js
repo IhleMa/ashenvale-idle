@@ -240,14 +240,14 @@ try {
   res = await a.act('expedition_speedup', { id: res.result?.id, maxCost: 48 });
   check(!res.ok && /need/.test(res.error), 'not enough crystals is rejected: ' + res.error);
 
-  // offline progression: stop the server, pretend alice was away for 2 hours (edit the database), start again
+  // offline progression: stop the server, pretend alice was away for 3 hours (edit the database), start again
   a.ws.close();
   await sleep(500);
   srv.kill('SIGINT');
   await new Promise(r => srv.once('exit', r));
   const db = new Database(path.join(DATA, 'ashenvale.db'));
   check(db.prepare('SELECT COUNT(*) n FROM accounts').get().n === 2, 'accounts stored in SQLite');
-  db.prepare("UPDATE players SET data = json_set(data, '$.lastActive', ?) WHERE id = ?").run(Date.now() - 2 * 3600 * 1000, a.state.id);
+  db.prepare("UPDATE players SET data = json_set(data, '$.lastActive', ?) WHERE id = ?").run(Date.now() - 3 * 3600 * 1000, a.state.id);
   check(JSON.parse(db.prepare("SELECT data FROM docs WHERE key = 'auction'").get().data).history.length === 1, 'auction house saved in the database');
   db.close();
   const srv2 = spawn(process.execPath, ['server/index.js'], { env: { ...process.env, PORT, DATA_DIR: DATA }, stdio: ['pipe', 'pipe', 'inherit'] });

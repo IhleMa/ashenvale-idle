@@ -11,6 +11,7 @@ export const SETTING_DEFS = {
   premiumMinutesPerCrystal: { label: 'Minutes skipped per Ashen Crystal 💠', type: 'number', min: 1, max: 240, step: 1, default: 10 },
   registrationOpen:  { label: 'Allow new registrations', type: 'boolean', default: true },
   motd:              { label: 'Message of the day (shown on login)', type: 'text', default: '' },
+  botTag:            { label: 'Show 🤖 next to bot players', type: 'boolean', default: true },
 };
 
 export class Settings {

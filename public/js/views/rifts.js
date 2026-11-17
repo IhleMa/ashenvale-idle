@@ -1,7 +1,7 @@
 // Rifts: timed, endlessly scaling dungeon runs with weekly affixes and a leaderboard.
 import { state, hero } from '../state.js';
 import { act } from '../net.js';
-import { esc, fmt, run, duration, toast, tipAttr } from '../ui.js';
+import { esc, fmt, run, duration, toast, tipAttr, botTag } from '../ui.js';
 import { enemyArt } from '../assets.js';
 import { openInspect } from '../inspect.js';
 import { ZONES } from '/shared/data/zones.js';
@@ -27,7 +27,7 @@ async function loadBoard(root) {
 function boardHtml() {
   if (!board) return '<p class="muted small">Loading…</p>';
   const rows = board.rows.filter(r => r.value !== '—');
-  return rows.length ? `<table class="rank-table compact"><tbody>${rows.map(r => `<tr class="${r.id === state.player.id ? 'me' : ''}" data-inspect="${esc(r.name)}"><td class="rank-no">${r.rank <= 3 ? ['🥇', '🥈', '🥉'][r.rank - 1] : r.rank}</td><td><b>${esc(r.name)}</b> <span class="muted small">${esc(r.hero.name)}</span></td><td class="num"><b>${esc(r.value)}</b></td></tr>`).join('')}</tbody></table>`
+  return rows.length ? `<table class="rank-table compact"><tbody>${rows.map(r => `<tr class="${r.id === state.player.id ? 'me' : ''}" data-inspect="${esc(r.name)}"><td class="rank-no">${r.rank <= 3 ? ['🥇', '🥈', '🥉'][r.rank - 1] : r.rank}</td><td><b>${esc(r.name)}</b>${botTag(r)} <span class="muted small">${esc(r.hero.name)}</span></td><td class="num"><b>${esc(r.value)}</b></td></tr>`).join('')}</tbody></table>`
     : '<p class="muted small">Nobody has timed a rift yet — be the first!</p>';
 }
 

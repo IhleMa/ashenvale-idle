@@ -131,7 +131,7 @@ export class Rankings {
         members: g.members.map(id => {
           const mp = this.game.sessions.get(id)?.player || this.game.store.loadPlayer(id);
           const mh = mp && L.hero(mp);
-          return { name: this.game.nameOf(id), online: this.game.sessions.has(id), leader: id === g.leaderId, hero: mh ? { name: mh.name, classId: mh.classId, level: mh.level, portrait: mh.portrait } : null };
+          return { name: this.game.nameOf(id), online: this.game.sessions.has(id), bot: this.game.showBot?.(id), leader: id === g.leaderId, hero: mh ? { name: mh.name, classId: mh.classId, level: mh.level, portrait: mh.portrait } : null };
         }),
       } : null,
       hero: charView(L.hero(p), !hidden),

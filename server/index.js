@@ -7,6 +7,7 @@ import { WebSocketServer } from 'ws';
 import { Store } from './store.js';
 import { AssetIndex } from './assets.js';
 import { Game } from './game.js';
+import { BotManager, ARCHETYPES } from './bots.js';
 import { computeBuildId } from './version.js';
 import { Settings } from './settings.js';
 import { AdminManager, isBanned } from './admin.js';
@@ -32,6 +33,8 @@ const assets = new AssetIndex(ASSETS_DIR);
 const settings = new Settings(store, { registrationOpen: ALLOW_REGISTRATION });
 const admins = new AdminManager(store, process.env.ADMIN_USERS || '');
 const game = new Game({ store, assets, log, settings, admins, buildId: computeBuildId(ROOT) });
+const bots = new BotManager(game, { log });
+game.bots = bots;
 game.loadGroups();
 const authLimiter = new RateLimiter(20, 60_000);
 
@@ -191,6 +194,8 @@ setInterval(() => {
 }, 30_000);
 
 game.start();
+bots.start();
+if (bots.bots.size) log(`${bots.bots.size} bot player(s) loaded${bots.enabled ? '' : ' (paused)'} — type "bots" to list them.`);
 // automatic daily database backup (data/backups, newest 7 kept)
 const BACKUP_HOURS = Number(process.env.BACKUP_HOURS ?? 24);
 if (BACKUP_HOURS > 0) setInterval(() => { try { log(`Automatic backup: ${path.basename(store.backup())}`); } catch (e) { log('Automatic backup failed:', e.message); } }, BACKUP_HOURS * 3600_000).unref();
@@ -206,6 +211,7 @@ function shutdown(sig) {
   stopping = true;
   log(`${sig} received, saving and shutting down...`);
   try { game.broadcast({ t: 'server_restart' }); } catch { /* ignore */ }
+  try { bots.stop(); bots.persist(); } catch (e) { log('Error while stopping bots', e); }
   try { game.stop(); } catch (e) { log('Error while saving', e); }
   try { store.close(); } catch (e) { log('Error while closing the database', e); }
   for (const ws of wss.clients) ws.close(1012, 'Server restarting');
@@ -247,7 +253,16 @@ async function runUpdate() {
 }
 
 const COMMANDS = {
-  help: () => log('Commands: update | reload-clients | players | say <message> | admin add|remove|list <name> | backup | db | stop'),
+  help: () => log('Commands: update | reload-clients | players | say <message> | admin add|remove|list <name> | bots [add <n> [type] | remove <name|all> | on | off] | backup | db | stop'),
+  bots: args => {
+    const [sub, a, b] = args.split(/\s+/).filter(Boolean);
+    if (sub === 'add') { const made = bots.add(Number(a) || 1, b); return log(`Added ${made.length} bot(s): ${made.map(x => `${x.name} (${x.archetype})`).join(', ')}. Types: ${Object.keys(ARCHETYPES).join(', ')}`); }
+    if (sub === 'remove') return log(a ? `Removed ${bots.remove(a)} bot(s).` : 'Usage: bots remove <name|all>');
+    if (sub === 'on' || sub === 'off') { bots.setEnabled(sub === 'on'); return log(`Bots ${sub === 'on' ? 'running' : 'paused'}.`); }
+    const list = bots.list();
+    log(`${list.length} bot(s), ${list.filter(x => x.online).length} online${bots.enabled ? '' : ' — PAUSED (bots on)'}. Add: bots add <n> [${Object.keys(ARCHETYPES).join('|')}]`);
+    for (const x of list) log(`  ${x.online ? '●' : '○'} ${x.name.padEnd(16)} ${String(x.label).padEnd(8)} ${x.hero ? `Lv ${String(x.hero.level).padStart(2)} ${x.hero.classId.padEnd(7)}` : 'no hero    '} ${x.doing}`);
+  },
   backup: () => { try { log(`Backup written: ${store.backup()}`); } catch (e) { log('Backup failed:', e.message); } },
   db: () => { const st = store.stats(); log(`Database ${store.file}: ${st.accounts} accounts, ${st.players} players, ${st.sizeMb} MB (driver: ${st.driver})`); },
   admin: args => {

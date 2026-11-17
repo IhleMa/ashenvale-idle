@@ -1,7 +1,7 @@
 // "Inspect player" window: public profile with hero, gear, skill tree, loadout, party and group.
 import { state } from './state.js';
 import { act } from './net.js';
-import { esc, fmt, pct, modal, run, tipAttr, itemTooltipHtml, duration } from './ui.js';
+import { esc, fmt, pct, modal, run, tipAttr, itemTooltipHtml, duration, botTag } from './ui.js';
 import { portrait, classIcon, itemIcon, slotIcon, abilityIcon } from './assets.js';
 import { classBadge, roleBadge } from './components.js';
 import { CLASSES, TRAITS } from '/shared/data/classes.js';
@@ -56,7 +56,7 @@ function profileHtml(p) {
   <div class="inspect-head">
     ${portrait(h, 'lg')}
     <div class="grow">
-      <h2>${esc(p.name)} ${me ? '<span class="tag hero">YOU</span>' : ''}</h2>
+      <h2>${esc(p.name)}${botTag(p)} ${me ? '<span class="tag hero">YOU</span>' : ''}</h2>
       <div><b>${esc(h.name)}</b> · ${esc(h.title || '')} · Lv ${h.level} ${classBadge(h.classId)}</div>
       <div class="small muted inspect-activity">${activityText(p.activity)}</div>
       <div class="rank-chips">${ranks.map(([k, r]) => `<span class="rank-chip ${r <= 3 ? 'top' : ''}">#${r} ${RANK_LABELS[k]}</span>`).join('')}</div>
@@ -81,7 +81,7 @@ function overviewHtml(p) {
     <section class="panel">
       <h3>Group</h3>
       ${g ? `<div class="small muted">${g.inBattle ? `⚔ Fighting <b>${esc(g.encounter || 'an encounter')}</b>` : 'Not in an encounter'}</div>
-        <div class="group-mini">${g.members.map(m => `<div class="bench-row">${m.hero ? portrait(m.hero, 'xs') : ''}<div class="grow"><b>${m.leader ? '👑 ' : ''}${esc(m.name)}</b> <span class="conn-dot ${m.online ? 'on' : ''}"></span>
+        <div class="group-mini">${g.members.map(m => `<div class="bench-row">${m.hero ? portrait(m.hero, 'xs') : ''}<div class="grow"><b>${m.leader ? '👑 ' : ''}${esc(m.name)}</b>${botTag(m)} <span class="conn-dot ${m.online ? 'on' : ''}"></span>
           <div class="muted small">${m.hero ? `${esc(m.hero.name)} · Lv ${m.hero.level} ${esc(CLASSES[m.hero.classId].name)}` : ''}</div></div>
           ${m.name !== p.name ? `<button class="btn tiny ghost" data-inspect-name="${esc(m.name)}">Inspect</button>` : ''}</div>`).join('')}</div>`
         : '<p class="muted small">Not in a group.</p>'}

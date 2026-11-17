@@ -18,6 +18,33 @@ let searchTimer = null;
 const ago = ts => (ts ? `${duration((Date.now() - ts) / 1000)} ago` : '—');
 
 async function loadOverview(root) { try { overview = await act('admin_overview'); } catch (e) { toast(e.message, 'error'); } render(root); }
+let botData = null;
+let botTimer = null;
+async function loadBots(root) { try { botData = await act('admin_bots'); } catch (e) { toast(e.message, 'error'); } render(root); }
+
+function botsHtml() {
+  if (!botData) return '<p class="muted">Loading…</p>';
+  const b = botData;
+  const online = b.bots.filter(x => x.online).length;
+  const bar = v => `<span class="persona-bar" title="${Math.round(v * 100)}%"><i style="width:${Math.round(v * 100)}%"></i></span>`;
+  return `<section class="panel">
+    <div class="panel-head"><h3>🤖 Bot players <span class="muted small">${b.bots.length} bots · ${online} online</span></h3>
+      <div class="row gap"><button class="btn small ${b.enabled ? 'ghost' : 'primary'}" data-bots-toggle>${b.enabled ? '⏸ Pause all bots' : '▶ Start bots'}</button><button class="btn small ghost" data-bots-refresh>↻</button></div></div>
+    <p class="muted small">Bots are real accounts that play through the same actions as everyone else: they create a hero, recruit, gear up, push zones and bosses, build their town, send expeditions, run rifts, claim quests, trade on the Auction House, form co-op groups (and accept your invites) and log in and out on their own schedule. Each has a personality: <b>skill</b> (how good their decisions are), <b>activity</b> (how much they play) and what they like doing. Nobody can log in to a bot account.</p>
+    <div class="row gap wrap">Add <select data-bots-count>${[1, 2, 3, 5, 10].map(n => `<option>${n}</option>`).join('')}</select>
+      <select data-bots-type><option value="">random personality</option>${Object.entries(b.archetypes).map(([k, l]) => `<option value="${k}">${esc(l)}</option>`).join('')}</select>
+      <button class="btn small primary" data-bots-add>+ Add bots</button>
+      <span class="grow"></span>${b.bots.length ? '<button class="btn small ghost danger" data-bot-remove="all">Remove all</button>' : ''}</div>
+    ${b.bots.length ? `<table class="admin-table bots-table"><thead><tr><th></th><th>Bot</th><th>Type</th><th>Hero</th><th>Skill</th><th>Activity</th><th>Gold</th><th>Rift</th><th>Doing</th><th></th></tr></thead><tbody>
+      ${b.bots.map(x => `<tr><td><span class="conn-dot ${x.online ? 'on' : ''}"></span></td><td><b>${esc(x.name)}</b></td><td>${esc(x.label || x.archetype)}</td>
+        <td>${x.hero ? `Lv ${x.hero.level} ${esc(x.hero.classId)}` : '<span class="muted">—</span>'}</td><td>${bar(x.persona.skill)}</td><td>${bar(x.persona.activity)}</td>
+        <td>${fmt(Math.floor(x.gold))}</td><td>${x.rift || '—'}</td><td class="small">${esc(x.online ? x.doing : `offline · back in ${duration(Math.max(0, (x.since - Date.now()) / 1000))}`)}</td>
+        <td><button class="btn tiny ghost danger" data-bot-remove="${esc(x.name)}">✕</button></td></tr>`).join('')}</tbody></table>`
+      : '<p class="muted pad">No bots yet. Add a few to make the world feel alive — they show up in rankings, the online list, the Auction House and can join your groups.</p>'}
+    <p class="faint small">Console: <code>bots</code>, <code>bots add 5 [casual|grinder|trader|crafter|social|tryhard]</code>, <code>bots remove &lt;name|all&gt;</code>, <code>bots on|off</code>. The 🤖 tag next to their names can be turned off in the server settings.</p>
+  </section>`;
+}
+
 async function loadPlayers(root) { try { players = await act('admin_players', { query: ui.query, sort: ui.sort }); } catch (e) { toast(e.message, 'error'); } render(root); }
 
 function dashboardHtml() {
@@ -78,7 +105,7 @@ function render(root) {
   const host = root.querySelector('.admin-body');
   if (!host) return;
   if (host.contains(document.activeElement) && /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) return;
-  host.innerHTML = ui.tab === 'dashboard' ? dashboardHtml() : playersHtml();
+  host.innerHTML = ui.tab === 'dashboard' ? dashboardHtml() : ui.tab === 'bots' ? botsHtml() : playersHtml();
 }
 
 async function openPlayer(id, root) {
@@ -154,9 +181,11 @@ export const adminView = {
   id: 'admin', label: 'Admin', icon: '🛡', adminOnly: true,
   mount(root) {
     root.innerHTML = `<section class="panel"><div class="panel-head"><h3>🛡 Admin</h3><span class="muted small">Only visible to admins. All actions are logged.</span></div>
-      <div class="tabs">${[['dashboard', 'Dashboard'], ['players', 'Players']].map(([id, l]) => `<button class="tab ${ui.tab === id ? 'active' : ''}" data-tab="${id}">${l}</button>`).join('')}</div>
+      <div class="tabs">${[['dashboard', 'Dashboard'], ['players', 'Players'], ['bots', '🤖 Bots']].map(([id, l]) => `<button class="tab ${ui.tab === id ? 'active' : ''}" data-tab="${id}">${l}</button>`).join('')}</div>
       <div class="admin-body"></div></section>`;
-    const reload = () => (ui.tab === 'dashboard' ? loadOverview(root) : loadPlayers(root));
+    const reload = () => (ui.tab === 'dashboard' ? loadOverview(root) : ui.tab === 'bots' ? loadBots(root) : loadPlayers(root));
+    clearInterval(botTimer);
+    botTimer = setInterval(() => { if (ui.tab === 'bots' && root.isConnected && !root.contains(document.activeElement?.closest?.('select, input'))) loadBots(root); }, 8000);
     root.addEventListener('click', async e => {
       const t = e.target.closest('button, tr[data-player]');
       if (!t) return;
@@ -167,6 +196,21 @@ export const adminView = {
         const hours = Number(root.querySelector('[data-ann-hours]').value);
         if (await run(act('admin_broadcast', { text: ta.value, hours }), 'Announcement sent.') !== undefined) { ta.value = ''; loadOverview(root); }
       }
+      if ('botsAdd' in t.dataset) {
+        const count = Number(root.querySelector('[data-bots-count]').value), archetype = root.querySelector('[data-bots-type]').value;
+        const r = await run(act('admin_bots_add', { count, archetype }));
+        if (r) { toast(`Added ${r.added.map(x => x.name).join(', ')}`, 'success'); loadBots(root); }
+        return;
+      }
+      if (t.dataset.botRemove) {
+        const all = t.dataset.botRemove === 'all';
+        if (await confirmBox(all ? 'Remove ALL bots? Their accounts, heroes and auctions are deleted.' : `Remove the bot ${t.dataset.botRemove}? Its account and hero are deleted.`, 'Remove')) {
+          if (await run(act('admin_bots_remove', { name: t.dataset.botRemove })) !== undefined) loadBots(root);
+        }
+        return;
+      }
+      if ('botsToggle' in t.dataset) { await run(act('admin_bots_enable', { on: !botData?.enabled })); loadBots(root); return; }
+      if ('botsRefresh' in t.dataset) { loadBots(root); return; }
       if (t.dataset.delAnn) {
         if (await confirmBox('Delete this announcement? Players who haven\'t seen it yet won\'t get it anymore.', 'Delete'))
           if (await run(act('admin_announcement_delete', { id: t.dataset.delAnn }), 'Announcement deleted.') !== undefined) loadOverview(root);

@@ -9,7 +9,7 @@
     "dev": "node --watch server/index.js",
     "simulate": "node tools/simulate.js",
     "assets": "node tools/asset-checklist.js",
-    "test": "node tools/migrate-test.js && node tools/smoke-test.js && node tools/town-test.js && node tools/endgame-test.js",
+    "test": "node tools/migrate-test.js && node tools/smoke-test.js && node tools/town-test.js && node tools/endgame-test.js && node tools/bot-test.js 4",
     "rift-sim": "node tools/rift-sim.js"
   },
   "engines": {

@@ -2,6 +2,7 @@
 // Admins come from the ADMIN_USERS environment variable (comma separated usernames)
 // plus data/admins.json (managed with the console command "admin add <name>").
 import crypto from 'node:crypto';
+import { ARCHETYPES } from './bots.js';
 import { MATERIALS } from '../shared/data/town.js';
 import { generateItem, ITEM_BASES } from '../shared/data/items.js';
 import { generateUnique, generateSetItem, UNIQUES, SETS } from '../shared/data/legendaries.js';
@@ -66,6 +67,29 @@ export function adminActions(game) {
   };
 
   return {
+    // ---- bot players
+    admin_bots() {
+      const b = game.bots || fail('Bots are not available');
+      return { enabled: b.enabled, bots: b.list(), archetypes: Object.fromEntries(Object.entries(ARCHETYPES).map(([k, a]) => [k, a.label])) };
+    },
+    admin_bots_add(s, d) {
+      const n = Math.max(1, Math.min(20, Math.floor(Number(d.count) || 1)));
+      const made = game.bots.add(n, d.archetype && ARCHETYPES[d.archetype] ? d.archetype : null);
+      admins.audit(s.player.name, 'add_bots', '-', made.map(x => `${x.name} (${x.archetype})`).join(', '));
+      return { added: made };
+    },
+    admin_bots_remove(s, d) {
+      const name = String(d.name || '');
+      if (!name) fail('Choose a bot');
+      const n = game.bots.remove(name);
+      if (!n) fail('Bot not found');
+      admins.audit(s.player.name, 'remove_bots', name, `${n} removed`);
+      return { removed: n };
+    },
+    admin_bots_enable(s, d) {
+      game.bots.setEnabled(!!d.on);
+      admins.audit(s.player.name, d.on ? 'bots_on' : 'bots_off', '-', '');
+    },
     admin_overview() {
       const accounts = store.allPlayerNames();
       const mem = process.memoryUsage();

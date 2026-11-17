@@ -48,6 +48,9 @@ export function modal(innerHtml, { onClose, wide = false } = {}) {
   return { el: wrap.querySelector('.modal'), close };
 }
 
+// 🤖 marker for bot players (server decides whether it is shown)
+export const botTag = x => (x?.bot ? ' <span class="bot-tag" title="Bot player">🤖</span>' : '');
+
 export function confirmBox(text, okLabel = 'Confirm', { html = false } = {}) {
   return new Promise(resolve => {
     const m = modal(`<p>${html ? text : esc(text)}</p><div class="row end gap"><button class="btn" data-close>Cancel</button><button class="btn primary" data-ok>${esc(okLabel)}</button></div>`, { onClose: () => resolve(false) });

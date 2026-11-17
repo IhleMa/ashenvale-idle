@@ -329,11 +329,14 @@ export class Game {
     ah_buy(s, d) { return this.auction.buy(s.player, { id: String(d.id) }); },
 
     get_rankings(s, d) {
-      return this.rankings.board({ category: String(d.category || 'level'), classId: d.classId ? String(d.classId) : null, search: d.search, limit: Number(d.limit) || 100 }, s.player.id);
+      const b = this.rankings.board({ category: String(d.category || 'level'), classId: d.classId ? String(d.classId) : null, search: d.search, limit: Number(d.limit) || 100 }, s.player.id);
+      for (const r of b.rows) r.bot = this.showBot(r.id);
+      return b;
     },
     inspect_player(s, d) {
       const prof = this.rankings.inspect(String(d.name || ''));
       if (!prof) fail('Player not found');
+      prof.bot = this.showBot(prof.id || this.store.getAccount(String(d.name || ''))?.id);
       return prof;
     },
     refresh_recruits(s) { L.refreshRecruits(s.player, false, this.assets.get()); },
@@ -693,7 +696,7 @@ export class Game {
         const p = this.sessions.get(id)?.player || this.store.loadPlayer(id);
         const chars = p ? L.coopCharacters(p) : [];
         return {
-          id, name: this.nameOf(id), online: this.sessions.has(id),
+          id, name: this.nameOf(id), online: this.sessions.has(id), bot: this.showBot(id),
           characters: chars.map(c => ({ id: c.id, name: c.name, classId: c.classId, level: c.level, isMain: c.isMain, portrait: c.portrait, role: c.role })),
         };
       }),
@@ -811,12 +814,15 @@ export class Game {
     this.broadcastGroup(g);
   }
 
+  // bot players are marked with 🤖 unless the admin turned the tag off
+  showBot(id) { return !!(this.bots?.isBot(id) && this.settings.get('botTag')); }
+
   broadcastOnline() {
     this.onlineDirty = false;
     this.lastOnlineSent = Date.now();
     const list = [...this.sessions.values()].map(s => {
       const h = L.hero(s.player);
-      return { id: s.player.id, name: s.player.name, hero: h ? { name: h.name, classId: h.classId, level: h.level } : null, inGroup: !!this.groupOf(s.player.id) };
+      return { id: s.player.id, name: s.player.name, bot: this.showBot(s.player.id), hero: h ? { name: h.name, classId: h.classId, level: h.level } : null, inGroup: !!this.groupOf(s.player.id) };
     });
     for (const s of this.sessions.values()) this.sendTo(s.player.id, { t: 'online', players: list });
   }

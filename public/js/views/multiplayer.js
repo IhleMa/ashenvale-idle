@@ -1,7 +1,7 @@
 // Multiplayer: groups, invitations, co-op team selection, encounters and group chat.
 import { state, chars, bus } from '../state.js';
 import { act } from '../net.js';
-import { esc, run, tipAttr } from '../ui.js';
+import { esc, run, tipAttr, botTag } from '../ui.js';
 import { portrait, classIcon, backgroundStyle } from '../assets.js';
 import { classBadge } from '../components.js';
 import { openInspect } from '../inspect.js';
@@ -112,7 +112,7 @@ export const multiplayerView = {
           <section class="panel">
             <h3>Players online <span class="muted small">${state.online.length}</span></h3>
             <div class="online-list">${state.online.filter(o => o.id !== me).map(o => `<div class="bench-row">
-              ${o.hero ? classIcon(o.hero.classId, 'xs') : ''}<div class="grow"><b>${esc(o.name)}</b><div class="muted small">${o.hero ? `${esc(o.hero.name)} · Lv ${o.hero.level} ${esc(CLASSES[o.hero.classId].name)}` : 'Creating hero…'}</div></div>
+              ${o.hero ? classIcon(o.hero.classId, 'xs') : ''}<div class="grow"><b>${esc(o.name)}</b>${botTag(o)}<div class="muted small">${o.hero ? `${esc(o.hero.name)} · Lv ${o.hero.level} ${esc(CLASSES[o.hero.classId].name)}` : 'Creating hero…'}</div></div>
               ${o.hero ? `<button class="btn tiny ghost" data-inspect="${esc(o.name)}">Inspect</button>` : ''}
               ${isLeader && !o.inGroup && o.hero ? `<button class="btn tiny" data-invite="${esc(o.name)}">Invite</button>` : o.inGroup ? '<span class="muted small">in group</span>' : ''}
             </div>`).join('') || '<p class="muted small">Nobody else is online right now.</p>'}</div>
@@ -128,7 +128,7 @@ export const multiplayerView = {
 
 function groupHtml(g, me, isLeader) {
   return `<div class="group-members">${g.members.map(m => `<div class="group-member">
-      <div class="row gap"><b>${m.id === g.leaderId ? '👑 ' : ''}${esc(m.name)}</b><span class="conn-dot ${m.online ? 'on' : ''}" title="${m.online ? 'Online' : 'Offline'}"></span>
+      <div class="row gap"><b>${m.id === g.leaderId ? '👑 ' : ''}${esc(m.name)}</b>${botTag(m)}<span class="conn-dot ${m.online ? 'on' : ''}" title="${m.online ? 'Online' : 'Offline'}"></span>
         <span class="grow"></span>${m.id !== me ? `<button class="btn tiny ghost" data-inspect="${esc(m.name)}">Inspect</button>` : ''}${isLeader && m.id !== me ? `<button class="btn tiny ghost" data-promote="${m.id}">Make leader</button><button class="btn tiny ghost danger" data-kick="${m.id}">Remove</button>` : ''}</div>
       <div class="member-chars">${m.characters.map(c => `<span class="member-char">${portrait(c, 'xs')}<span>${c.isMain ? '★ ' : ''}${esc(c.name)} <small class="muted">Lv ${c.level}</small> ${classBadge(c.classId)}</span></span>`).join('')}</div>
     </div>`).join('')}
