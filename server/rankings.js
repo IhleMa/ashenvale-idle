@@ -15,6 +15,7 @@ export const RANKING_CATEGORIES = {
   bossKills:    { label: 'Bosses slain', value: s => s.bossKills, display: s => s.bossKills },
   coopWins:     { label: 'Co-op victories', value: s => s.coopWins, display: s => s.coopWins },
   achievements: { label: 'Achievements', value: s => s.achievements, display: s => `${s.achievements}/${Object.keys(ACHIEVEMENTS).length}` },
+  rift:         { label: 'Highest rift', value: s => s.riftBest * 1e5 - (s.riftTime || 0), display: s => (s.riftBest ? `Tier ${s.riftBest}${s.riftTime ? ` · ${Math.floor(s.riftTime / 60)}:${String(Math.round(s.riftTime % 60)).padStart(2, '0')}` : ''}` : '—') },
   progress:     { label: 'World progress', value: s => s.zonesUnlocked * 1e6 + s.bossKills, display: s => `${s.zonesUnlocked} zone${s.zonesUnlocked === 1 ? '' : 's'}` },
 };
 
@@ -48,6 +49,8 @@ export class Rankings {
       partyClasses: party.map(c => c.classId),
       kills: p.stats.kills || 0, bossKills: p.stats.bossKills || 0, coopWins: p.stats.coopWins || 0,
       achievements: Object.keys(p.achievements || {}).length, zonesUnlocked: p.unlockedZones.length,
+      riftBest: p.rift?.best || 0, riftTime: p.rift?.bestTimes?.[p.rift?.best] || 0,
+      bestiary: Object.keys(p.bestiary || {}).length,
       inGroup: !!this.game.groupOf(p.id),
     };
   }
@@ -134,6 +137,7 @@ export class Rankings {
       hero: charView(L.hero(p), !hidden),
       party: party.map(c => charView(c, !hidden)),
       achievements: Object.keys(p.achievements || {}),
+      rift: { best: p.rift?.best || 0, runs: p.rift?.runs || 0, timed: p.rift?.timed || 0 },
       stats: { kills: p.stats.kills, bossKills: p.stats.bossKills, coopWins: p.stats.coopWins, fights: p.stats.fights, recruited: p.stats.recruited, epicFound: p.stats.epicFound, legendaryFound: p.stats.legendaryFound },
       unlockedZones: p.unlockedZones,
     };

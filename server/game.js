@@ -19,6 +19,9 @@ import { elixirBonuses } from '../shared/town.js';
 import { speedUpCost } from '../shared/premium.js';
 import { BUILDINGS } from '../shared/data/town.js';
 import * as L from './playerLogic.js';
+import * as Q from './questLogic.js';
+import { masteryMap } from '../shared/bestiary.js';
+import { RIFT, riftWaves, riftScale, riftHooks, affixesFor, maxStartTier, riftThemes, riftRewardOptions, riftChest, firstClearCrystals } from '../shared/rifts.js';
 
 const { GameError } = L;
 const SAVE_NOW = new Set(['ah_list', 'ah_buy', 'ah_cancel', 'collect_mail', 'town_speedup', 'expedition_speedup']);
@@ -114,6 +117,7 @@ export class Game {
     if (s.graceTimer) { clearTimeout(s.graceTimer); s.graceTimer = null; } // reconnected within the grace period
     s.sockets.add(ws);
     this.send(ws, { t: 'welcome', playerId: player.id, name: player.name, serverTime: Date.now(), buildId: this.buildId, config: { version: CONFIG.version }, isAdmin: this.isAdmin(account), motd: this.settings.get('motd') || '', auction: { feePct: this.settings.get('auctionFeePct'), taxPct: this.settings.get('auctionTaxPct') }, premium: { minutesPerCrystal: this.settings.get('premiumMinutesPerCrystal') } });
+    Q.ensureQuests(player); // before offline progress, so it counts toward today's quests
     if (first) this.handleOffline(s);
     L.maybeAutoRefreshRecruits(player, this.assets.get());
     s.stateDirty = true;
@@ -261,15 +265,43 @@ export class Game {
     expedition_claim(s, d) {
       const r = d.id ? XL.claimExpedition(s.player, { id: String(d.id) }) : XL.claimAll(s.player);
       this.profToast(s, r.messages);
+      this.questDone(s.player, Q.track(s.player, 'expedition', r.count || 1));
       L.checkAchievements(s.player);
       return r;
     },
-    salvage_items(s, d) { return TL.salvageItems(s.player, d); },
-    salvage_by_rarity(s, d) { return TL.salvageByRarity(s.player, d); },
-    craft_item(s, d) { const r = TL.craft(s.player, d, L.hero(s.player).level); this.profToast(s, r.msg); return r; },
-    reforge_item(s, d) { const r = TL.reforge(s.player, d, L.hero(s.player).level); this.profToast(s, r.msg); return r; },
-    enchant_item(s, d) { const r = TL.enchant(s.player, d); this.profToast(s, r.msg); return r; },
-    brew_elixir(s, d) { const r = TL.brew(s.player, d, L.hero(s.player).level); this.profToast(s, r.msg); return r; },
+    salvage_items(s, d) { const r = TL.salvageItems(s.player, d); this.questDone(s.player, Q.track(s.player, 'salvage', r.count)); return r; },
+    salvage_by_rarity(s, d) { const r = TL.salvageByRarity(s.player, d); this.questDone(s.player, Q.track(s.player, 'salvage', r.count)); return r; },
+    craft_item(s, d) { const r = TL.craft(s.player, d, L.hero(s.player).level); this.profToast(s, r.msg); this.questDone(s.player, Q.track(s.player, 'craft', 1)); return r; },
+    reforge_item(s, d) { const r = TL.reforge(s.player, d, L.hero(s.player).level); this.profToast(s, r.msg); this.questDone(s.player, Q.track(s.player, 'craft', 1)); return r; },
+    enchant_item(s, d) { const r = TL.enchant(s.player, d); this.profToast(s, r.msg); this.questDone(s.player, Q.track(s.player, 'craft', 1)); return r; },
+    brew_elixir(s, d) { const r = TL.brew(s.player, d, L.hero(s.player).level); this.profToast(s, r.msg); this.questDone(s.player, Q.track(s.player, 'craft', 1)); return r; },
+
+    // ---- quests
+    quest_claim(s, d) { return d.id === 'all' ? Q.claimAll(s.player) : Q.claim(s.player, { id: String(d.id) }); },
+    quest_reroll(s, d) { return Q.reroll(s.player, { id: String(d.id), maxCost: d.maxCost }); },
+
+    // ---- rifts
+    rift_start(s, d) {
+      const p = s.player;
+      const h = L.hero(p);
+      if (h.level < RIFT.minLevel) fail(`Rifts open at hero level ${RIFT.minLevel}`);
+      const tier = Math.floor(Number(d.tier));
+      if (!(tier >= 1 && tier <= maxStartTier(p))) fail(`You can start tiers 1–${maxStartTier(p)} (time a tier to unlock the next)`);
+      const themes = riftThemes(p);
+      const theme = themes.includes(d.theme) ? d.theme : themes[Math.floor(Math.random() * themes.length)];
+      if (!L.activePartyChars(p).length) fail('Your active party is empty');
+      this.ensureNotInCoop(p.id);
+      this.abortSolo(s);
+      s.solo = { next: { kind: 'rift', tier, theme, random: !themes.includes(d.theme) }, restUntil: 0 };
+      return { tier, theme };
+    },
+    rift_stop(s) {
+      if (s.solo?.kind !== 'rift' && s.solo?.next?.kind !== 'rift') fail('No rift running');
+      this.abortSolo(s);
+    },
+    rift_settings(s, d) {
+      if (['off', 'repeat', 'push'].includes(d.auto)) s.player.rift.auto = d.auto;
+    },
 
     ack_announcements(s, d) {
       const upTo = Math.min(Date.now(), Number(d.upTo) || Date.now());
@@ -278,7 +310,11 @@ export class Game {
     collect_mail(s, d) { return L.collectMail(s.player, { id: d.id }); },
     ah_search(s, d) { return this.auction.search(s.player, d); },
     ah_mine(s) { return this.auction.mine(s.player); },
-    ah_list(s, d) { return this.auction.list(s.player, { itemUid: d.itemUid ? String(d.itemUid) : null, material: d.material ? String(d.material) : null, qty: d.qty, price: d.price, hours: d.hours }); },
+    ah_list(s, d) {
+      const r = this.auction.list(s.player, { itemUid: d.itemUid ? String(d.itemUid) : null, material: d.material ? String(d.material) : null, qty: d.qty, price: d.price, hours: d.hours });
+      this.questDone(s.player, Q.track(s.player, 'auction', 1));
+      return r;
+    },
     ah_cancel(s, d) { this.auction.cancel(s.player, { id: String(d.id) }); },
     ah_buy(s, d) { return this.auction.buy(s.player, { id: String(d.id) }); },
 
@@ -416,20 +452,33 @@ export class Game {
     if (!chars.length) return;
     const h = L.hero(p);
     const next = s.solo?.next || { kind: 'idle', zoneId: p.zone };
-    const zone = ZONES[next.zoneId] || ZONES.whispering_woods;
     const rng = createRng(randomSeed());
-    const waves = next.kind === 'boss' ? bossWaves(zone.id, h.level) : idleWaves(zone.id, h.level, rng, chars.length);
-    const battle = createBattle({
-      seed: randomSeed(), allies: buildPartyUnits(chars, { ownerId: p.id, ownerName: p.name, buffs: elixirBonuses(p) }), waves,
-      scale: (next.kind === 'boss' ? zone.bossScale : zone.scale) || { hp: 1, damage: 1 },
-      meta: { kind: next.kind, zoneId: zone.id, title: next.kind === 'boss' ? `Boss: ${zone.name}` : zone.name, level: zoneLevel(zone, h.level) },
-    });
-    s.solo = { battle, kind: next.kind, zoneId: zone.id, chars: chars.map(c => c.id) };
+    const allies = buildPartyUnits(chars, { ownerId: p.id, ownerName: p.name, buffs: elixirBonuses(p), vsEnemy: masteryMap(p) });
+    let battle, zone;
+    if (next.kind === 'rift') {
+      zone = ZONES[next.theme] || ZONES[p.zone];
+      const affixes = affixesFor(next.tier);
+      battle = createBattle({
+        seed: randomSeed(), allies, waves: riftWaves(zone.id, h.level, rng, chars.length), scale: riftScale(next.tier), hooks: riftHooks(affixes),
+        meta: { kind: 'rift', zoneId: zone.id, tier: next.tier, affixes, timeLimit: RIFT.timeLimit, title: `Rift Tier ${next.tier} · ${zone.name}`, level: h.level },
+      });
+    } else {
+      zone = ZONES[next.zoneId] || ZONES.whispering_woods;
+      const waves = next.kind === 'boss' ? bossWaves(zone.id, h.level) : idleWaves(zone.id, h.level, rng, chars.length);
+      battle = createBattle({
+        seed: randomSeed(), allies, waves,
+        scale: (next.kind === 'boss' ? zone.bossScale : zone.scale) || { hp: 1, damage: 1 },
+        meta: { kind: next.kind, zoneId: zone.id, title: next.kind === 'boss' ? `Boss: ${zone.name}` : zone.name, level: zoneLevel(zone, h.level) },
+      });
+    }
+    s.solo = { battle, kind: next.kind, zoneId: zone.id, chars: chars.map(c => c.id), rift: next.kind === 'rift' ? next : null };
+    L.recordBestiary(p, { seen: battle.waves.flat().map(w => w.enemyId) });
     drainEvents(battle);
     this.sendTo(p.id, { t: 'battle_start', k: 'solo', battle: battleSnapshot(battle) });
   }
 
   finishSoloBattle(s) {
+    if (s.solo.kind === 'rift') return this.finishRift(s);
     const p = s.player;
     const { battle, kind, zoneId } = s.solo;
     const rest = battle.state === 'victory' ? CONFIG.combat.restBetweenFights : CONFIG.combat.reviveDelay;
@@ -449,10 +498,73 @@ export class Game {
       Object.assign(summary, this.rewardSummary(rewards, res));
       for (const lu of res.levelUps) this.toast(p.id, `${lu.name} reached level ${lu.level}!`, 'success');
     }
+    this.afterBattle(p, battle, summary.gold || 0);
     for (const a of L.checkAchievements(p)) this.toast(p.id, `Achievement unlocked: ${a.name} (+${a.reward.gold} gold)`, 'achievement');
     this.sendTo(p.id, { t: 'battle_end', k: 'solo', summary });
     L.maybeAutoRefreshRecruits(p, this.assets.get());
     s.solo = { restUntil: Date.now() + rest * 1000 };
+    this.markDirty(s);
+  }
+
+  // bestiary kills + quest progress after any finished battle
+  afterBattle(p, b, gold = 0) {
+    for (const m of L.recordBestiary(p, { kills: b.kills })) this.toast(p.id, `📖 Bestiary mastery ${'★'.repeat(m.level)} — ${m.name}: you now deal more damage to it.`, 'achievement');
+    this.questDone(p, Q.onBattle(p, { won: b.state === 'victory', kills: b.kills, gold }));
+  }
+
+  questDone(p, titles) {
+    for (const t of titles || []) this.toast(p.id, `📜 Quest complete: ${t} — claim your reward on the Quests page.`, 'achievement');
+  }
+
+  // ------------------------------------------------------------------ rifts
+  finishRift(s) {
+    const p = s.player;
+    const { battle: b, rift } = s.solo;
+    const tier = rift.tier;
+    const won = b.state === 'victory';
+    const timed = won && b.time <= RIFT.timeLimit;
+    const summary = { result: b.state, kind: 'rift', zoneId: s.solo.zoneId, tier, time: Math.round(b.time), timeLimit: RIFT.timeLimit, timed };
+    const r = p.rift;
+    p.stats.fights++;
+    r.runs = (r.runs || 0) + 1;
+    if (won) {
+      const rng = createRng(randomSeed());
+      const rewards = this.applyElixirRewards(p, computeRewards(b.kills, rng, { ...riftRewardOptions(tier, timed), lootMult: this.settings.get('lootRate') }));
+      rewards.kills = b.kills.length;
+      const h = L.hero(p);
+      if (timed) {
+        const chest = riftChest(tier);
+        for (let i = 0; i < chest.count; i++) rewards.items.push(generateItem(rng, Math.min(CONFIG.levelCap, h.level + chest.itemLevelBonus), { minRarity: chest.minRarity, boost: 1 + tier * 0.05 }));
+        r.timed = (r.timed || 0) + 1;
+        if (!r.bestTimes[tier] || b.time < r.bestTimes[tier]) r.bestTimes[tier] = Math.round(b.time * 10) / 10;
+        if (tier > (r.best || 0)) {
+          const crystals = firstClearCrystals(tier);
+          r.best = tier;
+          p.premium = (p.premium || 0) + crystals;
+          summary.crystals = crystals;
+          summary.newBest = true;
+          this.toast(p.id, `🌀 Rift tier ${tier} timed for the first time! +${crystals} 💠 — tier ${Math.min(RIFT.maxTier, tier + 1)} unlocked.`, 'achievement');
+        }
+      }
+      p.stats.bossKills += b.kills.filter(k => k.boss && !k.summoned).length;
+      const chars = s.solo.chars.map(id => p.characters[id]).filter(Boolean);
+      const res = L.applyRewards(p, chars, rewards);
+      Object.assign(summary, this.rewardSummary(rewards, res));
+      for (const lu of res.levelUps) this.toast(p.id, `${lu.name} reached level ${lu.level}!`, 'success');
+      this.questDone(p, Q.track(p, 'rift', 1));
+      if (timed) this.questDone(p, Q.track(p, 'rift_timed', 1));
+    }
+    p.stats.riftBest = r.best || 0;
+    r.history = [{ tier, theme: s.solo.zoneId, time: Math.round(b.time), timed, result: b.state, affixes: b.meta.affixes, at: Date.now() }, ...(r.history || [])].slice(0, 12);
+    this.afterBattle(p, b, summary.gold || 0);
+    for (const a of L.checkAchievements(p)) this.toast(p.id, `Achievement unlocked: ${a.name} (+${a.reward.gold} gold)`, 'achievement');
+    this.sendTo(p.id, { t: 'battle_end', k: 'solo', summary });
+    // auto-continue
+    let next = null;
+    if (won && r.auto === 'repeat') next = { kind: 'rift', tier, theme: rift.random ? null : rift.theme, random: rift.random };
+    if (won && r.auto === 'push') next = { kind: 'rift', tier: timed ? Math.min(maxStartTier(p), tier + 1) : tier, theme: rift.random ? null : rift.theme, random: rift.random };
+    if (next && next.random) { const th = riftThemes(p); next.theme = th[Math.floor(Math.random() * th.length)]; }
+    s.solo = { restUntil: Date.now() + (won ? 3000 : CONFIG.combat.reviveDelay * 1000), ...(next ? { next } : {}) };
     this.markDirty(s);
   }
 
@@ -477,6 +589,8 @@ export class Game {
     if (!this.lastTownCheck || now - this.lastTownCheck > 1000) {
       this.lastTownCheck = now;
       for (const s of this.sessions.values()) {
+        const fresh = Q.ensureQuests(s.player, now);
+        if (fresh.daily || fresh.weekly) { this.toast(s.player.id, `📜 New ${fresh.daily ? 'daily' : 'weekly'} quests are available!`, 'info'); this.markDirty(s); }
         if (!s.player.town) continue;
         for (const d of TL.finishConstructions(s.player, now)) { this.toast(s.player.id, `🏗 ${d.name} upgraded to level ${d.level}!`, 'success'); this.markDirty(s); }
         for (const ex of XL.newlyReturned(s.player, now)) { this.toast(s.player.id, `🧭 Your expedition to ${EXPEDITIONS[ex.destId]?.name} has returned — claim the rewards!`, 'success'); this.markDirty(s); }
@@ -525,15 +639,17 @@ export class Game {
     while (simTime < seconds && fights < CONFIG.offline.maxSimulatedFights) {
       const h = L.hero(p);
       const at = (p.lastActive || Date.now()) + simTime * 1000;
-      const b = createBattle({ seed: rng.int(1, 2 ** 31), allies: buildPartyUnits(chars, { ownerId: p.id, ownerName: p.name, buffs: elixirBonuses(p, at) }), waves: idleWaves(zone.id, h.level, rng, chars.length), scale: zone.scale || { hp: 1, damage: 1 } });
+      const b = createBattle({ seed: rng.int(1, 2 ** 31), allies: buildPartyUnits(chars, { ownerId: p.id, ownerName: p.name, buffs: elixirBonuses(p, at), vsEnemy: masteryMap(p) }), waves: idleWaves(zone.id, h.level, rng, chars.length), scale: zone.scale || { hp: 1, damage: 1 } });
       runToEnd(b);
       fights++;
       simTime += b.time + (b.state === 'victory' ? CONFIG.combat.restBetweenFights : CONFIG.combat.reviveDelay);
-      if (b.state !== 'victory') continue;
+      L.recordBestiary(p, { kills: b.kills });
+      if (b.state !== 'victory') { Q.onBattle(p, { won: false, kills: b.kills }); continue; }
       wins++;
       const r = this.applyElixirRewards(p, computeRewards(b.kills, rng, { rewardMult: CONFIG.offline.efficiency, lootMult: this.settings.get('lootRate') }), at);
       r.kills = b.kills.length;
       xp += r.xp; gold += r.gold; kills += r.kills;
+      Q.onBattle(p, { won: true, kills: b.kills, gold: r.gold });
       const res = L.applyRewards(p, chars, r);
       itemsKept += res.kept; itemsSold += res.sold;
       for (const it of r.items) if (['epic', 'legendary', 'mythic'].includes(it.rarity)) found.push({ name: it.name, rarity: it.rarity });
@@ -628,7 +744,7 @@ export class Game {
     const allies = [];
     for (const p of players) {
       const chars = L.coopCharacters(p);
-      allies.push(...buildPartyUnits(chars, { ownerId: p.id, ownerName: p.name, positionOffset: offset, extraBonuses: bonuses, buffs: elixirBonuses(p) }));
+      allies.push(...buildPartyUnits(chars, { ownerId: p.id, ownerName: p.name, positionOffset: offset, extraBonuses: bonuses, buffs: elixirBonuses(p), vsEnemy: masteryMap(p) }));
       offset += chars.length;
     }
     const groupLevel = Math.round(players.reduce((sum, p) => sum + L.hero(p).level, 0) / players.length);
@@ -670,7 +786,10 @@ export class Game {
         const res = L.applyRewards(p, part.chars.map(id => p.characters[id]).filter(Boolean), rewards);
         Object.assign(summary, this.rewardSummary(rewards, res));
         for (const lu of res.levelUps) this.toast(p.id, `${lu.name} reached level ${lu.level}!`, 'success');
+        this.questDone(p, Q.track(p, 'coop', 1));
       }
+      L.recordBestiary(p, { seen: b.waves.flat().map(w => w.enemyId) });
+      this.afterBattle(p, b, summary.gold || 0);
       for (const a of L.checkAchievements(p)) this.toast(p.id, `Achievement unlocked: ${a.name} (+${a.reward.gold} gold)`, 'achievement');
       this.sendTo(p.id, { t: 'battle_end', k: 'coop', summary });
       const ss = this.sessions.get(p.id);

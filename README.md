@@ -51,7 +51,7 @@ public/assets/
 ├── portraits/      warrior_1.png, mage_female.png, …   (extra appearance choices per class)
 ├── abilities/      fireball.png, heal.png, execute.png, …
 ├── items/          sword.png, staff.png, plate_chest.png, … (+ optional sword_legendary.png)
-├── enemies/        wolf.png, goblin_chieftain.png, …
+├── enemies/        wolf.png, goblin_chieftain.png, …  (also shown in the Bestiary)
 ├── statuses/       poison.png, shield_wall.png, …
 ├── skilltree/      keystone.png, notable.png, rank.png   (optional node icons)
 ├── zones/          whispering_woods.png, …              (combat backgrounds)
@@ -89,6 +89,9 @@ public/assets/
 | **Uniques & item sets** | 12 named unique items with special effects, such as ignite on hit, Renew on heal, damage reflection, cooldown reset on kill, cheaper abilities or bonus damage to bosses. There are also 5 four-piece sets with 2- and 4-piece bonuses. Both drop mainly from bosses and elites (bosses about 4% unique and 6% set piece) and are never auto-sold. Effects are data-driven "procs" in `shared/data/legendaries.js`. |
 | **Auction house** | Players list items or material stacks for a fixed buyout price for 12, 24 or 48 h. You can browse with filters (slot, rarity, uniques & sets, usable by one of your characters, level, sorting) and see recent average sale prices. A listing fee and a sales tax act as gold sinks; both are adjustable. Proceeds, expired items, gifts and overflow loot arrive in the **mailbox**. |
 | **Ashen Crystals 💠 (premium currency)** | Finishes a town construction or brings an expedition back instantly, with full rewards. The cost scales with the time remaining: by default 1 crystal per 10 minutes, so an 8 h expedition costs 48. The rate is adjustable on the Admin page. Crystals are only obtainable through admin gifts, delivered by mail. The server charges at most the price the player saw. |
+| **Daily & weekly quests** | 3 daily quests and 2 weekly quests per player, drawn from things you can currently do: slay enemy types, defeat bosses, earn gold, complete rifts or expeditions, salvage, craft, trade. Progress counts automatically, including offline fights. Rewards are gold, XP, materials and **Ashen Crystals 💠** (2 per daily, a 5 💠 chest for finishing all dailies, 12 per weekly plus an epic item). One free daily-quest swap per day, then 2 💠 per swap. Reset: 03:00 UTC daily, Mondays for weeklies. Templates and rewards are in `shared/quests.js`. |
+| **Rifts** | Timed, endlessly scaling dungeons from hero level 8. A rift is themed after one of your unlocked zones: 3 waves, then a Rift Guardian (that zone's boss), with a 3:30 clock. Each tier adds enemy health and damage. Finish in time to unlock the next tier and earn a loot chest (rare+ from tier 5, epic+ from 12, legendary from 25), plus crystals for each new best tier. **Weekly affixes** (Fortified/Tyrannical, Bolstering, Sanguine, Raging, Volcanic, Necrotic, Arcane Ward, Ironhide, Quaking) switch on at tiers 2, 5 and 10. They're the same for everyone, so the **Highest rift** leaderboard is fair. "After a run" can repeat a tier or push higher automatically. Tune in `shared/rifts.js`; check the balance with `node tools/rift-sim.js <level> <zone>`. |
+| **Bestiary** | Every enemy with its stats at any level and every ability in plain words, with estimated damage, target, cooldown and when it's used. Bosses also list their phases and enrage timer, plus where the enemy appears and auto-generated "How to prepare" tips. Click any enemy in combat to look it up. **Mastery:** 25/150/500 kills (bosses 3/15/40) give ★/★★/★★★, which means +2/4/6% damage against that enemy. |
 | **Admin page** | Only visible to admins.<br>• **Dashboard:** players online, accounts, uptime, memory, auctions, and an announcement box.<br>• **Announcements:** pop up for everyone online and are kept on the server, so players who were offline see them as soon as they log in (shown for 1/3/7/30 days or until deleted). Players can re-read them via the 📢 button in the top bar; admins can delete them from the dashboard.<br>• **Live settings:** XP, gold and loot rates; offline cap; auction fee and tax; registrations on/off; message of the day.<br>• **Player management:** search, details, kick, timed or permanent bans, gifts of gold, Ashen Crystals, materials or items (including specific uniques and set pieces) by mail, password reset, account deletion.<br>• **Audit log** of every admin action. |
 | **Rankings & inspect** | Leaderboards for hero level, party power, hero power, kills, bosses, co-op wins, achievements and world progress. You can filter by class and search. Inspect any player to see their current activity, group, stats and progress, plus the full hero build: attributes, gear, a skill tree preview, notables, and the loadout with behaviour rules. You can also see their party and invite them from there. Gold and inventory are never shown, and players can make their build private in Settings. |
 | **Progression** | XP and levels up to 60, skill tree points, ability ranks, class titles, 16 achievements and statistics. |
@@ -108,6 +111,9 @@ shared/            Game rules, used by both the server and the browser
   character.js     levels, XP, abilities, auto-development
   party.js         party synergy
   encounters.js    encounter generation & rewards
+  quests.js        daily/weekly quest templates & reset times
+  rifts.js         rift tiers, affixes, rewards
+  bestiary.js      enemy descriptions, tips, mastery
 server/            Node.js server: HTTP, WebSocket, auth, persistence, battle loop, groups
 public/            Browser client (vanilla JS modules + CSS)
   assets/          ← put your images here

@@ -12,6 +12,8 @@ import { rarityById } from '/shared/config.js';
 import { createMeter, recordEvent, seedUnits, mergeMeter } from '../meter.js';
 import { LOG_CATEGORIES, PRESETS, loadFilter, saveFilter, makeEntry, passes } from '../combatlog.js';
 import { renderMeterPanel, meterUI } from './combat-meter.js';
+import { AFFIXES } from '/shared/rifts.js';
+import { openBestiary } from './bestiary.js';
 
 const battles = { solo: null, coop: null };
 const results = { solo: [], coop: [] };
@@ -227,6 +229,13 @@ function headerHtml(k, b) {
   }
   const zone = ZONES[p.zone];
   const zones = Object.values(ZONES).sort((a, c) => a.order - c.order);
+  if (b?.meta?.kind === 'rift' && b.state === 'running') {
+    return `<div class="combat-title">
+        <h2>🌀 ${esc(b.meta.title)}</h2>
+        <span class="muted">${b.meta.affixes?.length ? b.meta.affixes.map(a => `<span class="affix-chip" ${tipAttr(`<b>${esc(AFFIXES[a]?.name)}</b><br>${esc(AFFIXES[a]?.description)}`)}>${AFFIXES[a]?.icon} ${esc(AFFIXES[a]?.name)}</span>`).join(' ') : 'No affixes'} · beat the clock: ${Math.floor(b.meta.timeLimit / 60)}:${String(b.meta.timeLimit % 60).padStart(2, '0')}</span>
+      </div>
+      <div class="combat-controls"><a class="btn" href="#/rifts">Rift details</a><button class="btn ghost danger" data-rift-stop>Abandon rift</button></div>`;
+  }
   return `<div class="combat-title">
       <h2>${esc(b?.meta?.title || zone.name)}</h2>
       <span class="muted">${esc(zone.description)}</span>
@@ -288,7 +297,13 @@ function update() {
   const b = battles[shown()];
   if (!root || !b) return;
   root.querySelector('.bf-wave').textContent = b.waves > 1 ? `Wave ${b.wave}/${b.waves}` : '';
-  root.querySelector('.bf-time').textContent = `${Math.floor(b.time)}s`;
+  const bt = root.querySelector('.bf-time');
+  if (b.meta?.kind === 'rift' && b.meta.timeLimit) {
+    const left = b.meta.timeLimit - b.time;
+    bt.textContent = left >= 0 ? `⏱ ${Math.floor(left / 60)}:${String(Math.floor(left % 60)).padStart(2, '0')} left` : `⏱ +${Math.floor(-left)}s over time`;
+    bt.classList.toggle('over', left < 0);
+    bt.classList.toggle('hurry', left >= 0 && left < 30);
+  } else { bt.textContent = `${Math.floor(b.time)}s`; bt.classList.remove('over', 'hurry'); }
   for (const u of b.units.values()) {
     const el = root.querySelector(`.unit[data-uid="${u.uid}"]`);
     if (!el) continue;
@@ -357,10 +372,11 @@ function showBanner(s) {
   if (!el) return;
   el.hidden = false;
   el.className = `result-banner ${s.result}`;
+  const riftLine = s.kind === 'rift' ? `<span>Rift tier ${s.tier}: ${Math.floor(s.time / 60)}:${String(s.time % 60).padStart(2, '0')} — ${s.timed ? '⏱ in time!' : s.result === 'victory' ? 'over time' : 'defeated'}${s.crystals ? ` · +${s.crystals} 💠` : ''}</span>` : '';
   el.innerHTML = s.result === 'victory'
-    ? `<b>Victory</b><span>+${fmt(s.xp)} XP · +${fmt(s.gold)} gold${s.items?.length ? ` · ${s.items.length} loot` : ''}</span>`
-    : `<b>Defeat</b><span>Tip: adjust ability behaviour, gear or party composition.</span>`;
-  setTimeout(() => { if (el.isConnected) el.hidden = true; }, 2200);
+    ? `<b>${s.kind === 'rift' ? (s.timed ? 'Rift timed!' : 'Rift cleared') : 'Victory'}</b>${riftLine}<span>+${fmt(s.xp)} XP · +${fmt(s.gold)} gold${s.items?.length ? ` · ${s.items.length} loot` : ''}</span>`
+    : `<b>Defeat</b>${riftLine}<span>Tip: click an enemy to see its abilities in the Bestiary, then adjust behaviour, gear or party.</span>`;
+  setTimeout(() => { if (el.isConnected) el.hidden = true; }, s.kind === 'rift' ? 5000 : 2200);
 }
 
 function renderResults() {
@@ -397,6 +413,13 @@ export const combatView = {
     });
     el.addEventListener('click', async e => {
       if (e.target.closest('[data-boss]')) { await run(act('challenge_boss', { zoneId: state.player.zone }), 'Boss challenge accepted!'); return; }
+      if (e.target.closest('[data-rift-stop]')) { await run(act('rift_stop'), 'Rift abandoned.'); return; }
+      const foe = e.target.closest('.unit.foe');
+      if (foe && !e.target.closest('button')) {
+        const u = battles[shown()]?.units.get(Number(foe.dataset.uid));
+        if (u) openBestiary(u.defId);
+        return;
+      }
       const cat = e.target.closest('[data-cat]');
       if (cat) {
         filter.cats[cat.dataset.cat] = !filter.cats[cat.dataset.cat];

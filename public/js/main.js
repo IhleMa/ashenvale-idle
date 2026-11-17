@@ -20,9 +20,12 @@ import { townView } from './views/town.js';
 import { expeditionsView } from './views/expeditions.js';
 import { auctionView } from './views/auction.js';
 import { adminView } from './views/admin.js';
+import { questsView, questsReady } from './views/quests.js';
+import { riftsView } from './views/rifts.js';
+import { bestiaryView } from './views/bestiary.js';
 import { createView } from './views/create.js';
 
-const VIEWS = [combatView, characterView, skilltreeView, abilitiesView, partyView, recruitmentView, townView, expeditionsView, inventoryView, auctionView, multiplayerView, rankingsView, progressionView, adminView];
+const VIEWS = [combatView, riftsView, questsView, characterView, skilltreeView, abilitiesView, partyView, recruitmentView, townView, expeditionsView, inventoryView, auctionView, multiplayerView, rankingsView, bestiaryView, progressionView, adminView];
 const viewEl = () => document.getElementById('view');
 let current = null;
 let root = null; // per-view container (listeners attached to it die with it)
@@ -135,6 +138,8 @@ function renderTopbar() {
   const expReady = (p.expeditions || []).filter(x => x.endsAt <= t).length;
   setBadge('expeditions', expReady ? String(expReady) : '');
   setBadge('auction', (p.mailbox || []).length ? String(p.mailbox.length) : '');
+  const qr = questsReady(p);
+  setBadge('quests', qr ? String(qr) : '');
 }
 function setBadge(id, text) {
   const b = document.querySelector(`[data-badge="${id}"]`);

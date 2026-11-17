@@ -26,10 +26,10 @@ export function partyBonuses(characters) {
 }
 
 // buffs: extra temporary bonuses (e.g. elixirs) { damagePct, damageTakenPct, allStatsPct }
-export function buildPartyUnits(characters, { ownerId, ownerName, positionOffset = 0, extraBonuses = null, buffs = null } = {}) {
+export function buildPartyUnits(characters, { ownerId, ownerName, positionOffset = 0, extraBonuses = null, buffs = null, vsEnemy = null } = {}) {
   const pb = extraBonuses || partyBonuses(characters);
   return characters.map((ch, i) => makeCharacterUnit(ch, {
-    ownerId, ownerName, position: positionOffset + i,
+    ownerId, ownerName, position: positionOffset + i, vsEnemy,
     bonuses: {
       allStatsPct: pb.allStatsPct + (buffs?.allStatsPct || 0),
       damagePct: pb.damagePct + (buffs?.damagePct || 0),

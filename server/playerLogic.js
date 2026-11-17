@@ -4,6 +4,8 @@ import { CONFIG, rarityIndex } from '../shared/config.js';
 import { CLASSES, CLASS_IDS, TRAITS } from '../shared/data/classes.js';
 import { ABILITIES, abilityPriority } from '../shared/data/abilities.js';
 import { ZONES } from '../shared/data/zones.js';
+import { ENEMIES } from '../shared/data/enemies.js';
+import { masteryLevel } from '../shared/bestiary.js';
 import { ACHIEVEMENTS } from '../shared/data/achievements.js';
 import { SLOT_IDS, generateItem, canEquip, itemSellValue, ITEM_BASES } from '../shared/data/items.js';
 import { createCharacter, addXp, autoDevelop, autoLoadout, syncTree, abilitySlots, cloneRule, treeRefundCost, treeResetCost } from '../shared/character.js';
@@ -33,6 +35,9 @@ export function newPlayer(account) {
     achievements: {},
     settings: { autoSellBelow: null, autoLootAction: 'sell', autoDevelopRecruits: true, autoDevelopHero: false, publicProfile: true },
     coopChars: [], mailbox: [],
+    bestiary: {},       // enemyId -> { kills, seen }
+    quests: null,       // daily/weekly quests (questLogic)
+    rift: { best: 0, bestTimes: {}, runs: 0, timed: 0, history: [], auto: 'off' },
   };
 }
 
@@ -42,6 +47,7 @@ export function migratePlayer(p) {
   for (const k of Object.keys(base)) if (p[k] === undefined) p[k] = base[k];
   p.stats = { ...base.stats, ...p.stats };
   p.settings = { ...base.settings, ...p.settings };
+  p.rift = { ...base.rift, ...p.rift };
   migrateTown(p);
   while (p.parties.length < CONFIG.party.presets) p.parties.push({ name: `Party ${p.parties.length + 1}`, members: p.heroId ? [p.heroId] : [] });
   for (const ch of Object.values(p.characters)) {
@@ -440,6 +446,22 @@ export function applyRewards(p, chars, rewards) {
   return { levelUps, sold, kept };
 }
 
+// Bestiary: remember which enemies were met and how many were killed. Returns new mastery ranks.
+export function recordBestiary(p, { kills = [], seen = [] }) {
+  const b = p.bestiary || (p.bestiary = {});
+  const now = Date.now();
+  for (const id of seen) if (ENEMIES[id] && !b[id]) b[id] = { kills: 0, seen: now };
+  const ups = [];
+  for (const k of kills) {
+    const e = b[k.enemyId] || (b[k.enemyId] = { kills: 0, seen: now });
+    const before = masteryLevel(k.enemyId, e.kills);
+    e.kills++;
+    const after = masteryLevel(k.enemyId, e.kills);
+    if (after > before) ups.push({ enemyId: k.enemyId, name: ENEMIES[k.enemyId].name, level: after });
+  }
+  return ups;
+}
+
 export function checkAchievements(p) {
   const granted = [];
   for (const a of Object.values(ACHIEVEMENTS)) {
@@ -461,6 +483,7 @@ export function publicPlayer(p) {
     recruitment: { ...p.recruitment, costs: Object.fromEntries(p.recruitment.offers.map(o => [o.offerId, recruitCost(p, o)])) },
     stats: p.stats, achievements: p.achievements, settings: p.settings, coopChars: p.coopChars,
     town: p.town, expeditions: p.expeditions || [], mailbox: p.mailbox || [], serverTime: Date.now(),
+    bestiary: p.bestiary || {}, quests: p.quests, rift: p.rift,
   };
 }
 

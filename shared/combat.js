@@ -14,7 +14,7 @@ const C = CONFIG.combat;
 const DT = C.tickMs / 1000;
 
 // ---------------------------------------------------------------- unit factories
-export function makeCharacterUnit(ch, { ownerId, ownerName, position, bonuses = {} }) {
+export function makeCharacterUnit(ch, { ownerId, ownerName, position, bonuses = {}, vsEnemy = null }) {
   const cls = CLASSES[ch.classId];
   const s = computeStats(ch);
   const role = CONFIG.roles[ch.role] || {};
@@ -39,6 +39,7 @@ export function makeCharacterUnit(ch, { ownerId, ownerName, position, bonuses = 
     },
     actionTimer: 0.3 + position * 0.25,
     danger: 0,
+    vsEnemy, // bestiary mastery: { enemyId: damage bonus }
   };
 }
 
@@ -66,10 +67,12 @@ export function makeEnemyUnit(enemyId, level, { position = 0, scale = { hp: 1, d
 
 // ---------------------------------------------------------------- battle
 // waves: array of arrays of { enemyId, level } ; scale: { hp, damage } multiplier for enemies
-export function createBattle({ seed, allies, waves, scale = { hp: 1, damage: 1 }, meta = {} }) {
+// hooks (optional, e.g. rift affixes): { spawn(b, unit, api), kill(b, src, tgt, api), damaged(b, src, tgt, info, api),
+//   tick(b, api), damageMult(src, tgt, school) -> number }
+export function createBattle({ seed, allies, waves, scale = { hp: 1, damage: 1 }, meta = {}, hooks = null }) {
   const b = {
     seed, rng: createRng(seed), time: 0, ticks: 0, nextUid: 1,
-    units: [], waves, waveIndex: -1, scale, meta,
+    units: [], waves, waveIndex: -1, scale, meta, hooks,
     state: 'running', events: [], kills: [], phaseTime: 0,
   };
   for (const u of allies) addUnit(b, u);
@@ -91,6 +94,7 @@ function nextWave(b) {
   wave.forEach((spec, i) => {
     const u = addUnit(b, makeEnemyUnit(spec.enemyId, spec.level, { position: i, scale: b.scale }));
     seedThreat(b, u);
+    b.hooks?.spawn?.(b, u, HOOK_API);
   });
   b.phaseTime = 0;
   emit(b, { type: 'wave', wave: b.waveIndex + 1, total: b.waves.length, units: b.units.filter(u => u.side === 'B').map(publicUnit) });
@@ -137,6 +141,7 @@ export function stepBattle(b) {
       emit(b, { type: 'phase', src: u.uid, message: `${u.name} becomes enraged!` });
     }
   }
+  if (b.hooks?.tick) { b.hooks.tick(b, HOOK_API); if (checkEnd(b)) return; }
   for (const u of b.units) {
     if (!u.alive) continue;
     u.actionTimer -= DT;
@@ -279,6 +284,7 @@ function applyEffect(b, src, tgt, eff, abilityId) {
         const nu = addUnit(b, makeEnemyUnit(eff.enemyId, src.level, { position: pos, scale: b.scale, summoned: true }));
         nu.side = src.side;
         seedThreat(b, nu);
+        b.hooks?.spawn?.(b, nu, HOOK_API);
         emit(b, { type: 'spawn', src: src.uid, unit: publicUnit(nu) });
       }
       break;
@@ -334,6 +340,8 @@ function dealDamage(b, src, tgt, raw, { school, ability, bonusCrit = 0, dot = nu
     if (src.passives.damageVsBossPct && tgt.boss) amount *= 1 + src.passives.damageVsBossPct;
     if (src.passives.damageVsHighHpPct && hpPct(tgt) > 80) amount *= 1 + src.passives.damageVsHighHpPct;
   }
+  if (src.vsEnemy && tgt.defId in src.vsEnemy) amount *= 1 + src.vsEnemy[tgt.defId];
+  if (b.hooks?.damageMult) amount *= b.hooks.damageMult(src, tgt, school);
   let crit = false;
   if (!noCrit && b.rng() < Math.min(C.critCap, src.stats.critChance + bonusCrit)) { crit = true; amount *= src.stats.critDamage; }
   if (!ignoreArmor) {
@@ -360,7 +368,10 @@ function dealDamage(b, src, tgt, raw, { school, ability, bonusCrit = 0, dot = nu
   if (tgt.resourceDef?.onDamaged) tgt.resource = Math.min(tgt.resourceMax, tgt.resource + tgt.resourceDef.onDamaged);
 
   if (tgt.hp <= 0) kill(b, src, tgt);
-  else if (tgt.phases?.length) checkPhases(b, tgt);
+  else {
+    if (tgt.phases?.length) checkPhases(b, tgt);
+    b.hooks?.damaged?.(b, src, tgt, { amount, school, ability, dot }, HOOK_API);
+  }
   if (!dot && !proc) {
     fireProcs(b, src, 'hit', { target: tgt, amount, school, ability });
     if (crit) fireProcs(b, src, 'crit', { target: tgt, amount, school, ability });
@@ -443,6 +454,7 @@ function kill(b, src, tgt) {
   emit(b, { type: 'death', src: src.uid, tgt: tgt.uid });
   if (tgt.side === 'B') b.kills.push({ enemyId: tgt.defId, level: tgt.level, boss: !!tgt.boss, elite: !!tgt.tags?.includes('elite'), summoned: !!tgt.summoned });
   if (src !== tgt) fireProcs(b, src, 'kill', { target: tgt });
+  b.hooks?.kill?.(b, src, tgt, HOOK_API);
 }
 
 function checkPhases(b, u) {
@@ -454,6 +466,14 @@ function checkPhases(b, u) {
     for (const eff of p.effects) applyEffect(b, u, u, eff, null);
   });
 }
+
+// What battle hooks may do (kept small on purpose)
+const HOOK_API = {
+  applyStatus: (b, src, tgt, id, duration, value = 0, stacks = 1) => applyStatus(b, src, tgt, id, duration, value, stacks),
+  heal: (b, src, tgt, amount) => healUnit(b, src, tgt, amount, null, null, 'affix'),
+  damage: (b, src, tgt, amount, school = 'magical') => dealDamage(b, src, tgt, amount, { school, ability: null, ignoreArmor: true, noCrit: true, proc: 'affix' }),
+  message: (b, src, message) => emit(b, { type: 'phase', src: src?.uid ?? 0, message }),
+};
 
 // ---------------------------------------------------------------- serialization for clients
 export function publicUnit(u) {

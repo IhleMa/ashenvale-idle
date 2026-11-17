@@ -12,6 +12,7 @@ export const STATUSES = {
   exposed:   { name: 'Exposed',   type: 'debuff', mods: { damageTakenPct: 0.15 }, description: 'Takes 15% more damage.' },
   marked:    { name: "Hunter's Mark", type: 'debuff', mods: { damageTakenPct: 0.10 }, description: 'Takes 10% more damage.' },
   sundered:  { name: 'Sundered',  type: 'debuff', mods: { defensePct: -0.3 }, description: 'Defense reduced by 30%.' },
+  necrotic:  { name: 'Necrotic Wound', type: 'debuff', mods: { healingTakenPct: -0.08 }, maxStacks: 8, description: 'Healing received reduced by 8% per stack.' },
   curse:     { name: 'Curse',     type: 'debuff', tick: 'damage', school: 'magical', mods: { healingTakenPct: -0.5 }, description: 'Shadow damage over time, healing received halved.' },
 
   // --- Buffs ---
@@ -27,6 +28,7 @@ export const STATUSES = {
   arcane_power: { name: 'Arcane Power', type: 'buff', mods: { damagePct: 0.25 }, description: 'Deals 25% more damage.' },
   enrage:       { name: 'Enrage',       type: 'buff', mods: { damagePct: 0.5, attackSpeedPct: 0.3 }, description: 'Greatly increased damage and speed.' },
   stone_skin:   { name: 'Stone Skin',   type: 'buff', mods: { damageTakenPct: -0.7 }, description: 'Takes 70% less damage.' },
+  bolstered:    { name: 'Bolstered',    type: 'buff', mods: { damagePct: 0.08 }, maxStacks: 10, description: 'Empowered by a fallen ally: +8% damage per stack.' },
   regeneration: { name: 'Regeneration', type: 'buff', tick: 'heal', description: 'Regenerating health.' },
 };
 
