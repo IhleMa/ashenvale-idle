@@ -1,86 +1,28 @@
-// Item bases and loot generation.
+// Item slots, bases, affixes and loot generation. The data lives in content/items.json.
 // Item images are looked up by base id (assets/items/<baseId>.png) and optionally by rarity
 // (assets/items/<baseId>_<rarity>.png) — see public/assets/README.md.
 import { CONFIG, rarityIndex, rarityById } from '../config.js';
+import { CONTENT, withIds } from '../content.js';
 
-export const SLOTS = {
-  weapon:  { label: 'Weapon' },
-  offhand: { label: 'Off-hand' },
-  head:    { label: 'Helmet' },
-  chest:   { label: 'Armor' },
-  hands:   { label: 'Gloves' },
-  feet:    { label: 'Boots' },
-  ring:    { label: 'Ring' },
-  amulet:  { label: 'Amulet' },
-};
+const I = CONTENT.items;
+export const SLOTS = I.slots;
 export const SLOT_IDS = Object.keys(SLOTS);
 
 // stats: { stat: [base, perLevel] }  — final = (base + perLevel * itemLevel) * rarity multiplier
-export const ITEM_BASES = {
-  // Weapons
-  sword:    { name: 'Sword',      slot: 'weapon', classes: ['warrior', 'rogue'], stats: { physPower: [4, 1.5] } },
-  axe:      { name: 'Battleaxe',  slot: 'weapon', classes: ['warrior'], stats: { physPower: [5, 1.7], critDamage: [0.05, 0.002] } },
-  mace:     { name: 'Mace',       slot: 'weapon', classes: ['warrior', 'cleric'], stats: { physPower: [3, 1.0], healPower: [2, 0.8], magPower: [2, 0.6] } },
-  dagger:   { name: 'Dagger',     slot: 'weapon', classes: ['rogue'], stats: { physPower: [3, 1.3], critChance: [0.02, 0.0004] } },
-  staff:    { name: 'Staff',      slot: 'weapon', classes: ['mage', 'cleric'], stats: { magPower: [5, 1.6], healPower: [3, 1.0] } },
-  wand:     { name: 'Wand',       slot: 'weapon', classes: ['mage', 'cleric'], stats: { magPower: [4, 1.4], critChance: [0.01, 0.0003] } },
-  bow:      { name: 'Longbow',    slot: 'weapon', classes: ['ranger'], stats: { physPower: [4, 1.5], attackSpeed: [0.02, 0.0005] } },
-  crossbow: { name: 'Crossbow',   slot: 'weapon', classes: ['ranger'], stats: { physPower: [5, 1.7] } },
-  // Off-hands
-  shield:   { name: 'Shield',     slot: 'offhand', classes: ['warrior', 'cleric'], stats: { defense: [4, 1.4], hp: [10, 3] } },
-  tome:     { name: 'Tome',       slot: 'offhand', classes: ['mage', 'cleric'], stats: { int: [2, 0.6], magPower: [1, 0.5] } },
-  quiver:   { name: 'Quiver',     slot: 'offhand', classes: ['ranger'], stats: { dex: [2, 0.6], attackSpeed: [0.01, 0.0004] } },
-  parrying_dagger: { name: 'Parrying Dagger', slot: 'offhand', classes: ['rogue'], stats: { dex: [2, 0.6], defense: [1, 0.4] } },
-  // Armor – plate
-  plate_helm:   { name: 'Plate Helm',      slot: 'head',  classes: ['warrior', 'cleric'], stats: { defense: [3, 0.9], vit: [1, 0.3] } },
-  plate_chest:  { name: 'Plate Armor',     slot: 'chest', classes: ['warrior', 'cleric'], stats: { defense: [5, 1.6], vit: [2, 0.5] } },
-  plate_gloves: { name: 'Gauntlets',       slot: 'hands', classes: ['warrior', 'cleric'], stats: { defense: [2, 0.6], str: [1, 0.3] } },
-  plate_boots:  { name: 'Sabatons',        slot: 'feet',  classes: ['warrior', 'cleric'], stats: { defense: [2, 0.7], vit: [1, 0.3] } },
-  // Armor – leather
-  leather_hood:   { name: 'Leather Hood',   slot: 'head',  classes: ['rogue', 'ranger', 'warrior'], stats: { defense: [2, 0.6], dex: [1, 0.35] } },
-  leather_chest:  { name: 'Leather Jerkin', slot: 'chest', classes: ['rogue', 'ranger', 'warrior'], stats: { defense: [3, 1.1], dex: [2, 0.5] } },
-  leather_gloves: { name: 'Leather Gloves', slot: 'hands', classes: ['rogue', 'ranger', 'warrior'], stats: { defense: [1, 0.4], critChance: [0.01, 0.0002] } },
-  leather_boots:  { name: 'Leather Boots',  slot: 'feet',  classes: ['rogue', 'ranger', 'warrior'], stats: { defense: [1, 0.5], attackSpeed: [0.01, 0.0003] } },
-  // Armor – cloth (any class)
-  cloth_hat:    { name: 'Cloth Hat',     slot: 'head',  classes: null, stats: { defense: [1, 0.3], int: [1, 0.4] } },
-  robe:         { name: 'Robe',          slot: 'chest', classes: null, stats: { defense: [2, 0.6], int: [2, 0.6] } },
-  cloth_gloves: { name: 'Silk Gloves',   slot: 'hands', classes: null, stats: { defense: [1, 0.2], magPower: [1, 0.4] } },
-  cloth_boots:  { name: 'Sandals',       slot: 'feet',  classes: null, stats: { defense: [1, 0.25], healPower: [1, 0.4] } },
-  // Accessories
-  ring:   { name: 'Ring',   slot: 'ring',   classes: null, stats: { critChance: [0.01, 0.0003] } },
-  amulet: { name: 'Amulet', slot: 'amulet', classes: null, stats: { hp: [12, 4] } },
-};
-for (const [id, b] of Object.entries(ITEM_BASES)) b.id = id;
+export const ITEM_BASES = withIds(I.bases);
 
 // Random bonus stats ("affixes") — magnitude per item level
-export const AFFIXES = {
-  str:         { label: 'Strength', base: 1, perLevel: 0.55 },
-  int:         { label: 'Intelligence', base: 1, perLevel: 0.55 },
-  dex:         { label: 'Dexterity', base: 1, perLevel: 0.55 },
-  vit:         { label: 'Vitality', base: 1, perLevel: 0.55 },
-  hp:          { label: 'Health', base: 8, perLevel: 3.5 },
-  defense:     { label: 'Defense', base: 1, perLevel: 0.5 },
-  physPower:   { label: 'Physical Power', base: 1, perLevel: 0.6 },
-  magPower:    { label: 'Magic Power', base: 1, perLevel: 0.6 },
-  healPower:   { label: 'Healing Power', base: 1, perLevel: 0.6 },
-  critChance:  { label: 'Critical Chance', base: 0.008, perLevel: 0.0003, pct: true },
-  critDamage:  { label: 'Critical Damage', base: 0.04, perLevel: 0.002, pct: true },
-  attackSpeed: { label: 'Attack Speed', base: 0.015, perLevel: 0.0005, pct: true },
-};
+export const AFFIXES = I.affixes;
 
 export const STAT_LABELS = {
   ...Object.fromEntries(Object.entries(AFFIXES).map(([k, v]) => [k, v.label])),
-  maxHp: 'Max Health',
+  ...I.extraStatLabels,
 };
-export const PCT_STATS = new Set(['critChance', 'critDamage', 'attackSpeed']);
-
-const MATERIALS = [
-  [1, 'Worn'], [6, 'Iron'], [12, 'Steel'], [20, 'Runed'], [30, 'Ashen'], [40, 'Voidforged'], [52, 'Eternal'],
-];
-const SUFFIXES = ['of the Bear', 'of the Owl', 'of the Fox', 'of Embers', 'of Frost', 'of the Phoenix', 'of Shadows', 'of the Ancients', 'of Ashenvale', 'of the Void'];
+export const PCT_STATS = new Set(I.pctStats);
 
 export function itemSellValue(item) {
-  return Math.floor((5 + item.level * 3) * Math.pow(2, rarityIndex(item.rarity)));
+  const v = I.sellValue;
+  return Math.floor((v.base + item.level * v.perLevel) * Math.pow(v.rarityFactor, rarityIndex(item.rarity)));
 }
 
 export function rollRarity(rng, boost = 0, minRarity = 'common') {
@@ -95,19 +37,21 @@ export function rollRarity(rng, boost = 0, minRarity = 'common') {
 // ---------------------------------------------------------------- sockets (gems: see shared/gems.js)
 // most sockets an item can ever have (by slot and rarity)
 export function maxSockets(item) {
+  const S = I.sockets;
   const r = rarityIndex(item.rarity);
-  const bySlot = { weapon: 3, chest: 3, offhand: 2, head: 2 }[item.slot] ?? 1;
-  const byRarity = [1, 1, 2, 2, 3, 3][r] ?? 1;
+  const bySlot = S.maxBySlot[item.slot] ?? S.maxDefault;
+  const byRarity = S.maxByRarity[r] ?? S.maxDefault;
   return Math.min(bySlot, byRarity);
 }
 // sockets on a fresh drop: rare-ish; legendary and better always have one
 export function rollSockets(rng, item) {
+  const S = I.sockets;
   const max = maxSockets(item);
   const r = rarityIndex(item.rarity);
-  const chance = [0.08, 0.15, 0.25, 0.35, 0.45, 0.6][r] ?? 0.1;
+  const chance = S.chanceByRarity[r] ?? 0.1;
   let n = 0;
-  for (let i = 0; i < max; i++) if (rng() < chance * (i === 0 ? 1 : 0.6)) n++;
-  if (r >= 4 && n === 0) n = 1;
+  for (let i = 0; i < max; i++) if (rng() < chance * (i === 0 ? 1 : S.extraSocketChanceMult)) n++;
+  if (r >= rarityIndex(S.guaranteedFromRarity) && n === 0) n = 1;
   return n;
 }
 
@@ -123,16 +67,17 @@ export function generateItem(rng, level, { boost = 0, minRarity = 'common', base
   for (let i = 0; i < rarity.affixes && pool.length; i++) {
     const k = pool.splice(Math.floor(rng() * pool.length), 1)[0];
     const a = AFFIXES[k];
-    add(k, (a.base + a.perLevel * lvl) * (0.7 + rng() * 0.3) * rarity.mult);
+    add(k, (a.base + a.perLevel * lvl) * (I.naming.affixRollMin + rng() * I.naming.affixRollRange) * rarity.mult);
   }
   for (const k of Object.keys(stats)) stats[k] = PCT_STATS.has(k) ? Math.round(stats[k] * 1000) / 1000 : Math.round(stats[k]);
-  const material = MATERIALS.filter(m => lvl >= m[0]).pop()[1];
-  let name = `${material} ${base.name}`;
-  if (rarityIndex(rarity.id) >= 3) name += ' ' + SUFFIXES[Math.floor(rng() * SUFFIXES.length)];
+  const N = I.naming;
+  const prefix = N.levelPrefixes.filter(m => lvl >= m[0]).pop()[1];
+  let name = `${prefix} ${base.name}`;
+  if (rarityIndex(rarity.id) >= rarityIndex(N.suffixFromRarity)) name += ' ' + N.suffixes[Math.floor(rng() * N.suffixes.length)];
   const item = {
     uid: uid || `i${Math.floor(rng() * 1e9).toString(36)}${Date.now().toString(36)}`,
     baseId: base.id, name, slot: base.slot, rarity: rarity.id, level: lvl,
-    requiredLevel: Math.max(1, lvl - 2), stats, classes: base.classes,
+    requiredLevel: Math.max(1, lvl - I.naming.requiredLevelBelowItemLevel), stats, classes: base.classes,
   };
   const sockets = rollSockets(rng, item);
   if (sockets) item.sockets = Array(sockets).fill(null);

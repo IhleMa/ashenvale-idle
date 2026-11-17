@@ -1,5 +1,5 @@
 // Daily & weekly quests: generation, progress tracking, rewards.
-import { QUEST_CONFIG, QUEST_TYPES, dayKey, weekKey, questContext, rollQuest, seededRng, questTitle } from '../shared/quests.js';
+import { dailyChestReward, QUEST_CONFIG, QUEST_TYPES, dayKey, weekKey, questContext, rollQuest, seededRng, questTitle } from '../shared/quests.js';
 import { ENEMIES } from '../shared/data/enemies.js';
 import { generateItem } from '../shared/data/items.js';
 import { createRng } from '../shared/rng.js';
@@ -87,7 +87,7 @@ export function claim(p, { id }) {
     if (p.quests.bonusClaimed) fail('Already claimed today');
     if (!p.quests.daily.every(q => q.claimed)) fail('Finish and claim all daily quests first');
     p.quests.bonusClaimed = true;
-    return giveReward(p, { crystals: QUEST_CONFIG.allDailiesCrystals, item: 'rare', gold: 0 }, 'bonus');
+    return giveReward(p, dailyChestReward(), 'bonus');
   }
   const f = findQuest(p, id) || fail('Quest not found');
   if (f.q.claimed) fail('Already claimed');

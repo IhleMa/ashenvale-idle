@@ -1,0 +1,1087 @@
+{
+  "_about": "Abilities of classes (\"classId\": warrior, …) and enemies (\"classId\": \"enemy\"). The combat engine interprets \"effects\"; \"defaultRule\" is the behaviour a newly learned ability starts with; \"priority\" (default 50) decides where it lands in the loadout.",
+  "abilities": {
+    "heroic_strike": {
+      "name": "Heroic Strike",
+      "classId": "warrior",
+      "unlockLevel": 1,
+      "type": "damage",
+      "description": "A powerful blow dealing 160% physical damage.",
+      "cost": 20,
+      "cooldown": 3,
+      "target": "enemy",
+      "effects": [{ "kind": "damage", "stat": "physPower", "power": 1.6, "school": "physical" }],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "always" }],
+        "target": { "selector": "enemy_current" },
+        "targetConditions": []
+      },
+      "priority": 20
+    },
+    "taunt": {
+      "name": "Taunt",
+      "classId": "warrior",
+      "unlockLevel": 1,
+      "type": "control",
+      "description": "Forces all enemies to attack you for 5 seconds and generates high threat.",
+      "cost": 0,
+      "cooldown": 10,
+      "target": "self",
+      "effects": [{ "kind": "taunt", "duration": 5 }],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "enemies_alive", "cmp": ">=", "value": 1 }],
+        "target": { "selector": "self" },
+        "targetConditions": [{ "type": "target_missing_status", "status": "taunting" }]
+      },
+      "priority": 90
+    },
+    "shield_wall": {
+      "name": "Shield Wall",
+      "classId": "warrior",
+      "unlockLevel": 3,
+      "type": "buff",
+      "description": "Raise your shield, taking 45% less damage for 8 seconds.",
+      "cost": 15,
+      "cooldown": 25,
+      "target": "self",
+      "effects": [{ "kind": "status", "status": "shield_wall", "duration": 8 }],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "self_hp_below", "value": 40 }, { "type": "self_missing_status", "status": "shield_wall" }],
+        "target": { "selector": "self" },
+        "targetConditions": []
+      },
+      "priority": 100
+    },
+    "cleave": {
+      "name": "Cleave",
+      "classId": "warrior",
+      "unlockLevel": 6,
+      "type": "damage",
+      "description": "Strike all enemies for 90% physical damage.",
+      "cost": 30,
+      "cooldown": 6,
+      "target": "enemy",
+      "area": true,
+      "effects": [{ "kind": "damage", "stat": "physPower", "power": 0.9, "school": "physical" }],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "enemies_alive", "cmp": ">=", "value": 2 }],
+        "target": { "selector": "all_enemies" },
+        "targetConditions": []
+      },
+      "priority": 65
+    },
+    "shield_bash": {
+      "name": "Shield Bash",
+      "classId": "warrior",
+      "unlockLevel": 10,
+      "type": "control",
+      "description": "Bash an enemy for 80% damage and stun it for 2 seconds.",
+      "cost": 20,
+      "cooldown": 14,
+      "target": "enemy",
+      "effects": [
+        { "kind": "damage", "stat": "physPower", "power": 0.8, "school": "physical" },
+        { "kind": "status", "status": "stun", "duration": 2 }
+      ],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "always" }],
+        "target": { "selector": "enemy_highest_threat" },
+        "targetConditions": [{ "type": "target_missing_status", "status": "stun" }]
+      },
+      "priority": 70
+    },
+    "battle_cry": {
+      "name": "Battle Cry",
+      "classId": "warrior",
+      "unlockLevel": 15,
+      "type": "buff",
+      "description": "Rally the party: all allies deal 15% more damage for 10 seconds.",
+      "cost": 30,
+      "cooldown": 30,
+      "target": "ally",
+      "area": true,
+      "effects": [{ "kind": "status", "status": "battle_cry", "duration": 10 }],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "self_missing_status", "status": "battle_cry" }],
+        "target": { "selector": "all_allies" },
+        "targetConditions": []
+      },
+      "priority": 75
+    },
+    "sunder_armor": {
+      "name": "Sunder Armor",
+      "classId": "warrior",
+      "unlockLevel": 20,
+      "type": "debuff",
+      "description": "Deal 110% damage and reduce the target's defense by 30% for 10 seconds.",
+      "cost": 20,
+      "cooldown": 8,
+      "target": "enemy",
+      "effects": [
+        { "kind": "damage", "stat": "physPower", "power": 1.1, "school": "physical" },
+        { "kind": "status", "status": "sundered", "duration": 10 }
+      ],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "always" }],
+        "target": { "selector": "enemy_highest_hp" },
+        "targetConditions": [{ "type": "target_missing_status", "status": "sundered" }]
+      },
+      "priority": 55
+    },
+    "fireball": {
+      "name": "Fireball",
+      "classId": "mage",
+      "unlockLevel": 1,
+      "type": "damage",
+      "description": "Hurl a fireball for 170% magic damage that burns for 6 seconds.",
+      "cost": 18,
+      "cooldown": 3,
+      "target": "enemy",
+      "effects": [
+        { "kind": "damage", "stat": "magPower", "power": 1.7, "school": "magical" },
+        { "kind": "status", "status": "burn", "duration": 6, "stat": "magPower", "power": 0.15 }
+      ],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "always" }],
+        "target": { "selector": "enemy_current" },
+        "targetConditions": []
+      },
+      "priority": 20
+    },
+    "frost_bolt": {
+      "name": "Frost Bolt",
+      "classId": "mage",
+      "unlockLevel": 1,
+      "type": "debuff",
+      "description": "130% magic damage and slows the target's attacks by 25% for 6 seconds.",
+      "cost": 14,
+      "cooldown": 4,
+      "target": "enemy",
+      "effects": [
+        { "kind": "damage", "stat": "magPower", "power": 1.3, "school": "magical" },
+        { "kind": "status", "status": "frostbite", "duration": 6 }
+      ],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "always" }],
+        "target": { "selector": "enemy_highest_threat" },
+        "targetConditions": [{ "type": "target_missing_status", "status": "frostbite" }]
+      },
+      "priority": 40
+    },
+    "arcane_missiles": {
+      "name": "Arcane Missiles",
+      "classId": "mage",
+      "unlockLevel": 3,
+      "type": "damage",
+      "description": "Fire 3 missiles, each dealing 70% magic damage.",
+      "cost": 25,
+      "cooldown": 7,
+      "target": "enemy",
+      "effects": [{ "kind": "damage", "stat": "magPower", "power": 0.7, "school": "magical", "hits": 3 }],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "always" }],
+        "target": { "selector": "enemy_lowest_hp_pct" },
+        "targetConditions": []
+      },
+      "priority": 45
+    },
+    "flame_wave": {
+      "name": "Flame Wave",
+      "classId": "mage",
+      "unlockLevel": 6,
+      "type": "damage",
+      "description": "A wave of fire hits all enemies for 110% magic damage.",
+      "cost": 35,
+      "cooldown": 9,
+      "target": "enemy",
+      "area": true,
+      "effects": [{ "kind": "damage", "stat": "magPower", "power": 1.1, "school": "magical" }],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "enemies_alive", "cmp": ">=", "value": 2 }],
+        "target": { "selector": "all_enemies" },
+        "targetConditions": []
+      },
+      "priority": 65
+    },
+    "frost_nova": {
+      "name": "Frost Nova",
+      "classId": "mage",
+      "unlockLevel": 10,
+      "type": "control",
+      "description": "Freeze all enemies: 60% magic damage and stun for 1.5 seconds.",
+      "cost": 30,
+      "cooldown": 20,
+      "target": "enemy",
+      "area": true,
+      "effects": [
+        { "kind": "damage", "stat": "magPower", "power": 0.6, "school": "magical" },
+        { "kind": "status", "status": "stun", "duration": 1.5 }
+      ],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "ally_hp_below", "value": 50 }],
+        "target": { "selector": "all_enemies" },
+        "targetConditions": []
+      },
+      "priority": 95
+    },
+    "arcane_power": {
+      "name": "Arcane Power",
+      "classId": "mage",
+      "unlockLevel": 15,
+      "type": "buff",
+      "description": "Increase your damage by 25% for 10 seconds.",
+      "cost": 10,
+      "cooldown": 35,
+      "target": "self",
+      "effects": [{ "kind": "status", "status": "arcane_power", "duration": 10 }],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "resource_above", "value": 60 }],
+        "target": { "selector": "self" },
+        "targetConditions": [{ "type": "target_missing_status", "status": "arcane_power" }]
+      },
+      "priority": 85
+    },
+    "meteor": {
+      "name": "Meteor",
+      "classId": "mage",
+      "unlockLevel": 22,
+      "type": "damage",
+      "description": "Call down a meteor: 260% magic damage to all enemies and burns them.",
+      "cost": 60,
+      "cooldown": 30,
+      "target": "enemy",
+      "area": true,
+      "effects": [
+        { "kind": "damage", "stat": "magPower", "power": 2.6, "school": "magical" },
+        { "kind": "status", "status": "burn", "duration": 6, "stat": "magPower", "power": 0.2 }
+      ],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "always" }],
+        "target": { "selector": "all_enemies" },
+        "targetConditions": []
+      },
+      "priority": 80
+    },
+    "backstab": {
+      "name": "Backstab",
+      "classId": "rogue",
+      "unlockLevel": 1,
+      "type": "damage",
+      "description": "180% physical damage with +20% critical chance.",
+      "cost": 35,
+      "cooldown": 3,
+      "target": "enemy",
+      "effects": [{ "kind": "damage", "stat": "physPower", "power": 1.8, "school": "physical", "bonusCrit": 0.2 }],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "always" }],
+        "target": { "selector": "enemy_current" },
+        "targetConditions": []
+      },
+      "priority": 20
+    },
+    "poison_blade": {
+      "name": "Poison Blade",
+      "classId": "rogue",
+      "unlockLevel": 1,
+      "type": "debuff",
+      "description": "90% damage and applies a stacking poison for 8 seconds.",
+      "cost": 25,
+      "cooldown": 4,
+      "target": "enemy",
+      "effects": [
+        { "kind": "damage", "stat": "physPower", "power": 0.9, "school": "physical" },
+        { "kind": "status", "status": "poison", "duration": 8, "stat": "physPower", "power": 0.18 }
+      ],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "always" }],
+        "target": { "selector": "enemy_highest_hp" },
+        "targetConditions": []
+      },
+      "priority": 35
+    },
+    "evasion": {
+      "name": "Evasion",
+      "classId": "rogue",
+      "unlockLevel": 3,
+      "type": "buff",
+      "description": "Gain 50% dodge chance for 6 seconds.",
+      "cost": 20,
+      "cooldown": 25,
+      "target": "self",
+      "effects": [{ "kind": "status", "status": "evasion", "duration": 6 }],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "self_hp_below", "value": 50 }],
+        "target": { "selector": "self" },
+        "targetConditions": [{ "type": "target_missing_status", "status": "evasion" }]
+      },
+      "priority": 100
+    },
+    "execute": {
+      "name": "Execute",
+      "classId": "rogue",
+      "unlockLevel": 6,
+      "type": "damage",
+      "description": "150% damage. Deals triple damage to enemies below 30% health.",
+      "cost": 30,
+      "cooldown": 6,
+      "target": "enemy",
+      "effects": [
+        {
+          "kind": "damage",
+          "stat": "physPower",
+          "power": 1.5,
+          "school": "physical",
+          "executeBelow": 0.3,
+          "executeMult": 3
+        }
+      ],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "always" }],
+        "target": { "selector": "enemy_lowest_hp" },
+        "targetConditions": []
+      },
+      "priority": 50
+    },
+    "rupture": {
+      "name": "Rupture",
+      "classId": "rogue",
+      "unlockLevel": 10,
+      "type": "debuff",
+      "description": "Open a wound that bleeds heavily for 10 seconds.",
+      "cost": 25,
+      "cooldown": 10,
+      "target": "enemy",
+      "effects": [{ "kind": "status", "status": "bleed", "duration": 10, "stat": "physPower", "power": 0.45 }],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "always" }],
+        "target": { "selector": "enemy_highest_hp" },
+        "targetConditions": [{ "type": "target_missing_status", "status": "bleed" }, { "type": "target_hp_above", "value": 40 }]
+      },
+      "priority": 60
+    },
+    "expose_weakness": {
+      "name": "Expose Weakness",
+      "classId": "rogue",
+      "unlockLevel": 15,
+      "type": "debuff",
+      "description": "The target takes 15% more damage from all sources for 10 seconds.",
+      "cost": 20,
+      "cooldown": 15,
+      "target": "enemy",
+      "effects": [{ "kind": "status", "status": "exposed", "duration": 10 }],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "always" }],
+        "target": { "selector": "enemy_highest_hp" },
+        "targetConditions": [{ "type": "target_missing_status", "status": "exposed" }]
+      },
+      "priority": 70
+    },
+    "shadow_flurry": {
+      "name": "Shadow Flurry",
+      "classId": "rogue",
+      "unlockLevel": 22,
+      "type": "damage",
+      "description": "Strike 5 times for 65% damage each.",
+      "cost": 50,
+      "cooldown": 14,
+      "target": "enemy",
+      "effects": [{ "kind": "damage", "stat": "physPower", "power": 0.65, "school": "physical", "hits": 5 }],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "always" }],
+        "target": { "selector": "enemy_current" },
+        "targetConditions": []
+      },
+      "priority": 75
+    },
+    "heal": {
+      "name": "Heal",
+      "classId": "cleric",
+      "unlockLevel": 1,
+      "type": "heal",
+      "description": "Restore health to one ally (220% healing power).",
+      "cost": 15,
+      "cooldown": 2.5,
+      "target": "ally",
+      "effects": [{ "kind": "heal", "stat": "healPower", "power": 2.2 }],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "ally_hp_below", "value": 70 }],
+        "target": { "selector": "ally_lowest_hp_pct" },
+        "targetConditions": [{ "type": "target_hp_below", "value": 70 }]
+      },
+      "priority": 90
+    },
+    "smite": {
+      "name": "Smite",
+      "classId": "cleric",
+      "unlockLevel": 1,
+      "type": "damage",
+      "description": "Holy damage equal to 150% magic power.",
+      "cost": 10,
+      "cooldown": 3,
+      "target": "enemy",
+      "effects": [{ "kind": "damage", "stat": "magPower", "power": 1.5, "school": "magical" }],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "resource_above", "value": 50 }],
+        "target": { "selector": "enemy_current" },
+        "targetConditions": []
+      },
+      "priority": 10
+    },
+    "renew": {
+      "name": "Renew",
+      "classId": "cleric",
+      "unlockLevel": 3,
+      "type": "heal",
+      "description": "Heals an ally every second for 10 seconds.",
+      "cost": 12,
+      "cooldown": 4,
+      "target": "ally",
+      "effects": [{ "kind": "status", "status": "renew", "duration": 10, "stat": "healPower", "power": 0.35 }],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "ally_hp_below", "value": 90 }],
+        "target": { "selector": "ally_lowest_hp_pct" },
+        "targetConditions": [{ "type": "target_missing_status", "status": "renew" }, { "type": "target_hp_below", "value": 90 }]
+      },
+      "priority": 60
+    },
+    "purify": {
+      "name": "Purify",
+      "classId": "cleric",
+      "unlockLevel": 6,
+      "type": "utility",
+      "description": "Remove up to 2 harmful effects from an ally and heal them slightly.",
+      "cost": 12,
+      "cooldown": 6,
+      "target": "ally",
+      "effects": [{ "kind": "cleanse", "count": 2 }, { "kind": "heal", "stat": "healPower", "power": 0.6 }],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "always" }],
+        "target": { "selector": "ally_lowest_hp_pct" },
+        "targetConditions": [{ "type": "target_has_debuff" }]
+      },
+      "priority": 70
+    },
+    "prayer_of_healing": {
+      "name": "Prayer of Healing",
+      "classId": "cleric",
+      "unlockLevel": 10,
+      "type": "heal",
+      "description": "Heal all allies for 120% healing power.",
+      "cost": 35,
+      "cooldown": 10,
+      "target": "ally",
+      "area": true,
+      "effects": [{ "kind": "heal", "stat": "healPower", "power": 1.2 }],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "allies_below_hp", "value": 75, "count": 2 }],
+        "target": { "selector": "all_allies" },
+        "targetConditions": []
+      },
+      "priority": 95
+    },
+    "power_word_barrier": {
+      "name": "Power Word: Barrier",
+      "classId": "cleric",
+      "unlockLevel": 15,
+      "type": "buff",
+      "description": "Shield an ally, absorbing damage for 10 seconds.",
+      "cost": 20,
+      "cooldown": 12,
+      "target": "ally",
+      "effects": [{ "kind": "shield", "stat": "healPower", "power": 2.5, "duration": 10 }],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "always" }],
+        "target": { "selector": "ally_tank" },
+        "targetConditions": [{ "type": "target_missing_status", "status": "barrier" }]
+      },
+      "priority": 65
+    },
+    "divine_blessing": {
+      "name": "Divine Blessing",
+      "classId": "cleric",
+      "unlockLevel": 22,
+      "type": "buff",
+      "description": "Bless the party: +8% damage and +15% defense for 15 seconds.",
+      "cost": 35,
+      "cooldown": 35,
+      "target": "ally",
+      "area": true,
+      "effects": [{ "kind": "status", "status": "blessing", "duration": 15 }],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "self_missing_status", "status": "blessing" }],
+        "target": { "selector": "all_allies" },
+        "targetConditions": []
+      },
+      "priority": 75
+    },
+    "aimed_shot": {
+      "name": "Aimed Shot",
+      "classId": "ranger",
+      "unlockLevel": 1,
+      "type": "damage",
+      "description": "A carefully aimed shot for 175% physical damage.",
+      "cost": 25,
+      "cooldown": 4,
+      "target": "enemy",
+      "effects": [{ "kind": "damage", "stat": "physPower", "power": 1.75, "school": "physical" }],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "always" }],
+        "target": { "selector": "enemy_current" },
+        "targetConditions": []
+      },
+      "priority": 20
+    },
+    "serpent_sting": {
+      "name": "Serpent Sting",
+      "classId": "ranger",
+      "unlockLevel": 1,
+      "type": "debuff",
+      "description": "Poisons the target for 12 seconds.",
+      "cost": 15,
+      "cooldown": 3,
+      "target": "enemy",
+      "effects": [{ "kind": "status", "status": "poison", "duration": 12, "stat": "physPower", "power": 0.2, "stacks": 1 }],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "always" }],
+        "target": { "selector": "enemy_highest_hp" },
+        "targetConditions": [{ "type": "target_missing_status", "status": "poison" }]
+      },
+      "priority": 45
+    },
+    "multi_shot": {
+      "name": "Multi-Shot",
+      "classId": "ranger",
+      "unlockLevel": 3,
+      "type": "damage",
+      "description": "Shoot all enemies for 80% physical damage.",
+      "cost": 30,
+      "cooldown": 6,
+      "target": "enemy",
+      "area": true,
+      "effects": [{ "kind": "damage", "stat": "physPower", "power": 0.8, "school": "physical" }],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "enemies_alive", "cmp": ">=", "value": 2 }],
+        "target": { "selector": "all_enemies" },
+        "targetConditions": []
+      },
+      "priority": 65
+    },
+    "hunters_mark": {
+      "name": "Hunter's Mark",
+      "classId": "ranger",
+      "unlockLevel": 6,
+      "type": "debuff",
+      "description": "Mark a target: it takes 10% more damage for 15 seconds.",
+      "cost": 10,
+      "cooldown": 8,
+      "target": "enemy",
+      "effects": [{ "kind": "status", "status": "marked", "duration": 15 }],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "always" }],
+        "target": { "selector": "enemy_highest_hp" },
+        "targetConditions": [{ "type": "target_missing_status", "status": "marked" }]
+      },
+      "priority": 55
+    },
+    "rapid_fire": {
+      "name": "Rapid Fire",
+      "classId": "ranger",
+      "unlockLevel": 10,
+      "type": "buff",
+      "description": "Increase attack speed by 40% for 10 seconds.",
+      "cost": 20,
+      "cooldown": 30,
+      "target": "self",
+      "effects": [{ "kind": "status", "status": "rapid_fire", "duration": 10 }],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "always" }],
+        "target": { "selector": "self" },
+        "targetConditions": [{ "type": "target_missing_status", "status": "rapid_fire" }]
+      },
+      "priority": 85
+    },
+    "volley": {
+      "name": "Volley",
+      "classId": "ranger",
+      "unlockLevel": 15,
+      "type": "damage",
+      "description": "Rain arrows: 3 volleys of 55% damage on all enemies.",
+      "cost": 45,
+      "cooldown": 14,
+      "target": "enemy",
+      "area": true,
+      "effects": [{ "kind": "damage", "stat": "physPower", "power": 0.55, "school": "physical", "hits": 3 }],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "enemies_alive", "cmp": ">=", "value": 2 }],
+        "target": { "selector": "all_enemies" },
+        "targetConditions": []
+      },
+      "priority": 80
+    },
+    "kill_shot": {
+      "name": "Kill Shot",
+      "classId": "ranger",
+      "unlockLevel": 22,
+      "type": "damage",
+      "description": "200% damage, quadrupled against enemies under 20% health.",
+      "cost": 30,
+      "cooldown": 10,
+      "target": "enemy",
+      "effects": [
+        {
+          "kind": "damage",
+          "stat": "physPower",
+          "power": 2,
+          "school": "physical",
+          "executeBelow": 0.2,
+          "executeMult": 4
+        }
+      ],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "enemy_hp_below", "value": 20 }],
+        "target": { "selector": "enemy_lowest_hp_pct" },
+        "targetConditions": [{ "type": "target_hp_below", "value": 20 }]
+      },
+      "priority": 78
+    },
+    "e_bite": {
+      "name": "Savage Bite",
+      "classId": "enemy",
+      "type": "damage",
+      "cost": 0,
+      "cooldown": 6,
+      "target": "enemy",
+      "effects": [
+        { "kind": "damage", "stat": "physPower", "power": 1.3, "school": "physical" },
+        { "kind": "status", "status": "bleed", "duration": 6, "stat": "physPower", "power": 0.15 }
+      ],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "always" }],
+        "target": { "selector": "enemy_highest_threat" },
+        "targetConditions": []
+      }
+    },
+    "e_venom": {
+      "name": "Venom Spit",
+      "classId": "enemy",
+      "type": "debuff",
+      "cost": 0,
+      "cooldown": 7,
+      "target": "enemy",
+      "effects": [{ "kind": "status", "status": "poison", "duration": 8, "stat": "physPower", "power": 0.2 }],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "always" }],
+        "target": { "selector": "enemy_random" },
+        "targetConditions": []
+      }
+    },
+    "e_stab": {
+      "name": "Dirty Stab",
+      "classId": "enemy",
+      "type": "damage",
+      "cost": 0,
+      "cooldown": 5,
+      "target": "enemy",
+      "effects": [{ "kind": "damage", "stat": "physPower", "power": 1.5, "school": "physical" }],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "always" }],
+        "target": { "selector": "enemy_lowest_hp_pct" },
+        "targetConditions": []
+      }
+    },
+    "e_shield_bash": {
+      "name": "Shield Bash",
+      "classId": "enemy",
+      "type": "control",
+      "cost": 0,
+      "cooldown": 12,
+      "target": "enemy",
+      "effects": [
+        { "kind": "damage", "stat": "physPower", "power": 0.8, "school": "physical" },
+        { "kind": "status", "status": "stun", "duration": 1.5 }
+      ],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "always" }],
+        "target": { "selector": "enemy_highest_threat" },
+        "targetConditions": []
+      }
+    },
+    "e_bone_arrow": {
+      "name": "Bone Arrow",
+      "classId": "enemy",
+      "type": "damage",
+      "cost": 0,
+      "cooldown": 5,
+      "target": "enemy",
+      "effects": [{ "kind": "damage", "stat": "physPower", "power": 1.4, "school": "physical" }],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "always" }],
+        "target": { "selector": "enemy_lowest_hp" },
+        "targetConditions": []
+      }
+    },
+    "e_firebolt": {
+      "name": "Firebolt",
+      "classId": "enemy",
+      "type": "damage",
+      "cost": 0,
+      "cooldown": 4,
+      "target": "enemy",
+      "effects": [
+        { "kind": "damage", "stat": "magPower", "power": 1.3, "school": "magical" },
+        { "kind": "status", "status": "burn", "duration": 4, "stat": "magPower", "power": 0.12 }
+      ],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "always" }],
+        "target": { "selector": "enemy_random" },
+        "targetConditions": []
+      }
+    },
+    "e_slam": {
+      "name": "Ground Slam",
+      "classId": "enemy",
+      "type": "damage",
+      "cost": 0,
+      "cooldown": 10,
+      "target": "enemy",
+      "area": true,
+      "effects": [{ "kind": "damage", "stat": "physPower", "power": 0.9, "school": "physical" }],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "always" }],
+        "target": { "selector": "all_enemies" },
+        "targetConditions": []
+      }
+    },
+    "e_dark_mend": {
+      "name": "Dark Mend",
+      "classId": "enemy",
+      "type": "heal",
+      "cost": 0,
+      "cooldown": 8,
+      "target": "ally",
+      "effects": [{ "kind": "heal", "stat": "magPower", "power": 2 }],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "ally_hp_below", "value": 60 }],
+        "target": { "selector": "ally_lowest_hp_pct" },
+        "targetConditions": [{ "type": "target_hp_below", "value": 60 }]
+      }
+    },
+    "e_curse": {
+      "name": "Curse of Ash",
+      "classId": "enemy",
+      "type": "debuff",
+      "cost": 0,
+      "cooldown": 10,
+      "target": "enemy",
+      "effects": [{ "kind": "status", "status": "curse", "duration": 10, "stat": "magPower", "power": 0.25 }],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "always" }],
+        "target": { "selector": "enemy_random" },
+        "targetConditions": [{ "type": "target_missing_status", "status": "curse" }]
+      }
+    },
+    "e_regenerate": {
+      "name": "Regenerate",
+      "classId": "enemy",
+      "type": "heal",
+      "cost": 0,
+      "cooldown": 20,
+      "target": "self",
+      "effects": [{ "kind": "status", "status": "regeneration", "duration": 8, "stat": "physPower", "power": 0.5 }],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "self_hp_below", "value": 50 }],
+        "target": { "selector": "self" },
+        "targetConditions": []
+      }
+    },
+    "e_chill": {
+      "name": "Chilling Touch",
+      "classId": "enemy",
+      "type": "debuff",
+      "cost": 0,
+      "cooldown": 7,
+      "target": "enemy",
+      "effects": [
+        { "kind": "damage", "stat": "magPower", "power": 1, "school": "magical" },
+        { "kind": "status", "status": "frostbite", "duration": 6 }
+      ],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "always" }],
+        "target": { "selector": "enemy_highest_threat" },
+        "targetConditions": []
+      }
+    },
+    "e_weaken": {
+      "name": "Enfeeble",
+      "classId": "enemy",
+      "type": "debuff",
+      "cost": 0,
+      "cooldown": 12,
+      "target": "enemy",
+      "effects": [{ "kind": "status", "status": "weakened", "duration": 8 }],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "always" }],
+        "target": { "selector": "enemy_random" },
+        "targetConditions": [{ "type": "target_missing_status", "status": "weakened" }]
+      }
+    },
+    "e_frenzy": {
+      "name": "Frenzy",
+      "classId": "enemy",
+      "type": "buff",
+      "cost": 0,
+      "cooldown": 25,
+      "target": "self",
+      "effects": [{ "kind": "status", "status": "battle_cry", "duration": 8 }],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "self_hp_below", "value": 60 }],
+        "target": { "selector": "self" },
+        "targetConditions": []
+      }
+    },
+    "e_cleave": {
+      "name": "Brutal Cleave",
+      "classId": "enemy",
+      "type": "damage",
+      "cost": 0,
+      "cooldown": 8,
+      "target": "enemy",
+      "area": true,
+      "effects": [{ "kind": "damage", "stat": "physPower", "power": 1, "school": "physical" }],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "enemies_alive", "cmp": ">=", "value": 2 }],
+        "target": { "selector": "all_enemies" },
+        "targetConditions": []
+      }
+    },
+    "e_void_bolt": {
+      "name": "Void Bolt",
+      "classId": "enemy",
+      "type": "damage",
+      "cost": 0,
+      "cooldown": 4,
+      "target": "enemy",
+      "effects": [{ "kind": "damage", "stat": "magPower", "power": 1.5, "school": "magical" }],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "always" }],
+        "target": { "selector": "enemy_lowest_hp_pct" },
+        "targetConditions": []
+      }
+    },
+    "b_war_stomp": {
+      "name": "War Stomp",
+      "classId": "enemy",
+      "type": "control",
+      "cost": 0,
+      "cooldown": 18,
+      "target": "enemy",
+      "area": true,
+      "effects": [
+        { "kind": "damage", "stat": "physPower", "power": 1.1, "school": "physical" },
+        { "kind": "status", "status": "stun", "duration": 1.5 }
+      ],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "always" }],
+        "target": { "selector": "all_enemies" },
+        "targetConditions": []
+      }
+    },
+    "b_crushing_blow": {
+      "name": "Crushing Blow",
+      "classId": "enemy",
+      "type": "damage",
+      "cost": 0,
+      "cooldown": 12,
+      "target": "enemy",
+      "effects": [
+        { "kind": "damage", "stat": "physPower", "power": 3.2, "school": "physical" },
+        { "kind": "status", "status": "sundered", "duration": 8 }
+      ],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "always" }],
+        "target": { "selector": "enemy_highest_threat" },
+        "targetConditions": []
+      }
+    },
+    "b_inferno": {
+      "name": "Inferno",
+      "classId": "enemy",
+      "type": "damage",
+      "cost": 0,
+      "cooldown": 15,
+      "target": "enemy",
+      "area": true,
+      "effects": [
+        { "kind": "damage", "stat": "magPower", "power": 1.4, "school": "magical" },
+        { "kind": "status", "status": "burn", "duration": 6, "stat": "magPower", "power": 0.2 }
+      ],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "always" }],
+        "target": { "selector": "all_enemies" },
+        "targetConditions": []
+      }
+    },
+    "b_blizzard": {
+      "name": "Blizzard",
+      "classId": "enemy",
+      "type": "damage",
+      "cost": 0,
+      "cooldown": 16,
+      "target": "enemy",
+      "area": true,
+      "effects": [
+        { "kind": "damage", "stat": "magPower", "power": 1.2, "school": "magical" },
+        { "kind": "status", "status": "frostbite", "duration": 8 }
+      ],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "always" }],
+        "target": { "selector": "all_enemies" },
+        "targetConditions": []
+      }
+    },
+    "b_void_rift": {
+      "name": "Void Rift",
+      "classId": "enemy",
+      "type": "damage",
+      "cost": 0,
+      "cooldown": 14,
+      "target": "enemy",
+      "area": true,
+      "effects": [
+        { "kind": "damage", "stat": "magPower", "power": 1.6, "school": "magical" },
+        { "kind": "status", "status": "exposed", "duration": 8 }
+      ],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "always" }],
+        "target": { "selector": "all_enemies" },
+        "targetConditions": []
+      }
+    },
+    "b_annihilate": {
+      "name": "Annihilate",
+      "classId": "enemy",
+      "type": "damage",
+      "cost": 0,
+      "cooldown": 20,
+      "target": "enemy",
+      "effects": [{ "kind": "damage", "stat": "magPower", "power": 4, "school": "magical" }],
+      "defaultRule": {
+        "enabled": true,
+        "mode": "all",
+        "conditions": [{ "type": "always" }],
+        "target": { "selector": "enemy_lowest_hp_pct" },
+        "targetConditions": []
+      }
+    }
+  }
+}

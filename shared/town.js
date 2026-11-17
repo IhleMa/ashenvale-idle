@@ -1,6 +1,7 @@
 // Town calculations shared by server (authoritative) and client (previews).
 import { rarityIndex, rarityById } from './config.js';
 import { AFFIXES, ITEM_BASES } from './data/items.js';
+import { CONTENT } from './content.js';
 import {
   BUILDINGS, BUILD_TIME, INN_ROSTER, INN_OFFERS, SALVAGE_BONUS,
   CRAFT_LEVEL_CAP, ITEM_MATERIAL, MATERIAL_OF_TYPE, QUALITIES, ELIXIRS, ELIXIR_BASE_MINUTES, enchantPower,
@@ -27,14 +28,15 @@ export function worker(p, id) {
 export const workerSkill = (p, id) => worker(p, id)?.profession.level || 0;
 
 // ---------------------------------------------------------------- construction
-const qty = (base, L, exp = 1.5) => Math.ceil(base * Math.pow(L, exp));
+const F = CONTENT.town.costFormula;
+const qty = (base, L, exp = F.materialExponent) => Math.ceil(base * Math.pow(L, exp));
 
 export function upgradeCost(id, toLevel) {
   const def = BUILDINGS[id];
   const mats = {};
   let gold = 0;
   for (const [k, v] of Object.entries(def.cost)) {
-    if (k === 'gold') gold = Math.round(v * Math.pow(toLevel, 2.2));
+    if (k === 'gold') gold = Math.round(v * Math.pow(toLevel, F.goldExponent));
     else if (v > 0) mats[k] = qty(v, toLevel);
   }
   for (const [k, [from, base]] of Object.entries(def.costFrom || {})) if (toLevel >= from) mats[k] = qty(base, toLevel - from + 1);
@@ -58,7 +60,7 @@ export function upgradeBlocker(p, id) {
   if (b.upgrade) return 'Already under construction';
   if (b.level >= def.maxLevel) return 'Maximum level reached';
   if (id !== 'town_hall' && b.level + 1 > bLevel(p, 'town_hall')) return `Requires Town Hall level ${b.level + 1}`;
-  const max = [0, 1, 1, 2, 2, 3][bLevel(p, 'town_hall')] || 1;
+  const max = CONTENT.town.concurrentBuilds[bLevel(p, 'town_hall')] || 1;
   if (activeBuilds(p) >= max) return `Only ${max} construction${max > 1 ? 's' : ''} at a time — upgrade the Town Hall for more`;
   if (!canAfford(p, upgradeCost(id, b.level + 1))) return 'Not enough gold or materials';
   return null;
@@ -66,17 +68,20 @@ export function upgradeBlocker(p, id) {
 
 // ---------------------------------------------------------------- salvage
 export function salvageYield(item, salvageLevel = 1, enchanterBonus = false) {
+  const S = CONTENT.town.salvage;
   const type = ITEM_MATERIAL[item.baseId] || 'metal';
   const r = rarityIndex(item.rarity);
   const bonus = 1 + (SALVAGE_BONUS[salvageLevel] || 0);
-  const arcane = bonus * (enchanterBonus ? 1.25 : 1);
+  const arcane = bonus * (enchanterBonus ? 1 + S.enchanterArcaneBonus : 1);
   const out = {};
   const add = (k, v) => { const n = Math.floor(v); if (n > 0) out[k] = (out[k] || 0) + n; };
-  add(MATERIAL_OF_TYPE[type], (1 + item.level / 7) * (1 + r * 0.25) * bonus);
-  if (r >= 1) add('arcane_dust', (1 + item.level / 12) * (r >= 2 ? 1.5 : 1) * arcane);
-  if (r >= 2) add('magic_essence', (1 + item.level / 25) * (r >= 3 ? 1.5 : 1) * arcane);
-  if (r >= 3) add('prismatic_shard', (1 + item.level / 40) * (r >= 4 ? 1.5 : 1) * arcane);
-  if (r >= 4) add('void_crystal', (r >= 5 ? 2 : 1) * Math.max(1, arcane * 0.9));
+  const bm = S.baseMaterial;
+  add(MATERIAL_OF_TYPE[type], (bm.base + item.level / bm.levelDivisor) * (1 + r * bm.perRarity) * bonus);
+  for (const a of S.arcane) {
+    if (r >= rarityIndex(a.fromRarity)) add(a.material, (1 + item.level / a.levelDivisor) * (r >= rarityIndex(a.betterRarity) ? a.betterMult : 1) * arcane);
+  }
+  const vc = S.voidCrystal;
+  if (r >= rarityIndex(vc.fromRarity)) add(vc.material, (r >= rarityIndex('mythic') ? vc.mythicAmount : vc.amount) * Math.max(1, arcane * vc.arcaneFactor));
   return out;
 }
 

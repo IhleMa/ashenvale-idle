@@ -1,0 +1,75 @@
+{
+  "_about": "Bestiary: kill mastery tiers and bonuses, wording for enemy targeting, and the rules that generate \"How to prepare\" tips (first matching rules are shown in order).",
+  "mastery": { "normal": [25, 150, 500], "boss": [3, 15, 40], "bonus": [0.02, 0.04, 0.06] },
+  "targetText": {
+    "enemy_highest_threat": "the hero with the most threat (your tank, if it holds aggro)",
+    "enemy_lowest_hp_pct": "the most wounded hero (lowest health %)",
+    "enemy_lowest_hp": "the hero with the least health",
+    "enemy_highest_hp": "the hero with the most health",
+    "enemy_random": "a random hero",
+    "enemy_current": "the front-most hero",
+    "all_enemies": "your whole party",
+    "self": "itself",
+    "ally_lowest_hp_pct": "its most wounded ally",
+    "ally_lowest_hp": "its most wounded ally",
+    "all_allies": "all of its allies"
+  },
+  "tips": [
+    {
+      "if": { "healsAllies": true },
+      "text": "Heals its allies — kill it first. Use the \"Specific enemy type\" target on burst abilities to focus it."
+    },
+    {
+      "if": { "anyOf": [{ "hasAbility": "e_regenerate" }, { "phaseStatus": "regeneration" }] },
+      "text": "Regenerates when hurt — save burst damage so it can't out-heal you."
+    },
+    {
+      "if": { "appliesStatuses": { "tickDamage": true, "ids": ["frostbite", "weakened", "sundered", "exposed"] } },
+      "text": "Applies {statuses} — a Cleric with Purify (cleanse) removes these."
+    },
+    {
+      "if": { "appliesStatus": "curse" },
+      "text": "Curse halves healing received — cleanse it quickly, or bring shields (Barrier) instead of relying on heals."
+    },
+    {
+      "if": { "appliesStatus": "stun" },
+      "text": "Stuns heroes — healers with heal-over-time (Renew) or shields keep the party alive while someone is stunned."
+    },
+    {
+      "if": { "areaDamage": true },
+      "text": "Deals damage to the whole party — group healing (Prayer of Healing, Renew) and high Vitality help."
+    },
+    {
+      "if": { "minHitPower": 3 },
+      "text": "Has a huge single-target hit — keep your tank's defensive cooldown (Shield Wall/Evasion) ready, e.g. \"when my health is below 60%\"."
+    },
+    {
+      "if": { "targetsSelectors": ["enemy_lowest_hp_pct", "enemy_lowest_hp"] },
+      "text": "Picks on wounded heroes — top up low-health party members early."
+    },
+    {
+      "if": { "basicSchool": "magical" },
+      "text": "Attacks with magic — armor only partly reduces magical damage, so healing matters more than defense."
+    },
+    {
+      "if": { "appliesStatus": "frostbite" },
+      "text": "Frostbite slows attack speed — attack-speed gear and buffs help make up for it."
+    },
+    {
+      "if": { "phaseSummons": true },
+      "text": "Summons adds during the fight — area damage (Cleave, Volley, Flame Wave) clears them fast."
+    },
+    {
+      "if": { "phaseStatus": "stone_skin" },
+      "text": "Becomes almost immune for a few seconds (Stone Skin) — use that window for defensive and healing abilities, not burst."
+    },
+    { "if": { "enrages": true }, "text": "Enrages{enrageAfter} — bring enough damage to finish before then." },
+    { "if": { "hasAbility": "e_frenzy" }, "text": "Frenzies at low health (+15% damage) — burst it down from 60%." },
+    {
+      "if": { "hasTag": "elite" },
+      "text": "Elite: much tougher than normal enemies and more likely to drop uniques and set items."
+    }
+  ],
+  "noTipsText": "No special mechanics — a straightforward fight.",
+  "tags": ["beast", "humanoid", "undead", "demon", "elemental", "giant", "dragon", "void", "caster"]
+}

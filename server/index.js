@@ -7,6 +7,8 @@ import { WebSocketServer } from 'ws';
 import { Store } from './store.js';
 import { AssetIndex } from './assets.js';
 import { Game } from './game.js';
+import { CONTENT } from '../shared/content.js';
+import { validateContent } from './content-check.js';
 import { BotManager, ARCHETYPES } from './bots.js';
 import { computeBuildId } from './version.js';
 import { Settings } from './settings.js';
@@ -32,7 +34,20 @@ try { store = new Store(DATA_DIR, { log }); } catch (e) { log('Could not open th
 const assets = new AssetIndex(ASSETS_DIR);
 const settings = new Settings(store, { registrationOpen: ALLOW_REGISTRATION });
 const admins = new AdminManager(store, process.env.ADMIN_USERS || '');
-const game = new Game({ store, assets, log, settings, admins, buildId: computeBuildId(ROOT) });
+// ---- game content: validate before anything uses it
+{
+  const { errors, warnings } = validateContent(CONTENT);
+  for (const w of warnings) log(`Content warning: ${w}`);
+  if (errors.length) {
+    log(`Game content has ${errors.length} error(s) — fix them in content/*.json${CONTENT._meta.overrides.length ? ` or ${CONTENT._meta.overrideDir}` : ''}:`);
+    for (const e of errors) log(`  ✘ ${e}`);
+    process.exit(1);
+  }
+  if (CONTENT._meta.overrides.length) log(`Content overrides loaded from ${CONTENT._meta.overrideDir}: ${CONTENT._meta.overrides.join(', ')}`);
+}
+const contentJson = JSON.stringify(CONTENT);
+const buildId = () => `${computeBuildId(ROOT).slice(0, 8)}${CONTENT._meta.hash.slice(0, 4)}`;
+const game = new Game({ store, assets, log, settings, admins, buildId: buildId() });
 const bots = new BotManager(game, { log });
 game.bots = bots;
 game.loadGroups();
@@ -128,6 +143,13 @@ const server = http.createServer(async (req, res) => {
   try {
     if (p === '/api/health') return json(res, 200, { ok: true, online: game.sessions.size });
     if (p === '/api/assets') return json(res, 200, { assets: assets.get() });
+    // game content (content/*.json + overrides) — the browser loads the same data the server uses
+    if (p === '/api/content') {
+      const etag = `"${CONTENT._meta.hash}"`;
+      if (req.headers['if-none-match'] === etag) { res.writeHead(304, { ETag: etag }); return res.end(); }
+      res.writeHead(200, { 'Content-Type': MIME['.json'], 'Cache-Control': 'no-cache', ETag: etag });
+      return res.end(contentJson);
+    }
     // installable app (PWA)
     if (p === '/manifest.webmanifest') return sendText(res, MIME['.webmanifest'], JSON.stringify(appManifest()));
     if (p === '/sw.js') return sendText(res, MIME['.js'], serviceWorkerSource(), { 'Service-Worker-Allowed': '/' });
@@ -234,14 +256,14 @@ async function runUpdate() {
     const after = await git(['rev-parse', 'HEAD']);
     if (before === after) return log('Already up to date.');
     const changed = (await git(['diff', '--name-only', before, after])).split('\n').filter(Boolean);
-    const serverSide = changed.filter(f => /^(server|shared)\//.test(f) || /^package(-lock)?\.json$/.test(f));
+    const serverSide = changed.filter(f => /^(server|shared|content)\//.test(f) || /^package(-lock)?\.json$/.test(f));
     log(`Updated ${before.slice(0, 7)} -> ${after.slice(0, 7)} (${changed.length} file(s) changed)`);
     if (serverSide.length) {
       log(`Server-side files changed (${serverSide.slice(0, 5).join(', ')}${serverSide.length > 5 ? ', ...' : ''}).`);
       log('>>> A RESTART is required to apply them. Players reconnect automatically after the restart.');
       game.broadcast({ t: 'toast', kind: 'info', text: 'A game update is ready — the server will restart briefly soon. You will reconnect automatically.' });
     } else {
-      game.buildId = computeBuildId(ROOT);
+      game.buildId = buildId();
       game.broadcast({ t: 'client_update', buildId: game.buildId });
       log('Client-only update applied live — no restart needed. Open game pages refresh themselves.');
     }
@@ -253,7 +275,19 @@ async function runUpdate() {
 }
 
 const COMMANDS = {
-  help: () => log('Commands: update | reload-clients | players | say <message> | admin add|remove|list <name> | bots [add <n> [type] | remove <name|all> | on | off] | backup | db | stop'),
+  help: () => log('Commands: update | reload-clients | players | say <message> | admin add|remove|list <name> | bots [add <n> [type] | remove <name|all> | on | off] | content | backup | db | stop'),
+  content: async () => {
+    // re-read the content files from disk and check them (applied on the next restart)
+    try {
+      const { loadContentFromDisk } = await import('./content-loader.js');
+      const fresh = loadContentFromDisk();
+      const { errors, warnings } = validateContent(fresh);
+      for (const w of warnings) log(`  ! ${w}`);
+      for (const e of errors) log(`  ✘ ${e}`);
+      const changed = fresh._meta.hash !== CONTENT._meta.hash;
+      log(errors.length ? `Content has ${errors.length} error(s) — the server would refuse to start with it.` : `Content OK${changed ? ' — it differs from the running version: restart the server to apply it.' : ' (same as the running version).'}`);
+    } catch (e) { log(`Content could not be loaded: ${e.message}`); }
+  },
   bots: args => {
     const [sub, a, b] = args.split(/\s+/).filter(Boolean);
     if (sub === 'add') { const made = bots.add(Number(a) || 1, b); return log(`Added ${made.length} bot(s): ${made.map(x => `${x.name} (${x.archetype})`).join(', ')}. Types: ${Object.keys(ARCHETYPES).join(', ')}`); }
@@ -275,7 +309,7 @@ const COMMANDS = {
   },
   stop: () => shutdown('stop'),
   update: () => runUpdate(),
-  'reload-clients': () => { game.buildId = computeBuildId(ROOT); game.broadcast({ t: 'client_update', buildId: game.buildId, force: true }); log('Told all open pages to refresh.'); },
+  'reload-clients': () => { game.buildId = buildId(); game.broadcast({ t: 'client_update', buildId: game.buildId, force: true }); log('Told all open pages to refresh.'); },
   players: () => log(`${game.sessions.size} online: ${[...game.sessions.values()].map(s => s.player.name).join(', ') || '-'}`),
   say: text => { if (text) { game.announce(text, 'Server', 24); log('Announcement sent (stays visible for 24h for players who are offline).'); } },
 };

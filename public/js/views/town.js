@@ -6,7 +6,7 @@ import { esc, fmt, run, toast, tipAttr, itemTooltipHtml, duration, bar, confirmB
 import { speedUpCost } from '/shared/premium.js';
 import { buildingArt, materialIcon, professionIcon, elixirIcon, itemIcon, portrait } from '../assets.js';
 import { CONFIG, rarityIndex } from '/shared/config.js';
-import { BUILDINGS, BUILDING_IDS, MATERIALS, MATERIAL_IDS, PROFESSIONS, ELIXIRS, QUALITIES, ITEM_MATERIAL, ENCHANT_STATS_BY_LEVEL, professionXpToNext, CRAFT_LEVEL_CAP } from '/shared/data/town.js';
+import { BUILDINGS, BUILDING_IDS, MATERIALS, MATERIAL_IDS, PROFESSIONS, ELIXIRS, QUALITIES, ITEM_MATERIAL, ENCHANT_STATS_BY_LEVEL, professionXpToNext, CRAFT_LEVEL_CAP, buildingEffects } from '/shared/data/town.js';
 import { ITEM_BASES, SLOTS, STAT_LABELS } from '/shared/data/items.js';
 import { CLASSES } from '/shared/data/classes.js';
 import * as T from '/shared/town.js';
@@ -78,7 +78,7 @@ function upgradeHtml(p, id) {
   return `<div class="upgrade-box">
     <div class="row between wrap gap"><b>${b.level ? `Upgrade to level ${to}` : 'Construct'}</b><span class="muted small">⏱ ${duration(T.buildSeconds(id, to))}</span></div>
     ${costHtml(p, cost)}
-    <div class="muted small">Level ${to}: ${def.effects(to).map(esc).join(' · ')}</div>
+    <div class="muted small">Level ${to}: ${buildingEffects(def.id, to).map(esc).join(' · ')}</div>
     <div class="row end"><button class="btn primary small" data-upgrade="${id}" ${blocker ? 'disabled' : ''}>${b.level ? 'Upgrade' : 'Build'}</button></div>
     ${blocker ? `<div class="warn-text small">${esc(blocker)}</div>` : ''}
   </div>`;
@@ -213,7 +213,7 @@ function detailHtml(p, id) {
   return `<div class="panel building-detail">
     <div class="row gap">${buildingArt(id, 'lg')}<div class="grow"><h2>${esc(def.name)} <span class="muted small">${b.level ? `Level ${b.level}/${def.maxLevel}` : 'Not built'}</span></h2>
       <p class="muted small">${esc(def.description)}</p>
-      ${b.level ? `<div class="effects">${def.effects(b.level).map(e => `<span class="chip">${esc(e)}</span>`).join(' ')}</div>` : ''}</div></div>
+      ${b.level ? `<div class="effects">${buildingEffects(def.id, b.level).map(e => `<span class="chip">${esc(e)}</span>`).join(' ')}</div>` : ''}</div></div>
     ${upgradeHtml(p, id)}
     ${workerHtml(p, id)}
     <div class="building-specific">${specificHtml(p, id)}</div>

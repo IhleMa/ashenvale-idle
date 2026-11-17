@@ -1,0 +1,331 @@
+{
+  "_about": "Town: materials, professions, buildings (costs for level L = base × L^1.5, gold × L^2.2), crafting qualities, enchanting and alchemy. Building \"effects\" are text templates — see CONTENT.md.",
+  "materials": {
+    "metal_scrap": {
+      "name": "Metal Scrap",
+      "glyph": "⛓",
+      "color": "#8a9099",
+      "description": "Salvaged from weapons, plate armor and shields."
+    },
+    "leather_scrap": {
+      "name": "Leather Scrap",
+      "glyph": "🟫",
+      "color": "#9a6a3a",
+      "description": "Salvaged from leather armor, bows and quivers."
+    },
+    "cloth_scrap": {
+      "name": "Cloth Scrap",
+      "glyph": "🧵",
+      "color": "#a88ac2",
+      "description": "Salvaged from cloth armor, staves, wands and tomes."
+    },
+    "gem_fragment": {
+      "name": "Gem Fragment",
+      "glyph": "💎",
+      "color": "#5ac8d8",
+      "description": "Salvaged from jewelry; also brought back from expeditions."
+    },
+    "ore": {
+      "name": "Ore",
+      "glyph": "⛏",
+      "color": "#b07a4a",
+      "description": "Brought back by recruits on mining expeditions."
+    },
+    "herb": { "name": "Herb", "glyph": "🌿", "color": "#5fbf5a", "description": "Gathered by recruits on herb expeditions." },
+    "arcane_dust": {
+      "name": "Arcane Dust",
+      "glyph": "✨",
+      "color": "#c9b8ff",
+      "description": "Disenchanted from Uncommon or better items."
+    },
+    "magic_essence": {
+      "name": "Magic Essence",
+      "glyph": "🔮",
+      "color": "#6ea4ff",
+      "description": "Disenchanted from Rare or better items."
+    },
+    "prismatic_shard": {
+      "name": "Prismatic Shard",
+      "glyph": "🔷",
+      "color": "#c98aff",
+      "description": "Disenchanted from Epic or better items."
+    },
+    "void_crystal": {
+      "name": "Void Crystal",
+      "glyph": "🌑",
+      "color": "#ff6f88",
+      "description": "Disenchanted from Legendary or Mythic items."
+    }
+  },
+  "shardStats": [
+    { "stat": "str", "label": "Strength", "color": "#e0464e" },
+    { "stat": "int", "label": "Intelligence", "color": "#4f7cff" },
+    { "stat": "dex", "label": "Dexterity", "color": "#3fbf6a" },
+    { "stat": "vit", "label": "Vitality", "color": "#e8a33a" },
+    { "stat": "hp", "label": "Health", "color": "#b0303a" },
+    { "stat": "defense", "label": "Defense", "color": "#8e8e9a" },
+    { "stat": "physPower", "label": "Physical Power", "color": "#c2413c" },
+    { "stat": "magPower", "label": "Magic Power", "color": "#a160e8" },
+    { "stat": "healPower", "label": "Healing Power", "color": "#f0ecdc" },
+    { "stat": "critChance", "label": "Critical Chance", "color": "#f2c14e" },
+    { "stat": "critDamage", "label": "Critical Damage", "color": "#c8f2ff" },
+    { "stat": "attackSpeed", "label": "Attack Speed", "color": "#ffd84a" }
+  ],
+  "professions": {
+    "blacksmithing": { "name": "Blacksmithing", "glyph": "⚒", "building": "blacksmith" },
+    "leatherworking": { "name": "Leatherworking", "glyph": "🪡", "building": "leatherworker" },
+    "tailoring": { "name": "Tailoring", "glyph": "🧶", "building": "tailor" },
+    "jewelcrafting": { "name": "Jewelcrafting", "glyph": "💍", "building": "jeweler" },
+    "enchanting": { "name": "Enchanting", "glyph": "✨", "building": "enchanter" },
+    "alchemy": { "name": "Alchemy", "glyph": "⚗", "building": "alchemy_lab" },
+    "mining": { "name": "Mining", "glyph": "⛏", "building": null, "expedition": true },
+    "herbalism": { "name": "Herbalism", "glyph": "🌿", "building": null, "expedition": true }
+  },
+  "professionMax": 50,
+  "professionXp": { "base": 40, "perLevel": 20 },
+  "materialOfType": { "metal": "metal_scrap", "leather": "leather_scrap", "cloth": "cloth_scrap", "gem": "gem_fragment" },
+  "craftBuildingOfType": { "metal": "blacksmith", "leather": "leatherworker", "cloth": "tailor", "gem": "jeweler" },
+  "buildTime": [0, 30, 240, 900, 2700, 7200],
+  "costFormula": { "materialExponent": 1.5, "goldExponent": 2.2 },
+  "buildings": {
+    "town_hall": {
+      "name": "Town Hall",
+      "kind": "core",
+      "maxLevel": 5,
+      "start": 1,
+      "timeMult": 1.5,
+      "description": "The heart of your town. Its level is the maximum level of every other building, and it allows more simultaneous constructions.",
+      "cost": { "gold": 400, "metal_scrap": 10, "leather_scrap": 6, "cloth_scrap": 6, "ore": 0, "gem_fragment": 0 },
+      "costFrom": { "ore": [2, 10], "gem_fragment": [3, 4] },
+      "effects": ["Other buildings up to level {level}", "{concurrentBuilds} construction{concurrentBuilds:s} at a time"]
+    },
+    "inn": {
+      "name": "Inn",
+      "kind": "core",
+      "maxLevel": 5,
+      "start": 1,
+      "description": "Houses your companions. More rooms mean a bigger roster and more recruits to choose from.",
+      "cost": { "gold": 250, "leather_scrap": 8, "cloth_scrap": 8, "metal_scrap": 4 },
+      "effects": [
+        "Roster: {innRoster} companions",
+        "{innOffers} recruits offered",
+        { "minLevel": 3, "text": "Recruits arrive with higher profession skill" },
+        { "maxLevel": 2, "text": "Higher levels attract skilled professionals" }
+      ]
+    },
+    "salvage_yard": {
+      "name": "Salvage Yard",
+      "kind": "core",
+      "maxLevel": 5,
+      "start": 1,
+      "description": "Break down unwanted equipment into crafting materials. Uncommon and better items also yield arcane materials.",
+      "cost": { "gold": 150, "metal_scrap": 6, "leather_scrap": 4 },
+      "effects": ["+{salvageBonusPct}% salvage yield", "Enchanter worker: +25% arcane materials"]
+    },
+    "expedition_camp": {
+      "name": "Expedition Camp",
+      "kind": "core",
+      "maxLevel": 5,
+      "start": 1,
+      "description": "Send recruits out to gather ore, herbs, gems and arcane materials. Recruits on an expedition cannot fight or work.",
+      "cost": { "gold": 200, "leather_scrap": 8, "metal_scrap": 6 },
+      "effects": [
+        "{campSlots} expedition{campSlots:s} at a time", "Up to {campMembers} recruit{campMembers:s} per expedition",
+        "Unlocks farther destinations"
+      ]
+    },
+    "blacksmith": {
+      "name": "Blacksmith",
+      "kind": "craft",
+      "profession": "blacksmithing",
+      "type": "metal",
+      "maxLevel": 5,
+      "start": 0,
+      "description": "Forge weapons, plate armor and shields, and reforge old metal gear to a higher item level.",
+      "cost": { "gold": 250, "metal_scrap": 15, "ore": 8 },
+      "effects": [
+        "Craft up to item level {craftLevelCap}",
+        "Best quality: {bestQuality} ({bestQualityRarity}+)",
+        { "minLevel": 5, "text": "Greatly increased mythic chance" },
+        { "maxLevel": 4, "text": "Reforge old gear to a higher level" }
+      ]
+    },
+    "leatherworker": {
+      "name": "Leatherworker",
+      "kind": "craft",
+      "profession": "leatherworking",
+      "type": "leather",
+      "maxLevel": 5,
+      "start": 0,
+      "description": "Craft leather armor, bows and quivers, and reforge leather gear.",
+      "cost": { "gold": 250, "leather_scrap": 15, "metal_scrap": 5 },
+      "effects": [
+        "Craft up to item level {craftLevelCap}",
+        "Best quality: {bestQuality} ({bestQualityRarity}+)",
+        { "minLevel": 5, "text": "Greatly increased mythic chance" },
+        { "maxLevel": 4, "text": "Reforge old gear to a higher level" }
+      ]
+    },
+    "tailor": {
+      "name": "Tailor",
+      "kind": "craft",
+      "profession": "tailoring",
+      "type": "cloth",
+      "maxLevel": 5,
+      "start": 0,
+      "description": "Sew cloth armor, staves, wands and tomes, and reforge cloth gear.",
+      "cost": { "gold": 250, "cloth_scrap": 15, "leather_scrap": 5 },
+      "effects": [
+        "Craft up to item level {craftLevelCap}",
+        "Best quality: {bestQuality} ({bestQualityRarity}+)",
+        { "minLevel": 5, "text": "Greatly increased mythic chance" },
+        { "maxLevel": 4, "text": "Reforge old gear to a higher level" }
+      ]
+    },
+    "jeweler": {
+      "name": "Jeweler",
+      "kind": "craft",
+      "profession": "jewelcrafting",
+      "type": "gem",
+      "maxLevel": 5,
+      "start": 0,
+      "description": "Cut rings and amulets, and reforge jewelry.",
+      "cost": { "gold": 300, "gem_fragment": 8, "metal_scrap": 8 },
+      "effects": [
+        "Craft up to item level {craftLevelCap}",
+        "Best quality: {bestQuality} ({bestQualityRarity}+)",
+        { "minLevel": 5, "text": "Greatly increased mythic chance" },
+        { "maxLevel": 4, "text": "Reforge old gear to a higher level" }
+      ]
+    },
+    "enchanter": {
+      "name": "Enchanter's Study",
+      "kind": "special",
+      "profession": "enchanting",
+      "maxLevel": 5,
+      "start": 0,
+      "description": "Imbue any item with a permanent bonus stat. A worker here also improves disenchanting at the Salvage Yard.",
+      "cost": { "gold": 300, "cloth_scrap": 10, "arcane_dust": 10 },
+      "effects": [
+        "Enchantment strength {enchantPowerPct}%",
+        { "minLevel": 3, "text": "Can enchant with any stat" },
+        { "maxLevel": 2, "text": "Stats: {enchantStatCount} options" }
+      ]
+    },
+    "alchemy_lab": {
+      "name": "Alchemy Lab",
+      "kind": "special",
+      "profession": "alchemy",
+      "maxLevel": 5,
+      "start": 0,
+      "description": "Brew elixirs that empower your whole party for a while — online and offline.",
+      "cost": { "gold": 250, "cloth_scrap": 8, "herb": 10 },
+      "effects": ["Elixirs: {elixirs}", "Duration +{elixirDurationPct}%"]
+    }
+  },
+  "innRoster": [0, 3, 5, 7, 9, 12],
+  "innOffers": [0, 3, 4, 4, 5, 6],
+  "salvageBonus": [0, 0, 0.1, 0.2, 0.35, 0.5],
+  "craftLevelCap": [0, 12, 24, 36, 48, 60],
+  "concurrentBuilds": [0, 1, 1, 2, 2, 3],
+  "qualities": {
+    "standard": { "label": "Standard", "minRarity": "uncommon", "building": 1, "extra": null },
+    "fine": { "label": "Fine", "minRarity": "rare", "building": 2, "extra": "magic_essence" },
+    "superior": { "label": "Superior", "minRarity": "epic", "building": 3, "extra": "prismatic_shard" },
+    "masterwork": { "label": "Masterwork", "minRarity": "legendary", "building": 4, "extra": "void_crystal" }
+  },
+  "enchanting": {
+    "statsByLevel": {
+      "1": ["str", "int", "dex", "vit", "hp"],
+      "2": ["str", "int", "dex", "vit", "hp", "defense", "physPower", "magPower", "healPower"],
+      "3": [
+        "str", "int", "dex", "vit", "hp", "defense", "physPower", "magPower", "healPower", "critChance", "critDamage",
+        "attackSpeed"
+      ]
+    },
+    "power": { "base": 0.5, "perLevel": 0.1, "perSkill": 0.006 }
+  },
+  "elixirs": {
+    "might": {
+      "name": "Elixir of Might",
+      "level": 1,
+      "glyph": "🗡",
+      "description": "Party deals +10% damage.",
+      "bonus": { "damagePct": 0.1 },
+      "herbs": 6,
+      "dust": 2,
+      "gold": 60
+    },
+    "fortitude": {
+      "name": "Elixir of Fortitude",
+      "level": 1,
+      "glyph": "🛡",
+      "description": "Party takes 8% less damage.",
+      "bonus": { "damageTakenPct": -0.08 },
+      "herbs": 6,
+      "dust": 2,
+      "gold": 60
+    },
+    "wisdom": {
+      "name": "Elixir of Wisdom",
+      "level": 2,
+      "glyph": "📖",
+      "description": "+15% experience from fights.",
+      "bonus": { "xpPct": 0.15 },
+      "herbs": 9,
+      "dust": 4,
+      "gold": 120
+    },
+    "fortune": {
+      "name": "Elixir of Fortune",
+      "level": 3,
+      "glyph": "🪙",
+      "description": "+20% gold from fights.",
+      "bonus": { "goldPct": 0.2 },
+      "herbs": 9,
+      "dust": 4,
+      "gold": 120
+    },
+    "titans": {
+      "name": "Titan's Draught",
+      "level": 4,
+      "glyph": "⛰",
+      "description": "Party gains +8% to all stats.",
+      "bonus": { "allStatsPct": 0.08 },
+      "herbs": 14,
+      "dust": 6,
+      "essence": 1,
+      "gold": 250
+    }
+  },
+  "elixirBaseMinutes": 60,
+  "elixirMaxHours": 8,
+  "salvage": {
+    "baseMaterial": { "base": 1, "levelDivisor": 7, "perRarity": 0.25 },
+    "enchanterArcaneBonus": 0.25,
+    "arcane": [
+      {
+        "material": "arcane_dust",
+        "fromRarity": "uncommon",
+        "levelDivisor": 12,
+        "betterRarity": "rare",
+        "betterMult": 1.5
+      },
+      {
+        "material": "magic_essence",
+        "fromRarity": "rare",
+        "levelDivisor": 25,
+        "betterRarity": "epic",
+        "betterMult": 1.5
+      },
+      {
+        "material": "prismatic_shard",
+        "fromRarity": "epic",
+        "levelDivisor": 40,
+        "betterRarity": "legendary",
+        "betterMult": 1.5
+      }
+    ],
+    "voidCrystal": { "material": "void_crystal", "fromRarity": "legendary", "amount": 1, "mythicAmount": 2, "arcaneFactor": 0.9 }
+  }
+}

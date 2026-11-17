@@ -1,4 +1,4 @@
-// Passive skill trees (Path of Exile style). Every class has its own web-shaped tree:
+// Passive skill trees (Path of Exile style) — specs in content/skilltree.json. Every class has its own web-shaped tree:
 // you start in the middle and spend one point per level on any node connected to what you already own.
 //
 // The layout is GENERATED deterministically from the compact specs below, so it is easy to tweak:
@@ -14,86 +14,11 @@
 //   damagePct, healingPct, damageTakenPct (combat)  ·  rank: { abilityId: +ranks }
 import { ABILITIES } from './abilities.js';
 
-export const TREE_CONFIG = {
-  rings: [1, 2, 3, 3, 4, 4, 5, 5],  // nodes per branch on each ring (ring 1..8)
-  ringSpacing: 95,
-  smallNodeValue: 4,                 // attribute points per small node
-  bridgeRings: [3, 5, 7],            // rings where neighbouring branches connect
-  lateralRings: [2, 4, 6, 8],        // rings where nodes inside a branch connect sideways
-  rankNodesPerAbility: 2,            // "Empowered X" nodes generated next to each ability
-};
+import { CONTENT } from '../content.js';
 
-const N = (name, stats) => ({ name, stats });
-
-export const TREE_SPECS = {
-  warrior: {
-    start: 'heroic_strike',
-    branches: [
-      { name: 'Bulwark', attrs: ['vit', 'str'], abilities: { 1: 'taunt', 3: 'shield_wall' },
-        notables: { 4: N('Iron Skin', { defensePct: 0.12, hpPct: 0.05 }), 8: N('Unbreakable', { hpPct: 0.15, damageTakenPct: -0.06 }) } },
-      { name: 'Warmonger', attrs: ['str', 'dex'], abilities: { 2: 'cleave', 6: 'battle_cry' },
-        notables: { 4: N('Brutality', { physPowerPct: 0.10 }), 8: N('Bloodlust', { damagePct: 0.10, critDamage: 0.2 }) } },
-      { name: 'Tactician', attrs: ['dex', 'str'], abilities: { 3: 'shield_bash' },
-        notables: { 4: N('Precision', { critChance: 0.04 }), 8: N('Relentless', { attackSpeed: 0.10, critChance: 0.02 }) } },
-      { name: 'Vanguard', attrs: ['vit', 'dex'], abilities: { 5: 'sunder_armor' },
-        notables: { 4: N('Second Wind', { hpPct: 0.08, defensePct: 0.05 }), 8: N("Warlord's Presence", { allPct: 0.05 }) } },
-    ],
-  },
-  mage: {
-    start: 'fireball',
-    branches: [
-      { name: 'Pyromancy', attrs: ['int', 'vit'], abilities: { 2: 'flame_wave', 7: 'meteor' },
-        notables: { 4: N('Kindling', { magPowerPct: 0.10 }), 8: N('Heart of Fire', { damagePct: 0.12 }) } },
-      { name: 'Cryomancy', attrs: ['int', 'dex'], abilities: { 1: 'frost_bolt', 5: 'frost_nova' },
-        notables: { 4: N('Cold Precision', { critChance: 0.04 }), 8: N('Absolute Zero', { critDamage: 0.3, critChance: 0.02 }) } },
-      { name: 'Arcana', attrs: ['int', 'dex'], abilities: { 3: 'arcane_missiles', 6: 'arcane_power' },
-        notables: { 4: N('Arcane Flow', { attackSpeed: 0.06 }), 8: N('Archmage', { magPowerPct: 0.15 }) } },
-      { name: 'Wardings', attrs: ['vit', 'int'], abilities: {},
-        notables: { 4: N('Mana Shield', { hpPct: 0.10 }), 8: N('Spellward', { damageTakenPct: -0.08, defensePct: 0.2 }) } },
-    ],
-  },
-  rogue: {
-    start: 'backstab',
-    branches: [
-      { name: 'Venom', attrs: ['dex', 'int'], abilities: { 1: 'poison_blade', 5: 'rupture' },
-        notables: { 4: N('Toxicology', { damagePct: 0.06, physPowerPct: 0.04 }), 8: N('Plaguebringer', { damagePct: 0.12 }) } },
-      { name: 'Assassination', attrs: ['dex', 'str'], abilities: { 3: 'execute', 7: 'shadow_flurry' },
-        notables: { 4: N('Deadly Aim', { critChance: 0.05 }), 8: N("Assassin's Mark", { critDamage: 0.35 }) } },
-      { name: 'Shadows', attrs: ['dex', 'vit'], abilities: { 2: 'evasion', 6: 'expose_weakness' },
-        notables: { 4: N('Fleet Footed', { attackSpeed: 0.08 }), 8: N('Shadow Dance', { attackSpeed: 0.10, critChance: 0.03 }) } },
-      { name: 'Survival', attrs: ['vit', 'str'], abilities: {},
-        notables: { 4: N('Thick Skin', { hpPct: 0.10 }), 8: N('Cheat Death', { damageTakenPct: -0.08, hpPct: 0.08 }) } },
-    ],
-  },
-  cleric: {
-    start: 'heal',
-    branches: [
-      { name: 'Restoration', attrs: ['int', 'vit'], abilities: { 1: 'renew', 5: 'prayer_of_healing' },
-        notables: { 4: N('Mending', { healPowerPct: 0.10 }), 8: N('Saintly Grace', { healingPct: 0.15 }) } },
-      { name: 'Holy Fire', attrs: ['int', 'str'], abilities: { 1: 'smite' },
-        notables: { 4: N('Zeal', { magPowerPct: 0.10 }), 8: N('Wrath of Heaven', { damagePct: 0.15 }) } },
-      { name: 'Protection', attrs: ['vit', 'int'], abilities: { 3: 'power_word_barrier', 7: 'divine_blessing' },
-        notables: { 4: N('Sanctuary', { defensePct: 0.15 }), 8: N('Aegis', { hpPct: 0.15 }) } },
-      { name: 'Purity', attrs: ['int', 'dex'], abilities: { 2: 'purify' },
-        notables: { 4: N('Clarity', { attackSpeed: 0.06 }), 8: N('Divine Favor', { critChance: 0.05, healingPct: 0.06 }) } },
-    ],
-  },
-  ranger: {
-    start: 'aimed_shot',
-    branches: [
-      { name: 'Marksmanship', attrs: ['dex', 'str'], abilities: { 3: 'hunters_mark', 7: 'kill_shot' },
-        notables: { 4: N('Steady Aim', { critChance: 0.04 }), 8: N('Deadeye', { critDamage: 0.35 }) } },
-      { name: 'Barrage', attrs: ['dex', 'vit'], abilities: { 2: 'multi_shot', 6: 'volley' },
-        notables: { 4: N('Barbed Arrows', { physPowerPct: 0.08 }), 8: N('Arrowstorm', { damagePct: 0.10 }) } },
-      { name: 'Wilds', attrs: ['dex', 'int'], abilities: { 1: 'serpent_sting' },
-        notables: { 4: N('Venomcraft', { damagePct: 0.06 }), 8: N('Apex Predator', { physPowerPct: 0.12 }) } },
-      { name: 'Swiftness', attrs: ['dex', 'vit'], abilities: { 5: 'rapid_fire' },
-        notables: { 4: N('Quickdraw', { attackSpeed: 0.08 }), 8: N('Wind Runner', { attackSpeed: 0.10, hpPct: 0.06 }) } },
-    ],
-  },
-};
-
-const ATTR_NAMES = { str: 'Strength', int: 'Intelligence', dex: 'Dexterity', vit: 'Vitality' };
+export const TREE_CONFIG = CONTENT.skilltree.config;
+export const TREE_SPECS = CONTENT.skilltree.specs;
+const ATTR_NAMES = CONTENT.skilltree.attributeNames;
 
 // --------------------------------------------------------------------------- generator
 const cache = new Map();
@@ -216,13 +141,7 @@ function buildTree(spec) {
   return { nodes, start: 'start', branches: spec.branches.map(b => b.name), radius: rings.length * ringSpacing };
 }
 
-export const TREE_STAT_LABELS = {
-  str: ['Strength', 'flat'], int: ['Intelligence', 'flat'], dex: ['Dexterity', 'flat'], vit: ['Vitality', 'flat'],
-  strPct: ['Strength', 'pct'], intPct: ['Intelligence', 'pct'], dexPct: ['Dexterity', 'pct'], vitPct: ['Vitality', 'pct'], allPct: ['all attributes & health', 'pct'],
-  physPowerPct: ['Physical Power', 'pct'], magPowerPct: ['Magic Power', 'pct'], healPowerPct: ['Healing Power', 'pct'],
-  defensePct: ['Defense', 'pct'], hpPct: ['maximum Health', 'pct'], critChance: ['Critical Chance', 'pct'], critDamage: ['Critical Damage', 'pct'],
-  attackSpeed: ['Attack Speed', 'pct'], damagePct: ['damage dealt', 'pct'], healingPct: ['healing done', 'pct'], damageTakenPct: ['damage taken', 'pct'],
-};
+export const TREE_STAT_LABELS = CONTENT.skilltree.statLabels;
 
 export function describeNodeStats(stats) {
   const out = [];

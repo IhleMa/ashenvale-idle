@@ -1,0 +1,31 @@
+{
+  "_about": "Loot filter limits and the ready-made rules offered as presets.",
+  "maxRules": 30,
+  "presets": {
+    "junk": {
+      "label": "Salvage Common & Uncommon",
+      "rule": { "name": "Junk", "action": "salvage", "rarities": ["common", "uncommon"] }
+    },
+    "unusable": {
+      "label": "Salvage gear nobody in my roster can use",
+      "rule": { "name": "Not for my classes", "action": "salvage", "unusable": true }
+    },
+    "outdated": {
+      "label": "Salvage items 5+ levels below my hero",
+      "rule": { "name": "Outdated", "action": "salvage", "levelsBelowHero": 5, "rarities": ["common", "uncommon", "rare"] }
+    },
+    "keepCrit": {
+      "label": "Keep Rare+ with crit stats",
+      "rule": {
+        "name": "Crit gear",
+        "action": "keep",
+        "rarities": ["rare", "epic", "legendary", "mythic"],
+        "anyStats": ["critChance", "critDamage"]
+      }
+    },
+    "sellRares": {
+      "label": "Sell Rare items without a main stat",
+      "rule": { "name": "Weak rares", "action": "sell", "rarities": ["rare"], "noStats": ["str", "int", "dex", "vit"] }
+    }
+  }
+}

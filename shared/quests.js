@@ -3,37 +3,20 @@ import { ZONES } from './data/zones.js';
 import { ENEMIES } from './data/enemies.js';
 import { createRng } from './rng.js';
 
-export const QUEST_CONFIG = {
-  dailyCount: 3,
-  weeklyCount: 2,
-  resetHourUtc: 3,          // 03:00 UTC = 04:00 CET / 05:00 CEST
-  freeRerollsPerDay: 1,
-  rerollCost: 2,            // Ashen Crystals after the free reroll
-  dailyCrystals: 2,         // per daily quest
-  allDailiesCrystals: 5,    // bonus for finishing all dailies
-  weeklyCrystals: 12,       // per weekly quest
-};
+import { CONTENT } from './content.js';
 
-export const TAG_NAMES = {
-  beast: 'Beasts', humanoid: 'Humanoids', undead: 'Undead', demon: 'Demons', elemental: 'Elementals',
-  giant: 'Giants', void: 'Void creatures', caster: 'Spellcasters', dragon: 'Dragons',
-};
+const Q = CONTENT.quests;
+export const QUEST_CONFIG = Q.config;
+export const TAG_NAMES = Q.tagNames;
+// Quest types (content/quests.json): title template, icon, daily/weekly target, weight, requires, hint
+export const QUEST_TYPES = Q.types;
 
-// target(level, ctx) → number; available(p, ctx) → bool. {n} in the title is replaced by the target.
-export const QUEST_TYPES = {
-  kill_tag:   { title: q => `Slay {n} ${TAG_NAMES[q.tag]}`, icon: '🗡', daily: true, weekly: true, target: () => 45, weeklyTarget: () => 400, weight: 4 },
-  kill_any:   { title: () => 'Defeat {n} enemies', icon: '⚔', daily: true, weekly: true, target: () => 150, weeklyTarget: () => 1500, weight: 3 },
-  win_fights: { title: () => 'Win {n} fights', icon: '🏆', daily: true, target: () => 50, weight: 2 },
-  boss:       { title: () => 'Defeat {n} bosses', icon: '☠', daily: true, weekly: true, target: () => 2, weeklyTarget: () => 15, weight: 3, hint: 'Zone bosses, rift guardians and co-op bosses all count.' },
-  gold:       { title: () => 'Earn {n} gold from battles', icon: '💰', daily: true, target: lvl => 120 + lvl * 45, weight: 2 },
-  rift:       { title: () => 'Complete {n} rifts', icon: '🌀', daily: true, weekly: true, target: () => 2, weeklyTarget: () => 12, weight: 3, requires: 'rift' },
-  rift_timed: { title: () => 'Complete {n} rifts in time', icon: '⏱', weekly: true, weeklyTarget: () => 8, weight: 2, requires: 'rift' },
-  expedition: { title: () => 'Complete {n} expeditions', icon: '🧭', daily: true, weekly: true, target: () => 2, weeklyTarget: () => 10, weight: 2, requires: 'expedition' },
-  salvage:    { title: () => 'Salvage {n} items', icon: '🔨', daily: true, target: () => 10, weight: 2, requires: 'town' },
-  craft:      { title: () => 'Craft, reforge, enchant or brew {n} times', icon: '⚒', daily: true, weekly: true, target: () => 2, weeklyTarget: () => 12, weight: 2, requires: 'workers' },
-  coop:       { title: () => 'Win {n} co-op encounters', icon: '⚑', weekly: true, weeklyTarget: () => 3, weight: 2, hint: 'You can also start a group on your own.' },
-  auction:    { title: () => 'List {n} items or materials on the Auction House', icon: '⚖', daily: true, target: () => 1, weight: 1 },
-};
+// number or { base, perLevel, perLevels } (perLevels: +1 every N levels)
+export function scaled(v, level) {
+  if (typeof v === 'number') return v;
+  if (!v) return 0;
+  return (v.base || 0) + (v.perLevel || 0) * level + (v.perLevels ? Math.floor(level / v.perLevels) : 0);
+}
 
 // ---------------------------------------------------------------- reset periods
 const DAY = 86400000;
@@ -85,18 +68,29 @@ export function rollQuest(rng, kind, ctx, exclude = []) {
     const tags = ctx.tags.filter(x => !usedTags.includes(x));
     q.tag = rng.pick(tags.length ? tags : ctx.tags);
   }
-  q.target = Math.max(1, Math.round(kind === 'weekly' ? t.weeklyTarget(ctx.level) : t.target(ctx.level)));
+  q.target = Math.max(1, Math.round(scaled(kind === 'weekly' ? t.weeklyTarget : t.target, ctx.level)));
   q.reward = questReward(kind, ctx.level, rng);
   return q;
 }
 
 export function questReward(kind, level, rng) {
-  const mats = ['ore', 'herb', 'metal_scrap', 'leather_scrap', 'cloth_scrap', 'gem_fragment', 'arcane_dust'];
-  if (kind === 'weekly') return { gold: 400 + level * 160, xpKills: 120, crystals: QUEST_CONFIG.weeklyCrystals, materials: { [rng.pick(mats)]: 20 + level, magic_essence: 3 + Math.floor(level / 10) }, item: 'epic' };
-  return { gold: 80 + level * 30, xpKills: 25, crystals: QUEST_CONFIG.dailyCrystals, materials: { [rng.pick(mats)]: 5 + Math.floor(level / 3) } };
+  const R = Q.rewards[kind];
+  const out = { gold: scaled(R.gold, level), xpKills: R.xpKills, crystals: typeof R.crystals === 'string' ? QUEST_CONFIG[R.crystals] : R.crystals || 0, materials: {} };
+  for (const m of R.materials || []) {
+    const id = m.pool ? rng.pick(m.pool) : m.id;
+    out.materials[id] = (out.materials[id] || 0) + scaled(m.amount, level);
+  }
+  if (R.item) out.item = R.item;
+  return out;
 }
 
-export function questTitle(q) { return QUEST_TYPES[q.type].title(q).replace('{n}', q.target.toLocaleString('en')); }
+// reward for finishing all daily quests
+export function dailyChestReward() {
+  const C = Q.rewards.dailyChest;
+  return { crystals: typeof C.crystals === 'string' ? QUEST_CONFIG[C.crystals] : C.crystals || 0, item: C.item, gold: C.gold || 0 };
+}
+
+export function questTitle(q) { return QUEST_TYPES[q.type].title.replace('{tag}', TAG_NAMES[q.tag] || q.tag || '').replace('{n}', q.target.toLocaleString('en')); }
 
 export function seededRng(playerId, key, salt = 0) {
   let h = 2166136261 ^ salt;

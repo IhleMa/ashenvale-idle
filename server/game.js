@@ -547,7 +547,7 @@ export class Game {
       const h = L.hero(p);
       if (timed) {
         const chest = riftChest(tier);
-        for (let i = 0; i < chest.count; i++) rewards.items.push(generateItem(rng, Math.min(CONFIG.levelCap, h.level + chest.itemLevelBonus), { minRarity: chest.minRarity, boost: 1 + tier * 0.05 }));
+        for (let i = 0; i < chest.count; i++) rewards.items.push(generateItem(rng, Math.min(CONFIG.levelCap, h.level + chest.itemLevelBonus), { minRarity: chest.minRarity, boost: chest.boost }));
         r.timed = (r.timed || 0) + 1;
         if (!r.bestTimes[tier] || b.time < r.bestTimes[tier]) r.bestTimes[tier] = Math.round(b.time * 10) / 10;
         if (tier > (r.best || 0)) {

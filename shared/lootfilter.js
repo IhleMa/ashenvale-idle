@@ -3,13 +3,14 @@
 import { CONFIG, rarityIndex } from './config.js';
 import { SLOTS, AFFIXES, canEquip } from './data/items.js';
 import { computeStats, powerRating } from './stats.js';
+import { CONTENT } from './content.js';
 
 export const FILTER_ACTIONS = {
   keep: { label: 'Keep', icon: '✋' },
   salvage: { label: 'Salvage', icon: '🔨' },
   sell: { label: 'Sell', icon: '💰' },
 };
-export const MAX_RULES = 30;
+export const MAX_RULES = CONTENT.lootfilter.maxRules;
 export const FILTER_STATS = Object.keys(AFFIXES);
 
 export function defaultFilter() {
@@ -25,14 +26,8 @@ export function newRule(over = {}) {
   };
 }
 
-// Ready-made rules for the "Add preset" menu
-export const PRESETS = {
-  junk: { label: 'Salvage Common & Uncommon', rule: { name: 'Junk', action: 'salvage', rarities: ['common', 'uncommon'] } },
-  unusable: { label: 'Salvage gear nobody in my roster can use', rule: { name: 'Not for my classes', action: 'salvage', unusable: true } },
-  outdated: { label: 'Salvage items 5+ levels below my hero', rule: { name: 'Outdated', action: 'salvage', levelsBelowHero: 5, rarities: ['common', 'uncommon', 'rare'] } },
-  keepCrit: { label: 'Keep Rare+ with crit stats', rule: { name: 'Crit gear', action: 'keep', rarities: ['rare', 'epic', 'legendary', 'mythic'], anyStats: ['critChance', 'critDamage'] } },
-  sellRares: { label: 'Sell Rare items without a main stat', rule: { name: 'Weak rares', action: 'sell', rarities: ['rare'], noStats: ['str', 'int', 'dex', 'vit'] } },
-};
+// Ready-made rules for the "Add preset" menu (content/lootfilter.json)
+export const PRESETS = CONTENT.lootfilter.presets;
 
 // Cleans up a filter sent by a client
 export function sanitizeFilter(f) {

@@ -7,11 +7,10 @@ import { ZONES, COOP_ENCOUNTERS } from './data/zones.js';
 import { describeCondition } from './rules.js';
 
 // ---------------------------------------------------------------- mastery
-export const MASTERY = {
-  normal: [25, 150, 500],  // kills for ★ / ★★ / ★★★
-  boss: [3, 15, 40],
-  bonus: [0.02, 0.04, 0.06], // damage dealt to that enemy
-};
+import { CONTENT } from './content.js';
+
+const B = CONTENT.bestiary;
+export const MASTERY = B.mastery;
 const isBossLike = def => !!def.boss;
 export function masteryTiers(enemyId) { return isBossLike(ENEMIES[enemyId]) ? MASTERY.boss : MASTERY.normal; }
 export function masteryLevel(enemyId, kills = 0) { return masteryTiers(enemyId).filter(n => kills >= n).length; }
@@ -59,19 +58,7 @@ export function enemyStats(enemyId, level) {
 // ---------------------------------------------------------------- text
 const pct = v => `${Math.round(v * 100)}%`;
 const statName = s => (s === 'magPower' ? 'magic power' : 'attack power');
-const TARGET_TEXT = {
-  enemy_highest_threat: 'the hero with the most threat (your tank, if it holds aggro)',
-  enemy_lowest_hp_pct: 'the most wounded hero (lowest health %)',
-  enemy_lowest_hp: 'the hero with the least health',
-  enemy_highest_hp: 'the hero with the most health',
-  enemy_random: 'a random hero',
-  enemy_current: 'the front-most hero',
-  all_enemies: 'your whole party',
-  self: 'itself',
-  ally_lowest_hp_pct: 'its most wounded ally',
-  ally_lowest_hp: 'its most wounded ally',
-  all_allies: 'all of its allies',
-};
+const TARGET_TEXT = B.targetText;
 
 function statusText(eff, stats) {
   const st = STATUSES[eff.status];
@@ -119,33 +106,50 @@ export function describePhases(def, stats = null) {
   return (def.phases || []).map(ph => ({ hpBelow: ph.hpBelow, message: ph.message, text: ph.effects.map(e => effectText(e, stats)).join(', ') }));
 }
 
-// Preparation tips derived from the enemy's actual mechanics
-export function enemyTips(enemyId) {
-  const def = ENEMIES[enemyId];
+// Preparation tips: rules in content/bestiary.json, checked against the enemy's actual mechanics.
+// Conditions: healsAllies, hasAbility, phaseStatus, appliesStatus, appliesStatuses { tickDamage, ids },
+// areaDamage, minHitPower, targetsSelectors, basicSchool, phaseSummons, enrages, hasTag, anyOf [..]
+function tipFacts(def) {
   const effects = def.abilities.flatMap(a => (ABILITIES[a]?.effects || []).map(e => ({ ...e, ability: a, area: ABILITIES[a]?.area })));
   const phaseFx = (def.phases || []).flatMap(p => p.effects);
-  const statuses = new Set(effects.filter(e => e.kind === 'status' && !e.self).map(e => e.status));
+  return { def, effects, phaseFx, statuses: new Set(effects.filter(e => e.kind === 'status' && !e.self).map(e => e.status)) };
+}
+function tipMatches(cond, f, vars) {
+  const { def, effects, phaseFx, statuses } = f;
+  return Object.entries(cond).every(([k, v]) => {
+    switch (k) {
+      case 'anyOf': return v.some(c => tipMatches(c, f, vars));
+      case 'healsAllies': return def.abilities.some(a => ABILITIES[a]?.type === 'heal' && ABILITIES[a]?.target === 'ally') === v;
+      case 'hasAbility': return def.abilities.includes(v);
+      case 'phaseStatus': return phaseFx.some(e => e.status === v);
+      case 'appliesStatus': return statuses.has(v);
+      case 'appliesStatuses': {
+        const list = [...statuses].filter(s => (v.tickDamage && STATUSES[s]?.tick === 'damage') || (v.ids || []).includes(s));
+        vars.statuses = list.map(s => STATUSES[s].name).join(', ');
+        return list.length > 0;
+      }
+      case 'areaDamage': return effects.some(e => e.kind === 'damage' && e.area) === v;
+      case 'minHitPower': return effects.some(e => e.kind === 'damage' && e.power >= v);
+      case 'targetsSelectors': return def.abilities.some(a => v.includes(ABILITIES[a]?.defaultRule?.target?.selector));
+      case 'basicSchool': return def.basicSchool === v;
+      case 'phaseSummons': return phaseFx.some(e => e.kind === 'summon') === v;
+      case 'enrages': vars.enrageAfter = def.enrageAfter ? ` after ${def.enrageAfter}s` : ''; return (phaseFx.some(e => e.status === 'enrage') || !!def.enrageAfter) === v;
+      case 'hasTag': return def.tags.includes(v);
+      default: return false;
+    }
+  });
+}
+export function enemyTips(enemyId) {
+  const f = tipFacts(ENEMIES[enemyId]);
   const tips = [];
-  if (def.abilities.some(a => ABILITIES[a]?.type === 'heal' && ABILITIES[a]?.target === 'ally')) tips.push('Heals its allies — kill it first. Use the "Specific enemy type" target on burst abilities to focus it.');
-  if (def.abilities.includes('e_regenerate') || phaseFx.some(e => e.status === 'regeneration')) tips.push('Regenerates when hurt — save burst damage so it can\'t out-heal you.');
-  const dots = [...statuses].filter(s => STATUSES[s]?.tick === 'damage' || s === 'frostbite' || s === 'weakened' || s === 'sundered' || s === 'exposed');
-  if (dots.length) tips.push(`Applies ${dots.map(s => STATUSES[s].name).join(', ')} — a Cleric with Purify (cleanse) removes these.`);
-  if (statuses.has('curse')) tips.push('Curse halves healing received — cleanse it quickly, or bring shields (Barrier) instead of relying on heals.');
-  if (statuses.has('stun')) tips.push('Stuns heroes — healers with heal-over-time (Renew) or shields keep the party alive while someone is stunned.');
-  if (effects.some(e => e.kind === 'damage' && e.area)) tips.push('Deals damage to the whole party — group healing (Prayer of Healing, Renew) and high Vitality help.');
-  if (effects.some(e => e.kind === 'damage' && e.power >= 3)) tips.push('Has a huge single-target hit — keep your tank\'s defensive cooldown (Shield Wall/Evasion) ready, e.g. "when my health is below 60%".');
-  if (def.abilities.some(a => ABILITIES[a]?.defaultRule?.target?.selector === 'enemy_lowest_hp_pct' || ABILITIES[a]?.defaultRule?.target?.selector === 'enemy_lowest_hp')) tips.push('Picks on wounded heroes — top up low-health party members early.');
-  if (def.basicSchool === 'magical') tips.push('Attacks with magic — armor only partly reduces magical damage, so healing matters more than defense.');
-  if (statuses.has('frostbite')) tips.push('Frostbite slows attack speed — attack-speed gear and buffs help make up for it.');
-  if (phaseFx.some(e => e.kind === 'summon')) tips.push('Summons adds during the fight — area damage (Cleave, Volley, Flame Wave) clears them fast.');
-  if (phaseFx.some(e => e.status === 'stone_skin')) tips.push('Becomes almost immune for a few seconds (Stone Skin) — use that window for defensive and healing abilities, not burst.');
-  if (phaseFx.some(e => e.status === 'enrage') || def.enrageAfter) tips.push(`Enrages${def.enrageAfter ? ` after ${def.enrageAfter}s` : ''} — bring enough damage to finish before then.`);
-  if (def.abilities.includes('e_frenzy')) tips.push('Frenzies at low health (+15% damage) — burst it down from 60%.');
-  if (def.tags.includes('elite')) tips.push('Elite: much tougher than normal enemies and more likely to drop uniques and set items.');
-  if (!tips.length) tips.push('No special mechanics — a straightforward fight.');
+  for (const rule of B.tips) {
+    const vars = {};
+    if (tipMatches(rule.if, f, vars)) tips.push(rule.text.replace(/\{(\w+)\}/g, (m, k) => vars[k] ?? ''));
+  }
+  if (!tips.length) tips.push(B.noTipsText);
   return tips;
 }
 
 export function enemyKind(def) { return def.boss ? 'Boss' : def.tags.includes('elite') ? 'Elite' : 'Normal'; }
 
-export const ALL_TAGS = ['beast', 'humanoid', 'undead', 'demon', 'elemental', 'giant', 'dragon', 'void', 'caster'];
+export const ALL_TAGS = B.tags;

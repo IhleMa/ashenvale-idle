@@ -8,99 +8,88 @@ import { ZONES } from './data/zones.js';
 import { ENEMIES } from './data/enemies.js';
 import { createRng } from './rng.js';
 import { CONFIG } from './config.js';
+import { CONTENT } from './content.js';
 
 const DT = CONFIG.combat.tickMs / 1000;
 
-export const RIFT = {
-  minLevel: 8,
-  maxTier: 150,
-  trashWaves: 3,
-  timeLimit: 210,            // seconds of battle time for the whole run
-  baseHp: 0.55,              // tier 1 enemy health vs. the open world
-  baseDamage: 0.6,
-  hpGrowth: 1.12,            // per tier
-  damageGrowth: 1.075,       // per tier
-  affixTiers: [2, 5, 10],    // tier at which the 1st/2nd/3rd affix switches on
-  untimedRewardMult: 0.5,
-};
+const RF = CONTENT.rifts;
+export const RIFT = RF.config;
 
 // ---------------------------------------------------------------- affixes
-// Every affix is pure data + battle hooks (see createBattle hooks in combat.js).
-export const AFFIXES = {
-  fortified: {
-    name: 'Fortified', icon: '🛡', description: 'Non-boss enemies have 25% more health and deal 15% more damage.',
-    spawn(b, u) { if (u.side === 'B' && !u.boss) buffUnit(u, 0.25, 0.15); },
-  },
-  tyrannical: {
-    name: 'Tyrannical', icon: '👑', description: 'The Rift Guardian has 35% more health and deals 15% more damage.',
-    spawn(b, u) { if (u.side === 'B' && u.boss) buffUnit(u, 0.35, 0.15); },
-  },
-  bolstering: {
-    name: 'Bolstering', icon: '💪', description: 'When an enemy dies, the other enemies gain +8% damage (stacks) and 8% more max health.',
-    kill(b, src, tgt, api) {
-      if (tgt.side !== 'B') return;
-      const rest = b.units.filter(u => u.side === 'B' && u.alive);
-      for (const u of rest) { api.applyStatus(b, u, u, 'bolstered', 999, 0, 1); const add = Math.round(u.maxHp * 0.08); u.maxHp += add; u.hp += add; }
-      if (rest.length) api.message(b, rest[0], 'Bolstering: the remaining enemies grow stronger!');
-    },
-  },
-  sanguine: {
-    name: 'Sanguine', icon: '🩸', description: 'When an enemy dies, the other enemies are healed for 15% of their max health.',
-    kill(b, src, tgt, api) {
-      if (tgt.side !== 'B') return;
-      for (const u of b.units.filter(x => x.side === 'B' && x.alive)) api.heal(b, u, u, u.maxHp * 0.15);
-    },
-  },
-  raging: {
-    name: 'Raging', icon: '😡', description: 'Non-boss enemies enrage below 30% health (+50% damage, +30% attack speed). Kill them quickly once they get low.',
-    damaged(b, src, tgt, info, api) {
-      if (tgt.side !== 'B' || tgt.boss || tgt.raged || tgt.hp / tgt.maxHp >= 0.3) return;
-      tgt.raged = true;
-      api.applyStatus(b, tgt, tgt, 'enrage', 999, 0, 1);
-      api.message(b, tgt, `${tgt.name} becomes enraged!`);
-    },
-  },
-  volcanic: {
-    name: 'Volcanic', icon: '🌋', description: 'Every 9 seconds the ground erupts under a random hero, burning them (3% of their max health per second for 5s).',
-    tick(b, api) {
-      b.affixTimer = (b.affixTimer ?? 9) - DT;
-      if (b.affixTimer > 0) return;
-      b.affixTimer = 9;
-      const heroes = b.units.filter(u => u.side === 'A' && u.alive);
-      const src = b.units.find(u => u.side === 'B' && u.alive);
-      if (!heroes.length || !src) return;
-      const t = heroes[Math.floor(b.rng() * heroes.length)];
-      api.applyStatus(b, src, t, 'burn', 5, t.maxHp * 0.03, 1);
-    },
-  },
-  necrotic: {
-    name: 'Necrotic', icon: '☠', description: 'Enemy attacks inflict Necrotic Wounds: healing received −8% per stack (up to 8). Hits your tank hardest — strong healing and cleanses help.',
-    damaged(b, src, tgt, info, api) {
-      if (src.side === 'B' && tgt.side === 'A' && !info.dot && !info.ability) api.applyStatus(b, src, tgt, 'necrotic', 6, 0, 1);
-    },
-  },
-  arcane_ward: {
-    name: 'Arcane Ward', icon: '🔮', description: 'Enemies take 25% less magical damage. Physical damage dealers shine.',
-    damageMult(src, tgt, school) { return tgt.side === 'B' && school === 'magical' ? 0.75 : 1; },
-  },
-  ironhide: {
-    name: 'Ironhide', icon: '🪨', description: 'Enemies take 25% less physical damage. Spellcasters shine.',
-    damageMult(src, tgt, school) { return tgt.side === 'B' && school === 'physical' ? 0.75 : 1; },
-  },
-  quaking: {
-    name: 'Quaking', icon: '💥', description: 'Every 14 seconds the rift quakes, dealing 8% of max health as damage to every hero.',
-    tick(b, api) {
-      b.quakeTimer = (b.quakeTimer ?? 14) - DT;
-      if (b.quakeTimer > 0) return;
-      b.quakeTimer = 14;
-      const src = b.units.find(u => u.side === 'B' && u.alive);
-      if (!src) return;
-      api.message(b, src, 'The rift quakes!');
-      for (const h of b.units.filter(u => u.side === 'A' && u.alive)) api.damage(b, src, h, h.maxHp * 0.08, 'physical');
-    },
-  },
-};
+// Affixes are data (content/rifts.json): each has a list of "mechanics" that this interpreter turns into
+// battle hooks (see createBattle hooks in combat.js). Mechanic types:
+//   enemyStats        { who: all|boss|nonBoss, hpPct, damagePct }            — when enemies spawn
+//   enemyDamageTaken  { school: physical|magical|any, mult }                  — damage enemies take
+//   onEnemyDeath      { action: bolster|healAllies, status?, maxHpPct?, pctMaxHp?, message? }
+//   enemyLowHealth    { who, below, status, message }                         — once per enemy
+//   onEnemyHit        { status, duration, basicAttacksOnly }                   — enemy hits a hero
+//   periodic          { every, target: randomHero|allHeroes, status?, duration?, pctMaxHp?, damagePctMaxHp?, school?, message? }
+export const AFFIXES = RF.affixes;
 for (const [id, a] of Object.entries(AFFIXES)) a.id = id;
+
+const whoMatches = (who, u) => !who || who === 'all' || (who === 'boss' ? !!u.boss : !u.boss);
+const fill = (text, u) => String(text || '').replace('{name}', u?.name || '');
+
+function mechanicHooks(m, key) {
+  switch (m.type) {
+    case 'enemyStats': return {
+      spawn(b, u) { if (u.side === 'B' && whoMatches(m.who, u)) buffUnit(u, m.hpPct || 0, m.damagePct || 0); },
+    };
+    case 'enemyDamageTaken': return {
+      damageMult(src, tgt, school) { return tgt.side === 'B' && (!m.school || m.school === 'any' || m.school === school) ? m.mult : 1; },
+    };
+    case 'onEnemyDeath': return {
+      kill(b, src, tgt, api) {
+        if (tgt.side !== 'B') return;
+        const rest = b.units.filter(u => u.side === 'B' && u.alive);
+        if (m.action === 'bolster') {
+          for (const u of rest) { api.applyStatus(b, u, u, m.status, 999, 0, 1); const add = Math.round(u.maxHp * (m.maxHpPct || 0)); u.maxHp += add; u.hp += add; }
+          if (rest.length && m.message) api.message(b, rest[0], fill(m.message, rest[0]));
+        } else if (m.action === 'healAllies') {
+          for (const u of rest) api.heal(b, u, u, u.maxHp * m.pctMaxHp);
+        }
+      },
+    };
+    case 'enemyLowHealth': return {
+      damaged(b, src, tgt, info, api) {
+        const flag = `_affix_${key}`;
+        if (tgt.side !== 'B' || !whoMatches(m.who, tgt) || tgt[flag] || tgt.hp / tgt.maxHp >= m.below) return;
+        tgt[flag] = true;
+        api.applyStatus(b, tgt, tgt, m.status, 999, 0, 1);
+        if (m.message) api.message(b, tgt, fill(m.message, tgt));
+      },
+    };
+    case 'onEnemyHit': return {
+      damaged(b, src, tgt, info, api) {
+        if (src.side === 'B' && tgt.side === 'A' && !info.dot && (!m.basicAttacksOnly || !info.ability)) api.applyStatus(b, src, tgt, m.status, m.duration, 0, 1);
+      },
+    };
+    case 'periodic': return {
+      tick(b, api) {
+        b.affixTimers ||= {};
+        b.affixTimers[key] = (b.affixTimers[key] ?? m.every) - DT;
+        if (b.affixTimers[key] > 0) return;
+        b.affixTimers[key] = m.every;
+        const src = b.units.find(u => u.side === 'B' && u.alive);
+        const heroes = b.units.filter(u => u.side === 'A' && u.alive);
+        if (m.target === 'randomHero') {
+          if (!heroes.length || !src) return;
+          const t = heroes[Math.floor(b.rng() * heroes.length)];
+          if (m.status) api.applyStatus(b, src, t, m.status, m.duration, t.maxHp * (m.pctMaxHp || 0), 1);
+          if (m.damagePctMaxHp) api.damage(b, src, t, t.maxHp * m.damagePctMaxHp, m.school || 'physical');
+        } else {
+          if (!src) return;
+          if (m.message) api.message(b, src, m.message);
+          for (const h of heroes) {
+            if (m.damagePctMaxHp) api.damage(b, src, h, h.maxHp * m.damagePctMaxHp, m.school || 'physical');
+            if (m.status) api.applyStatus(b, src, h, m.status, m.duration, h.maxHp * (m.pctMaxHp || 0), 1);
+          }
+        }
+      },
+    };
+    default: return {};
+  }
+}
 
 function buffUnit(u, hpPct, dmgPct) {
   u.maxHp = Math.round(u.maxHp * (1 + hpPct));
@@ -117,12 +106,14 @@ export function weekEndsAt(now = Date.now()) { return EPOCH + (weekIndex(now) + 
 // [first, second, third]: first is always fortified or tyrannical (like the classic rotation)
 export function weeklyAffixes(now = Date.now()) {
   const w = weekIndex(now);
-  const rng = createRng(9173 + w * 7919);
-  const first = w % 2 === 0 ? 'fortified' : 'tyrannical';
-  const pool = Object.keys(AFFIXES).filter(a => a !== 'fortified' && a !== 'tyrannical');
+  const RO = RF.rotation;
+  const rng = createRng(RO.seed + w * RO.seedPerWeek);
+  const first = RO.firstAffix[w % RO.firstAffix.length];
+  const pool = Object.keys(AFFIXES).filter(a => !RO.firstAffix.includes(a));
   const second = pool.splice(Math.floor(rng() * pool.length), 1)[0];
-  // never two affixes that cancel each other's counterplay (arcane_ward + ironhide)
-  const third = pool.filter(a => !(second === 'arcane_ward' && a === 'ironhide') && !(second === 'ironhide' && a === 'arcane_ward'))[Math.floor(rng() * (pool.length - 1))];
+  // never two affixes that cancel each other's counterplay (e.g. arcane_ward + ironhide)
+  const clash = a => RO.mutuallyExclusive.some(pair => pair.includes(a) && pair.includes(second) && a !== second);
+  const third = pool.filter(a => !clash(a))[Math.floor(rng() * (pool.length - 1))];
   return [first, second, third];
 }
 export function affixesFor(tier, now = Date.now()) {
@@ -130,7 +121,7 @@ export function affixesFor(tier, now = Date.now()) {
 }
 
 export function riftHooks(affixIds) {
-  const list = affixIds.map(id => AFFIXES[id]).filter(Boolean);
+  const list = affixIds.filter(id => AFFIXES[id]).flatMap(id => (AFFIXES[id].mechanics || []).map((m, i) => mechanicHooks(m, `${id}_${i}`)));
   if (!list.length) return null;
   return {
     spawn: (b, u, api) => { for (const a of list) a.spawn?.(b, u, api); },
@@ -152,15 +143,16 @@ export function riftLevel(heroLevel) { return Math.max(RIFT.minLevel, heroLevel)
 export function riftWaves(themeZoneId, heroLevel, rng, partySize = 4) {
   const zone = ZONES[themeZoneId];
   const lvl = riftLevel(heroLevel);
-  const size = Math.max(3, Math.min(5, partySize));
+  const C = RF.composition;
+  const size = Math.max(C.minWaveSize, Math.min(C.maxWaveSize, partySize));
   const waves = [];
   for (let w = 0; w < RIFT.trashWaves; w++) {
     const wave = [];
-    const n = size - (w === 0 ? 1 : 0);
+    const n = size - (w === 0 ? C.firstWaveFewer : 0);
     for (let i = 0; i < n; i++) wave.push({ enemyId: rng.pick(zone.enemies), level: lvl });
     waves.push(wave);
   }
-  waves.push([{ enemyId: zone.boss, level: lvl + 1 }, { enemyId: zone.enemies[0], level: lvl }]);
+  waves.push([{ enemyId: zone.boss, level: lvl + C.guardianLevelBonus }, ...zone.enemies.slice(0, C.guardianEscorts).map(enemyId => ({ enemyId, level: lvl }))]);
   return waves;
 }
 
@@ -169,13 +161,15 @@ export function riftThemes(p) { return p.unlockedZones.filter(z => ZONES[z]?.bos
 // ---------------------------------------------------------------- rewards
 export function riftRewardOptions(tier, timed) {
   const m = timed ? 1 : RIFT.untimedRewardMult;
-  return { rewardMult: (1.4 + 0.08 * tier) * m, lootBoost: Math.min(2.5, 0.12 * tier) };
+  const W = RF.rewards;
+  return { rewardMult: (W.rewardMult.base + W.rewardMult.perTier * tier) * m, lootBoost: Math.min(W.lootBoost.max, W.lootBoost.perTier * tier) };
 }
 // guaranteed chest for timed runs
 export function riftChest(tier) {
-  const count = 1 + (tier >= 5 ? 1 : 0) + (tier >= 12 ? 1 : 0);
-  const minRarity = tier >= 25 ? 'legendary' : tier >= 12 ? 'epic' : tier >= 5 ? 'rare' : 'uncommon';
-  return { count, minRarity, itemLevelBonus: Math.min(10, Math.floor(tier / 4)) };
+  const C = RF.rewards.chest;
+  const count = 1 + C.extraItemAtTiers.filter(t => tier >= t).length;
+  const minRarity = C.rarityByTier.filter(([t]) => tier >= t).pop()?.[1] || C.rarityByTier[0][1];
+  return { count, minRarity, itemLevelBonus: Math.min(C.maxItemLevelBonus, Math.floor(tier / C.itemLevelEveryTiers)), boost: 1 + tier * C.qualityBoostPerTier };
 }
 // crystals for the first timed clear of a tier
-export function firstClearCrystals(tier) { return 2 + Math.floor(tier / 5); }
+export function firstClearCrystals(tier) { const F = RF.rewards.firstClearCrystals; return F.base + Math.floor(tier / F.perTiers); }

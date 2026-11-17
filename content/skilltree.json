@@ -1,0 +1,241 @@
+{
+  "_about": "Passive skill trees. The web layout is generated from these specs: 4 branches per class, small attribute nodes, ability nodes and notables on rings 1–8.",
+  "config": {
+    "rings": [1, 2, 3, 3, 4, 4, 5, 5],
+    "ringSpacing": 95,
+    "smallNodeValue": 4,
+    "bridgeRings": [3, 5, 7],
+    "lateralRings": [2, 4, 6, 8],
+    "rankNodesPerAbility": 2
+  },
+  "specs": {
+    "warrior": {
+      "start": "heroic_strike",
+      "branches": [
+        {
+          "name": "Bulwark",
+          "attrs": ["vit", "str"],
+          "abilities": { "1": "taunt", "3": "shield_wall" },
+          "notables": {
+            "4": { "name": "Iron Skin", "stats": { "defensePct": 0.12, "hpPct": 0.05 } },
+            "8": { "name": "Unbreakable", "stats": { "hpPct": 0.15, "damageTakenPct": -0.06 } }
+          }
+        },
+        {
+          "name": "Warmonger",
+          "attrs": ["str", "dex"],
+          "abilities": { "2": "cleave", "6": "battle_cry" },
+          "notables": {
+            "4": { "name": "Brutality", "stats": { "physPowerPct": 0.1 } },
+            "8": { "name": "Bloodlust", "stats": { "damagePct": 0.1, "critDamage": 0.2 } }
+          }
+        },
+        {
+          "name": "Tactician",
+          "attrs": ["dex", "str"],
+          "abilities": { "3": "shield_bash" },
+          "notables": {
+            "4": { "name": "Precision", "stats": { "critChance": 0.04 } },
+            "8": { "name": "Relentless", "stats": { "attackSpeed": 0.1, "critChance": 0.02 } }
+          }
+        },
+        {
+          "name": "Vanguard",
+          "attrs": ["vit", "dex"],
+          "abilities": { "5": "sunder_armor" },
+          "notables": {
+            "4": { "name": "Second Wind", "stats": { "hpPct": 0.08, "defensePct": 0.05 } },
+            "8": { "name": "Warlord's Presence", "stats": { "allPct": 0.05 } }
+          }
+        }
+      ]
+    },
+    "mage": {
+      "start": "fireball",
+      "branches": [
+        {
+          "name": "Pyromancy",
+          "attrs": ["int", "vit"],
+          "abilities": { "2": "flame_wave", "7": "meteor" },
+          "notables": {
+            "4": { "name": "Kindling", "stats": { "magPowerPct": 0.1 } },
+            "8": { "name": "Heart of Fire", "stats": { "damagePct": 0.12 } }
+          }
+        },
+        {
+          "name": "Cryomancy",
+          "attrs": ["int", "dex"],
+          "abilities": { "1": "frost_bolt", "5": "frost_nova" },
+          "notables": {
+            "4": { "name": "Cold Precision", "stats": { "critChance": 0.04 } },
+            "8": { "name": "Absolute Zero", "stats": { "critDamage": 0.3, "critChance": 0.02 } }
+          }
+        },
+        {
+          "name": "Arcana",
+          "attrs": ["int", "dex"],
+          "abilities": { "3": "arcane_missiles", "6": "arcane_power" },
+          "notables": {
+            "4": { "name": "Arcane Flow", "stats": { "attackSpeed": 0.06 } },
+            "8": { "name": "Archmage", "stats": { "magPowerPct": 0.15 } }
+          }
+        },
+        {
+          "name": "Wardings",
+          "attrs": ["vit", "int"],
+          "abilities": {},
+          "notables": {
+            "4": { "name": "Mana Shield", "stats": { "hpPct": 0.1 } },
+            "8": { "name": "Spellward", "stats": { "damageTakenPct": -0.08, "defensePct": 0.2 } }
+          }
+        }
+      ]
+    },
+    "rogue": {
+      "start": "backstab",
+      "branches": [
+        {
+          "name": "Venom",
+          "attrs": ["dex", "int"],
+          "abilities": { "1": "poison_blade", "5": "rupture" },
+          "notables": {
+            "4": { "name": "Toxicology", "stats": { "damagePct": 0.06, "physPowerPct": 0.04 } },
+            "8": { "name": "Plaguebringer", "stats": { "damagePct": 0.12 } }
+          }
+        },
+        {
+          "name": "Assassination",
+          "attrs": ["dex", "str"],
+          "abilities": { "3": "execute", "7": "shadow_flurry" },
+          "notables": {
+            "4": { "name": "Deadly Aim", "stats": { "critChance": 0.05 } },
+            "8": { "name": "Assassin's Mark", "stats": { "critDamage": 0.35 } }
+          }
+        },
+        {
+          "name": "Shadows",
+          "attrs": ["dex", "vit"],
+          "abilities": { "2": "evasion", "6": "expose_weakness" },
+          "notables": {
+            "4": { "name": "Fleet Footed", "stats": { "attackSpeed": 0.08 } },
+            "8": { "name": "Shadow Dance", "stats": { "attackSpeed": 0.1, "critChance": 0.03 } }
+          }
+        },
+        {
+          "name": "Survival",
+          "attrs": ["vit", "str"],
+          "abilities": {},
+          "notables": {
+            "4": { "name": "Thick Skin", "stats": { "hpPct": 0.1 } },
+            "8": { "name": "Cheat Death", "stats": { "damageTakenPct": -0.08, "hpPct": 0.08 } }
+          }
+        }
+      ]
+    },
+    "cleric": {
+      "start": "heal",
+      "branches": [
+        {
+          "name": "Restoration",
+          "attrs": ["int", "vit"],
+          "abilities": { "1": "renew", "5": "prayer_of_healing" },
+          "notables": {
+            "4": { "name": "Mending", "stats": { "healPowerPct": 0.1 } },
+            "8": { "name": "Saintly Grace", "stats": { "healingPct": 0.15 } }
+          }
+        },
+        {
+          "name": "Holy Fire",
+          "attrs": ["int", "str"],
+          "abilities": { "1": "smite" },
+          "notables": {
+            "4": { "name": "Zeal", "stats": { "magPowerPct": 0.1 } },
+            "8": { "name": "Wrath of Heaven", "stats": { "damagePct": 0.15 } }
+          }
+        },
+        {
+          "name": "Protection",
+          "attrs": ["vit", "int"],
+          "abilities": { "3": "power_word_barrier", "7": "divine_blessing" },
+          "notables": {
+            "4": { "name": "Sanctuary", "stats": { "defensePct": 0.15 } },
+            "8": { "name": "Aegis", "stats": { "hpPct": 0.15 } }
+          }
+        },
+        {
+          "name": "Purity",
+          "attrs": ["int", "dex"],
+          "abilities": { "2": "purify" },
+          "notables": {
+            "4": { "name": "Clarity", "stats": { "attackSpeed": 0.06 } },
+            "8": { "name": "Divine Favor", "stats": { "critChance": 0.05, "healingPct": 0.06 } }
+          }
+        }
+      ]
+    },
+    "ranger": {
+      "start": "aimed_shot",
+      "branches": [
+        {
+          "name": "Marksmanship",
+          "attrs": ["dex", "str"],
+          "abilities": { "3": "hunters_mark", "7": "kill_shot" },
+          "notables": {
+            "4": { "name": "Steady Aim", "stats": { "critChance": 0.04 } },
+            "8": { "name": "Deadeye", "stats": { "critDamage": 0.35 } }
+          }
+        },
+        {
+          "name": "Barrage",
+          "attrs": ["dex", "vit"],
+          "abilities": { "2": "multi_shot", "6": "volley" },
+          "notables": {
+            "4": { "name": "Barbed Arrows", "stats": { "physPowerPct": 0.08 } },
+            "8": { "name": "Arrowstorm", "stats": { "damagePct": 0.1 } }
+          }
+        },
+        {
+          "name": "Wilds",
+          "attrs": ["dex", "int"],
+          "abilities": { "1": "serpent_sting" },
+          "notables": {
+            "4": { "name": "Venomcraft", "stats": { "damagePct": 0.06 } },
+            "8": { "name": "Apex Predator", "stats": { "physPowerPct": 0.12 } }
+          }
+        },
+        {
+          "name": "Swiftness",
+          "attrs": ["dex", "vit"],
+          "abilities": { "5": "rapid_fire" },
+          "notables": {
+            "4": { "name": "Quickdraw", "stats": { "attackSpeed": 0.08 } },
+            "8": { "name": "Wind Runner", "stats": { "attackSpeed": 0.1, "hpPct": 0.06 } }
+          }
+        }
+      ]
+    }
+  },
+  "attributeNames": { "str": "Strength", "int": "Intelligence", "dex": "Dexterity", "vit": "Vitality" },
+  "statLabels": {
+    "str": ["Strength", "flat"],
+    "int": ["Intelligence", "flat"],
+    "dex": ["Dexterity", "flat"],
+    "vit": ["Vitality", "flat"],
+    "strPct": ["Strength", "pct"],
+    "intPct": ["Intelligence", "pct"],
+    "dexPct": ["Dexterity", "pct"],
+    "vitPct": ["Vitality", "pct"],
+    "allPct": ["all attributes & health", "pct"],
+    "physPowerPct": ["Physical Power", "pct"],
+    "magPowerPct": ["Magic Power", "pct"],
+    "healPowerPct": ["Healing Power", "pct"],
+    "defensePct": ["Defense", "pct"],
+    "hpPct": ["maximum Health", "pct"],
+    "critChance": ["Critical Chance", "pct"],
+    "critDamage": ["Critical Damage", "pct"],
+    "attackSpeed": ["Attack Speed", "pct"],
+    "damagePct": ["damage dealt", "pct"],
+    "healingPct": ["healing done", "pct"],
+    "damageTakenPct": ["damage taken", "pct"]
+  }
+}

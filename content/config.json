@@ -1,0 +1,62 @@
+{
+  "_about": "Global balance numbers (levels, XP curve, combat, party, offline progress, rarities, premium currency). See CONTENT.md.",
+  "version": "0.1.0",
+  "levelCap": 60,
+  "xp": { "base": 80, "exponent": 1.85 },
+  "party": { "size": 4, "presets": 3, "rosterLimit": 12 },
+  "mainCharacter": {
+    "attributeBonus": 0.08,
+    "extraAbilitySlots": 1,
+    "bonusSkillPointEvery": 5,
+    "xpBonus": 0.1,
+    "leadershipAura": { "unlockLevel": 10, "damagePct": 0.04 }
+  },
+  "skillPointsPerLevel": 1,
+  "treeNodeRefundCostPerLevel": 5,
+  "treeResetCostPerLevel": 40,
+  "baseAbilitySlots": 4,
+  "maxAbilityRank": 3,
+  "abilityRankBonus": 0.2,
+  "roles": {
+    "tank": { "label": "Tank", "threatMult": 3, "damageTakenPct": -0.05 },
+    "healer": { "label": "Healer", "healingPct": 0.1 },
+    "damage": { "label": "Damage Dealer", "damagePct": 0.06 },
+    "support": { "label": "Support", "buffDurationPct": 0.25, "damagePct": 0.02, "healingPct": 0.04 }
+  },
+  "synergy": { "balancedBonusPct": 0.1, "perDistinctClassPct": 0.02 },
+  "combat": {
+    "tickMs": 100,
+    "globalCooldown": 1.2,
+    "baseAttackInterval": 2,
+    "critCap": 0.75,
+    "attackSpeedCap": 2.5,
+    "armorK": 60,
+    "armorCap": 0.75,
+    "magicArmorFactor": 0.5,
+    "statusTickInterval": 1,
+    "restBetweenFights": 2,
+    "reviveDelay": 8,
+    "maxBattleSeconds": 300,
+    "positionThreat": [40, 25, 10, 5, 3, 2, 1, 0]
+  },
+  "idle": { "enemiesPerFight": [1, 3] },
+  "offline": { "maxHours": 8, "minSeconds": 60, "maxSimulatedFights": 250, "efficiency": 1 },
+  "recruitment": { "offers": 4, "refreshSeconds": 600, "refreshCostPerLevel": 15, "costBase": 100, "costPerLevel": 40 },
+  "inventory": { "limit": 80 },
+  "coop": {
+    "maxPlayers": 4,
+    "charactersPerPlayer": 2,
+    "hpScalePerExtraPlayer": 0.75,
+    "damageScalePerExtraPlayer": 0.12,
+    "inviteTimeoutSeconds": 300
+  },
+  "rarities": [
+    { "id": "common", "label": "Common", "color": "#b8b8b8", "mult": 1, "affixes": 0, "weight": 600 },
+    { "id": "uncommon", "label": "Uncommon", "color": "#4fd16b", "mult": 1.12, "affixes": 1, "weight": 260 },
+    { "id": "rare", "label": "Rare", "color": "#4a8cff", "mult": 1.25, "affixes": 2, "weight": 100 },
+    { "id": "epic", "label": "Epic", "color": "#b25cff", "mult": 1.42, "affixes": 3, "weight": 30 },
+    { "id": "legendary", "label": "Legendary", "color": "#ff9a2e", "mult": 1.62, "affixes": 4, "weight": 8 },
+    { "id": "mythic", "label": "Mythic", "color": "#ff4d6d", "mult": 1.85, "affixes": 5, "weight": 1.5 }
+  ],
+  "premium": { "name": "Ashen Crystals", "short": "Crystals", "glyph": "💠" }
+}

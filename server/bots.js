@@ -22,26 +22,13 @@ import { GEM_STATS, GEM_CONFIG, shardId, parseGemKey } from '../shared/gems.js';
 import { rarityIndex, CONFIG } from '../shared/config.js';
 import { PRESETS, newRule } from '../shared/lootfilter.js';
 
-const NAMES = ['Aldric', 'Brynja', 'Cedric', 'Dagny', 'Eamon', 'Freya', 'Garrick', 'Hilde', 'Ivor', 'Jorunn', 'Kael', 'Liora', 'Magnus', 'Nessa', 'Orrin', 'Perrin', 'Quill', 'Rowena', 'Soren', 'Thyra',
-  'Ulric', 'Vala', 'Wren', 'Ysolde', 'Zarek', 'Alys', 'Bram', 'Corin', 'Dorn', 'Elspeth', 'Fenwick', 'Gwyn', 'Halvar', 'Isolde', 'Jarek', 'Kestrel', 'Lucan', 'Mira', 'Nyle', 'Osric', 'Petra',
-  'Rook', 'Sable', 'Tamsin', 'Torvin', 'Ulla', 'Varis', 'Wynne', 'Yorick', 'Zelda', 'Ashka', 'Bastian', 'Cyra', 'Draven', 'Elowen', 'Faelan', 'Greer', 'Hakon', 'Inga', 'Jory', 'Kira'];
-const SUFFIX = ['', '', '', 'x', 'son', 'a', 'ir', 'en', '77', '42', '_', 'TV', 'GG'];
-const CHAT = {
-  hello: ['hi all', 'hey!', 'o/', 'yo', 'hello there', 'ready when you are'],
-  win: ['gg', 'gg wp', 'nice', 'easy', 'that was close', 'ty for the group', 'loot!'],
-  lose: ['oof', 'wipe :(', 'we need more healing', 'that boss hits hard', 'again?', 'my bad'],
-  bye: ['gtg, cya', 'thanks for the runs', 'bye o/', 'gonna farm solo a bit'],
-};
+import { CONTENT } from '../shared/content.js';
 
-// personality presets; values get randomized a little per bot
-export const ARCHETYPES = {
-  casual:  { label: 'Casual',  skill: 0.45, activity: 0.25, trader: 0.2, crafter: 0.3, rifter: 0.2, social: 0.4 },
-  grinder: { label: 'Grinder', skill: 0.7,  activity: 0.7,  trader: 0.2, crafter: 0.4, rifter: 0.6, social: 0.2 },
-  trader:  { label: 'Trader',  skill: 0.6,  activity: 0.5,  trader: 0.9, crafter: 0.5, rifter: 0.2, social: 0.3 },
-  crafter: { label: 'Crafter', skill: 0.6,  activity: 0.45, trader: 0.4, crafter: 0.9, rifter: 0.2, social: 0.3 },
-  social:  { label: 'Social',  skill: 0.5,  activity: 0.5,  trader: 0.3, crafter: 0.3, rifter: 0.4, social: 0.9 },
-  tryhard: { label: 'Tryhard', skill: 0.95, activity: 0.85, trader: 0.5, crafter: 0.6, rifter: 0.9, social: 0.5 },
-};
+// names, chat lines and personality archetypes: content/bots.json
+const NAMES = CONTENT.bots.names;
+const SUFFIX = CONTENT.bots.suffixes;
+const CHAT = CONTENT.bots.chat;
+export const ARCHETYPES = CONTENT.bots.archetypes;
 
 const clamp01 = v => Math.max(0.05, Math.min(1, v));
 const pick = a => a[Math.floor(Math.random() * a.length)];

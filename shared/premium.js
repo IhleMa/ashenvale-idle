@@ -1,5 +1,7 @@
 // Premium currency ("Ashen Crystals"): finish timers instantly.
-export const PREMIUM = { name: 'Ashen Crystals', short: 'Crystals', glyph: '💠' };
+import { CONFIG } from './config.js';
+
+export const PREMIUM = CONFIG.premium; // content/config.json → premium
 
 // Cost to skip `remainingMs` at a rate of `minutesPerCrystal` (at least 1 crystal)
 export function speedUpCost(remainingMs, minutesPerCrystal = 10) {
