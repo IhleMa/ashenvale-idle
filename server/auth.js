@@ -77,3 +77,12 @@ export class RateLimiter {
     return e.n <= this.limit;
   }
 }
+
+export function setPassword(store, acc, password) {
+  const err = validatePassword(password);
+  if (err) throw new Error(err);
+  acc.salt = crypto.randomBytes(16).toString('hex');
+  acc.hash = hashPassword(password, acc.salt);
+  acc.tokens = [];
+  store.setAccount(acc);
+}

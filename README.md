@@ -34,7 +34,8 @@ Create an account in the browser and choose a class. Your first companion is fre
 | `PORT` / `SERVER_PORT` | `8080` | HTTP/WebSocket port (`SERVER_PORT` is set automatically by Pterodactyl) |
 | `HOST` | `0.0.0.0` | Bind address |
 | `DATA_DIR` | `./data` | Where accounts and player saves are stored (JSON files) |
-| `ALLOW_REGISTRATION` | `true` | Set to `false` to block new accounts |
+| `ALLOW_REGISTRATION` | `true` | Initial value for registrations (can be toggled later on the Admin page) |
+| `ADMIN_USERS` | | Comma-separated usernames with admin rights |
 | `TRUST_PROXY` | `false` | Set to `true` behind nginx or Cloudflare so rate limiting sees real IPs |
 
 ---
@@ -84,6 +85,9 @@ public/assets/
 | **Multiplayer** | Groups of up to 4 players with invitations, leader controls and chat. Co-op encounters: a dungeon, an elite hunt, a challenge and a world boss. Enemies scale with group size and every player gets their own loot. |
 | **Town & professions** | A garrison-style town you build up over time, with construction timers.<br>• **Town Hall:** caps building levels and allows more constructions at once.<br>• **Inn:** sets your roster size and how many recruits are offered.<br>• **Salvage Yard:** breaks items into materials (metal, leather, cloth, gems, plus arcane dust, essences, shards and void crystals from better items). Auto-loot can salvage instead of selling.<br>• **Expedition Camp:** sets how many expeditions can run at once, how many recruits each can take, and which destinations are unlocked.<br>• **Blacksmith, Leatherworker, Tailor, Jeweler:** craft gear up to Masterwork quality and reforge old gear to a higher item level.<br>• **Enchanter's Study:** adds a permanent bonus stat to any item.<br>• **Alchemy Lab:** brews timed party elixirs (damage, defense, XP, gold, all stats) that also apply offline.<br>Every recruit has one of 8 professions with its own skill level, and crafting buildings need a worker with the matching profession. **Workers live in town and don't fight.** |
 | **Expeditions** | Send 1–3 recruits to one of 7 destinations for 15 min to 8 h. They bring back ore, herbs, gems, scraps and arcane materials, with occasional lucky finds. More recruits, higher levels and the matching profession (Mining, Herbalism, Jewelcrafting…) mean a bigger haul. Recruits on an expedition can't fight or work until they return. The server calculates the rewards when you claim them. |
+| **Uniques & item sets** | 12 named unique items with special effects, such as ignite on hit, Renew on heal, damage reflection, cooldown reset on kill, cheaper abilities or bonus damage to bosses. There are also 5 four-piece sets with 2- and 4-piece bonuses. Both drop mainly from bosses and elites (bosses about 4% unique and 6% set piece) and are never auto-sold. Effects are data-driven "procs" in `shared/data/legendaries.js`. |
+| **Auction house** | Players list items or material stacks for a fixed buyout price for 12, 24 or 48 h. You can browse with filters (slot, rarity, uniques & sets, usable by one of your characters, level, sorting) and see recent average sale prices. A listing fee and a sales tax act as gold sinks; both are adjustable. Proceeds, expired items, gifts and overflow loot arrive in the **mailbox**. |
+| **Admin page** | Only visible to admins.<br>• **Dashboard:** players online, accounts, uptime, memory, auctions, and an announcement box for every online player.<br>• **Live settings:** XP, gold and loot rates; offline cap; auction fee and tax; registrations on/off; message of the day.<br>• **Player management:** search, details, kick, timed or permanent bans, gifts of gold, materials or items (including specific uniques and set pieces) by mail, password reset, account deletion.<br>• **Audit log** of every admin action. |
 | **Rankings & inspect** | Leaderboards for hero level, party power, hero power, kills, bosses, co-op wins, achievements and world progress. You can filter by class and search. Inspect any player to see their current activity, group, stats and progress, plus the full hero build: attributes, gear, a skill tree preview, notables, and the loadout with behaviour rules. You can also see their party and invite them from there. Gold and inventory are never shown, and players can make their build private in Settings. |
 | **Progression** | XP and levels up to 60, skill tree points, ability ranks, class titles, 16 achievements and statistics. |
 
@@ -137,7 +141,8 @@ pterodactyl/       Pterodactyl egg
 
    With *Auto Update = 1*, every restart also runs `git pull`. Player data in `data/` is never touched.
 
-   Other console commands: `players` (who is online), `say <message>` (in-game announcement, e.g. `say Restarting in 2 minutes!`), `reload-clients` (refresh every open page), `help`.
+   Other console commands: `players` (who is online), `say <message>` (in-game announcement, e.g. `say Restarting in 2 minutes!`), `reload-clients` (refresh every open page), `admin add|remove|list <username>`, `help`.
+7. **Admins:** set the server variable **Admin Users** (e.g. `alice,bob`) or type `admin add alice` in the console. Admins get an extra **🛡 Admin** page in the sidebar after refreshing.
 5. **Images on the server:** commit them to `public/assets/` in the repo (recommended, so they arrive with updates), or upload them with the panel's File Manager into `public/assets/<folder>/`. Uploaded files sit outside git and survive updates. Don't upload a file with the same name as one that's also committed to the repo, or `git pull` will refuse to update.
 6. **Backups:** back up the `data/` folder, which holds all accounts and saves. The panel's Backups feature works for this.
 

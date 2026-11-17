@@ -692,3 +692,57 @@ ul.plus li::marker { content: '+ '; color: var(--good); } ul.minus li::marker { 
 .exp-estimate { background: rgba(18, 13, 12, .85); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; display: flex; flex-direction: column; gap: 4px; }
 .cost.rare { color: #c98aff; }
 @media (max-width: 1100px) { .exp-layout { grid-template-columns: 1fr; } }
+
+/* ---------- uniques & sets ---------- */
+.unique-name { color: #e8b04a !important; }
+.set-name { color: #5fe0a0 !important; }
+.unique-effect { color: #e8b04a; margin-top: 6px; }
+.flavor { color: var(--faint); font-style: italic; font-size: 11px; margin-top: 2px; }
+.set-block { margin-top: 6px; border-top: 1px solid var(--line); padding-top: 4px; }
+.set-piece { color: var(--faint); font-size: 11px; padding-left: 8px; }
+.set-bonus { color: var(--faint); font-size: 12px; } .set-bonus.on { color: #5fe0a0; }
+.art.item-icon.unique { border-color: #e8b04a !important; box-shadow: 0 0 12px rgba(232, 176, 74, .7); }
+.art.item-icon.set { border-color: #5fe0a0 !important; box-shadow: 0 0 10px rgba(95, 224, 160, .5); }
+.special-effects { background: #120d0c; border-radius: 8px; padding: 8px 10px; margin-bottom: 8px; display: flex; flex-direction: column; gap: 6px; }
+.log-proc { color: #e8b04a; font-weight: 600; }
+
+.toast.announce { border-left-color: #6ea4ff; background: linear-gradient(90deg, #142238, var(--panel2)); font-weight: 600; }
+.motd { white-space: pre-wrap; }
+
+/* ---------- auction house ---------- */
+.ah-filters { margin-bottom: 8px; }
+.ah-filters input, .ah-filters select { font-size: 12px; padding: 5px 7px; }
+.ah-filters input[type=number] { width: 72px; }
+.ah-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 6px; }
+.ah-table th { text-align: left; color: var(--faint); font-size: 11px; text-transform: uppercase; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+.ah-table td { padding: 6px 8px; border-bottom: 1px solid #241b18; vertical-align: middle; }
+.ah-table tr.mine { background: rgba(232, 116, 44, .08); }
+.ah-table .num { text-align: right; white-space: nowrap; }
+.ah-item { display: inline-flex; align-items: center; gap: 8px; }
+.ah-item > span { display: flex; flex-direction: column; }
+.ah-sell { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(280px, 1fr); gap: 16px; align-items: start; }
+.ah-sell-grid { grid-template-columns: repeat(auto-fill, minmax(52px, 1fr)); max-height: 320px; overflow-y: auto; }
+.ah-sell-form { display: flex; flex-direction: column; gap: 10px; }
+.ah-sell-form input[type=number] { width: 140px; }
+.center-row { justify-content: center; margin-top: 8px; }
+.mail-list { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+.mail { display: flex; gap: 10px; align-items: center; background: #120d0c; border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; }
+.tab-badge { color: var(--gold); }
+/* ---------- admin ---------- */
+.admin-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; margin-bottom: 14px; }
+.admin-cards.small-cards { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); margin: 10px 0; }
+.admin-card { background: #120d0c; border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; display: flex; flex-direction: column; }
+.admin-card small { color: var(--faint); font-size: 10px; text-transform: uppercase; letter-spacing: .05em; }
+.admin-card b { font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.admin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 14px; }
+.admin-grid textarea, .admin-settings textarea { width: 100%; resize: vertical; }
+.admin-settings { display: flex; flex-direction: column; gap: 6px; }
+.inline-set { display: flex; justify-content: space-between; align-items: center; gap: 10px; color: var(--text); font-size: 13px; margin: 0; }
+.inline-set input { width: 90px; display: inline-block; margin: 0; }
+.admin-log { max-height: 520px; overflow-y: auto; }
+.admin-log > div { padding: 3px 0; border-bottom: 1px solid #241b18; }
+.admin-players tbody tr { cursor: pointer; }
+.admin-give { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; background: #120d0c; border-radius: 10px; padding: 10px; }
+.admin-give input[type=number] { width: 80px; }
+pre.pw { background: #000; padding: 12px; border-radius: 8px; font-size: 18px; text-align: center; user-select: all; }
+@media (max-width: 1100px) { .ah-sell { grid-template-columns: 1fr; } }

@@ -8,6 +8,8 @@ import { Store } from './store.js';
 import { AssetIndex } from './assets.js';
 import { Game } from './game.js';
 import { computeBuildId } from './version.js';
+import { Settings } from './settings.js';
+import { AdminManager, isBanned } from './admin.js';
 import { execFile } from 'node:child_process';
 import { createAccount, verifyLogin, issueToken, accountFromToken, revokeToken, RateLimiter } from './auth.js';
 
@@ -24,7 +26,9 @@ const TRUST_PROXY = process.env.TRUST_PROXY === 'true';
 const log = (...a) => console.log(new Date().toISOString(), ...a);
 const store = new Store(DATA_DIR);
 const assets = new AssetIndex(ASSETS_DIR);
-const game = new Game({ store, assets, log, buildId: computeBuildId(ROOT) });
+const settings = new Settings(DATA_DIR, { registrationOpen: ALLOW_REGISTRATION });
+const admins = new AdminManager(DATA_DIR, process.env.ADMIN_USERS || '');
+const game = new Game({ store, assets, log, settings, admins, buildId: computeBuildId(ROOT) });
 game.loadGroups();
 const authLimiter = new RateLimiter(20, 60_000);
 
@@ -81,7 +85,7 @@ const server = http.createServer(async (req, res) => {
     if (p === '/api/assets') return json(res, 200, { assets: assets.get() });
     if (p === '/api/register' && req.method === 'POST') {
       if (!authLimiter.allow(clientIp(req))) return json(res, 429, { error: 'Too many attempts, try again in a minute' });
-      if (!ALLOW_REGISTRATION) return json(res, 403, { error: 'Registration is disabled on this server' });
+      if (!settings.get('registrationOpen')) return json(res, 403, { error: 'Registration is currently closed on this server' });
       const body = await readBody(req);
       try {
         const acc = createAccount(store, body.username, body.password);
@@ -95,6 +99,7 @@ const server = http.createServer(async (req, res) => {
       const body = await readBody(req);
       try {
         const acc = verifyLogin(store, body.username, body.password);
+        if (isBanned(acc)) return json(res, 403, { error: `This account is banned${acc.banned.until ? ` until ${new Date(acc.banned.until).toUTCString()}` : ''}: ${acc.banned.reason}` });
         const token = issueToken(store, acc);
         store.flush();
         return json(res, 200, { token, username: acc.username });
@@ -120,7 +125,7 @@ server.on('upgrade', (req, socket, head) => {
   const url = new URL(req.url, 'http://localhost');
   if (url.pathname !== '/ws') return socket.destroy();
   const account = accountFromToken(store, url.searchParams.get('token'));
-  if (!account) { socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n'); return socket.destroy(); }
+  if (!account || isBanned(account)) { socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n'); return socket.destroy(); }
   wss.handleUpgrade(req, socket, head, ws => {
     const session = game.connect(ws, account);
     ws.isAlive = true;
@@ -192,7 +197,15 @@ async function runUpdate() {
 }
 
 const COMMANDS = {
-  help: () => log('Commands: update | reload-clients | players | say <message> | stop'),
+  help: () => log('Commands: update | reload-clients | players | say <message> | admin add|remove|list <name> | stop'),
+  admin: args => {
+    const [sub, name] = args.split(/\s+/);
+    if (sub === 'list') return log('Admins:', admins.list().join(', ') || '(none)');
+    if (!name || !['add', 'remove'].includes(sub)) return log('Usage: admin add <username> | admin remove <username> | admin list');
+    if (!store.getAccount(name)) return log(`No account named "${name}"`);
+    if (sub === 'add') { admins.add(name); log(`${name} is now an admin (they may need to refresh the page).`); }
+    else log(admins.remove(name) ? `${name} is no longer an admin.` : `${name} is set via ADMIN_USERS — remove them there.`);
+  },
   stop: () => shutdown('stop'),
   update: () => runUpdate(),
   'reload-clients': () => { game.buildId = computeBuildId(ROOT); game.broadcast({ t: 'client_update', buildId: game.buildId, force: true }); log('Told all open pages to refresh.'); },

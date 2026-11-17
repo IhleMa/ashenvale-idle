@@ -30,6 +30,7 @@ function entry(m, u) {
 const bump = (map, key, label) => (map[key] ||= { key, label, total: 0, hits: 0, crits: 0, max: 0, over: 0 });
 
 export function abilityKey(ev) {
+  if (ev.proc) return `proc:${ev.proc}`;
   if (ev.ability) return ev.ability;
   if (ev.dot) return `dot:${ev.dot}`;
   if (ev.hot) return `hot:${ev.hot}`;
@@ -37,6 +38,7 @@ export function abilityKey(ev) {
 }
 export function abilityLabel(key) {
   if (key === 'auto') return 'Auto Attack';
+  if (key.startsWith('proc:')) return `${key.slice(5)} (item)`;
   if (key.startsWith('dot:')) return `${STATUSES[key.slice(4)]?.name || key.slice(4)} (DoT)`;
   if (key.startsWith('hot:')) return `${STATUSES[key.slice(4)]?.name || key.slice(4)} (HoT)`;
   return ABILITIES[key]?.name || key;

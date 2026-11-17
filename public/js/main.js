@@ -18,9 +18,11 @@ import { progressionView } from './views/progression.js';
 import { rankingsView } from './views/rankings.js';
 import { townView } from './views/town.js';
 import { expeditionsView } from './views/expeditions.js';
+import { auctionView } from './views/auction.js';
+import { adminView } from './views/admin.js';
 import { createView } from './views/create.js';
 
-const VIEWS = [combatView, characterView, skilltreeView, abilitiesView, partyView, recruitmentView, townView, expeditionsView, inventoryView, multiplayerView, rankingsView, progressionView];
+const VIEWS = [combatView, characterView, skilltreeView, abilitiesView, partyView, recruitmentView, townView, expeditionsView, inventoryView, auctionView, multiplayerView, rankingsView, progressionView, adminView];
 const viewEl = () => document.getElementById('view');
 let current = null;
 let root = null; // per-view container (listeners attached to it die with it)
@@ -69,14 +71,14 @@ function startGame() {
 
 function renderNav() {
   const nav = document.getElementById('sidebar');
-  nav.innerHTML = VIEWS.map(v => `<a href="#/${v.id}" data-view="${v.id}"><span class="nav-icon">${v.icon}</span><span class="nav-label">${v.label}</span><span class="nav-badge" data-badge="${v.id}"></span></a>`).join('');
+  nav.innerHTML = VIEWS.filter(v => !v.adminOnly || state.isAdmin).map(v => `<a href="#/${v.id}" data-view="${v.id}"><span class="nav-icon">${v.icon}</span><span class="nav-label">${v.label}</span><span class="nav-badge" data-badge="${v.id}"></span></a>`).join('');
 }
 
 function route() {
   if (!state.player) return;
   if (!state.player.heroId) { mount(createView); return; }
   const id = (location.hash.match(/^#\/(\w+)/) || [])[1] || 'combat';
-  const v = VIEWS.find(x => x.id === id) || combatView;
+  const v = VIEWS.find(x => x.id === id && (!x.adminOnly || state.isAdmin)) || combatView;
   mount(v);
 }
 
@@ -131,6 +133,7 @@ function renderTopbar() {
   setBadge('town', townReady ? '✓' : '');
   const expReady = (p.expeditions || []).filter(x => x.endsAt <= t).length;
   setBadge('expeditions', expReady ? String(expReady) : '');
+  setBadge('auction', (p.mailbox || []).length ? String(p.mailbox.length) : '');
 }
 function setBadge(id, text) {
   const b = document.querySelector(`[data-badge="${id}"]`);
@@ -160,13 +163,22 @@ function reloadSoon(reason) {
   };
   setTimeout(tryReload, 1500);
 }
+let motdShown = false;
 bus.on('msg:welcome', m => {
+  if (m.auction) { state.ahFee = m.auction.feePct; state.ahTax = m.auction.taxPct; }
+  if (!!m.isAdmin !== !!state.isAdmin) { state.isAdmin = !!m.isAdmin; renderNav(); route(); }
+  if (m.motd && !motdShown) { motdShown = true; modal(`<h2>📜 Message of the day</h2><p class="motd">${esc(m.motd)}</p><div class="row end"><button class="btn primary" data-close>OK</button></div>`); }
   if (buildId && m.buildId && m.buildId !== buildId) return reloadSoon('The game was updated — refreshing…');
   buildId = m.buildId;
 });
 bus.on('msg:client_update', m => {
   if (m.force || (m.buildId && m.buildId !== buildId)) reloadSoon('A new version of the game is available — refreshing…');
 });
+bus.on('msg:announcement', m => {
+  toast(`📢 ${m.text}`, 'announce', 12000);
+  banner(`📢 <b>Announcement:</b> ${esc(m.text)} <button class="btn tiny ghost" onclick="this.parentElement.hidden=true">✕</button>`, 'info');
+});
+bus.on('kicked', reason => banner(`${esc(reason || 'You were disconnected.')} <button class="btn tiny" onclick="location.reload()">Reconnect</button>`, 'warn'));
 bus.on('msg:server_restart', () => banner('⟳ The server is restarting for an update. You will reconnect automatically — your progress is saved.', 'warn'));
 
 bus.on('connection', s => {

@@ -3,6 +3,7 @@ import { CONFIG } from './config.js';
 import { ENEMIES } from './data/enemies.js';
 import { ZONES, COOP_ENCOUNTERS, bossWave } from './data/zones.js';
 import { generateItem } from './data/items.js';
+import { DROP_CHANCE, generateUnique, generateSetItem } from './data/legendaries.js';
 
 export function zoneLevel(zone, heroLevel) {
   return Math.max(zone.levelRange[0], Math.min(zone.levelRange[1], heroLevel));
@@ -51,7 +52,7 @@ export function killGold(kill, rng) {
 }
 
 // Returns { xp, gold, items[] } for a finished (won) battle
-export function computeRewards(kills, rng, { rewardMult = 1, lootBoost = 0 } = {}) {
+export function computeRewards(kills, rng, { rewardMult = 1, lootBoost = 0, lootMult = 1 } = {}) {
   let xp = 0, gold = 0;
   const items = [];
   for (const k of kills) {
@@ -61,7 +62,14 @@ export function computeRewards(kills, rng, { rewardMult = 1, lootBoost = 0 } = {
     const count = loot.count || 1;
     for (let i = 0; i < count; i++) {
       const chance = (loot.chance || 0.1) * (k.summoned ? 0.25 : 1) * Math.min(2, rewardMult);
-      if (rng() < chance) items.push(generateItem(rng, k.level, { boost: (loot.boost || 0) + lootBoost, minRarity: k.summoned ? 'common' : loot.minRarity || 'common' }));
+      if (rng() < chance * lootMult) items.push(generateItem(rng, k.level, { boost: (loot.boost || 0) + lootBoost, minRarity: k.summoned ? 'common' : loot.minRarity || 'common' }));
+    }
+    // uniques & set pieces
+    if (!k.summoned) {
+      const tier = k.boss ? 'boss' : k.elite ? 'elite' : 'normal';
+      const mult = Math.min(3, rewardMult) * lootMult;
+      if (rng() < DROP_CHANCE.unique[tier] * mult) { const u = generateUnique(rng, k.level); if (u) items.push(u); }
+      if (rng() < DROP_CHANCE.set[tier] * mult) { const si = generateSetItem(rng, k.level); if (si) items.push(si); }
     }
   }
   return { xp: Math.round(xp * rewardMult), gold: Math.round(gold * rewardMult), items };

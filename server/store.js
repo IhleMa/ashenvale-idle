@@ -47,6 +47,15 @@ export class Store {
     if (this.accountsDirty) { this.#writeJson(this.accountsFile, this.accounts); this.accountsDirty = false; }
   }
 
+  deleteAccount(acc) {
+    delete this.accounts[acc.username.toLowerCase()];
+    this.accountsDirty = true;
+    this.players.delete(acc.id);
+    this.dirty.delete(acc.id);
+    try { fs.unlinkSync(path.join(this.playersDir, acc.id + '.json')); } catch { /* no save yet */ }
+    this.flush();
+  }
+
   allPlayerNames() {
     return Object.values(this.accounts).map(a => ({ id: a.id, username: a.username }));
   }

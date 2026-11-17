@@ -32,7 +32,7 @@ export function newPlayer(account) {
     stats: { kills: 0, bossKills: 0, recruited: 0, epicFound: 0, legendaryFound: 0, coopWins: 0, heroLevel: 1, zonesUnlocked: 1, fights: 0 },
     achievements: {},
     settings: { autoSellBelow: null, autoLootAction: 'sell', autoDevelopRecruits: true, autoDevelopHero: false, publicProfile: true },
-    coopChars: [],
+    coopChars: [], mailbox: [],
   };
 }
 
@@ -238,6 +238,12 @@ export function receiveItem(p, item) {
   const r = rarityIndex(item.rarity);
   if (r >= 3) p.stats.epicFound++;
   if (r >= 4) p.stats.legendaryFound++;
+  if (item.unique || item.set) {
+    // uniques and set pieces are never auto-sold; overflow goes to the mailbox
+    if (p.inventory.length >= CONFIG.inventory.limit) { sendMail(p, { item, from: 'Loot', note: 'Your inventory was full.' }); return 'mailed'; }
+    p.inventory.push(item);
+    return 'kept';
+  }
   const below = p.settings.autoSellBelow;
   if ((below && r <= rarityIndex(below)) || p.inventory.length >= CONFIG.inventory.limit) {
     // auto-loot: salvage into materials (Salvage Yard) or sell for gold
@@ -247,6 +253,32 @@ export function receiveItem(p, item) {
   }
   p.inventory.push(item);
   return 'kept';
+}
+
+// --------------------------------------------------------------------------- mailbox
+// Mail carries items, gold or materials (auction sales, expired listings, overflow loot, admin gifts).
+export function sendMail(p, { item = null, gold = 0, materials = null, from = 'System', note = '' }) {
+  p.mailbox ||= [];
+  p.mailbox.push({ id: uid(), item, gold: Math.max(0, Math.floor(gold)), materials, from, note, at: Date.now() });
+  if (p.mailbox.length > 200) p.mailbox.splice(0, p.mailbox.length - 200);
+}
+
+export function collectMail(p, { id }) {
+  p.mailbox ||= [];
+  const ids = id ? [String(id)] : p.mailbox.map(m => m.id);
+  let gold = 0, items = 0, skipped = 0;
+  for (const mid of ids) {
+    const idx = p.mailbox.findIndex(m => m.id === mid);
+    if (idx < 0) continue;
+    const m = p.mailbox[idx];
+    if (m.item && p.inventory.length >= CONFIG.inventory.limit) { skipped++; continue; }
+    if (m.item) { p.inventory.push(m.item); items++; }
+    if (m.gold) { p.gold += m.gold; gold += m.gold; }
+    if (m.materials) { p.town ||= { materials: {} }; for (const [k, v] of Object.entries(m.materials)) p.town.materials[k] = (p.town.materials[k] || 0) + v; }
+    p.mailbox.splice(idx, 1);
+  }
+  if (!gold && !items && skipped) fail('Your inventory is full');
+  return { gold, items, skipped };
 }
 
 // --------------------------------------------------------------------------- recruitment
@@ -427,7 +459,7 @@ export function publicPlayer(p) {
     parties: p.parties, activeParty: p.activeParty, zone: p.zone, unlockedZones: p.unlockedZones, bossKills: p.bossKills,
     recruitment: { ...p.recruitment, costs: Object.fromEntries(p.recruitment.offers.map(o => [o.offerId, recruitCost(p, o)])) },
     stats: p.stats, achievements: p.achievements, settings: p.settings, coopChars: p.coopChars,
-    town: p.town, expeditions: p.expeditions || [], serverTime: Date.now(),
+    town: p.town, expeditions: p.expeditions || [], mailbox: p.mailbox || [], serverTime: Date.now(),
   };
 }
 

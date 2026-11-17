@@ -14,6 +14,7 @@ import { CONFIG } from '../shared/config.js';
 import { AssetIndex } from '../server/assets.js';
 import { BUILDINGS, MATERIALS, PROFESSIONS, ELIXIRS } from '../shared/data/town.js';
 import { EXPEDITIONS } from '../shared/data/expeditions.js';
+import { UNIQUES, SETS } from '../shared/data/legendaries.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const index = new AssetIndex(path.join(ROOT, 'public', 'assets')).get();
@@ -40,6 +41,8 @@ md += section('Abilities', 'abilities', Object.values(ABILITIES).filter(a => a.c
 md += section('Enemy abilities (optional)', 'abilities', Object.values(ABILITIES).filter(a => a.classId === 'enemy').map(a => [a.id, a.name]));
 md += section('Item bases', 'items', Object.entries(ITEM_BASES).map(([id, b]) => [id, `${b.name} (${SLOTS[b.slot].label})`]),
   `Square icons. You can also add a rarity-specific version: \`items/<base>_<rarity>.png\` (rarities: ${CONFIG.rarities.map(r => r.id).join(', ')}), e.g. \`items/sword_legendary.png\`.`);
+md += section('Unique items', 'items', Object.values(UNIQUES).map(u => [`unique_${u.id}`, `${u.name} (falls back to items/${u.baseId})`]), 'Optional special art for each unique item.');
+md += section('Set pieces', 'items', Object.values(SETS).flatMap(st => Object.entries(st.pieces).map(([b, nm]) => [`set_${st.id}_${b}`, `${nm} — ${st.name}`])), 'Optional art per set piece. Fallback order: items/set_<set>_<base> → items/set_<set> → items/<base>.');
 md += section('Empty equipment slots (optional)', 'items', Object.entries(SLOTS).map(([id, s]) => [`slot_${id}`, `${s.label} slot placeholder / generic fallback`]));
 md += section('Enemies & bosses', 'enemies', Object.values(ENEMIES).map(e => [e.id, `${e.name}${e.boss ? ' (boss)' : ''}`]),
   'Square or portrait images; shown in circles in combat.');

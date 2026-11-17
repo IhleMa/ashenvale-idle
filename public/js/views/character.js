@@ -9,6 +9,7 @@ import { CLASSES, TRAITS } from '/shared/data/classes.js';
 import { SLOTS, SLOT_IDS, canEquip } from '/shared/data/items.js';
 import { computeStats, ATTRIBUTES, powerRating } from '/shared/stats.js';
 import { abilitySlots } from '/shared/character.js';
+import { activeSetBonuses, equippedSetCounts, SETS, UNIQUES } from '/shared/data/legendaries.js';
 import { availablePoints, treeStats } from '/shared/skilltree.js';
 import { PROFESSIONS, BUILDINGS, professionXpToNext } from '/shared/data/town.js';
 import { professionIcon } from '../assets.js';
@@ -95,17 +96,29 @@ export const characterView = {
           <div class="equip-grid">
             ${SLOT_IDS.map(slot => {
               const it = ch.equipment[slot];
-              return `<button class="equip-slot" data-act="slot" data-slot="${slot}" ${it ? tipAttr(itemTooltipHtml(it)) : ''}>
+              return `<button class="equip-slot" data-act="slot" data-slot="${slot}" ${it ? tipAttr(itemTooltipHtml(it, null, ch)) : ''}>
                 ${it ? itemIcon(it, 'md') : slotIcon(slot, 'md')}
-                <span class="slot-text"><small>${esc(SLOTS[slot].label)}</small><b class="${it ? `rarity-text rarity-${it.rarity}` : 'muted'}">${it ? esc(it.name) : 'Empty'}</b></span>
+                <span class="slot-text"><small>${esc(SLOTS[slot].label)}</small><b class="${it ? `rarity-text rarity-${it.rarity} ${it.unique ? 'unique-name' : ''} ${it.set ? 'set-name' : ''}` : 'muted'}">${it ? esc(it.name) : 'Empty'}</b></span>
               </button>`;
             }).join('')}
           </div>
+          ${specialEffectsHtml(ch)}
           <div class="muted small">${p.inventory.filter(i => canEquip(i, ch)).length} usable item(s) in inventory.</div>
         </section>
       </div>`;
   },
 };
+
+function specialEffectsHtml(ch) {
+  const uniques = Object.values(ch.equipment).filter(i => i?.unique && UNIQUES[i.unique]);
+  const counts = equippedSetCounts(ch);
+  if (!uniques.length && !Object.keys(counts).length) return '';
+  return `<div class="special-effects">
+    ${uniques.map(i => `<div class="small"><span class="unique-name">✦ ${esc(UNIQUES[i.unique].name)}:</span> ${esc(UNIQUES[i.unique].description)}</div>`).join('')}
+    ${Object.entries(counts).map(([sid, n]) => `<div class="small"><span class="set-name">${esc(SETS[sid].name)} (${n}/${Object.keys(SETS[sid].pieces).length})</span>
+      ${Object.entries(SETS[sid].bonuses).map(([need, b]) => `<div class="set-bonus ${n >= Number(need) ? 'on' : ''}">(${need}) ${esc(b.description)}</div>`).join('')}</div>`).join('')}
+  </div>`;
+}
 
 function statRow(label, value, tip) {
   return `<div class="stat-row" ${tip ? tipAttr(esc(tip)) : ''}><span>${esc(label)}</span><b>${value}</b></div>`;
@@ -140,7 +153,7 @@ function openSlot(ch, slot) {
       const ok = canEquip(i, ch);
       return `<div class="item-choice ${ok ? '' : 'disabled'}">
         ${itemIcon(i, 'md')}
-        <div class="grow">${itemTooltipHtml(i, current)}</div>
+        <div class="grow">${itemTooltipHtml(i, current, ch)}</div>
         <button class="btn small primary" data-equip="${i.uid}" ${ok ? '' : 'disabled'}>${ok ? 'Equip' : i.requiredLevel > ch.level ? `Lv ${i.requiredLevel}` : 'Wrong class'}</button>
       </div>`;
     }).join('') : '<p class="muted">No items for this slot. Defeat enemies to find loot!</p>'}</div>`, { wide: true });

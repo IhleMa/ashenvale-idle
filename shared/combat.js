@@ -6,6 +6,7 @@ import { ABILITIES } from './data/abilities.js';
 import { STATUSES } from './data/statuses.js';
 import { ENEMIES, enemyStatsAt } from './data/enemies.js';
 import { computeStats } from './stats.js';
+import { equipmentEffects } from './data/legendaries.js';
 import { createRng } from './rng.js';
 import { resolveRule, hpPct, hasStatus, enemiesOf, alliesOf } from './rules.js';
 
@@ -17,7 +18,9 @@ export function makeCharacterUnit(ch, { ownerId, ownerName, position, bonuses = 
   const cls = CLASSES[ch.classId];
   const s = computeStats(ch);
   const role = CONFIG.roles[ch.role] || {};
+  const fx = equipmentEffects(ch); // uniques & set bonuses
   return {
+    procs: fx.procs.map(p => ({ ...p, lastAt: -1e9, used: false })), passives: fx.passives,
     uid: 0, side: 'A', kind: 'character', name: ch.name, defId: ch.classId, classId: ch.classId,
     charId: ch.id, ownerId, ownerName, isMain: !!ch.isMain, portrait: ch.portrait || null,
     level: ch.level, role: ch.role, tags: ['hero'], position,
@@ -173,19 +176,21 @@ function act(b, u) {
     const ab = ABILITIES[abilityId];
     if (!ab || (u.cooldowns[abilityId] || 0) > 0) continue;
     const rule = u.rules[abilityId];
+    const cost = Math.ceil(ab.cost * Math.max(0, 1 + (u.passives?.costPct || 0)));
     if (u.resourceDef) {
-      if (u.resource < ab.cost) {
-        if (rule?.reserve !== false && ab.cost > reserved && resolveRule(rule, ab, b, u)) reserved = ab.cost;
+      if (u.resource < cost) {
+        if (rule?.reserve !== false && cost > reserved && resolveRule(rule, ab, b, u)) reserved = cost;
         continue;
       }
-      if (reserved && u.resource - ab.cost < reserved) continue;
+      if (reserved && u.resource - cost < reserved) continue;
     }
     const targets = resolveRule(rule, ab, b, u);
     if (!targets) continue;
-    if (u.resourceDef) u.resource -= ab.cost;
+    if (u.resourceDef) u.resource -= cost;
     u.cooldowns[abilityId] = ab.cooldown;
     emit(b, { type: 'ability', src: u.uid, ability: abilityId, tgts: targets.map(t => t.uid) });
     for (const t of targets) for (const eff of ab.effects) applyEffect(b, u, t, eff, abilityId);
+    fireProcs(b, u, 'cast', { ability: abilityId, area: !!ab.area, target: targets[0] });
     u.actionTimer = gcd;
     return;
   }
@@ -220,13 +225,13 @@ function applyEffect(b, src, tgt, eff, abilityId) {
       for (let i = 0; i < hits && tgt.alive; i++) {
         let amount = effPower(src, eff.stat) * eff.power * rm;
         if (eff.executeBelow && hpPct(tgt) < eff.executeBelow * 100) amount *= eff.executeMult || 2;
-        dealDamage(b, src, tgt, amount, { school: eff.school, ability: abilityId, bonusCrit: eff.bonusCrit });
+        dealDamage(b, src, tgt, amount, { school: eff.school, ability: abilityId, bonusCrit: eff.bonusCrit, proc: eff.proc });
       }
       break;
     }
     case 'heal': {
       if (!tgt.alive) return;
-      healUnit(b, src, tgt, effPower(src, eff.stat) * eff.power * rm, abilityId);
+      healUnit(b, src, tgt, effPower(src, eff.stat) * eff.power * rm, abilityId, null, eff.proc);
       break;
     }
     case 'status': {
@@ -318,13 +323,17 @@ function tickStatuses(b, u) {
   if (u.statuses.length !== before) emit(b, { type: 'status_end', tgt: u.uid });
 }
 
-function dealDamage(b, src, tgt, raw, { school, ability, bonusCrit = 0, dot = null, ignoreArmor = false, noCrit = false }) {
+function dealDamage(b, src, tgt, raw, { school, ability, bonusCrit = 0, dot = null, ignoreArmor = false, noCrit = false, proc = null }) {
   if (!tgt.alive) return 0;
   if (!dot && school === 'physical' && mod(tgt, 'dodge') > 0 && b.rng() < mod(tgt, 'dodge')) {
     emit(b, { type: 'miss', src: src.uid, tgt: tgt.uid, ability });
     return 0;
   }
   let amount = raw * (1 + src.bonuses.damagePct + mod(src, 'damagePct'));
+  if (src.passives) {
+    if (src.passives.damageVsBossPct && tgt.boss) amount *= 1 + src.passives.damageVsBossPct;
+    if (src.passives.damageVsHighHpPct && hpPct(tgt) > 80) amount *= 1 + src.passives.damageVsHighHpPct;
+  }
   let crit = false;
   if (!noCrit && b.rng() < Math.min(C.critCap, src.stats.critChance + bonusCrit)) { crit = true; amount *= src.stats.critDamage; }
   if (!ignoreArmor) {
@@ -345,17 +354,72 @@ function dealDamage(b, src, tgt, raw, { school, ability, bonusCrit = 0, dot = nu
     amount -= absorbed;
   }
   tgt.hp = Math.max(0, tgt.hp - amount);
-  emit(b, { type: 'damage', src: src.uid, tgt: tgt.uid, amount, absorbed, crit, ability, dot, school });
+  emit(b, { type: 'damage', src: src.uid, tgt: tgt.uid, amount, absorbed, crit, ability, dot, school, ...(proc ? { proc } : {}) });
 
   if (tgt.threatTable && src.side !== tgt.side) tgt.threatTable[src.uid] = (tgt.threatTable[src.uid] || 0) + (amount + absorbed) * src.threatMult;
   if (tgt.resourceDef?.onDamaged) tgt.resource = Math.min(tgt.resourceMax, tgt.resource + tgt.resourceDef.onDamaged);
 
   if (tgt.hp <= 0) kill(b, src, tgt);
   else if (tgt.phases?.length) checkPhases(b, tgt);
+  if (!dot && !proc) {
+    fireProcs(b, src, 'hit', { target: tgt, amount, school, ability });
+    if (crit) fireProcs(b, src, 'crit', { target: tgt, amount, school, ability });
+    if (tgt.alive) fireProcs(b, tgt, 'struck', { source: src, amount: amount + absorbed, school });
+  }
+  if (tgt.alive && tgt.procs?.length && hpPct(tgt) < 30) fireProcs(b, tgt, 'lowHp', {});
   return amount;
 }
 
-function healUnit(b, src, tgt, raw, ability, hot = null) {
+// ---------------------------------------------------------------- procs (uniques & set bonuses)
+function procTargets(b, u, p, ctx) {
+  switch (p.target) {
+    case 'self': return [u];
+    case 'target': return ctx.target?.alive ? [ctx.target] : [];
+    case 'source': return ctx.source?.alive ? [ctx.source] : [];
+    case 'randomEnemy': { const f = enemiesOf(b, u); return f.length ? [f[Math.floor(b.rng() * f.length)]] : []; }
+    case 'lowestAlly': { const a = alliesOf(b, u); return a.length ? [a.reduce((m, x) => (hpPct(x) < hpPct(m) ? x : m), a[0])] : []; }
+    case 'allAllies': return alliesOf(b, u);
+    default: return [];
+  }
+}
+
+function fireProcs(b, u, trigger, ctx) {
+  if (!u.procs?.length || !u.alive || b.procDepth > 0) return;
+  b.procDepth = (b.procDepth || 0) + 1;
+  try {
+    for (const p of u.procs) {
+      if (p.trigger !== trigger) continue;
+      if (p.once && p.used) continue;
+      if (p.icd && b.time - p.lastAt < p.icd) continue;
+      const f = p.filter;
+      if (f?.ability && ctx.ability !== f.ability) continue;
+      if (f?.area && !ctx.area) continue;
+      if (f?.school && ctx.school !== f.school) continue;
+      if (p.chance < 1 && b.rng() >= p.chance) continue;
+      const targets = procTargets(b, u, p, ctx);
+      if (!targets.length) continue;
+      p.lastAt = b.time;
+      p.used = true;
+      emit(b, { type: 'proc', src: u.uid, name: p.name, tgt: targets[0].uid });
+      for (const t of targets) applyProcEffect(b, u, t, p, ctx);
+    }
+  } finally {
+    b.procDepth--;
+  }
+}
+
+function applyProcEffect(b, u, t, p, ctx) {
+  const e = p.effect;
+  switch (e.kind) {
+    case 'reflect': if (t.alive && ctx.amount) dealDamage(b, u, t, ctx.amount * e.pct, { school: 'physical', ignoreArmor: true, noCrit: true, proc: p.name }); break;
+    case 'healPct': healUnit(b, u, t, t.maxHp * e.pct, null, null, p.name); break;
+    case 'shieldPct': applyStatus(b, u, t, 'barrier', e.duration, t.maxHp * e.pct, 1); break;
+    case 'cooldowns': for (const k in t.cooldowns) t.cooldowns[k] = Math.max(0, t.cooldowns[k] - e.seconds); break;
+    default: applyEffect(b, u, t, { ...e, proc: p.name }, null);
+  }
+}
+
+function healUnit(b, src, tgt, raw, ability, hot = null, proc = null) {
   if (!tgt.alive) return 0;
   let amount = raw * (1 + src.bonuses.healingPct) * Math.max(0, 1 + mod(tgt, 'healingTakenPct'));
   let crit = false;
@@ -363,7 +427,8 @@ function healUnit(b, src, tgt, raw, ability, hot = null) {
   amount = Math.round(amount);
   const effective = Math.min(amount, tgt.maxHp - tgt.hp);
   tgt.hp += effective;
-  emit(b, { type: 'heal', src: src.uid, tgt: tgt.uid, amount: effective, overheal: amount - effective, crit, ability, hot });
+  emit(b, { type: 'heal', src: src.uid, tgt: tgt.uid, amount: effective, overheal: amount - effective, crit, ability, hot, ...(proc ? { proc } : {}) });
+  if (ability && !hot && !proc) fireProcs(b, src, 'heal', { target: tgt, ability });
   // healing generates a little threat on all enemies
   if (effective > 0 && src.side === 'A') {
     for (const e of enemiesOf(b, src)) if (e.threatTable) e.threatTable[src.uid] = (e.threatTable[src.uid] || 0) + effective * 0.4;
@@ -376,7 +441,8 @@ function kill(b, src, tgt) {
   tgt.hp = 0;
   tgt.statuses = [];
   emit(b, { type: 'death', src: src.uid, tgt: tgt.uid });
-  if (tgt.side === 'B') b.kills.push({ enemyId: tgt.defId, level: tgt.level, boss: !!tgt.boss, summoned: !!tgt.summoned });
+  if (tgt.side === 'B') b.kills.push({ enemyId: tgt.defId, level: tgt.level, boss: !!tgt.boss, elite: !!tgt.tags?.includes('elite'), summoned: !!tgt.summoned });
+  if (src !== tgt) fireProcs(b, src, 'kill', { target: tgt });
 }
 
 function checkPhases(b, u) {

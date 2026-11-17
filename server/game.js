@@ -11,6 +11,8 @@ import { idleWaves, bossWaves, coopWaves, coopScale, computeRewards, zoneLevel }
 import { createRng, randomSeed } from '../shared/rng.js';
 import { ABILITIES } from '../shared/data/abilities.js';
 import { Rankings } from './rankings.js';
+import { AuctionHouse } from './auction.js';
+import { adminActions } from './admin.js';
 import * as TL from './townLogic.js';
 import * as XL from './expeditionLogic.js';
 import { EXPEDITIONS } from '../shared/data/expeditions.js';
@@ -18,13 +20,16 @@ import { elixirBonuses } from '../shared/town.js';
 import * as L from './playerLogic.js';
 
 const { GameError } = L;
-const READ_ONLY = new Set(['get_rankings', 'inspect_player']);
+const READ_ONLY = new Set(['get_rankings', 'inspect_player', 'ah_search', 'ah_mine']);
 const fail = m => { throw new GameError(m); };
 
 export class Game {
-  constructor({ store, assets, buildId = 'dev', log = console.log }) {
+  constructor({ store, assets, settings, admins = null, buildId = 'dev', log = console.log }) {
     this.buildId = buildId;
-    this.rankings = new Rankings(this);
+    this.settings = settings;
+    this.admins = admins;
+    this.startedAt = Date.now();
+
     this.store = store;
     this.assets = assets;
     this.log = log;
@@ -34,6 +39,9 @@ export class Game {
     this.tickHandle = null;
     this.saveHandle = null;
     this.onlineDirty = true;
+    this.rankings = new Rankings(this);
+    this.auction = new AuctionHouse(this);
+    this.adminActions = adminActions(this);
   }
 
   start() {
@@ -47,6 +55,7 @@ export class Game {
     const now = Date.now();
     for (const s of this.sessions.values()) { s.player.lastActive = now; this.store.savePlayerSoon(s.player); }
     this.store.flush();
+    this.auction.save();
     this.saveGroups();
   }
 
@@ -77,9 +86,12 @@ export class Game {
     const now = Date.now();
     for (const s of this.sessions.values()) { s.player.lastActive = now; this.store.savePlayerSoon(s.player); }
     this.store.flush();
+    this.auction.save();
   }
 
   // ------------------------------------------------------------------ connections
+  isAdmin(account) { return !!this.admins?.has(account.username.toLowerCase()); }
+
   connect(ws, account) {
     let player = this.store.loadPlayer(account.id);
     if (!player) { player = L.newPlayer(account); this.store.savePlayerSoon(player); }
@@ -92,7 +104,7 @@ export class Game {
     }
     if (s.graceTimer) { clearTimeout(s.graceTimer); s.graceTimer = null; } // reconnected within the grace period
     s.sockets.add(ws);
-    this.send(ws, { t: 'welcome', playerId: player.id, name: player.name, serverTime: Date.now(), buildId: this.buildId, config: { version: CONFIG.version } });
+    this.send(ws, { t: 'welcome', playerId: player.id, name: player.name, serverTime: Date.now(), buildId: this.buildId, config: { version: CONFIG.version }, isAdmin: this.isAdmin(account), motd: this.settings.get('motd') || '', auction: { feePct: this.settings.get('auctionFeePct'), taxPct: this.settings.get('auctionTaxPct') } });
     if (first) this.handleOffline(s);
     L.maybeAutoRefreshRecruits(player, this.assets.get());
     s.stateDirty = true;
@@ -158,14 +170,16 @@ export class Game {
 
     if (msg.t === 'ping') return this.send(ws, { t: 'pong', id: msg.id, serverTime: now });
     if (msg.t !== 'action') return;
-    const handler = this.actions[msg.type];
+    const isAdminAction = typeof msg.type === 'string' && msg.type.startsWith('admin_');
+    if (isAdminAction && !this.admins?.has(s.player.name)) return this.send(ws, { t: 'result', id: msg.id, ok: false, error: 'Admins only' });
+    const handler = isAdminAction ? this.adminActions[msg.type] : this.actions[msg.type];
     if (!handler) return this.send(ws, { t: 'result', id: msg.id, ok: false, error: 'Unknown action' });
     try {
       const payload = msg.payload && typeof msg.payload === 'object' ? msg.payload : {};
       const p = s.player;
-      if (!p.heroId && msg.type !== 'create_hero') fail('Create your hero first');
+      if (!p.heroId && msg.type !== 'create_hero' && !isAdminAction) fail('Create your hero first');
       const result = handler.call(this, s, payload);
-      if (!READ_ONLY.has(msg.type)) this.markDirty(s);
+      if (!READ_ONLY.has(msg.type) && !isAdminAction) this.markDirty(s);
       this.send(ws, { t: 'result', id: msg.id, ok: true, result: result ?? null });
       this.flushState(s);
     } catch (e) {
@@ -223,6 +237,13 @@ export class Game {
     reforge_item(s, d) { const r = TL.reforge(s.player, d, L.hero(s.player).level); this.profToast(s, r.msg); return r; },
     enchant_item(s, d) { const r = TL.enchant(s.player, d); this.profToast(s, r.msg); return r; },
     brew_elixir(s, d) { const r = TL.brew(s.player, d, L.hero(s.player).level); this.profToast(s, r.msg); return r; },
+
+    collect_mail(s, d) { return L.collectMail(s.player, { id: d.id }); },
+    ah_search(s, d) { return this.auction.search(s.player, d); },
+    ah_mine(s) { return this.auction.mine(s.player); },
+    ah_list(s, d) { return this.auction.list(s.player, { itemUid: d.itemUid ? String(d.itemUid) : null, material: d.material ? String(d.material) : null, qty: d.qty, price: d.price, hours: d.hours }); },
+    ah_cancel(s, d) { this.auction.cancel(s.player, { id: String(d.id) }); },
+    ah_buy(s, d) { return this.auction.buy(s.player, { id: String(d.id) }); },
 
     get_rankings(s, d) {
       return this.rankings.board({ category: String(d.category || 'level'), classId: d.classId ? String(d.classId) : null, search: d.search, limit: Number(d.limit) || 100 }, s.player.id);
@@ -378,7 +399,7 @@ export class Game {
     const summary = { result: battle.state, kind, zoneId };
     p.stats.fights++;
     if (battle.state === 'victory') {
-      const rewards = this.applyElixirRewards(p, computeRewards(battle.kills, createRng(randomSeed())));
+      const rewards = this.applyElixirRewards(p, computeRewards(battle.kills, createRng(randomSeed()), { lootMult: this.settings.get('lootRate') }));
       rewards.kills = battle.kills.length;
       const chars = s.solo.chars.map(id => p.characters[id]).filter(Boolean);
       if (kind === 'boss') {
@@ -400,8 +421,8 @@ export class Game {
 
   applyElixirRewards(p, rewards, at = Date.now()) {
     const eb = elixirBonuses(p, at);
-    rewards.xp = Math.round(rewards.xp * (1 + eb.xpPct));
-    rewards.gold = Math.round(rewards.gold * (1 + eb.goldPct));
+    rewards.xp = Math.round(rewards.xp * (1 + eb.xpPct) * this.settings.get('xpRate'));
+    rewards.gold = Math.round(rewards.gold * (1 + eb.goldPct) * this.settings.get('goldRate'));
     return rewards;
   }
 
@@ -415,6 +436,7 @@ export class Game {
 
   tick() {
     const now = Date.now();
+    if (!this.lastAuctionSweep || now - this.lastAuctionSweep > 30000) { this.lastAuctionSweep = now; this.auction.sweepExpired(); }
     if (!this.lastTownCheck || now - this.lastTownCheck > 1000) {
       this.lastTownCheck = now;
       for (const s of this.sessions.values()) {
@@ -446,7 +468,7 @@ export class Game {
   handleOffline(s) {
     const p = s.player;
     if (!p.heroId) return;
-    const elapsedMs = Math.min(Date.now() - (p.lastActive || Date.now()), CONFIG.offline.maxHours * 3600 * 1000);
+    const elapsedMs = Math.min(Date.now() - (p.lastActive || Date.now()), this.settings.get('offlineMaxHours') * 3600 * 1000);
     if (elapsedMs < CONFIG.offline.minSeconds * 1000) return;
     const summary = this.simulateOffline(p, elapsedMs / 1000);
     p.lastActive = Date.now();
@@ -472,7 +494,7 @@ export class Game {
       simTime += b.time + (b.state === 'victory' ? CONFIG.combat.restBetweenFights : CONFIG.combat.reviveDelay);
       if (b.state !== 'victory') continue;
       wins++;
-      const r = this.applyElixirRewards(p, computeRewards(b.kills, rng, { rewardMult: CONFIG.offline.efficiency }), at);
+      const r = this.applyElixirRewards(p, computeRewards(b.kills, rng, { rewardMult: CONFIG.offline.efficiency, lootMult: this.settings.get('lootRate') }), at);
       r.kills = b.kills.length;
       xp += r.xp; gold += r.gold; kills += r.kills;
       const res = L.applyRewards(p, chars, r);
@@ -604,7 +626,7 @@ export class Game {
       if (!p) continue;
       const summary = { result: b.state, kind: 'coop', encounterId: enc.id };
       if (b.state === 'victory') {
-        const rewards = this.applyElixirRewards(p, computeRewards(b.kills, createRng(randomSeed()), { rewardMult: enc.rewardMult, lootBoost: 0.5 }));
+        const rewards = this.applyElixirRewards(p, computeRewards(b.kills, createRng(randomSeed()), { rewardMult: enc.rewardMult, lootBoost: 0.5, lootMult: this.settings.get('lootRate') }));
         rewards.kills = b.kills.length;
         p.stats.coopWins++;
         p.stats.bossKills += b.kills.filter(k => k.boss).length;

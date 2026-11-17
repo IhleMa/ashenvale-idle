@@ -13,7 +13,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 let failures = 0;
 const check = (cond, msg) => { console.log(`${cond ? '✔' : '✘'} ${msg}`); if (!cond) failures++; };
 
-const srv = spawn(process.execPath, ['server/index.js'], { env: { ...process.env, PORT, DATA_DIR: DATA }, stdio: ['pipe', 'pipe', 'inherit'] });
+const srv = spawn(process.execPath, ['server/index.js'], { env: { ...process.env, PORT, DATA_DIR: DATA, ADMIN_USERS: 'alice' }, stdio: ['pipe', 'pipe', 'inherit'] });
 await new Promise(res => srv.stdout.on('data', d => { if (String(d).includes('listening')) res(); }));
 
 async function api(p, body) {
@@ -136,6 +136,48 @@ try {
   check(b.group.chat.some(c => c.text.includes('hello')), 'group chat works');
   res = await b.act('group_leave');
   check(res.ok, 'bob left group');
+
+  // admin & auction house
+  res = await b.act('admin_overview');
+  check(!res.ok && /Admins only/.test(res.error), 'non-admin blocked from admin actions');
+  res = await a.act('admin_overview');
+  check(res.ok && res.result.accounts === 2, 'admin overview works');
+  const bobId = b.state.id;
+  res = await a.act('admin_give', { id: bobId, gold: 1000, item: { type: 'unique', uniqueId: 'emberheart', level: 10 } });
+  check(res.ok && res.result.item.unique === 'emberheart', 'admin gift: unique item');
+  await sleep(300);
+  check(b.state.mailbox.length === 2, 'gift arrives by mail');
+  const bobGold = b.state.gold;
+  res = await b.act('collect_mail', {});
+  await sleep(200);
+  check(res.ok && b.state.gold === bobGold + 1000 && b.state.inventory.some(i => i.unique === 'emberheart'), 'mail collected (gold + unique)');
+  const uniqueItem = b.state.inventory.find(i => i.unique === 'emberheart');
+  res = await b.act('ah_list', { itemUid: uniqueItem.uid, price: 500, hours: 24 });
+  check(res.ok && res.result.fee === 10, 'listed unique on auction house (fee 2%)');
+  await sleep(200);
+  check(!b.state.inventory.some(i => i.uid === uniqueItem.uid), 'listed item left the inventory');
+  res = await b.act('ah_buy', { id: res.result.listing.id });
+  check(!res.ok, 'cannot buy own auction');
+  res = await a.act('ah_search', { query: 'ember' });
+  check(res.ok && res.result.rows.length === 1, 'auction search finds listing');
+  const listingId = res.result.rows[0].id;
+  await a.act('admin_give', { id: a.state.id, gold: 2000 });
+  await a.act('collect_mail', {});
+  await sleep(200);
+  const aliceGold = a.state.gold;
+  res = await a.act('ah_buy', { id: listingId });
+  await sleep(300);
+  check(res.ok && a.state.gold === aliceGold - 500 && a.state.inventory.some(i => i.uid === uniqueItem.uid), 'buyer paid and received the item');
+  check(b.state.mailbox.some(m => m.gold === 475), 'seller got 475 gold by mail (5% tax)');
+  res = await a.act('admin_ban', { id: bobId, reason: 'testing', hours: 1 });
+  await sleep(300);
+  const banned = await api('/api/login', { username: 'bob', password: 'secret456' });
+  check(res.ok && banned.status === 403, 'banned player cannot log in');
+  await a.act('admin_unban', { id: bobId });
+  const unbanned = await api('/api/login', { username: 'bob', password: 'secret456' });
+  check(unbanned.status === 200, 'unbanned player can log in again');
+  res = await a.act('admin_settings', { changes: { xpRate: 2, motd: 'Welcome!' } });
+  check(res.ok && res.result.xpRate === 2, 'admin settings saved');
 
   // offline progression
   a.ws.close();

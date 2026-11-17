@@ -2,6 +2,7 @@
 import { CONFIG } from './config.js';
 import { CLASSES, TRAITS, classTier } from './data/classes.js';
 import { treeStats } from './skilltree.js';
+import { setStatBonuses } from './data/legendaries.js';
 
 export const ATTRIBUTES = {
   str: { label: 'Strength', short: 'STR' },
@@ -18,6 +19,7 @@ function collectBonuses(ch) {
   for (const t of cls.tiers) if (ch.level >= t.level && (!t.mainOnly || ch.isMain)) add(t.bonus);
   if (ch.trait && TRAITS[ch.trait]) add(TRAITS[ch.trait].bonus);
   if (ch.tree) add(treeStats(ch)); // skill tree: flat attributes (str/int/dex/vit) and % bonuses
+  add(setStatBonuses(ch));          // item set bonuses
   return bonus;
 }
 

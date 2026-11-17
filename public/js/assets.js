@@ -8,6 +8,7 @@ import { STATUSES } from '/shared/data/statuses.js';
 import { ENEMIES } from '/shared/data/enemies.js';
 import { ITEM_BASES, SLOTS } from '/shared/data/items.js';
 import { rarityById } from '/shared/config.js';
+import { specialItemImageKeys } from '/shared/data/legendaries.js';
 import { esc } from './ui.js';
 
 let index = {};
@@ -74,8 +75,8 @@ export function abilityIcon(abilityId, cls = '') {
 const SLOT_GLYPH = { weapon: '⚔', offhand: '⛨', head: '⛑', chest: '👕', hands: '🧤', feet: '👢', ring: '💍', amulet: '📿' };
 export function itemIcon(item, cls = '') {
   const r = rarityById(item.rarity);
-  const url = assetUrl(`items/${item.baseId}_${item.rarity}`, `items/${item.baseId}`, `items/slot_${item.slot || ITEM_BASES[item.baseId]?.slot}`);
-  return render(url, { cls: `item-icon rarity-${item.rarity} ${cls}`, color: r.color, glyph: SLOT_GLYPH[item.slot || ITEM_BASES[item.baseId]?.slot] || '◆', title: item.name });
+  const url = assetUrl(...specialItemImageKeys(item), `items/${item.baseId}_${item.rarity}`, `items/${item.baseId}`, `items/slot_${item.slot || ITEM_BASES[item.baseId]?.slot}`);
+  return render(url, { cls: `item-icon rarity-${item.rarity} ${item.unique ? 'unique' : ''} ${item.set ? 'set' : ''} ${cls}`, color: r.color, glyph: SLOT_GLYPH[item.slot || ITEM_BASES[item.baseId]?.slot] || '◆', title: item.name });
 }
 
 export function slotIcon(slot, cls = '') {

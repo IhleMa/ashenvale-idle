@@ -81,7 +81,7 @@
         },
         {
             "name": "Allow Registration",
-            "description": "Allow new players to create accounts (true/false).",
+            "description": "Allow new players to create accounts on first start (true/false). Afterwards this can be toggled live on the Admin page.",
             "env_variable": "ALLOW_REGISTRATION",
             "default_value": "true",
             "user_viewable": true,
@@ -97,6 +97,16 @@
             "user_viewable": true,
             "user_editable": true,
             "rules": "required|string|in:true,false",
+            "field_type": "text"
+        },
+        {
+            "name": "Admin Users",
+            "description": "Comma-separated usernames that get access to the in-game Admin page (e.g. alice,bob). You can also use the console command: admin add <username>",
+            "env_variable": "ADMIN_USERS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:500",
             "field_type": "text"
         }
     ]

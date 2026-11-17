@@ -2,6 +2,7 @@
 import { STAT_LABELS, PCT_STATS, SLOTS } from '/shared/data/items.js';
 import { rarityById } from '/shared/config.js';
 import { CLASSES } from '/shared/data/classes.js';
+import { UNIQUES, SETS, equippedSetCounts } from '/shared/data/legendaries.js';
 
 export const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 export const fmt = n => {
@@ -75,7 +76,7 @@ export function rarityLabel(id) {
   return `<span class="rarity-text rarity-${r.id}">${esc(r.label)}</span>`;
 }
 
-export function itemTooltipHtml(item, compareTo = null) {
+export function itemTooltipHtml(item, compareTo = null, wearer = null) {
   const lines = Object.entries(item.stats).map(([k, v]) => {
     let diff = '';
     if (compareTo) {
@@ -92,10 +93,21 @@ export function itemTooltipHtml(item, compareTo = null) {
   }
   if (item.enchant) lines.push(`<div class="stat-line enchant-line"><span>✨ Enchanted: ${esc(STAT_LABELS[item.enchant.stat] || item.enchant.stat)}</span><span>${statValue(item.enchant.stat, item.enchant.value)}</span></div>`);
   if (item.crafted) lines.push(`<div class="muted small">Crafted by ${esc(item.crafted)}</div>`);
+  if (item.unique && UNIQUES[item.unique]) {
+    const u = UNIQUES[item.unique];
+    lines.push(`<div class="unique-effect">✦ ${esc(u.description)}</div>${u.flavor ? `<div class="flavor">“${esc(u.flavor)}”</div>` : ''}`);
+  }
+  if (item.set && SETS[item.set]) {
+    const set = SETS[item.set];
+    const n = wearer ? (equippedSetCounts(wearer)[item.set] || 0) : 0;
+    lines.push(`<div class="set-block"><div class="set-name">${esc(set.name)}${wearer ? ` (${n}/${Object.keys(set.pieces).length})` : ''}</div>
+      ${Object.values(set.pieces).map(nm => `<div class="set-piece">${esc(nm)}</div>`).join('')}
+      ${Object.entries(set.bonuses).map(([need, b]) => `<div class="set-bonus ${n >= Number(need) ? 'on' : ''}">(${need}) ${esc(b.description)}</div>`).join('')}</div>`);
+  }
   const classes = item.classes ? item.classes.map(c => CLASSES[c]?.name).join(', ') : 'All classes';
   return `<div class="item-tip">
-    <div class="item-name rarity-text rarity-${item.rarity}">${esc(item.name)}</div>
-    <div class="muted small">${rarityLabel(item.rarity)} ${esc(SLOTS[item.slot]?.label || '')} · Item level ${item.level}</div>
+    <div class="item-name rarity-text rarity-${item.rarity} ${item.unique ? 'unique-name' : ''} ${item.set ? 'set-name' : ''}">${esc(item.name)}</div>
+    <div class="muted small">${item.unique ? '<span class="unique-name">Unique</span>' : item.set ? '<span class="set-name">Set item</span>' : rarityLabel(item.rarity)} ${esc(SLOTS[item.slot]?.label || '')} · Item level ${item.level}</div>
     ${lines.join('')}
     <div class="muted small">Requires level ${item.requiredLevel} · ${esc(classes)}</div>
   </div>`;

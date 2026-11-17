@@ -39,7 +39,14 @@ export function connect() {
     }
     bus.emit('msg:' + msg.t, msg);
   };
-  ws.onclose = () => {
+  ws.onclose = ev => {
+    if (ev.code === 4001) { // removed by an admin: don't reconnect automatically
+      for (const p of pending.values()) p.reject(new Error('Disconnected'));
+      pending.clear();
+      bus.emit('connection', 'offline');
+      bus.emit('kicked', ev.reason);
+      return;
+    }
     for (const p of pending.values()) p.reject(new Error('Connection lost'));
     pending.clear();
     if (manualClose) return;

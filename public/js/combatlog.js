@@ -49,8 +49,8 @@ export function makeEntry(units, ev, time) {
       return { ...base, cat: 'cast', html: `${nameOf(units, ev.src)} uses <b>${esc(a?.name)}</b>${ev.tgts[0] === ev.src && ev.tgts.length === 1 ? '' : ` on ${tg}`}.` };
     }
     case 'damage': {
-      const cat = ev.dot ? 'dot' : ev.ability ? 'hit' : 'auto';
-      const how = ev.dot ? `<i>${esc(STATUSES[ev.dot]?.name)}</i> (${nameOf(units, ev.src)}) deals` : `${nameOf(units, ev.src)}'s ${ab ? `<b>${esc(ab)}</b>` : 'attack'} hits`;
+      const cat = ev.dot ? 'dot' : (ev.ability || ev.proc) ? 'hit' : 'auto';
+      const how = ev.dot ? `<i>${esc(STATUSES[ev.dot]?.name)}</i> (${nameOf(units, ev.src)}) deals` : `${nameOf(units, ev.src)}'s ${ab ? `<b>${esc(ab)}</b>` : ev.proc ? `<span class="log-proc">${esc(ev.proc)}</span>` : 'attack'} hits`;
       const abs = ev.absorbed ? ` <span class="muted">(${fmt(ev.absorbed)} absorbed)</span>` : '';
       return { ...base, cat, amount: ev.amount + (ev.absorbed || 0), crit: !!ev.crit, html: `${how} ${nameOf(units, ev.tgt)} for <span class="log-dmg">${fmt(ev.amount)}</span>${crit}${abs}` };
     }
@@ -64,6 +64,7 @@ export function makeEntry(units, ev, time) {
       if (!st) return null;
       return { ...base, cat: 'status', html: `${nameOf(units, ev.tgt)} ${st.type === 'buff' ? 'gains' : 'suffers'} <span class="${st.type === 'buff' ? 'log-buff' : 'log-debuff'}">${esc(st.name)}</span>${ev.src !== ev.tgt ? ` from ${nameOf(units, ev.src)}` : ''}.` };
     }
+    case 'proc': return { ...base, cat: 'cast', html: `<span class="log-proc">✦ ${esc(ev.name)}</span> triggers for ${nameOf(units, ev.src)}${ev.tgt !== ev.src ? ` on ${nameOf(units, ev.tgt)}` : ''}.` };
     case 'miss': return { ...base, cat: 'miss', html: `${nameOf(units, ev.tgt)} dodges ${nameOf(units, ev.src)}'s attack.` };
     case 'cleanse': return { ...base, cat: 'cast', html: `${nameOf(units, ev.src)} removes ${esc(STATUSES[ev.status]?.name)} from ${nameOf(units, ev.tgt)}.` };
     case 'death': return { ...base, cat: 'event', html: `<span class="log-death">☠ ${nameOf(units, ev.tgt)} has fallen.</span>` };
