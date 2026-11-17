@@ -30,9 +30,13 @@ function dashboardHtml() {
     <div class="admin-grid">
       <section class="panel">
         <h3>Announcement</h3>
-        <p class="muted small">Shows a banner and notification to everyone online right now.</p>
-        <textarea data-broadcast rows="3" maxlength="300" placeholder="e.g. Server restart in 5 minutes!"></textarea>
-        <div class="row end"><button class="btn primary small" data-send-broadcast>Send to all players</button></div>
+        <p class="muted small">Pops up for everyone online right now. Players who are offline see it the next time they log in (until it expires).</p>
+        <textarea data-broadcast rows="3" maxlength="500" placeholder="e.g. Server restart in 5 minutes!"></textarea>
+        <div class="row end gap"><label class="small">Show to returning players for
+          <select data-ann-hours>${[[24, '1 day'], [72, '3 days'], [168, '7 days'], [720, '30 days'], [0, 'until deleted']].map(([h, l]) => `<option value="${h}" ${h === 168 ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
+          <button class="btn primary small" data-send-broadcast>Send to all players</button></div>
+        <h3>Active announcements</h3>
+        ${(o.announcements || []).map(a => `<div class="admin-ann"><div><div class="small"><b>${esc(a.from)}</b> <span class="muted">${new Date(a.at).toLocaleString()} · ${a.expiresAt ? 'expires in ' + duration((a.expiresAt - Date.now()) / 1000) : 'until deleted'}</span></div><div class="ann-text">${esc(a.text)}</div></div><button class="btn tiny danger" data-del-ann="${esc(a.id)}">Delete</button></div>`).join('') || '<p class="muted small">None.</p>'}
         <h3>Online</h3><p class="small">${o.onlineNames.map(esc).join(', ') || '<span class="muted">nobody</span>'}</p>
         <h3>Admins</h3><p class="small">${o.admins.map(esc).join(', ')}</p>
         <p class="faint small">Add admins with the console command <code>admin add &lt;username&gt;</code> or the ADMIN_USERS server variable.</p>
@@ -160,7 +164,12 @@ export const adminView = {
       if (t.dataset.player) { openPlayer(t.dataset.player, root); return; }
       if ('sendBroadcast' in t.dataset) {
         const ta = root.querySelector('[data-broadcast]');
-        if (await run(act('admin_broadcast', { text: ta.value }), 'Announcement sent.') !== undefined) ta.value = '';
+        const hours = Number(root.querySelector('[data-ann-hours]').value);
+        if (await run(act('admin_broadcast', { text: ta.value, hours }), 'Announcement sent.') !== undefined) { ta.value = ''; loadOverview(root); }
+      }
+      if (t.dataset.delAnn) {
+        if (await confirmBox('Delete this announcement? Players who haven\'t seen it yet won\'t get it anymore.', 'Delete'))
+          if (await run(act('admin_announcement_delete', { id: t.dataset.delAnn }), 'Announcement deleted.') !== undefined) loadOverview(root);
       }
     });
     root.addEventListener('submit', async e => {

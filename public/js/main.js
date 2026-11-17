@@ -1,6 +1,6 @@
 // App entry: authentication, layout, routing and global message handling.
 import { bus, state, hero } from './state.js';
-import { connect, disconnect, apiPost, getToken, setToken } from './net.js';
+import { connect, disconnect, apiPost, getToken, setToken, act } from './net.js';
 import { loadAssets, portrait } from './assets.js';
 import { esc, fmt, toast, modal, initTooltips, duration, bar } from './ui.js';
 import { xpToNext } from '/shared/config.js';
@@ -176,9 +176,55 @@ bus.on('msg:welcome', m => {
 bus.on('msg:client_update', m => {
   if (m.force || (m.buildId && m.buildId !== buildId)) reloadSoon('A new version of the game is available — refreshing…');
 });
+// ---- persistent announcements: delivered on connect (incl. ones posted while offline) and live
+function annHtml(a, isNew) {
+  const when = new Date(a.at).toLocaleString();
+  return `<div class="ann ${isNew ? 'new' : ''}"><div class="ann-meta">${isNew ? '<span class="tag">NEW</span> ' : ''}<b>${esc(a.from || 'Server')}</b> · <span class="muted">${esc(when)}</span></div><div class="ann-text">${esc(a.text)}</div></div>`;
+}
+let annModal = null;
+function updateAnnBadge() {
+  const b = document.getElementById('topbar-ann-badge');
+  const n = state.unseenAnn.size;
+  b.textContent = n; b.hidden = !n;
+  document.getElementById('topbar-ann').classList.toggle('has-new', n > 0);
+}
+function ackAnnouncements() {
+  if (!state.unseenAnn.size) return;
+  const upTo = Math.max(...state.announcements.map(a => a.at));
+  state.unseenAnn.clear();
+  updateAnnBadge();
+  act('ack_announcements', { upTo }).catch(() => {});
+}
+function showAnnouncements(onlyUnseen) {
+  annModal?.close();
+  const list = onlyUnseen ? state.announcements.filter(a => state.unseenAnn.has(a.id)) : state.announcements;
+  const body = list.length ? list.map(a => annHtml(a, state.unseenAnn.has(a.id))).join('') : '<p class="muted">No current announcements.</p>';
+  annModal = modal(`<h2>📢 ${onlyUnseen ? 'New announcement' + (list.length > 1 ? 's' : '') : 'Server announcements'}</h2><div class="ann-list">${body}</div>
+    <div class="row end">${onlyUnseen && state.announcements.length > list.length ? '<button class="btn ghost" data-ann-all>Show all</button>' : ''}<button class="btn primary" data-close>Got it</button></div>`,
+    { onClose: () => { annModal = null; ackAnnouncements(); } });
+  annModal.el.querySelector('[data-ann-all]')?.addEventListener('click', () => showAnnouncements(false));
+}
+document.getElementById('topbar-ann').addEventListener('click', () => showAnnouncements(false));
+bus.on('msg:announcements', m => {
+  state.announcements = m.list || [];
+  state.unseenAnn = new Set(m.unseen || []);
+  updateAnnBadge();
+  if (state.unseenAnn.size) setTimeout(() => showAnnouncements(true), 300);
+});
 bus.on('msg:announcement', m => {
-  toast(`📢 ${m.text}`, 'announce', 12000);
-  banner(`📢 <b>Announcement:</b> ${esc(m.text)} <button class="btn tiny ghost" onclick="this.parentElement.hidden=true">✕</button>`, 'info');
+  const a = m.announcement;
+  if (!a) return;
+  state.announcements = [a, ...state.announcements.filter(x => x.id !== a.id)];
+  state.unseenAnn.add(a.id);
+  updateAnnBadge();
+  showAnnouncements(true);
+  if (current?.id === 'admin') requestRender();
+});
+bus.on('msg:announcement_removed', m => {
+  state.announcements = state.announcements.filter(a => a.id !== m.id);
+  state.unseenAnn.delete(m.id);
+  updateAnnBadge();
+  if (current?.id === 'admin') requestRender();
 });
 bus.on('kicked', reason => banner(`${esc(reason || 'You were disconnected.')} <button class="btn tiny" onclick="location.reload()">Reconnect</button>`, 'warn'));
 bus.on('msg:server_restart', () => banner('⟳ The server is restarting for an update. You will reconnect automatically — your progress is saved.', 'warn'));

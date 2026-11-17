@@ -9,6 +9,8 @@ export const state = {
   player: null,       // full player data from the server
   group: null,
   invites: [],
+  announcements: [], // active server announcements, newest first
+  unseenAnn: new Set(), // ids this player hasn't read yet
   online: [],
   connection: 'offline',
   battles: { solo: null, coop: null }, // live battle snapshots (kept up to date by combat view)

@@ -77,7 +77,7 @@ export function adminActions(game) {
         memoryMb: Math.round(mem.rss / 1048576), buildId: game.buildId, node: process.version,
         groups: game.groups.size, coopBattles: [...game.groups.values()].filter(g => g.battle).length,
         auction: game.auction.stats(), settings: game.settings.values, settingDefs: SETTING_DEFS,
-        admins: admins.list(), log: admins.log.slice(-60).reverse(),
+        admins: admins.list(), log: admins.log.slice(-60).reverse(), announcements: game.announcements.active(),
         onlineNames: [...game.sessions.values()].map(s => s.player.name),
       };
     },
@@ -172,10 +172,17 @@ export function adminActions(game) {
       return game.settings.values;
     },
     admin_broadcast(s, d) {
-      const text = String(d.text || '').trim().slice(0, 300);
+      const text = String(d.text || '').trim().slice(0, 500);
       if (!text) fail('Message is empty');
-      game.broadcast({ t: 'announcement', text, from: s.player.name });
-      admins.audit(s.player.name, 'broadcast', '-', text);
+      const hours = Math.max(0, Math.min(24 * 365, Number(d.hours ?? 168)));
+      const a = game.announce(text, s.player.name, hours);
+      admins.audit(s.player.name, 'announce', '-', `${hours ? hours + 'h' : 'until deleted'}: ${text}`);
+      return a;
+    },
+    admin_announcement_delete(s, d) {
+      if (!game.announcements.remove(String(d.id))) fail('Announcement not found');
+      game.broadcast({ t: 'announcement_removed', id: String(d.id) });
+      admins.audit(s.player.name, 'delete_announcement', '-', String(d.id));
     },
   };
 }

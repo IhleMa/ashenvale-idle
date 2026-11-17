@@ -210,7 +210,7 @@ const COMMANDS = {
   update: () => runUpdate(),
   'reload-clients': () => { game.buildId = computeBuildId(ROOT); game.broadcast({ t: 'client_update', buildId: game.buildId, force: true }); log('Told all open pages to refresh.'); },
   players: () => log(`${game.sessions.size} online: ${[...game.sessions.values()].map(s => s.player.name).join(', ') || '-'}`),
-  say: text => { if (text) { game.broadcast({ t: 'toast', kind: 'info', text: `[Server] ${text}` }); log('Broadcast sent.'); } },
+  say: text => { if (text) { game.announce(text, 'Server', 24); log('Announcement sent (stays visible for 24h for players who are offline).'); } },
 };
 let stdinBuf = '';
 process.stdin.on('data', d => {

@@ -181,6 +181,29 @@ try {
   await a.act('admin_unban', { id: bobId });
   const unbanned = await api('/api/login', { username: 'bob', password: 'secret456' });
   check(unbanned.status === 200, 'unbanned player can log in again');
+  // persistent announcements: bob is offline (his socket was closed by the ban) while it is posted
+  res = await a.act('admin_broadcast', { text: 'Patch tonight!', hours: 24 });
+  const annId = res.result?.id;
+  await sleep(200);
+  check(res.ok && a.msgs.some(m => m.t === 'announcement' && m.announcement.id === annId), 'announcement delivered live to online players');
+  const tmp = await a.act('admin_broadcast', { text: 'temporary', hours: 0 });
+  const b2 = new Client(unbanned.body.token); await b2.open();
+  await sleep(500);
+  let annMsg = b2.msgs.find(m => m.t === 'announcements');
+  check(annMsg && annMsg.unseen.includes(annId) && annMsg.list.some(x => x.text === 'Patch tonight!'), 'offline player gets the announcement as unread when coming back');
+  await b2.act('ack_announcements', { upTo: Math.max(...annMsg.list.map(x => x.at)) });
+  res = await a.act('admin_announcement_delete', { id: tmp.result.id });
+  await sleep(200);
+  check(res.ok && b2.msgs.some(m => m.t === 'announcement_removed' && m.id === tmp.result.id), 'deleted announcement removed for online players');
+  b2.ws.close();
+  await sleep(300);
+  const b3 = new Client((await api('/api/login', { username: 'bob', password: 'secret456' })).body.token); await b3.open();
+  await sleep(500);
+  annMsg = b3.msgs.find(m => m.t === 'announcements');
+  check(annMsg && annMsg.unseen.length === 0 && annMsg.list.length === 1, 'read announcements are not shown again; deleted one is gone');
+  b3.ws.close();
+  res = await b.act('admin_broadcast', { text: 'x' });
+  check(!res.ok, 'non-admin cannot announce');
   res = await a.act('admin_settings', { changes: { xpRate: 2, motd: 'Welcome!' } });
   check(res.ok && res.result.xpRate === 2, 'admin settings saved');
 
@@ -238,6 +261,8 @@ try {
   const a2 = new Client(login.body.token); await a2.open();
   await sleep(1500);
   const off = a2.msgs.find(m => m.t === 'offline');
+  annMsg = a2.msgs.find(m => m.t === 'announcements');
+  check(annMsg && annMsg.list.some(x => x.id === annId), 'announcements survive a server restart');
   check(off && off.summary.fights > 0 && off.summary.xp > 0, `offline progression: ${off ? JSON.stringify({ fights: off.summary.fights, xp: off.summary.xp, gold: off.summary.gold, levels: off.summary.levels }) : 'none'}`);
   res = await a2.act('group_create');
   res = await a2.act('group_start', { encounterId: 'ashen_crypt' });

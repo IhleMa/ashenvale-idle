@@ -13,6 +13,7 @@ import { ABILITIES } from '../shared/data/abilities.js';
 import { Rankings } from './rankings.js';
 import { AuctionHouse } from './auction.js';
 import { adminActions } from './admin.js';
+import { Announcements } from './announcements.js';
 import * as TL from './townLogic.js';
 import * as XL from './expeditionLogic.js';
 import { EXPEDITIONS } from '../shared/data/expeditions.js';
@@ -43,6 +44,7 @@ export class Game {
     this.onlineDirty = true;
     this.rankings = new Rankings(this);
     this.auction = new AuctionHouse(this);
+    this.announcements = new Announcements(store.dataDir);
     this.adminActions = adminActions(this);
   }
 
@@ -77,6 +79,13 @@ export class Game {
       for (const m of group.members) this.playerGroup.set(m, group.id);
     }
     if (data.length) this.log(`Restored ${data.length} group(s)`);
+  }
+
+  // Creates a persistent announcement and shows it to everyone online right now
+  announce(text, from, hours = 168) {
+    const a = this.announcements.add({ text, from, hours });
+    this.broadcast({ t: 'announcement', announcement: a });
+    return a;
   }
 
   broadcast(msg) {
@@ -117,6 +126,8 @@ export class Game {
     else if (s.solo?.battle) this.send(ws, { t: 'battle_start', k: 'solo', battle: battleSnapshot(s.solo.battle) });
     if (g) this.send(ws, { t: 'group', group: this.publicGroup(g) });
     this.sendInvites(player.id);
+    // announcements: full recent list + which ones this player hasn't read yet (also after being offline)
+    this.send(ws, { t: 'announcements', list: this.announcements.active().slice(0, 20), unseen: this.announcements.unseenFor(player).map(a => a.id) });
     this.onlineDirty = true;
     return s;
   }
@@ -260,6 +271,10 @@ export class Game {
     enchant_item(s, d) { const r = TL.enchant(s.player, d); this.profToast(s, r.msg); return r; },
     brew_elixir(s, d) { const r = TL.brew(s.player, d, L.hero(s.player).level); this.profToast(s, r.msg); return r; },
 
+    ack_announcements(s, d) {
+      const upTo = Math.min(Date.now(), Number(d.upTo) || Date.now());
+      s.player.announcementsSeenAt = Math.max(s.player.announcementsSeenAt || 0, upTo);
+    },
     collect_mail(s, d) { return L.collectMail(s.player, { id: d.id }); },
     ah_search(s, d) { return this.auction.search(s.player, d); },
     ah_mine(s) { return this.auction.mine(s.player); },
