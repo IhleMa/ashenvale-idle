@@ -13,6 +13,15 @@ export const MATERIALS = {
   prismatic_shard: { name: 'Prismatic Shard', glyph: '🔷', color: '#c98aff', description: 'Disenchanted from Epic or better items.' },
   void_crystal:    { name: 'Void Crystal',    glyph: '🌑', color: '#ff6f88', description: 'Disenchanted from Legendary or Mythic items.' },
 };
+// Stat shards: every stat on a salvaged item turns into shards of that stat; the Jeweler cuts them into gems (shared/gems.js)
+const SHARD_STATS = [
+  ['str', 'Strength', '#e0464e'], ['int', 'Intelligence', '#4f7cff'], ['dex', 'Dexterity', '#3fbf6a'], ['vit', 'Vitality', '#e8a33a'],
+  ['hp', 'Health', '#b0303a'], ['defense', 'Defense', '#8e8e9a'], ['physPower', 'Physical Power', '#c2413c'], ['magPower', 'Magic Power', '#a160e8'],
+  ['healPower', 'Healing Power', '#f0ecdc'], ['critChance', 'Critical Chance', '#f2c14e'], ['critDamage', 'Critical Damage', '#c8f2ff'], ['attackSpeed', 'Attack Speed', '#ffd84a'],
+];
+for (const [stat, label, color] of SHARD_STATS) {
+  MATERIALS[`shard_${stat}`] = { name: `${label} Shard`, glyph: '◆', color, group: 'shard', stat, description: `Salvaged from items with ${label}. The Jeweler cuts these into gems.` };
+}
 export const MATERIAL_IDS = Object.keys(MATERIALS);
 
 export const PROFESSIONS = {

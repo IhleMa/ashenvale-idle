@@ -882,3 +882,37 @@ html.standalone body { padding-bottom: env(safe-area-inset-bottom); padding-left
 .lf-top label.switch-row { display: inline-flex !important; flex-direction: row !important; align-items: center; gap: 8px; margin: 0; }
 .lf-top label.switch-row input { width: auto !important; margin: 0; }
 .lf-top label.inline { display: inline-flex; align-items: center; gap: 8px; }
+
+/* ---- gems & sockets */
+.gem-icon { --gem: #888; position: relative; display: inline-block; width: 28px; height: 28px; flex: none;
+  background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.75) 0 8%, transparent 30%), linear-gradient(135deg, color-mix(in srgb, var(--gem) 100%, #fff 25%), var(--gem) 45%, color-mix(in srgb, var(--gem) 70%, #000 45%));
+  clip-path: polygon(50% 0, 100% 38%, 80% 100%, 20% 100%, 0 38%); filter: drop-shadow(0 0 3px color-mix(in srgb, var(--gem) 60%, transparent)); }
+.gem-icon.sm { width: 22px; height: 22px; } .gem-icon.md { width: 34px; height: 34px; }
+.gem-icon.t4, .gem-icon.t5 { animation: gem-shine 2.5s ease-in-out infinite; }
+@keyframes gem-shine { 50% { filter: drop-shadow(0 0 7px var(--gem)); } }
+.gem-tier { position: absolute; bottom: 1px; left: 0; right: 0; text-align: center; font-size: 8px; font-weight: 800; color: #fff; text-shadow: 0 0 2px #000, 0 0 2px #000; }
+.gem-art { position: relative; }
+.shard-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 10px; margin-top: 10px; }
+.shard-card { border: 1px solid var(--line); border-radius: 10px; padding: 10px; background: var(--panel2); display: grid; gap: 6px; }
+.gem-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
+.gem-table th, .gem-table td { padding: 6px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+.gem-cell.empty { opacity: .45; }
+.gem-cell .btn { margin-top: 4px; }
+.sock-layout { display: grid; grid-template-columns: minmax(300px, 1fr) minmax(320px, 1.2fr); gap: 16px; align-items: start; }
+.sock-char { margin-bottom: 10px; }
+.sock-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.sock-item { position: relative; background: none; border: 1px solid var(--line); border-radius: 8px; padding: 3px; cursor: pointer; }
+.sock-item.active { border-color: var(--accent); box-shadow: 0 0 6px rgba(232,116,44,.5); }
+.sock-dots { position: absolute; bottom: 1px; left: 0; right: 0; display: flex; justify-content: center; gap: 2px; }
+.sock-dots i, .sock-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; border: 1px solid #c9b48a; background: #1a1210; }
+.sock-dots i.full, .sock-dot.full { background: var(--gem); border-color: #fff8; }
+.sock-dot { margin-right: 6px; vertical-align: middle; }
+.socket { display: flex; gap: 10px; align-items: center; padding: 8px; border: 1px dashed var(--line); border-radius: 10px; margin-bottom: 8px; }
+.socket.full { border-style: solid; background: var(--panel2); }
+.socket-hole { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: radial-gradient(circle, #0c0807 55%, #3a2c24); }
+.empty-socket { width: 22px; height: 22px; border-radius: 50%; border: 2px dashed #6b5a4a; }
+.drill { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); display: grid; gap: 6px; justify-items: start; }
+.socket-line span:first-child { display: inline-flex; align-items: center; }
+.bad-text { color: #ff7a6a; }
+@media (max-width: 900px) { .sock-layout { grid-template-columns: 1fr; } }
+.good-text { color: var(--good); }

@@ -279,6 +279,13 @@ export class Game {
     enchant_item(s, d) { const r = TL.enchant(s.player, d); this.profToast(s, r.msg); this.questDone(s.player, Q.track(s.player, 'craft', 1)); return r; },
     brew_elixir(s, d) { const r = TL.brew(s.player, d, L.hero(s.player).level); this.profToast(s, r.msg); this.questDone(s.player, Q.track(s.player, 'craft', 1)); return r; },
 
+    // ---- gems & sockets
+    gem_cut(s, d) { const r = TL.cutGem(s.player, { stat: String(d.stat), count: d.count }); this.profToast(s, r.msg); this.questDone(s.player, Q.track(s.player, 'craft', 1)); return r; },
+    gem_fuse(s, d) { const r = TL.fuseGems(s.player, { stat: String(d.stat), tier: d.tier, count: d.count }); this.profToast(s, r.msg); this.questDone(s.player, Q.track(s.player, 'craft', 1)); return r; },
+    gem_socket(s, d) { return TL.socketGem(s.player, { itemUid: String(d.itemUid), charId: d.charId, index: d.index, gem: String(d.gem) }); },
+    gem_unsocket(s, d) { return TL.unsocketGem(s.player, { itemUid: String(d.itemUid), charId: d.charId, index: d.index }); },
+    gem_drill(s, d) { const r = TL.drillSocket(s.player, { itemUid: String(d.itemUid), charId: d.charId }); this.profToast(s, r.msg); this.questDone(s.player, Q.track(s.player, 'craft', 1)); return r; },
+
     // ---- quests
     quest_claim(s, d) { return d.id === 'all' ? Q.claimAll(s.player) : Q.claim(s.player, { id: String(d.id) }); },
     quest_reroll(s, d) { return Q.reroll(s.player, { id: String(d.id), maxCost: d.maxCost }); },

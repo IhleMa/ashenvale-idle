@@ -1,6 +1,7 @@
 // Generates ASSETS.md: every image file name the game looks for, and whether it already exists.
 // Usage: npm run assets
 import fs from 'node:fs';
+import { GEM_KINDS } from '../shared/gems.js';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { CLASSES } from '../shared/data/classes.js';
@@ -56,6 +57,7 @@ md += section('Skill tree nodes (optional)', 'skilltree', [['keystone', 'Keyston
 md += section('Town buildings', 'buildings', Object.entries(BUILDINGS).map(([id, b]) => [id, b.name]), 'Square or slightly wide images shown on the Town page.');
 md += section('Materials', 'materials', Object.entries(MATERIALS).map(([id, m]) => [id, m.name]), 'Small square icons (64 px).');
 md += section('Professions', 'professions', Object.entries(PROFESSIONS).map(([id, p]) => [id, p.name]), 'Small square icons.');
+md += section('Gems', 'gems', Object.entries(GEM_KINDS).map(([id, g]) => [id, `${g.name} (optional per tier: ${id}_1 … ${id}_5)`]), 'Small square icons (64 px). One image per stat is enough; add <stat>_<tier> for tier-specific art.');
 md += section('Elixirs', 'elixirs', Object.entries(ELIXIRS).map(([id, e]) => [id, e.name]), 'Small square icons.');
 md += section('Expedition destinations', 'expeditions', Object.entries(EXPEDITIONS).map(([id, e]) => [id, e.name]), 'Wide or square images; also used as the background of the expedition planner.');
 md += section('Interface', 'ui', [['logo', 'Game logo (top bar & login screen)'], ['background', 'Full-page background image']]);

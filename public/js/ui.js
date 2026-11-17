@@ -1,5 +1,6 @@
 // UI helpers: escaping, formatting, toasts, modals, tooltips.
 import { STAT_LABELS, PCT_STATS, SLOTS } from '/shared/data/items.js';
+import { GEM_KINDS, gemName, gemValue, parseGemKey } from '/shared/gems.js';
 import { rarityById } from '/shared/config.js';
 import { CLASSES } from '/shared/data/classes.js';
 import { UNIQUES, SETS, equippedSetCounts } from '/shared/data/legendaries.js';
@@ -92,6 +93,13 @@ export function itemTooltipHtml(item, compareTo = null, wearer = null) {
     }
   }
   if (item.enchant) lines.push(`<div class="stat-line enchant-line"><span>✨ Enchanted: ${esc(STAT_LABELS[item.enchant.stat] || item.enchant.stat)}</span><span>${statValue(item.enchant.stat, item.enchant.value)}</span></div>`);
+  if (item.sockets?.length) {
+    for (const g of item.sockets) {
+      const gem = g && parseGemKey(g);
+      lines.push(gem ? `<div class="stat-line socket-line"><span><i class="sock-dot full" style="--gem:${GEM_KINDS[gem.stat].color}"></i>${esc(gemName(gem.stat, gem.tier))}</span><span>${statValue(gem.stat, gemValue(gem.stat, gem.tier))}</span></div>`
+        : '<div class="stat-line socket-line muted"><span><i class="sock-dot"></i>Empty socket</span><span></span></div>');
+    }
+  }
   if (item.crafted) lines.push(`<div class="muted small">Crafted by ${esc(item.crafted)}</div>`);
   if (item.unique && UNIQUES[item.unique]) {
     const u = UNIQUES[item.unique];

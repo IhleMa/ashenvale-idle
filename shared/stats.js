@@ -3,6 +3,7 @@ import { CONFIG } from './config.js';
 import { CLASSES, TRAITS, classTier } from './data/classes.js';
 import { treeStats } from './skilltree.js';
 import { setStatBonuses } from './data/legendaries.js';
+import { socketStats } from './gems.js';
 
 export const ATTRIBUTES = {
   str: { label: 'Strength', short: 'STR' },
@@ -29,6 +30,7 @@ export function equipmentStats(ch) {
     if (!item) continue;
     for (const [k, v] of Object.entries(item.stats)) out[k] = (out[k] || 0) + v;
     if (item.enchant) out[item.enchant.stat] = (out[item.enchant.stat] || 0) + item.enchant.value; // Enchanter's Study
+    if (item.sockets) for (const [k, v] of Object.entries(socketStats(item))) out[k] = (out[k] || 0) + v; // socketed gems
   }
   return out;
 }

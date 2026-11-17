@@ -92,6 +92,25 @@ export function rollRarity(rng, boost = 0, minRarity = 'common') {
   return list[list.length - 1].r;
 }
 
+// ---------------------------------------------------------------- sockets (gems: see shared/gems.js)
+// most sockets an item can ever have (by slot and rarity)
+export function maxSockets(item) {
+  const r = rarityIndex(item.rarity);
+  const bySlot = { weapon: 3, chest: 3, offhand: 2, head: 2 }[item.slot] ?? 1;
+  const byRarity = [1, 1, 2, 2, 3, 3][r] ?? 1;
+  return Math.min(bySlot, byRarity);
+}
+// sockets on a fresh drop: rare-ish; legendary and better always have one
+export function rollSockets(rng, item) {
+  const max = maxSockets(item);
+  const r = rarityIndex(item.rarity);
+  const chance = [0.08, 0.15, 0.25, 0.35, 0.45, 0.6][r] ?? 0.1;
+  let n = 0;
+  for (let i = 0; i < max; i++) if (rng() < chance * (i === 0 ? 1 : 0.6)) n++;
+  if (r >= 4 && n === 0) n = 1;
+  return n;
+}
+
 export function generateItem(rng, level, { boost = 0, minRarity = 'common', baseId = null, uid, rarity: forcedRarity = null } = {}) {
   const baseIds = Object.keys(ITEM_BASES);
   const base = ITEM_BASES[baseId] || ITEM_BASES[baseIds[Math.floor(rng() * baseIds.length)]];
@@ -110,11 +129,14 @@ export function generateItem(rng, level, { boost = 0, minRarity = 'common', base
   const material = MATERIALS.filter(m => lvl >= m[0]).pop()[1];
   let name = `${material} ${base.name}`;
   if (rarityIndex(rarity.id) >= 3) name += ' ' + SUFFIXES[Math.floor(rng() * SUFFIXES.length)];
-  return {
+  const item = {
     uid: uid || `i${Math.floor(rng() * 1e9).toString(36)}${Date.now().toString(36)}`,
     baseId: base.id, name, slot: base.slot, rarity: rarity.id, level: lvl,
     requiredLevel: Math.max(1, lvl - 2), stats, classes: base.classes,
   };
+  const sockets = rollSockets(rng, item);
+  if (sockets) item.sockets = Array(sockets).fill(null);
+  return item;
 }
 
 export function canEquip(item, character) {

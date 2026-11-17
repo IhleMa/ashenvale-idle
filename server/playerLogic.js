@@ -14,7 +14,7 @@ import { createCharacter, addXp, autoDevelop, autoLoadout, syncTree, abilitySlot
 import { allocateNode as treeAllocate, refundNode as treeRefund, resetTree as treeReset, availablePoints } from '../shared/skilltree.js';
 import { sanitizeRule } from '../shared/rules.js';
 import { createRng, randomSeed } from '../shared/rng.js';
-import { migrateTown, rollProfession, autoSalvage } from './townLogic.js';
+import { migrateTown, rollProfession, autoSalvage, returnGems } from './townLogic.js';
 import { rosterLimit, recruitOffers, bLevel } from '../shared/town.js';
 import { busyWith } from '../shared/expeditions.js';
 import { EXPEDITIONS } from '../shared/data/expeditions.js';
@@ -216,6 +216,7 @@ export function sellItem(p, { itemUid }) {
   const idx = findItem(p, itemUid);
   if (p.inventory[idx].locked) fail('Item is locked');
   const [item] = p.inventory.splice(idx, 1);
+  returnGems(p, item);
   const v = itemSellValue(item);
   p.gold += v;
   return v;
@@ -226,6 +227,7 @@ export function sellByRarity(p, { maxRarity }) {
   let total = 0, n = 0;
   p.inventory = p.inventory.filter(i => {
     if (i.locked || rarityIndex(i.rarity) > max) return true;
+    returnGems(p, i);
     total += itemSellValue(i); n++; return false;
   });
   p.gold += total;
@@ -311,7 +313,7 @@ export function applyLootFilter(p, { dryRun = false } = {}) {
   let gold = 0;
   for (const h of hits) {
     if (h.action === 'salvage' && p.town) for (const [k, v] of Object.entries(autoSalvage(p, h.item))) materials[k] = (materials[k] || 0) + v;
-    else { const g = itemSellValue(h.item); gold += g; p.gold += g; }
+    else { returnGems(p, h.item); const g = itemSellValue(h.item); gold += g; p.gold += g; }
   }
   if (summary.salvage) trackQuest(p, 'salvage', summary.salvage);
   return { ...summary, items: undefined, gold, materials };

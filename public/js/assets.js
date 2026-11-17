@@ -3,6 +3,7 @@
 // name exists in public/assets/ it is used, otherwise a generated placeholder is shown.
 // See public/assets/README.md for the full list of keys.
 import { CLASSES } from '/shared/data/classes.js';
+import { GEM_KINDS, gemName } from '/shared/gems.js';
 import { ABILITIES } from '/shared/data/abilities.js';
 import { STATUSES } from '/shared/data/statuses.js';
 import { ENEMIES } from '/shared/data/enemies.js';
@@ -113,6 +114,13 @@ export function buildingArt(id, cls = '') {
 export function materialIcon(id, cls = '') {
   const m = MATERIALS[id] || {};
   return render(assetUrl(`materials/${id}`), { cls: `material-icon ${cls}`, color: m.color || '#555', glyph: m.glyph || '?', title: m.name });
+}
+// Gems: assets/gems/<stat>_<tier>.png or assets/gems/<stat>.png; otherwise a coloured CSS gem
+export function gemIcon(stat, tier, cls = '') {
+  const title = gemName(stat, tier);
+  const url = assetUrl(`gems/${stat}_${tier}`, `gems/${stat}`);
+  if (url) return `<span class="art gem-art ${cls}" title="${esc(title)}"><img src="${esc(url)}" alt="${esc(title)}" loading="lazy" draggable="false"><span class="gem-tier">${'I II III IV V'.split(' ')[tier - 1]}</span></span>`;
+  return `<span class="gem-icon t${tier} ${cls}" style="--gem:${GEM_KINDS[stat]?.color || '#888'}" title="${esc(title)}"><span class="gem-tier">${'I II III IV V'.split(' ')[tier - 1]}</span></span>`;
 }
 export function professionIcon(id, cls = '') {
   const pr = PROFESSIONS[id] || {};

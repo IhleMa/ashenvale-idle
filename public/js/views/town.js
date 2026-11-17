@@ -223,11 +223,12 @@ function detailHtml(p, id) {
 function resourcesHtml(p) {
   const elixirs = Object.entries(p.town.elixirs).filter(([, exp]) => exp > now());
   return `<div class="panel town-resources">
-    <div class="res-list">${MATERIAL_IDS.map(m => `<span class="res" ${tipAttr(`<b>${esc(MATERIALS[m].name)}</b><br>${esc(MATERIALS[m].description)}`)}>${materialIcon(m, 'xs')}<b>${fmt(Math.floor(p.town.materials[m] || 0))}</b></span>`).join('')}</div>
+    <div class="res-list">${MATERIAL_IDS.filter(m => MATERIALS[m].group !== 'shard').map(m => `<span class="res" ${tipAttr(`<b>${esc(MATERIALS[m].name)}</b><br>${esc(MATERIALS[m].description)}`)}>${materialIcon(m, 'xs')}<b>${fmt(Math.floor(p.town.materials[m] || 0))}</b></span>`).join('')}</div>
     <div class="row gap wrap">
       <span class="res" ${tipAttr('Ashen Crystals: finish constructions and expeditions instantly')}>${premiumTxt(p.premium || 0)}</span>
       ${elixirs.map(([eid, exp]) => `<span class="active-elixir" ${tipAttr(esc(ELIXIRS[eid].description))}>${elixirIcon(eid, 'xxs')} ${countdown(exp)}</span>`).join('')}
       <a class="btn small" href="#/expeditions">🧭 Expeditions</a>
+      <a class="btn small" href="#/gems">💎 Gems · ${fmt(MATERIAL_IDS.filter(m => MATERIALS[m].group === 'shard').reduce((n, m) => n + Math.floor(p.town.materials[m] || 0), 0))} shards</a>
     </div>
   </div>`;
 }

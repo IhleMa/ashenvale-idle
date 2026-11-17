@@ -161,6 +161,66 @@ try {
   const legacy = filterFromLegacy({ autoSellBelow: 'uncommon', autoLootAction: 'salvage' });
   ok(legacy.enabled && legacy.rules[0].action === 'salvage' && legacy.rules[0].rarities.join() === 'common,uncommon', 'old auto-sell setting becomes a filter rule');
 
+  // ---------------------------------------------------------------- shards, gems & sockets
+  {
+    const TL = await import('../server/townLogic.js');
+    const G = await import('../shared/gems.js');
+    const { equipmentStats } = await import('../shared/stats.js');
+    const { maxSockets } = await import('../shared/data/items.js');
+    let socketed = 0, total = 0;
+    const grng = createRng(77);
+    for (let i = 0; i < 3000; i++) { const it = generateItem(grng, 30); total++; if (it.sockets) { socketed++; if (it.sockets.length > maxSockets(it)) failures++; } }
+    ok(socketed > 0 && socketed < total * 0.4, `drops with sockets: ${(socketed / total * 100).toFixed(1)}%`);
+    const sal = generateItem(createRng(9), 30, { rarity: 'rare' });
+    p.inventory.push(sal);
+    const before = { ...p.town.materials };
+    r = act('salvage_items', { itemUids: [sal.uid] });
+    const gotShards = Object.keys(sal.stats).every(st => (p.town.materials[G.shardId(st)] || 0) > (before[G.shardId(st)] || 0));
+    ok(r.ok && gotShards, `salvage gives shards for every stat: ${Object.entries(r.result.materials).filter(([k]) => k.startsWith('shard_')).map(([k, v]) => `${v} ${k}`).join(', ')}`);
+    r = act('gem_cut', { stat: 'str' });
+    ok(!r.ok && /Jeweler/.test(r.error), 'cutting needs a Jeweler: ' + r.error);
+    const jw = createCharacter({ id: 'jw', name: 'Gemma', classId: 'rogue', level: 5 });
+    jw.profession = { id: 'jewelcrafting', level: 10, xp: 0 };
+    p.characters.jw = jw;
+    p.town.buildings.jeweler = { level: 2, upgrade: null, worker: 'jw' };
+    p.town.materials.shard_str = 49; p.town.materials.gem_fragment = 500; p.town.materials.arcane_dust = 500; p.town.materials.magic_essence = 50; p.town.materials.prismatic_shard = 50; p.town.materials.void_crystal = 10;
+    p.gold = 1e6;
+    r = act('gem_cut', { stat: 'str' });
+    ok(!r.ok && /Missing 1 Strength Shard/.test(r.error), 'needs 50 shards: ' + r.error);
+    p.town.materials.shard_str = 50 * 7;
+    r = act('gem_cut', { stat: 'str', count: 7 });
+    ok(r.ok && p.town.gems['str:1'] >= 7 && p.town.materials.shard_str === 0, `cut 7 Chipped Rubies (got ${r.result?.count})`);
+    r = act('gem_fuse', { stat: 'str', tier: 1, count: 2 });
+    ok(r.ok && p.town.gems['str:2'] >= 2 && p.town.gems['str:1'] === (r.result ? p.town.gems['str:1'] : -1), `fused 6 Chipped → ${r.result?.count} Flawed`);
+    r = act('gem_fuse', { stat: 'str', tier: 2 });
+    ok(!r.ok, 'Polished needs Jeweler 3 / enough gems: ' + r.error);
+    // socket into the hero's weapon
+    const w = h.equipment.weapon;
+    w.sockets = [null];
+    const strBefore = equipmentStats(h).str || 0;
+    r = act('gem_socket', { itemUid: w.uid, charId: h.id, index: 0, gem: 'str:2' });
+    const gained = (equipmentStats(h).str || 0) - strBefore;
+    ok(r.ok && w.sockets[0] === 'str:2' && gained > 0, `Flawed Ruby socketed into ${w.name}: +${gained} Strength (gem value ${G.gemValue('str', 2)})`);
+    const flawed = p.town.gems['str:2'] || 0, g0 = p.gold;
+    r = act('gem_unsocket', { itemUid: w.uid, charId: h.id, index: 0 });
+    ok(r.ok && !w.sockets[0] && p.town.gems['str:2'] === flawed + 1 && p.gold === g0 - G.unsocketCost(2, w.level), `unsocket returns the gem for ${G.unsocketCost(2, w.level)}g`);
+    const maxW = maxSockets(w);
+    r = act('gem_drill', { itemUid: w.uid, charId: h.id });
+    ok(maxW < 2 || (!r.ok && /level 3/.test(r.error)), 'socket #2 needs Jeweler level 3');
+    p.town.buildings.jeweler.level = 3;
+    r = act('gem_drill', { itemUid: w.uid, charId: h.id });
+    ok(maxW > 1 ? (r.ok && w.sockets.length === 2) : !r.ok, `drill 2nd socket (max ${maxW}): ${r.ok ? 'ok' : r.error}`);
+    r = act('gem_drill', { itemUid: w.uid, charId: h.id });
+    ok(!r.ok, 'third socket blocked: ' + r.error);
+    // selling a socketed item returns its gem
+    const sell = generateItem(createRng(3), 10, { rarity: 'rare' });
+    sell.sockets = ['str:1'];
+    p.inventory.push(sell);
+    const chipped = p.town.gems['str:1'] || 0;
+    r = act('sell_item', { itemUid: sell.uid });
+    ok(r.ok && p.town.gems['str:1'] === chipped + 1, 'selling returns socketed gems');
+  }
+
   // public state carries the new data
   game.flushState(s);
   const st = msgs.filter(m => m.t === 'state').pop().player;

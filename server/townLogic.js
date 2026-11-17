@@ -2,7 +2,8 @@
 import crypto from 'node:crypto';
 import { CONFIG, rarityIndex } from '../shared/config.js';
 import { BUILDINGS, MATERIALS, PROFESSIONS, PROFESSION_IDS, PROFESSION_MAX, professionXpToNext, ITEM_MATERIAL, CRAFT_BUILDING_OF_TYPE, QUALITIES, ELIXIRS, ELIXIR_MAX_HOURS, ENCHANT_STATS_BY_LEVEL, INN_ROSTER } from '../shared/data/town.js';
-import { ITEM_BASES, generateItem, canEquip } from '../shared/data/items.js';
+import { ITEM_BASES, generateItem, canEquip, maxSockets } from '../shared/data/items.js';
+import * as G from '../shared/gems.js';
 import * as T from '../shared/town.js';
 import { createRng, randomSeed } from '../shared/rng.js';
 import { busyWith } from '../shared/expeditions.js';
@@ -20,6 +21,7 @@ export function migrateTown(p) {
     while (inn < 5 && INN_ROSTER[inn] < recruits) inn++;
     p.town.buildings.inn.level = inn;
   }
+  p.town.gems ||= {}; // gem pouch: 'stat:tier' -> count
   // v0.5: Mine & Herb Garden were replaced by expeditions — refund what was spent on them
   const LEGACY = { mine: { gold: 200, metal_scrap: 10, leather_scrap: 6 }, herb_garden: { gold: 200, leather_scrap: 8, cloth_scrap: 8 } };
   for (const [id, cost] of Object.entries(LEGACY)) {
@@ -155,9 +157,108 @@ export function assignWorker(p, { buildingId, charId }) {
 
 // ---------------------------------------------------------------- salvage
 function salvageOne(p, item) {
-  const y = T.salvageYield(item, T.bLevel(p, 'salvage_yard'), !!T.worker(p, 'enchanter'));
+  const lvl = T.bLevel(p, 'salvage_yard');
+  const y = { ...T.salvageYield(item, lvl, !!T.worker(p, 'enchanter')) };
+  for (const [k, v] of Object.entries(G.shardYield(item, lvl))) y[k] = (y[k] || 0) + v; // stat shards
   addMaterials(p, y);
+  returnGems(p, item);
   return y;
+}
+
+// ---------------------------------------------------------------- gems & sockets
+// gems in a destroyed/sold item go back into the gem pouch
+export function returnGems(p, item) {
+  if (!item?.sockets || !p.town) return 0;
+  let n = 0;
+  for (const g of item.sockets) if (g && G.parseGemKey(g)) { p.town.gems[g] = (p.town.gems[g] || 0) + 1; n++; }
+  item.sockets = item.sockets.map(() => null);
+  return n;
+}
+
+function jewelerWorkerLevel(p) { return T.worker(p, 'jeweler')?.profession?.level || 1; }
+function rollDoubles(p, count) {
+  const ch = G.doubleChance(jewelerWorkerLevel(p));
+  let extra = 0;
+  for (let i = 0; i < count; i++) if (Math.random() < ch) extra++;
+  return extra;
+}
+
+export function cutGem(p, { stat, count = 1 }) {
+  if (!G.GEM_STATS.includes(stat)) fail('Unknown gem');
+  requireBuilding(p, 'jeweler');
+  const w = requireWorker(p, 'jeweler');
+  const n = Math.max(1, Math.min(50, Math.floor(Number(count) || 1)));
+  pay(p, G.cutCost(stat, n));
+  const extra = rollDoubles(p, n);
+  const key = G.gemKey(stat, 1);
+  p.town.gems[key] = (p.town.gems[key] || 0) + n + extra;
+  const msg = gainProfessionXp(w, 6 * n);
+  return { gem: key, count: n + extra, extra, msg };
+}
+
+export function fuseGems(p, { stat, tier, count = 1 }) {
+  const t = Math.floor(Number(tier));
+  if (!G.GEM_STATS.includes(stat) || !(t >= 1 && t < G.MAX_GEM_TIER)) fail('Unknown gem');
+  requireBuilding(p, 'jeweler');
+  const w = requireWorker(p, 'jeweler');
+  const need = G.GEM_TIERS[t + 1].jeweler;
+  if (T.bLevel(p, 'jeweler') < need) fail(`${G.GEM_TIERS[t + 1].name} gems need Jeweler level ${need}`);
+  const n = Math.max(1, Math.min(50, Math.floor(Number(count) || 1)));
+  const from = G.gemKey(stat, t), to = G.gemKey(stat, t + 1);
+  if ((p.town.gems[from] || 0) < G.GEM_CONFIG.fuseCount * n) fail(`You need ${G.GEM_CONFIG.fuseCount * n}× ${G.gemName(stat, t)}`);
+  pay(p, G.fuseCost(t, n));
+  p.town.gems[from] -= G.GEM_CONFIG.fuseCount * n;
+  if (!p.town.gems[from]) delete p.town.gems[from];
+  const extra = rollDoubles(p, n);
+  p.town.gems[to] = (p.town.gems[to] || 0) + n + extra;
+  const msg = gainProfessionXp(w, 12 * n * t);
+  return { gem: to, count: n + extra, extra, msg };
+}
+
+export function socketGem(p, { itemUid, charId, index, gem }) {
+  const { item } = findItemRef(p, String(itemUid), charId ? String(charId) : null);
+  const g = G.parseGemKey(gem) || fail('Unknown gem');
+  const i = Math.floor(Number(index));
+  if (!item.sockets || !(i >= 0 && i < item.sockets.length)) fail('This item has no such socket');
+  if (!(p.town.gems[gem] > 0)) fail(`You have no ${G.gemName(g.stat, g.tier)}`);
+  let fee = 0;
+  if (item.sockets[i]) { // swap: pull the old gem out first (costs the unsocket fee)
+    const old = G.parseGemKey(item.sockets[i]);
+    fee = G.unsocketCost(old.tier, item.level);
+    pay(p, { gold: fee });
+    p.town.gems[item.sockets[i]] = (p.town.gems[item.sockets[i]] || 0) + 1;
+  }
+  p.town.gems[gem]--;
+  if (!p.town.gems[gem]) delete p.town.gems[gem];
+  item.sockets[i] = gem;
+  return { item, fee };
+}
+
+export function unsocketGem(p, { itemUid, charId, index }) {
+  const { item } = findItemRef(p, String(itemUid), charId ? String(charId) : null);
+  const i = Math.floor(Number(index));
+  const key = item.sockets?.[i];
+  const g = key && G.parseGemKey(key);
+  if (!g) fail('That socket is empty');
+  const fee = G.unsocketCost(g.tier, item.level);
+  pay(p, { gold: fee });
+  item.sockets[i] = null;
+  p.town.gems[key] = (p.town.gems[key] || 0) + 1;
+  return { item, fee, gem: key };
+}
+
+export function drillSocket(p, { itemUid, charId }) {
+  requireBuilding(p, 'jeweler');
+  const w = requireWorker(p, 'jeweler');
+  const { item } = findItemRef(p, String(itemUid), charId ? String(charId) : null);
+  const have = (item.sockets || []).length;
+  if (have >= maxSockets(item)) fail(`This item can't hold more than ${maxSockets(item)} socket${maxSockets(item) > 1 ? 's' : ''}`);
+  const need = G.drillJewelerLevel(item);
+  if (T.bLevel(p, 'jeweler') < need) fail(`Socket #${have + 1} needs Jeweler level ${need}`);
+  pay(p, G.drillCost(item));
+  item.sockets = [...(item.sockets || []), null];
+  const msg = gainProfessionXp(w, 15 + item.level / 3);
+  return { item, msg };
 }
 
 export function salvageItems(p, { itemUids }) {

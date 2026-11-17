@@ -9,7 +9,7 @@ import {
 export function newTown() {
   const buildings = {};
   for (const [id, b] of Object.entries(BUILDINGS)) buildings[id] = { level: b.start, upgrade: null, worker: null };
-  return { buildings, materials: {}, elixirs: {} };
+  return { buildings, materials: {}, elixirs: {}, gems: {} };
 }
 
 export const bLevel = (p, id) => p.town?.buildings?.[id]?.level || 0;
