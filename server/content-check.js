@@ -293,6 +293,7 @@ export function validateContent(C) {
       ids.add(s?.id);
       str(`${w}.title`, s?.title); str(`${w}.text`, s?.text);
       if (s?.view && !views.has(s.view)) err(`${w}.view`, `unknown page "${s.view}"`);
+      (s?.highlight || []).forEach((h, j) => { if (!(typeof h === 'string' && h) && !(h && typeof h === 'object' && typeof h.el === 'string' && h.el && (h.done === undefined || typeof h.done === 'string'))) err(`${w}.highlight[${j}]`, 'must be a CSS selector or { "el": selector, "done": selector }'); });
       for (const v of s?.unlocks || []) if (!views.has(v)) err(`${w}.unlocks`, `unknown page "${v}" (pages: ${TUTORIAL_VIEWS.join(', ')})`);
       const g = s?.goal;
       const cond = (c, cw) => {

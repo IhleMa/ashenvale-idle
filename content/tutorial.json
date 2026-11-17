@@ -1,5 +1,5 @@
 {
-  "_about": "The new-player tutorial: steps in order. Each step names the page it happens on (view), what to highlight there, the goal that completes it and an optional reward. Pages are only shown in the menu once a step unlocks them; the last step unlocks everything. Goals: { \"type\": \"ack\" } (a Continue button) or { \"metric\": …, \"count\": n } counted from the start of the step (\"absolute\": true counts the total instead), or { \"any\": [goal, …] }. Metrics: kills, fights, recruited, heroNodes, buildingUpgrades, expeditionsSent, expeditionSpeedups, expeditionsReady, expeditionsClaimed, partySize, heroLevel. Rewards: gold, premium, xp (hero), materials { id: n }, coverUpgrade (a building id: gives whatever is missing to upgrade it).",
+  "_about": "The new-player tutorial: steps in order. Each step names the page it happens on (view), what to highlight there, the goal that completes it and an optional reward. Pages are only shown in the menu once a step unlocks them; the last step unlocks everything. Goals: { \"type\": \"ack\" } (a Continue button) or { \"metric\": …, \"count\": n } counted from the start of the step (\"absolute\": true counts the total instead), or { \"any\": [goal, …] }. Metrics: kills, fights, recruited, heroNodes, buildingUpgrades, expeditionsSent, expeditionSpeedups, expeditionsReady, expeditionsClaimed, partySize, heroLevel. Rewards: gold, premium, xp (hero), materials { id: n }, coverUpgrade (a building id: gives whatever is missing to upgrade it). highlight: what to click, in order — \"selector\" or { \"el\": selector, \"done\": selector }; the first entry that is not done and exists on the page glows and gets a Click-here arrow.",
   "enabled": true,
   "alwaysVisible": ["progression", "admin"],
   "steps": [
@@ -57,7 +57,12 @@
       "text": "Companions can gather materials while you fight. Open **Expeditions**, choose the **Whispering Glade**, pick your companion, set **15 min** and send them off.",
       "view": "expeditions",
       "unlocks": ["expeditions"],
-      "highlight": ["[data-dest=\"whispering_glade\"]", "[data-pick]", "[data-hours=\"0.25\"]", "[data-send]"],
+      "highlight": [
+        { "el": "[data-dest=\"whispering_glade\"]", "done": "[data-dest=\"whispering_glade\"].active" },
+        { "el": "[data-pick]", "done": "[data-pick].on" },
+        { "el": "[data-hours=\"0.25\"]", "done": "[data-hours=\"0.25\"].primary" },
+        "[data-send]"
+      ],
       "goal": { "metric": "expeditionsSent", "count": 1 }
     },
     {

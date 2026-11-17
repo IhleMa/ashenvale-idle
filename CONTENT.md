@@ -167,7 +167,7 @@ Easiest: **Admin → 📈 XP curve** (drag the points, save — live). In the fi
 
 ### Change the tutorial
 
-`content/tutorial.json` lists the steps in order. Each step has a `title`, a `text` (`**bold**` works, `{count}` is the goal count), the page it happens on (`view`), the pages it makes visible (`unlocks`; `"*"` = everything — used by the last step), CSS selectors of what to make glow (`highlight`), a `goal` and an optional `reward`.
+`content/tutorial.json` lists the steps in order. Each step has a `title`, a `text` (`**bold**` works, `{count}` is the goal count), the page it happens on (`view`), the pages it makes visible (`unlocks`; `"*"` = everything — used by the last step), what to click, in order (`highlight`: CSS selectors, or `{ "el": selector, "done": selector }` to move on to the next entry once `done` matches — only the first unfinished one glows and gets a "Click here" arrow), a `goal` and an optional `reward`.
 
 - Goals: `{ "type": "ack" }` shows a button (`"button"` sets its label). `{ "metric": "kills", "count": 5 }` counts from the start of the step; add `"absolute": true` to count the total instead. `{ "any": [ … ] }` completes when one of several goals is met. Metrics: `kills`, `fights`, `recruited`, `heroLevel`, `heroNodes`, `buildingUpgrades`, `expeditionsSent`, `expeditionSpeedups`, `expeditionsReady`, `expeditionsClaimed`, `partySize`.
 - Rewards: `gold`, `premium`, `xp` (hero), `materials` `{ "ore": 5 }`, and `coverUpgrade: "<building>"`, which gives exactly what is still missing to upgrade that building. `rewardText` overrides how the reward is described.

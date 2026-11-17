@@ -106,7 +106,7 @@ export function renderTutorial() {
       ${reward ? `<div class="tut-reward">🎁 Reward: ${esc(reward)}</div>` : ''}
       <div class="tut-actions">
         ${isAck ? `<button class="btn primary" data-tut-ack="${esc(step.id)}">${esc(step.button || 'Continue')}</button>`
-          : here ? '<span class="tut-hint">👉 Look for the glowing button</span>'
+          : here ? '<span class="tut-hint">Follow the <b>Click here</b> arrow</span>'
           : `<button class="btn primary small" data-tut-go="${esc(step.view)}">Go to ${esc(ctx.viewLabel(step.view))} →</button>`}
         <span class="grow"></span>
         ${idx < steps.length - 1 ? '<button class="tut-skip" data-tut-skip>Skip tutorial</button>' : ''}
@@ -115,20 +115,77 @@ export function renderTutorial() {
   applyHighlights();
 }
 
+// One target at a time: the first highlight entry that is not done yet and exists on the page gets the glow
+// and a bouncing "Click here" arrow. Entries: "selector" or { "el": selector, "done": selector } — the entry
+// is skipped once something matches "done" (e.g. the destination is already selected).
+let arrows = null;
+let scrolledFor = null;
+function targets(step) {
+  if (ctx.currentView() !== step.view) {
+    const nav = document.querySelector(`#sidebar a[data-view="${step.view}"]`);
+    const sidebarHidden = !nav || nav.getBoundingClientRect().right <= 0;
+    return { nav: true, els: [sidebarHidden ? document.getElementById('menu-toggle') : nav].filter(Boolean) };
+  }
+  const view = document.getElementById('view');
+  for (const h of step.highlight || []) {
+    const sel = typeof h === 'string' ? h : h?.el;
+    const done = typeof h === 'object' ? h?.done : null;
+    try {
+      if (done && view.querySelector(done)) continue;
+      const els = [...view.querySelectorAll(sel)].filter(x => !x.disabled && x.getClientRects().length).slice(0, 6);
+      if (els.length) return { nav: false, els };
+    } catch { /* bad selector in content */ }
+  }
+  return { nav: false, els: [] };
+}
+
 function applyHighlights() {
   for (const el of document.querySelectorAll('.tut-hl, .tut-hl-nav')) el.classList.remove('tut-hl', 'tut-hl-nav');
   const p = state.player;
   const step = p && currentStep(p);
-  if (!step || step.goal?.type === 'ack') return;
-  if (ctx.currentView() !== step.view) {
-    document.querySelector(`#sidebar a[data-view="${step.view}"]`)?.classList.add('tut-hl-nav');
-    document.getElementById('menu-toggle')?.classList.add('tut-hl-nav');
-    return;
+  if (!step || step.goal?.type === 'ack') { placeArrow(null); return; }
+  const t = targets(step);
+  for (const el of t.els) el.classList.add(t.nav ? 'tut-hl-nav' : 'tut-hl');
+  const first = t.els[0] || null;
+  // bring the target into view once (don't fight the player's own scrolling afterwards)
+  const key = first && `${step.id}:${first.dataset ? JSON.stringify(first.dataset) : ''}`;
+  if (first && key !== scrolledFor) {
+    scrolledFor = key;
+    const r = first.getBoundingClientRect();
+    if (r.top < 60 || r.bottom > innerHeight - 160) first.scrollIntoView({ block: 'center', behavior: 'smooth' });
   }
-  const view = document.getElementById('view');
-  for (const sel of step.highlight || []) {
-    let list = [];
-    try { list = [...view.querySelectorAll(sel)]; } catch { /* bad selector in content */ }
-    for (const el of list.filter(x => !x.disabled).slice(0, 6)) el.classList.add('tut-hl');
-  }
+  placeArrow(first, t.nav);
 }
+
+function placeArrow(el, nav = false) {
+  if (!arrows) {
+    arrows = document.createElement('div');
+    arrows.className = 'tut-arrow';
+    arrows.hidden = true;
+    document.body.appendChild(arrows);
+  }
+  arrows.target = el;
+  arrows.nav = nav;
+  positionArrow();
+}
+function positionArrow() {
+  const a = arrows, el = a?.target;
+  if (!a) return;
+  if (!el || !el.isConnected) { a.hidden = true; return; }
+  const r = el.getBoundingClientRect();
+  if (!r.width && !r.height) { a.hidden = true; return; }
+  a.hidden = false;
+  const side = a.nav && el.id !== 'menu-toggle' ? 'right' : r.top > 90 ? 'above' : 'below';
+  a.className = `tut-arrow ${side}`;
+  a.innerHTML = side === 'right' ? '<span>👈</span><b>Click here</b>' : side === 'above' ? '<b>Click here</b><span>👇</span>' : '<span>👆</span><b>Click here</b>';
+  const w = a.offsetWidth, h = a.offsetHeight;
+  let x, y;
+  if (side === 'right') { x = r.right + 10; y = r.top + r.height / 2 - h / 2; }
+  else { x = r.left + r.width / 2 - w / 2; y = side === 'above' ? r.top - h - 8 : r.bottom + 8; }
+  a.style.left = `${Math.max(6, Math.min(innerWidth - w - 6, x))}px`;
+  a.style.top = `${Math.max(6, Math.min(innerHeight - h - 6, y))}px`;
+}
+// targets move with scrolling, resizing and layout changes
+addEventListener('scroll', () => positionArrow(), true);
+addEventListener('resize', () => positionArrow());
+setInterval(() => { if (arrows?.target) positionArrow(); }, 400);
