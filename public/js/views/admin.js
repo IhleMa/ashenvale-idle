@@ -61,13 +61,13 @@ function playersHtml() {
       <select data-player-sort>${[['online', 'Online / recent'], ['level', 'Hero level'], ['gold', 'Gold'], ['newest', 'Newest'], ['name', 'Name']].map(([v, l]) => `<option value="${v}" ${ui.sort === v ? 'selected' : ''}>${l}</option>`).join('')}</select>
       <span class="muted small">${players ? `${players.total} accounts` : ''}</span>
     </div>
-    <table class="rank-table admin-players"><thead><tr><th>Player</th><th>Hero</th><th class="num">Gold</th><th>Last seen</th><th>Created</th><th>Status</th><th></th></tr></thead>
+    <table class="rank-table admin-players"><thead><tr><th>Player</th><th>Hero</th><th class="num">Gold</th><th class="num">💠</th><th>Last seen</th><th>Created</th><th>Status</th><th></th></tr></thead>
     <tbody>${(players?.rows || []).map(r => `<tr data-player="${r.id}">
       <td><span class="conn-dot ${r.online ? 'on' : ''}"></span> <b>${esc(r.username)}</b>${r.admin ? ' <span class="tag hero">ADMIN</span>' : ''}</td>
       <td>${r.hero ? `${classIcon(r.hero.classId, 'xxs')} ${esc(r.hero.name)} <span class="muted small">Lv ${r.hero.level}</span>` : '<span class="muted">no hero</span>'}</td>
-      <td class="num">${fmt(r.gold)}</td><td class="muted small">${r.online ? 'online' : ago(r.lastActive)}</td><td class="muted small">${new Date(r.createdAt).toLocaleDateString()}</td>
+      <td class="num">${fmt(r.gold)}</td><td class="num">${fmt(r.premium || 0)}</td><td class="muted small">${r.online ? 'online' : ago(r.lastActive)}</td><td class="muted small">${new Date(r.createdAt).toLocaleDateString()}</td>
       <td>${r.banned ? `<span class="tag boss" ${tipAttr(esc(r.banned.reason))}>BANNED</span>` : ''}</td>
-      <td class="num"><button class="btn tiny">Manage</button></td></tr>`).join('') || '<tr><td colspan="7" class="muted">No players.</td></tr>'}</tbody></table>`;
+      <td class="num"><button class="btn tiny">Manage</button></td></tr>`).join('') || '<tr><td colspan="8" class="muted">No players.</td></tr>'}</tbody></table>`;
 }
 
 function render(root) {
@@ -84,7 +84,7 @@ async function openPlayer(id, root) {
   const m = modal(`<h2>${esc(d.username)} ${d.online ? '<span class="tag live">ONLINE</span>' : ''} ${d.banned ? '<span class="tag boss">BANNED</span>' : ''}</h2>
     <div class="muted small">Account created ${new Date(d.createdAt).toLocaleString()} · last seen ${d.online ? 'now' : ago(d.lastActive)}${d.banned ? ` · banned: ${esc(d.banned.reason)}${d.banned.until ? ` (until ${new Date(d.banned.until).toLocaleString()})` : ' (permanent)'}` : ''}</div>
     ${pl ? `<div class="admin-cards small-cards">
-      ${[['Gold', fmt(pl.gold)], ['Kills', fmt(pl.stats.kills || 0)], ['Characters', pl.characters.length], ['Inventory', `${pl.inventory.length}/${CONFIG.inventory.limit}`], ['Mailbox', pl.mailbox], ['Auctions', pl.auctions], ['Expeditions', pl.expeditions], ['Zone', pl.zone]].map(([l, v]) => `<div class="admin-card"><small>${l}</small><b>${esc(String(v))}</b></div>`).join('')}
+      ${[['Gold', fmt(pl.gold)], ['💠 Crystals', fmt(pl.premium)], ['Kills', fmt(pl.stats.kills || 0)], ['Characters', pl.characters.length], ['Inventory', `${pl.inventory.length}/${CONFIG.inventory.limit}`], ['Mailbox', pl.mailbox], ['Auctions', pl.auctions], ['Expeditions', pl.expeditions], ['Zone', pl.zone]].map(([l, v]) => `<div class="admin-card"><small>${l}</small><b>${esc(String(v))}</b></div>`).join('')}
     </div>
     <h4>Characters</h4><div class="small">${pl.characters.map(c => `${classIcon(c.classId, 'xxs')} ${c.isMain ? '★ ' : ''}${esc(c.name)} Lv ${c.level}${c.profession ? ` <span class="muted">(${esc(c.profession.id)} ${c.profession.level})</span>` : ''}`).join(' · ')}</div>
     <h4>Materials</h4><div class="row gap wrap small">${Object.entries(pl.materials).filter(([, v]) => v >= 1).map(([k, v]) => `<span class="cost">${materialIcon(k, 'xxs')} ${fmt(Math.floor(v))}</span>`).join('') || '<span class="muted">none</span>'}</div>
@@ -93,6 +93,7 @@ async function openPlayer(id, root) {
     <h3>Give</h3>
     <div class="admin-give">
       <label class="inline">Gold <input type="number" data-g-gold min="0" value="0"></label>
+      <label class="inline">💠 Crystals <input type="number" data-g-premium min="0" value="0"></label>
       <label class="inline">Material <select data-g-mat><option value="">—</option>${MATERIAL_IDS.map(k => `<option value="${k}">${esc(MATERIALS[k].name)}</option>`).join('')}</select> <input type="number" data-g-matqty min="0" value="0"></label>
       <label class="inline">Item <select data-g-type><option value="">—</option><option value="random">Random item</option><option value="unique">Unique</option><option value="set">Set piece</option></select></label>
       <select data-g-unique><option value="">random unique</option>${Object.values(UNIQUES).map(u => `<option value="${u.id}">${esc(u.name)}</option>`).join('')}</select>
@@ -120,7 +121,7 @@ async function openPlayer(id, root) {
       const mat = q('[data-g-mat]').value;
       const type = q('[data-g-type]').value;
       const r = await run(act('admin_give', {
-        id, gold: Number(q('[data-g-gold]').value) || 0,
+        id, gold: Number(q('[data-g-gold]').value) || 0, premium: Number(q('[data-g-premium]').value) || 0,
         materials: mat ? { [mat]: Number(q('[data-g-matqty]').value) || 0 } : {},
         item: type ? { type, uniqueId: q('[data-g-unique]').value, setId: q('[data-g-set]').value, baseId: q('[data-g-base]').value, rarity: q('[data-g-rarity]').value, level: Number(q('[data-g-level]').value) } : null,
         note: q('[data-g-note]').value || undefined,

@@ -25,7 +25,7 @@ const uid = () => crypto.randomBytes(6).toString('hex');
 export function newPlayer(account) {
   return {
     id: account.id, name: account.username, createdAt: Date.now(), lastActive: Date.now(),
-    heroId: null, characters: {}, gold: 0, inventory: [],
+    heroId: null, characters: {}, gold: 0, premium: 0, inventory: [],
     parties: Array.from({ length: CONFIG.party.presets }, (_, i) => ({ name: `Party ${i + 1}`, members: [] })),
     activeParty: 0, zone: 'whispering_woods', unlockedZones: ['whispering_woods'], bossKills: {},
     recruitment: { offers: [], refreshedAt: 0 },
@@ -257,16 +257,16 @@ export function receiveItem(p, item) {
 
 // --------------------------------------------------------------------------- mailbox
 // Mail carries items, gold or materials (auction sales, expired listings, overflow loot, admin gifts).
-export function sendMail(p, { item = null, gold = 0, materials = null, from = 'System', note = '' }) {
+export function sendMail(p, { item = null, gold = 0, premium = 0, materials = null, from = 'System', note = '' }) {
   p.mailbox ||= [];
-  p.mailbox.push({ id: uid(), item, gold: Math.max(0, Math.floor(gold)), materials, from, note, at: Date.now() });
+  p.mailbox.push({ id: uid(), item, gold: Math.max(0, Math.floor(gold)), premium: Math.max(0, Math.floor(premium)), materials, from, note, at: Date.now() });
   if (p.mailbox.length > 200) p.mailbox.splice(0, p.mailbox.length - 200);
 }
 
 export function collectMail(p, { id }) {
   p.mailbox ||= [];
   const ids = id ? [String(id)] : p.mailbox.map(m => m.id);
-  let gold = 0, items = 0, skipped = 0;
+  let gold = 0, items = 0, skipped = 0, premium = 0;
   for (const mid of ids) {
     const idx = p.mailbox.findIndex(m => m.id === mid);
     if (idx < 0) continue;
@@ -274,11 +274,12 @@ export function collectMail(p, { id }) {
     if (m.item && p.inventory.length >= CONFIG.inventory.limit) { skipped++; continue; }
     if (m.item) { p.inventory.push(m.item); items++; }
     if (m.gold) { p.gold += m.gold; gold += m.gold; }
+    if (m.premium) { p.premium = (p.premium || 0) + m.premium; premium += m.premium; }
     if (m.materials) { p.town ||= { materials: {} }; for (const [k, v] of Object.entries(m.materials)) p.town.materials[k] = (p.town.materials[k] || 0) + v; }
     p.mailbox.splice(idx, 1);
   }
-  if (!gold && !items && skipped) fail('Your inventory is full');
-  return { gold, items, skipped };
+  if (!gold && !items && !premium && skipped) fail('Your inventory is full');
+  return { gold, items, skipped, premium };
 }
 
 // --------------------------------------------------------------------------- recruitment
@@ -455,7 +456,7 @@ export function checkAchievements(p) {
 // --------------------------------------------------------------------------- client view
 export function publicPlayer(p) {
   return {
-    id: p.id, name: p.name, heroId: p.heroId, characters: p.characters, gold: p.gold, inventory: p.inventory,
+    id: p.id, name: p.name, heroId: p.heroId, characters: p.characters, gold: p.gold, premium: p.premium || 0, inventory: p.inventory,
     parties: p.parties, activeParty: p.activeParty, zone: p.zone, unlockedZones: p.unlockedZones, bossKills: p.bossKills,
     recruitment: { ...p.recruitment, costs: Object.fromEntries(p.recruitment.offers.map(o => [o.offerId, recruitCost(p, o)])) },
     stats: p.stats, achievements: p.achievements, settings: p.settings, coopChars: p.coopChars,
@@ -464,3 +465,12 @@ export function publicPlayer(p) {
 }
 
 export { ITEM_BASES };
+
+// --------------------------------------------------------------------------- premium currency
+// maxCost: the price the player saw; protects against paying more if the time/rate changed meanwhile
+export function spendPremium(p, cost, maxCost) {
+  if (maxCost != null && cost > Number(maxCost)) fail(`The price changed to ${cost} crystals — please try again`);
+  if ((p.premium || 0) < cost) fail(`You need ${cost} Ashen Crystals (you have ${p.premium || 0})`);
+  p.premium -= cost;
+  p.stats.premiumSpent = (p.stats.premiumSpent || 0) + cost;
+}

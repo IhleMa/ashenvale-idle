@@ -2,7 +2,8 @@
 // Gathering happens through expeditions (views/expeditions.js).
 import { state, hero } from '../state.js';
 import { act } from '../net.js';
-import { esc, fmt, run, toast, tipAttr, itemTooltipHtml, duration, bar, confirmBox, statValue } from '../ui.js';
+import { esc, fmt, run, toast, tipAttr, itemTooltipHtml, duration, bar, confirmBox, statValue, premiumTxt, confirmSpend } from '../ui.js';
+import { speedUpCost } from '/shared/premium.js';
 import { buildingArt, materialIcon, professionIcon, elixirIcon, itemIcon, portrait } from '../assets.js';
 import { CONFIG, rarityIndex } from '/shared/config.js';
 import { BUILDINGS, BUILDING_IDS, MATERIALS, MATERIAL_IDS, PROFESSIONS, ELIXIRS, QUALITIES, ITEM_MATERIAL, ENCHANT_STATS_BY_LEVEL, professionXpToNext, CRAFT_LEVEL_CAP } from '/shared/data/town.js';
@@ -26,6 +27,10 @@ function costHtml(p, cost) {
 }
 function matsList(mats) {
   return Object.entries(mats).map(([k, v]) => `<span class="cost">${materialIcon(k, 'xxs')} ${fmt(v)}</span>`).join(' ') || '<span class="muted">nothing</span>';
+}
+const skipCost = endsAt => speedUpCost(endsAt - now(), state.premiumRate || 10);
+function speedBtn(kind, id, endsAt) {
+  return `<button class="btn tiny premium-btn" data-speed-${kind}="${id}" data-speed-end="${endsAt}" ${tipAttr('Finish instantly with Ashen Crystals')}>⚡ <span data-speed-cost>${skipCost(endsAt)}</span> 💠</button>`;
 }
 function countdown(endsAt) { return `<span data-ends="${endsAt}">${duration(Math.max(0, (endsAt - now()) / 1000))}</span>`; }
 
@@ -65,7 +70,7 @@ function cardHtml(p, id) {
 function upgradeHtml(p, id) {
   const def = BUILDINGS[id];
   const b = p.town.buildings[id];
-  if (b.upgrade) return `<div class="notice good">🏗 Upgrading to level ${b.upgrade.to} — ready in ${countdown(b.upgrade.endsAt)}</div>`;
+  if (b.upgrade) return `<div class="notice good row between wrap gap"><span>🏗 Upgrading to level ${b.upgrade.to} — ready in ${countdown(b.upgrade.endsAt)}</span>${speedBtn('build', id, b.upgrade.endsAt)}</div>`;
   if (b.level >= def.maxLevel) return '<div class="muted small">Maximum level reached.</div>';
   const to = b.level + 1;
   const cost = T.upgradeCost(id, to);
@@ -220,6 +225,7 @@ function resourcesHtml(p) {
   return `<div class="panel town-resources">
     <div class="res-list">${MATERIAL_IDS.map(m => `<span class="res" ${tipAttr(`<b>${esc(MATERIALS[m].name)}</b><br>${esc(MATERIALS[m].description)}`)}>${materialIcon(m, 'xs')}<b>${fmt(Math.floor(p.town.materials[m] || 0))}</b></span>`).join('')}</div>
     <div class="row gap wrap">
+      <span class="res" ${tipAttr('Ashen Crystals: finish constructions and expeditions instantly')}>${premiumTxt(p.premium || 0)}</span>
       ${elixirs.map(([eid, exp]) => `<span class="active-elixir" ${tipAttr(esc(ELIXIRS[eid].description))}>${elixirIcon(eid, 'xxs')} ${countdown(exp)}</span>`).join('')}
       <a class="btn small" href="#/expeditions">🧭 Expeditions</a>
     </div>
@@ -238,6 +244,12 @@ export const townView = {
       const d = t.dataset;
       if (d.building) { ui.selected = d.building; ui.salvageSel.clear(); rerender(); return; }
       if (d.upgrade) { await run(act('town_upgrade', { buildingId: d.upgrade }), 'Construction started!'); return; }
+      if (d.speedBuild) {
+        const cost = skipCost(Number(d.speedEnd));
+        if ((p.premium || 0) < cost) return toast(`You need ${cost} Ashen Crystals (you have ${p.premium || 0}).`, 'error');
+        if (await confirmSpend(cost, `finish the ${BUILDINGS[d.speedBuild].name} now`)) await run(act('town_speedup', { buildingId: d.speedBuild, maxCost: cost }));
+        return;
+      }
       if (d.assign) { await run(act('town_assign', { buildingId: d.assign, charId: d.char }), 'Worker assigned.'); return; }
       if (d.unassign) { await run(act('town_assign', { buildingId: d.unassign, charId: null })); return; }
       if (d.salv) {
@@ -287,6 +299,7 @@ export const townView = {
       const p = state.player;
       if (!p?.town) return;
       root.querySelectorAll('[data-ends]').forEach(el => { el.textContent = duration(Math.max(0, (Number(el.dataset.ends) - now()) / 1000)); });
+      root.querySelectorAll('[data-speed-end]').forEach(el => { const c = el.querySelector('[data-speed-cost]'); if (c) c.textContent = skipCost(Number(el.dataset.speedEnd)); });
       root.querySelectorAll('[data-progress-end]').forEach(el => {
         const s = Number(el.dataset.progressStart), en = Number(el.dataset.progressEnd);
         const f = el.querySelector('.fill');

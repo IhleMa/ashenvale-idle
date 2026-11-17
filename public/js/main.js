@@ -118,6 +118,7 @@ function renderTopbar() {
   const p = state.player;
   if (!p) return;
   document.getElementById('topbar-gold').textContent = fmt(p.gold);
+  document.getElementById('topbar-premium').textContent = fmt(p.premium || 0);
   const h = hero();
   const el = document.getElementById('topbar-hero');
   if (!h) { el.innerHTML = ''; return; }
@@ -165,6 +166,7 @@ function reloadSoon(reason) {
 }
 let motdShown = false;
 bus.on('msg:welcome', m => {
+  if (m.premium) state.premiumRate = m.premium.minutesPerCrystal;
   if (m.auction) { state.ahFee = m.auction.feePct; state.ahTax = m.auction.taxPct; }
   if (!!m.isAdmin !== !!state.isAdmin) { state.isAdmin = !!m.isAdmin; renderNav(); route(); }
   if (m.motd && !motdShown) { motdShown = true; modal(`<h2>📜 Message of the day</h2><p class="motd">${esc(m.motd)}</p><div class="row end"><button class="btn primary" data-close>OK</button></div>`); }

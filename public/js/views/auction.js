@@ -1,7 +1,7 @@
 // Auction House: browse/buy, sell, manage listings, mailbox.
 import { state, chars } from '../state.js';
 import { act } from '../net.js';
-import { esc, fmt, run, toast, tipAttr, itemTooltipHtml, duration, confirmBox } from '../ui.js';
+import { esc, fmt, run, toast, tipAttr, itemTooltipHtml, duration, confirmBox, premiumTxt } from '../ui.js';
 import { itemIcon, materialIcon } from '../assets.js';
 import { CONFIG } from '/shared/config.js';
 import { SLOTS, itemSellValue } from '/shared/data/items.js';
@@ -104,7 +104,7 @@ function mailHtml() {
     <div class="mail-list">${mail.map(m => `<div class="mail">
       <div class="grow"><b>${esc(m.from)}</b> <span class="muted small">${new Date(m.at).toLocaleString()}</span><div class="small">${esc(m.note || '')}</div>
         <div class="row gap wrap small">${m.item ? `<span ${tipAttr(itemTooltipHtml(m.item))}>${itemIcon(m.item, 'xs')} <span class="rarity-text rarity-${m.item.rarity} ${m.item.unique ? 'unique-name' : ''} ${m.item.set ? 'set-name' : ''}">${esc(m.item.name)}</span></span>` : ''}
-        ${m.gold ? goldTxt(m.gold) : ''}${m.materials ? Object.entries(m.materials).map(([k, v]) => `<span class="cost">${materialIcon(k, 'xxs')} ${fmt(v)}</span>`).join('') : ''}</div></div>
+        ${m.gold ? goldTxt(m.gold) : ''}${m.premium ? ' ' + premiumTxt(m.premium) : ''}${m.materials ? Object.entries(m.materials).map(([k, v]) => `<span class="cost">${materialIcon(k, 'xxs')} ${fmt(v)}</span>`).join('') : ''}</div></div>
       <button class="btn small" data-collect="${m.id}">Collect</button></div>`).join('') || '<p class="muted">Your mailbox is empty.</p>'}</div>`;
 }
 

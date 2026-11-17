@@ -17,6 +17,8 @@ import * as TL from './townLogic.js';
 import * as XL from './expeditionLogic.js';
 import { EXPEDITIONS } from '../shared/data/expeditions.js';
 import { elixirBonuses } from '../shared/town.js';
+import { speedUpCost } from '../shared/premium.js';
+import { BUILDINGS } from '../shared/data/town.js';
 import * as L from './playerLogic.js';
 
 const { GameError } = L;
@@ -104,7 +106,7 @@ export class Game {
     }
     if (s.graceTimer) { clearTimeout(s.graceTimer); s.graceTimer = null; } // reconnected within the grace period
     s.sockets.add(ws);
-    this.send(ws, { t: 'welcome', playerId: player.id, name: player.name, serverTime: Date.now(), buildId: this.buildId, config: { version: CONFIG.version }, isAdmin: this.isAdmin(account), motd: this.settings.get('motd') || '', auction: { feePct: this.settings.get('auctionFeePct'), taxPct: this.settings.get('auctionTaxPct') } });
+    this.send(ws, { t: 'welcome', playerId: player.id, name: player.name, serverTime: Date.now(), buildId: this.buildId, config: { version: CONFIG.version }, isAdmin: this.isAdmin(account), motd: this.settings.get('motd') || '', auction: { feePct: this.settings.get('auctionFeePct'), taxPct: this.settings.get('auctionTaxPct') }, premium: { minutesPerCrystal: this.settings.get('premiumMinutesPerCrystal') } });
     if (first) this.handleOffline(s);
     L.maybeAutoRefreshRecruits(player, this.assets.get());
     s.stateDirty = true;
@@ -223,6 +225,26 @@ export class Game {
       const ex = XL.startExpedition(s.player, { destId: String(d.destId), charIds: d.charIds, hours: Number(d.hours) });
       for (const id of ex.charIds) this.abortSoloIfUsing(s, id);
       return ex;
+    },
+    town_speedup(s, d) {
+      const p = s.player;
+      const b = p.town.buildings[String(d.buildingId)] || fail('Unknown building');
+      if (!b.upgrade) fail('Nothing is being built there');
+      const cost = speedUpCost(b.upgrade.endsAt - Date.now(), this.settings.get('premiumMinutesPerCrystal'));
+      if (cost > 0) L.spendPremium(p, cost, d.maxCost);
+      b.upgrade.endsAt = Date.now();
+      const done = TL.finishConstructions(p);
+      for (const x of done) this.toast(p.id, `🏗 ${x.name} upgraded to level ${x.level}!`, 'success');
+      return { cost };
+    },
+    expedition_speedup(s, d) {
+      const p = s.player;
+      const ex = (p.expeditions || []).find(e => e.id === String(d.id)) || fail('Expedition not found');
+      const cost = speedUpCost(ex.endsAt - Date.now(), this.settings.get('premiumMinutesPerCrystal'));
+      if (cost > 0) L.spendPremium(p, cost, d.maxCost);
+      ex.endsAt = Date.now();
+      ex.announced = true;
+      return { cost };
     },
     expedition_cancel(s, d) { XL.cancelExpedition(s.player, { id: String(d.id) }); },
     expedition_claim(s, d) {

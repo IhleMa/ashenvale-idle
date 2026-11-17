@@ -1,7 +1,8 @@
 // Expeditions: send recruits out to gather materials.
 import { state } from '../state.js';
 import { act } from '../net.js';
-import { esc, fmt, run, toast, tipAttr, duration, bar, confirmBox } from '../ui.js';
+import { esc, fmt, run, toast, tipAttr, duration, bar, confirmBox, premiumTxt, confirmSpend } from '../ui.js';
+import { speedUpCost } from '/shared/premium.js';
 import { portrait, materialIcon, professionIcon, backgroundStyle, assetUrl } from '../assets.js';
 import { CLASSES } from '/shared/data/classes.js';
 import { MATERIALS, PROFESSIONS, BUILDINGS } from '/shared/data/town.js';
@@ -44,7 +45,7 @@ function activeHtml(p) {
         <div class="row gap small">${ex.charIds.map(id => p.characters[id]).filter(Boolean).map(c => `${portrait(c, 'xxs')} ${esc(c.name)}`).join(' · ')}</div>
         ${done ? '<div class="up small">Returned — rewards ready!</div>' : `<div data-exp-progress="${ex.startedAt}:${ex.endsAt}">${bar(0, 1, 'build thin', '')}<small class="muted">back in <span data-ends="${ex.endsAt}">${duration((ex.endsAt - t) / 1000)}</span></small></div>`}
       </div>
-      ${done ? `<button class="btn primary small" data-claim="${ex.id}">Claim</button>` : `<button class="btn tiny ghost" data-cancel="${ex.id}" title="Recall the recruits early (no rewards)">Recall</button>`}
+      ${done ? `<button class="btn primary small" data-claim="${ex.id}">Claim</button>` : `<div class="col-btns"><button class="btn tiny premium-btn" data-speed="${ex.id}" data-speed-end="${ex.endsAt}" ${tipAttr('Bring them back now — with full rewards')}>⚡ Return now <span data-speed-cost>${speedUpCost(ex.endsAt - t, state.premiumRate || 10)}</span> 💠</button><button class="btn tiny ghost" data-cancel="${ex.id}" title="Recall the recruits early (no rewards)">Recall</button></div>`}
     </div>`;
   }).join('')}</div>`;
 }
@@ -113,10 +114,17 @@ export const expeditionsView = {
         if (r) toast(`Brought back: ${Object.entries(r.got).map(([k, v]) => `${v} ${MATERIALS[k].name}`).join(', ') || 'nothing'}`, 'success');
         return;
       }
+      if (d.speed) {
+        const cost = speedUpCost(Number(d.speedEnd) - now(), state.premiumRate || 10);
+        if ((p.premium || 0) < cost) return toast(`You need ${cost} Ashen Crystals (you have ${p.premium || 0}).`, 'error');
+        if (await confirmSpend(cost, 'bring this expedition back now (full rewards)')) await run(act('expedition_speedup', { id: d.speed, maxCost: cost }));
+        return;
+      }
       if (d.cancel && await confirmBox('Recall this expedition early? The recruits return immediately but bring nothing back.', 'Recall')) await run(act('expedition_cancel', { id: d.cancel }));
     });
     timer = setInterval(() => {
       root.querySelectorAll('[data-ends]').forEach(el => { el.textContent = duration(Math.max(0, (Number(el.dataset.ends) - now()) / 1000)); });
+      root.querySelectorAll('[data-speed-end]').forEach(el => { const c = el.querySelector('[data-speed-cost]'); if (c) c.textContent = speedUpCost(Number(el.dataset.speedEnd) - now(), state.premiumRate || 10); });
       let finished = false;
       root.querySelectorAll('[data-exp-progress]').forEach(el => {
         const [s, en] = el.dataset.expProgress.split(':').map(Number);
@@ -136,7 +144,7 @@ export const expeditionsView = {
     root.innerHTML = `
       <section class="panel">
         <div class="panel-head"><h3>Expeditions <span class="muted small">${(p.expeditions || []).length}/${campSlots(p)} underway</span></h3>
-          <div class="row gap">${ready > 1 ? `<button class="btn small primary" data-claim-all>Claim all (${ready})</button>` : ''}<a class="small" href="#/town">Expedition Camp: level ${camp}${camp < 5 ? ` → ${CAMP_SLOTS[camp + 1]} slots at level ${camp + 1}` : ''}</a></div></div>
+          <div class="row gap"><span class="small">${premiumTxt(p.premium || 0)}</span>${ready > 1 ? `<button class="btn small primary" data-claim-all>Claim all (${ready})</button>` : ''}<a class="small" href="#/town">Expedition Camp: level ${camp}${camp < 5 ? ` → ${CAMP_SLOTS[camp + 1]} slots at level ${camp + 1}` : ''}</a></div></div>
         <p class="muted small">Recruits on an expedition can't fight or work in town until they return. Rewards are calculated by the server when you claim them.</p>
         ${activeHtml(p)}
       </section>

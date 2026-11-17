@@ -137,3 +137,9 @@ export function initTooltips() {
   document.addEventListener('click', () => { tipEl.style.display = 'none'; }, true);
 }
 export const tipAttr = html => `data-tip="${esc(html)}"`;
+
+// ---- premium currency helpers
+export const premiumTxt = n => `<span class="premium-text">💠 ${fmt(n)}</span>`;
+export async function confirmSpend(cost, what) {
+  return confirmBox(`Spend ${cost} Ashen Crystal${cost === 1 ? '' : 's'} to ${what}?`, `Spend 💠 ${cost}`);
+}

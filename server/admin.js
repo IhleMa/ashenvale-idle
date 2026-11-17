@@ -57,7 +57,7 @@ export function adminActions(game) {
     return {
       id: acc.id, username: acc.username, createdAt: acc.createdAt, online: game.sessions.has(acc.id),
       lastActive: game.sessions.has(acc.id) ? Date.now() : p?.lastActive || null,
-      hero: h ? { name: h.name, classId: h.classId, level: h.level } : null, gold: p?.gold || 0,
+      hero: h ? { name: h.name, classId: h.classId, level: h.level } : null, gold: p?.gold || 0, premium: p?.premium || 0,
       banned: isBanned(acc) ? acc.banned : null, admin: admins.has(acc.username),
       kills: p?.stats?.kills || 0, characters: p ? Object.keys(p.characters).length : 0,
     };
@@ -94,7 +94,7 @@ export function adminActions(game) {
       return {
         ...summary(acc),
         player: p ? {
-          gold: p.gold, materials: p.town?.materials || {}, inventory: p.inventory, mailbox: (p.mailbox || []).length,
+          gold: p.gold, premium: p.premium || 0, materials: p.town?.materials || {}, inventory: p.inventory, mailbox: (p.mailbox || []).length,
           characters: Object.values(p.characters).map(c => ({ id: c.id, name: c.name, classId: c.classId, level: c.level, isMain: c.isMain, profession: c.profession || null })),
           stats: p.stats, zone: p.zone, unlockedZones: p.unlockedZones, town: Object.fromEntries(Object.entries(p.town?.buildings || {}).map(([k, b]) => [k, b.level])),
           expeditions: (p.expeditions || []).length, auctions: game.auction.data.listings.filter(l => l.sellerId === acc.id).length,
@@ -126,6 +126,7 @@ export function adminActions(game) {
       const { acc, p } = loadById(d.id);
       if (!p) fail('This account has no game data yet');
       const gold = Math.max(0, Math.min(1e9, Math.floor(Number(d.gold) || 0)));
+      const premium = Math.max(0, Math.min(1e6, Math.floor(Number(d.premium) || 0)));
       const materials = {};
       for (const [k, v] of Object.entries(d.materials || {})) { const n = Math.floor(Number(v) || 0); if (MATERIALS[k] && n > 0) materials[k] = Math.min(1e6, n); }
       let item = null;
@@ -136,14 +137,14 @@ export function adminActions(game) {
         else if (d.item.type === 'set') item = generateSetItem(rng, lvl, SETS[d.item.setId] ? d.item.setId : null, d.item.baseId || null);
         else item = generateItem(rng, lvl, { baseId: ITEM_BASES[d.item.baseId] ? d.item.baseId : null, rarity: CONFIG.rarities.some(r => r.id === d.item.rarity) ? d.item.rarity : null });
       }
-      if (!gold && !Object.keys(materials).length && !item) fail('Nothing to give');
+      if (!gold && !premium && !Object.keys(materials).length && !item) fail('Nothing to give');
       const note = String(d.note || 'A gift from the server admins.').slice(0, 200);
       if (item) sendMail(p, { item, from: 'Server', note });
-      if (gold || Object.keys(materials).length) sendMail(p, { gold, materials: Object.keys(materials).length ? materials : null, from: 'Server', note });
+      if (gold || premium || Object.keys(materials).length) sendMail(p, { gold, premium, materials: Object.keys(materials).length ? materials : null, from: 'Server', note });
       store.savePlayerSoon(p);
       const ses = game.sessions.get(acc.id);
       if (ses) { ses.stateDirty = true; game.toast(acc.id, `🎁 You received a gift: ${note} Check your mailbox in the Auction House.`, 'success'); }
-      admins.audit(s.player.name, 'give', acc.username, [gold && `${gold} gold`, ...Object.entries(materials).map(([k, v]) => `${v} ${k}`), item && item.name].filter(Boolean).join(', '));
+      admins.audit(s.player.name, 'give', acc.username, [gold && `${gold} gold`, premium && `${premium} crystals`, ...Object.entries(materials).map(([k, v]) => `${v} ${k}`), item && item.name].filter(Boolean).join(', '));
       return { item };
     },
     admin_reset_password(s, d) {

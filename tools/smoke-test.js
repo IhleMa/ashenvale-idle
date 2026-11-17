@@ -37,7 +37,12 @@ class Client {
   open() { return new Promise(r => this.ws.on('open', r)); }
   act(type, payload = {}) {
     const id = ++this.n;
-    return new Promise(res => { this.pending.set(id, res); this.ws.send(JSON.stringify({ t: 'action', id, type, payload })); });
+    return new Promise(res => {
+      if (this.ws.readyState !== 1) return res({ ok: false, error: 'socket closed' });
+      this.pending.set(id, res);
+      this.ws.send(JSON.stringify({ t: 'action', id, type, payload }));
+      setTimeout(() => { if (this.pending.has(id)) { this.pending.delete(id); res({ ok: false, error: 'timeout' }); } }, 10000);
+    });
   }
   count(t) { return this.msgs.filter(m => m.t === t).length; }
 }
@@ -178,6 +183,38 @@ try {
   check(unbanned.status === 200, 'unbanned player can log in again');
   res = await a.act('admin_settings', { changes: { xpRate: 2, motd: 'Welcome!' } });
   check(res.ok && res.result.xpRate === 2, 'admin settings saved');
+
+  // premium currency
+  res = await a.act('admin_give', { id: a.state.id, premium: 100 });
+  check(res.ok, 'admin can send premium currency');
+  await a.act('collect_mail', {});
+  await sleep(200);
+  check(a.state.premium === 100, 'crystals arrive through the mailbox');
+  const recruitId = Object.keys(a.state.characters).find(id => id !== a.state.heroId);
+  res = await a.act('expedition_start', { destId: 'copper_hills', charIds: [recruitId], hours: 8 });
+  check(res.ok, 'expedition started (8h)');
+  const exId = res.result.id;
+  res = await a.act('expedition_speedup', { id: exId, maxCost: 1 });
+  check(!res.ok && /price/.test(res.error), 'speed-up refuses to charge more than the shown price');
+  res = await a.act('expedition_speedup', { id: exId, maxCost: 48 });
+  await sleep(200);
+  check(res.ok && res.result.cost === 48 && a.state.premium === 52, 'expedition finished instantly for 48 crystals (8h at 10 min/crystal)');
+  res = await a.act('expedition_claim', { id: exId });
+  check(res.ok && Object.keys(res.result.got).length > 0, 'sped-up expedition gives full rewards');
+  res = await a.act('expedition_speedup', { id: 'not-mine', maxCost: 99 });
+  check(!res.ok, 'cannot speed up an unknown expedition');
+  res = await a.act('expedition_start', { destId: 'copper_hills', charIds: [recruitId], hours: 8 });
+  await a.act('admin_give', { id: a.state.id, premium: 0, gold: 1 });
+  const before = a.state.premium;
+  const ex2 = res.result.id;
+  a.state.premium = 0; // client view only; the server still knows the real balance
+  res = await a.act('expedition_speedup', { id: ex2, maxCost: 48 });
+  await sleep(200);
+  await a.act('expedition_claim', { id: ex2 });
+  check(res.ok && a.state.premium === before - 48, 'server uses its own balance, not the client\'s');
+  res = await a.act('expedition_start', { destId: 'copper_hills', charIds: [recruitId], hours: 8 });
+  res = await a.act('expedition_speedup', { id: res.result?.id, maxCost: 48 });
+  check(!res.ok && /need/.test(res.error), 'not enough crystals is rejected: ' + res.error);
 
   // offline progression
   a.ws.close();

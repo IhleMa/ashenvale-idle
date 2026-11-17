@@ -10,6 +10,7 @@ export const SETTING_DEFS = {
   auctionFeePct:     { label: 'Auction listing fee (%)', type: 'number', min: 0, max: 50, step: 0.5, default: 2 },
   auctionTaxPct:     { label: 'Auction sales tax (%)', type: 'number', min: 0, max: 50, step: 0.5, default: 5 },
   auctionMaxListings:{ label: 'Max auction listings per player', type: 'number', min: 1, max: 100, step: 1, default: 20 },
+  premiumMinutesPerCrystal: { label: 'Minutes skipped per Ashen Crystal 💠', type: 'number', min: 1, max: 240, step: 1, default: 10 },
   registrationOpen:  { label: 'Allow new registrations', type: 'boolean', default: true },
   motd:              { label: 'Message of the day (shown on login)', type: 'text', default: '' },
 };
