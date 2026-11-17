@@ -1,5 +1,4 @@
 // Ashenvale Idle server: static files + JSON API + WebSocket game channel.
-import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -12,6 +11,8 @@ import { validateContent } from './content-check.js';
 import { ContentManager } from './content-admin.js';
 import { BotManager, ARCHETYPES } from './bots.js';
 import { computeBuildId } from './version.js';
+import { TlsManager } from './tls.js';
+import { createListener } from './listener.js';
 import { Settings } from './settings.js';
 import { AdminManager, isBanned } from './admin.js';
 import { execFile } from 'node:child_process';
@@ -148,7 +149,7 @@ function serveStatic(req, res, baseDir, relPath) {
   });
 }
 
-const server = http.createServer(async (req, res) => {
+async function handleRequest(req, res) {
   const url = new URL(req.url, 'http://localhost');
   const p = url.pathname;
   try {
@@ -199,10 +200,10 @@ const server = http.createServer(async (req, res) => {
     log('HTTP error', e);
     if (!res.headersSent) json(res, 500, { error: 'Server error' });
   }
-});
+}
 
 const wss = new WebSocketServer({ noServer: true, maxPayload: 64 * 1024 });
-server.on('upgrade', (req, socket, head) => {
+function handleUpgrade(req, socket, head) {
   const url = new URL(req.url, 'http://localhost');
   if (url.pathname !== '/ws') return socket.destroy();
   const account = accountFromToken(store, url.searchParams.get('token'));
@@ -215,7 +216,7 @@ server.on('upgrade', (req, socket, head) => {
     ws.on('close', () => game.disconnect(ws, account.id));
     ws.on('error', () => {});
   });
-});
+}
 
 // drop dead connections
 setInterval(() => {
@@ -232,11 +233,35 @@ if (bots.bots.size) log(`${bots.bots.size} bot player(s) loaded${bots.enabled ? 
 // automatic daily database backup (data/backups, newest 7 kept)
 const BACKUP_HOURS = Number(process.env.BACKUP_HOURS ?? 24);
 if (BACKUP_HOURS > 0) setInterval(() => { try { log(`Automatic backup: ${path.basename(store.backup())}`); } catch (e) { log('Automatic backup failed:', e.message); } }, BACKUP_HOURS * 3600_000).unref();
-server.listen(PORT, HOST, () => {
-  const st = store.stats();
-  log(`Ashenvale Idle server listening on http://${HOST}:${PORT} (database: ${store.file}, ${st.accounts} accounts, ${st.sizeMb} MB, ${st.driver}; build ${game.buildId})`);
-  log('Type "help" for console commands (e.g. "update" to pull a new version).');
+// ---- HTTP / HTTPS (server/tls.js: TLS_MODE=auto gets Let's Encrypt certificates, TLS_MODE=files uses your own)
+let listener = null;
+function startListener(creds, first = false) {
+  listener = createListener({ handler: handleRequest, onUpgrade: handleUpgrade, creds, tls, port: PORT, log });
+  listener.listen(HOST, () => {
+    const st = store.stats();
+    const proto = creds ? 'https' : 'http';
+    const where = creds && tls.config.domain ? `https://${tls.config.domain}${PORT === 443 ? '' : `:${PORT}`}` : `${proto}://${HOST}:${PORT}`;
+    if (first) log(`Ashenvale Idle server listening on ${where} (database: ${store.file}, ${st.accounts} accounts, ${st.sizeMb} MB, ${st.driver}; build ${game.buildId})`);
+    else log(`Now listening on ${where}.`);
+    if (first) log('Type "help" for console commands (e.g. "update" to pull a new version).');
+  });
+}
+const tls = new TlsManager({ dataDir: DATA_DIR, log, root: ROOT });
+game.tls = tls;
+const creds = await tls.init();
+if (tls.enabled && !creds) log(`TLS: HTTPS is NOT active — the game runs on plain HTTP until a certificate is available${tls.config.mode === 'auto' && !tls.config.errors.length ? ' (retrying automatically)' : ''}. Fix the problem above${tls.config.mode === 'files' ? ' and restart' : ''}.`);
+startListener(creds, true);
+tls.onChange(next => {
+  if (listener.secure) { listener.setCredentials(next); log('TLS: switched to the renewed certificate.'); return; }
+  // first certificate after starting without one: move the port over to HTTPS
+  log('TLS: certificate ready — switching to HTTPS (open pages reload and are redirected to https://).');
+  game.broadcast({ t: 'client_update', buildId: game.buildId, force: true });
+  setTimeout(() => {
+    for (const ws of wss.clients) ws.close(1012, 'Switching to HTTPS');
+    listener.close(() => startListener(next));
+  }, 1500);
 });
+tls.startRenewal();
 
 let stopping = false;
 function shutdown(sig) {
@@ -248,7 +273,8 @@ function shutdown(sig) {
   try { game.stop(); } catch (e) { log('Error while saving', e); }
   try { store.close(); } catch (e) { log('Error while closing the database', e); }
   for (const ws of wss.clients) ws.close(1012, 'Server restarting');
-  server.close(() => process.exit(0));
+  tls.stop();
+  listener.close(() => process.exit(0));
   setTimeout(() => process.exit(0), 2000).unref();
 }
 process.on('SIGINT', () => shutdown('SIGINT'));
@@ -286,7 +312,7 @@ async function runUpdate() {
 }
 
 const COMMANDS = {
-  help: () => log('Commands: update | reload-clients | players | say <message> | admin add|remove|list <name> | bots [add <n> [type] | remove <name|all> | on | off] | content [reload] | backup | db | stop'),
+  help: () => log('Commands: update | reload-clients | players | say <message> | admin add|remove|list <name> | bots [add <n> [type] | remove <name|all> | on | off] | content [reload] | tls [renew] | backup | db | stop'),
   content: async args => {
     // "content" checks the files on disk; "content reload" also switches the running server to them
     try {
@@ -323,6 +349,17 @@ const COMMANDS = {
     if (!store.getAccount(name)) return log(`No account named "${name}"`);
     if (sub === 'add') { admins.add(name); log(`${name} is now an admin (they may need to refresh the page).`); }
     else log(admins.remove(name) ? `${name} is no longer an admin.` : `${name} is set via ADMIN_USERS — remove them there.`);
+  },
+  tls: async args => {
+    const st = tls.status();
+    if (st.mode === 'off') return log('HTTPS is off. Set TLS_MODE=auto (Let\'s Encrypt) or TLS_MODE=files in the server variables — see README → HTTPS.');
+    log(`HTTPS: mode ${st.mode}${st.challenge ? ` (${st.challenge})` : ''}, ${st.active ? 'ACTIVE' : 'NOT active'}${st.domains.length ? `, domain ${st.domains.join(', ')}` : ''}`);
+    if (st.expires) log(`  certificate for ${st.names.join(', ')} valid until ${new Date(st.expires).toISOString().slice(0, 10)} (${Math.floor((st.expires - Date.now()) / 86400000)} days)${st.staging ? ' — STAGING certificate' : ''}; issuer ${st.issuer}`);
+    if (st.error) log(`  last problem: ${st.error}`);
+    if (args.trim() === 'renew') {
+      if (st.mode !== 'auto') return log('Only TLS_MODE=auto certificates can be renewed from here (for files: replace the files, they are picked up within 12 h, or restart).');
+      try { await tls.obtain(); } catch (e) { log(`Renewal failed: ${e.message}`); }
+    } else if (st.mode === 'auto') log('  "tls renew" gets a fresh certificate now (Let\'s Encrypt allows 5 per week for the same domain).');
   },
   stop: () => shutdown('stop'),
   update: () => runUpdate(),

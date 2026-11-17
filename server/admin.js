@@ -131,7 +131,7 @@ export function adminActions(game) {
         online: game.sessions.size, accounts: accounts.length, uptime: Math.round((Date.now() - game.startedAt) / 1000),
         memoryMb: Math.round(mem.rss / 1048576), buildId: game.buildId, node: process.version,
         groups: game.groups.size, coopBattles: [...game.groups.values()].filter(g => g.battle).length,
-        auction: game.auction.stats(), settings: game.settings.values, settingDefs: SETTING_DEFS,
+        auction: game.auction.stats(), settings: game.settings.values, settingDefs: SETTING_DEFS, tls: game.tls?.status() || null,
         admins: admins.list(), log: admins.log.slice(-60).reverse(), announcements: game.announcements.active(),
         onlineNames: [...game.sessions.values()].map(s => s.player.name),
       };

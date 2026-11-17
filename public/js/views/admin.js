@@ -48,11 +48,17 @@ function botsHtml() {
 
 async function loadPlayers(root) { try { players = await act('admin_players', { query: ui.query, sort: ui.sort }); } catch (e) { toast(e.message, 'error'); } render(root); }
 
+function tlsText(t) {
+  if (!t || t.mode === 'off') return location.protocol === 'https:' ? 'via proxy' : 'off';
+  if (!t.active) return '⚠ not active';
+  const days = t.expires ? Math.floor((t.expires - Date.now()) / 86400000) : null;
+  return `🔒 ${t.staging ? 'staging · ' : ''}${days != null ? `${days} days left` : 'on'}`;
+}
 function dashboardHtml() {
   if (!overview) return '<p class="muted">Loading…</p>';
   const o = overview;
   return `<div class="admin-cards">
-      ${[['Online now', o.online], ['Accounts', o.accounts], ['Uptime', duration(o.uptime)], ['Memory', o.memoryMb + ' MB'], ['Groups', `${o.groups} (${o.coopBattles} fighting)`], ['Auctions', `${o.auction.listings} listed · ${o.auction.sales24h} sold/24h`], ['Build', o.buildId], ['Node', o.node]]
+      ${[['Online now', o.online], ['Accounts', o.accounts], ['Uptime', duration(o.uptime)], ['Memory', o.memoryMb + ' MB'], ['Groups', `${o.groups} (${o.coopBattles} fighting)`], ['Auctions', `${o.auction.listings} listed · ${o.auction.sales24h} sold/24h`], ['HTTPS', tlsText(o.tls)], ['Build', o.buildId], ['Node', o.node]]
         .map(([l, v]) => `<div class="admin-card"><small>${l}</small><b>${esc(String(v))}</b></div>`).join('')}
     </div>
     <div class="admin-grid">

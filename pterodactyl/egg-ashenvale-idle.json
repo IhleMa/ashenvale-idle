@@ -108,6 +108,96 @@
             "user_editable": true,
             "rules": "nullable|string|max:500",
             "field_type": "text"
+        },
+        {
+            "name": "HTTPS Mode",
+            "description": "off = plain HTTP (default). auto = free Let's Encrypt certificate, obtained and renewed automatically (needs Domain; with Cloudflare DNS also the Cloudflare API Token). files = use your own certificate files (TLS Certificate / TLS Key). Players then open https://your-domain:PORT; http:// on the same port redirects automatically.",
+            "env_variable": "TLS_MODE",
+            "default_value": "off",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:off,auto,files",
+            "field_type": "text"
+        },
+        {
+            "name": "Domain",
+            "description": "Domain (or subdomain) whose DNS A record points at this server's IP, e.g. game.example.com. Several names: comma separated. Needed for HTTPS Mode auto.",
+            "env_variable": "DOMAIN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:255",
+            "field_type": "text"
+        },
+        {
+            "name": "Let's Encrypt E-Mail",
+            "description": "Optional e-mail for Let's Encrypt (warnings if a certificate is about to expire without being renewed).",
+            "env_variable": "ACME_EMAIL",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|email|max:191",
+            "field_type": "text"
+        },
+        {
+            "name": "Certificate Check",
+            "description": "How Let's Encrypt checks that you own the domain. dns-cloudflare (recommended): a temporary DNS record via the Cloudflare API — works on any port. http: needs a second allocation that is reachable from the internet as port 80, set as HTTP Redirect Port.",
+            "env_variable": "ACME_CHALLENGE",
+            "default_value": "dns-cloudflare",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:dns-cloudflare,http",
+            "field_type": "text"
+        },
+        {
+            "name": "Cloudflare API Token",
+            "description": "For Certificate Check dns-cloudflare: a Cloudflare API token with permission Zone → DNS → Edit for your domain (Cloudflare → My Profile → API Tokens → Create Token → template \"Edit zone DNS\").",
+            "env_variable": "CLOUDFLARE_API_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:255",
+            "field_type": "text"
+        },
+        {
+            "name": "Let's Encrypt Staging",
+            "description": "1 = use Let's Encrypt's test environment (certificates browsers do NOT trust, but no rate limits) to try the setup. Set back to 0 when it works — the real certificate is then fetched automatically.",
+            "env_variable": "ACME_STAGING",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "TLS Certificate",
+            "description": "For HTTPS Mode files: certificate chain (PEM), relative to the server folder.",
+            "env_variable": "TLS_CERT",
+            "default_value": "data/tls/fullchain.pem",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:255",
+            "field_type": "text"
+        },
+        {
+            "name": "TLS Key",
+            "description": "For HTTPS Mode files: private key (PEM), relative to the server folder.",
+            "env_variable": "TLS_KEY",
+            "default_value": "data/tls/privkey.pem",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:255",
+            "field_type": "text"
+        },
+        {
+            "name": "HTTP Redirect Port",
+            "description": "Optional: a second allocation (ideally reachable as port 80) that redirects http:// to https:// and answers the Let's Encrypt http check. Leave empty if not needed — the game port already redirects http:// itself.",
+            "env_variable": "HTTP_PORT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|integer|between:1,65535",
+            "field_type": "text"
         }
     ]
 }
