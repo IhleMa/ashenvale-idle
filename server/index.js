@@ -15,6 +15,8 @@ import { createAccount, verifyLogin, issueToken, accountFromToken, revokeToken, 
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const PORT = Number(process.env.SERVER_PORT || process.env.PORT || 8080);
+const APP_NAME = process.env.APP_NAME || 'Ashenvale Idle';
+const APP_SHORT_NAME = process.env.APP_SHORT_NAME || APP_NAME.split(' ')[0];
 const HOST = process.env.HOST || '0.0.0.0';
 const DATA_DIR = path.resolve(ROOT, process.env.DATA_DIR || 'data');
 const PUBLIC_DIR = path.join(ROOT, 'public');
@@ -35,7 +37,7 @@ const authLimiter = new RateLimiter(20, 60_000);
 
 const MIME = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8',
-  '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8', '.svg': 'image/svg+xml',
+  '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8', '.webmanifest': 'application/manifest+json; charset=utf-8', '.svg': 'image/svg+xml',
   '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.gif': 'image/gif', '.avif': 'image/avif',
   '.ico': 'image/x-icon', '.woff2': 'font/woff2', '.mp3': 'audio/mpeg', '.ogg': 'audio/ogg', '.wav': 'audio/wav', '.txt': 'text/plain; charset=utf-8', '.md': 'text/plain; charset=utf-8',
 };
@@ -43,6 +45,45 @@ const MIME = {
 function clientIp(req) {
   if (TRUST_PROXY && req.headers['x-forwarded-for']) return String(req.headers['x-forwarded-for']).split(',')[0].trim();
   return req.socket.remoteAddress;
+}
+
+function sendText(res, type, body, headers = {}) {
+  res.writeHead(200, { 'Content-Type': type, 'Cache-Control': 'no-cache', ...headers });
+  res.end(body);
+}
+
+// Web app manifest. Your own icons override the defaults: public/assets/ui/app-icon-192.png and app-icon-512.png
+function appManifest() {
+  const own = size => fs.existsSync(path.join(PUBLIC_DIR, 'assets', 'ui', `app-icon-${size}.png`));
+  const icon = (size, purpose = 'any') => ({ src: own(size) ? `/assets/ui/app-icon-${size}.png` : `/icons/${purpose === 'maskable' ? 'maskable' : 'icon'}-${size}.png`, sizes: `${size}x${size}`, type: 'image/png', purpose });
+  return {
+    id: '/', name: APP_NAME, short_name: APP_SHORT_NAME, description: 'Multiplayer idle RPG — build your party, script their tactics, conquer together.',
+    start_url: '/?source=app', scope: '/', display: 'standalone', orientation: 'any',
+    background_color: '#120d0b', theme_color: '#120d0b', categories: ['games'],
+    icons: [icon(192), icon(512), icon(512, 'maskable')],
+  };
+}
+
+// Service worker: network-first (so updates arrive immediately), cached copy when offline.
+// The cache name contains the build id, so every update replaces the old cache.
+function serviceWorkerSource() {
+  return `// Ashenvale Idle service worker — build ${game.buildId}
+const CACHE = 'ashenvale-${game.buildId}';
+const SHELL = ['/', '/css/style.css', '/js/main.js', '/favicon.svg', '/icons/icon-192.png'];
+self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).catch(() => {}).then(() => self.skipWaiting())); });
+self.addEventListener('activate', e => {
+  e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k.startsWith('ashenvale-') && k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim()));
+});
+self.addEventListener('fetch', e => {
+  const req = e.request;
+  const url = new URL(req.url);
+  if (req.method !== 'GET' || url.origin !== location.origin || url.pathname.startsWith('/api/') || url.pathname === '/ws' || url.pathname === '/sw.js') return;
+  e.respondWith(fetch(req).then(res => {
+    if (res.ok && res.type === 'basic') { const copy = res.clone(); caches.open(CACHE).then(c => c.put(req, copy)); }
+    return res;
+  }).catch(() => caches.match(req, { ignoreSearch: req.mode === 'navigate' }).then(r => r || (req.mode === 'navigate' ? caches.match('/') : Response.error()))));
+});
+`;
 }
 
 function json(res, status, data) {
@@ -84,6 +125,9 @@ const server = http.createServer(async (req, res) => {
   try {
     if (p === '/api/health') return json(res, 200, { ok: true, online: game.sessions.size });
     if (p === '/api/assets') return json(res, 200, { assets: assets.get() });
+    // installable app (PWA)
+    if (p === '/manifest.webmanifest') return sendText(res, MIME['.webmanifest'], JSON.stringify(appManifest()));
+    if (p === '/sw.js') return sendText(res, MIME['.js'], serviceWorkerSource(), { 'Service-Worker-Allowed': '/' });
     if (p === '/api/register' && req.method === 'POST') {
       if (!authLimiter.allow(clientIp(req))) return json(res, 429, { error: 'Too many attempts, try again in a minute' });
       if (!settings.get('registrationOpen')) return json(res, 403, { error: 'Registration is currently closed on this server' });

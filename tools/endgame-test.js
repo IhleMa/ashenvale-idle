@@ -19,6 +19,7 @@ import { masteryMap, describeEnemyAbility, enemyTips, enemyLocations } from '../
 import { ENEMIES } from '../shared/data/enemies.js';
 import { ABILITIES } from '../shared/data/abilities.js';
 import { dayKey, weekKey, nextDailyReset } from '../shared/quests.js';
+import { filterFromLegacy } from '../shared/lootfilter.js';
 
 let failures = 0;
 const ok = (c, m) => { console.log(c ? '✔' : '✘', m); if (!c) failures++; };
@@ -131,6 +132,34 @@ try {
   }
   ok(!missing.length, `every enemy has descriptions, tips and locations${missing.length ? ': missing ' + missing.join(',') : ''}`);
   ok(Object.keys(ABILITIES).filter(a => a.startsWith('e_') || a.startsWith('b_')).every(a => describeEnemyAbility(a).text.length > 20), 'all enemy abilities describable');
+
+  // ---------------------------------------------------------------- loot filter
+  const mk = (over) => ({ ...generateItem(createRng(Math.random() * 1e9 | 0), 3, { rarity: 'common', baseId: 'ring' }), ...over });
+  r = act('loot_filter_save', { filter: { enabled: true, protectUpgrades: true, rules: [
+    { name: 'Keep crit uncommons', action: 'keep', rarities: ['uncommon'], anyStats: ['critDamage'] },
+    { name: 'Junk', action: 'salvage', rarities: ['common', 'uncommon'] },
+    { name: 'Old rares', action: 'sell', rarities: ['rare'], levelsBelowHero: 5 },
+    { name: 'bogus', action: 'explode', rarities: ['nope'], slots: ['tail'] },
+  ] } });
+  ok(r.ok && p.lootFilter.rules.length === 4 && p.lootFilter.rules[3].action === 'keep' && !p.lootFilter.rules[3].rarities.length, 'filter saved and sanitized');
+  const inv0 = p.inventory.length, mats0 = JSON.stringify(p.town.materials), gold0 = p.gold;
+  ok(L.receiveItem(p, mk({ name: 'Junk Ring', stats: { critChance: 0.001 } })) === 'salvaged' && p.inventory.length === inv0 && JSON.stringify(p.town.materials) !== mats0, 'common junk is salvaged into materials');
+  ok(p.lootLog[0]?.name === 'Junk Ring' && p.lootLog[0].action === 'salvaged' && /Junk/.test(p.lootLog[0].reason), 'filtered drop is logged with its rule');
+  ok(L.receiveItem(p, mk({ rarity: 'uncommon', stats: { critDamage: 0.01 } })) === 'kept', 'keep rule above wins (uncommon with crit damage kept)');
+  ok(L.receiveItem(p, mk({ rarity: 'rare', level: 3, stats: {} })) === 'sold' && p.gold > gold0, 'old rare sold');
+  ok(L.receiveItem(p, mk({ rarity: 'rare', level: 14, stats: { str: 1 } })) === 'kept', 'current-level rare kept (no rule matches)');
+  ok(L.receiveItem(p, mk({ level: 14, requiredLevel: 1, stats: { critChance: 0.9 } })) === 'kept', 'upgrade protected even though "Junk" matches');
+  ok(L.receiveItem(p, mk({ unique: 'test', stats: {} })) === 'kept', 'uniques never filtered');
+  const locked = mk({ locked: true }); p.inventory.push(locked);
+  const junk = mk({ name: 'Old junk' }); p.inventory.push(junk);
+  r = act('loot_filter_apply', { dryRun: true });
+  ok(r.ok && r.result.items.some(x => x.uid === junk.uid) && !r.result.items.some(x => x.uid === locked.uid) && p.inventory.includes(junk), `dry run lists ${r.result.salvage} to salvage, ${r.result.sell} to sell, changes nothing`);
+  r = act('loot_filter_apply', {});
+  ok(r.ok && !p.inventory.includes(junk) && p.inventory.includes(locked), 'apply removes matches, keeps locked items');
+  act('loot_filter_save', { filter: { ...p.lootFilter, enabled: false } });
+  ok(L.receiveItem(p, mk({})) === 'kept', 'disabled filter keeps everything');
+  const legacy = filterFromLegacy({ autoSellBelow: 'uncommon', autoLootAction: 'salvage' });
+  ok(legacy.enabled && legacy.rules[0].action === 'salvage' && legacy.rules[0].rarities.join() === 'common,uncommon', 'old auto-sell setting becomes a filter rule');
 
   // public state carries the new data
   game.flushState(s);

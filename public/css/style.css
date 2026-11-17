@@ -842,3 +842,43 @@ pre.pw { background: #000; padding: 12px; border-radius: 8px; font-size: 18px; t
 .best-level input { width: 64px !important; padding: 2px 6px; }
 .best-stats .stat-row { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
 @media (max-width: 600px) { .rift-form select { min-width: 0; max-width: 62%; } }
+
+/* ---- loot filter */
+.inv-tabs .tag { margin-left: 4px; }
+.lf-top { display: flex; flex-wrap: wrap; gap: 10px 24px; align-items: center; margin: 4px 0 8px; }
+.switch-row { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
+.lf-rules { display: grid; gap: 10px; margin: 12px 0; }
+.lf-rule { border: 1px solid var(--line); border-left: 4px solid #6b6b6b; border-radius: 10px; padding: 8px 10px; background: var(--panel2); }
+.lf-rule.act-salvage { border-left-color: #c9822e; } .lf-rule.act-sell { border-left-color: var(--gold); } .lf-rule.act-keep { border-left-color: var(--good); }
+.lf-rule.off { opacity: .5; }
+.lf-rule-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.lf-order { width: 22px; height: 22px; border-radius: 50%; background: #3a2c26; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; }
+.lf-name { width: 180px; font-weight: 600; }
+.lf-summary { margin: 6px 0 0 30px; }
+.lf-conds { display: grid; gap: 8px; margin: 10px 0 2px 30px; padding-top: 8px; border-top: 1px dashed var(--line); }
+.lf-cond { display: grid; grid-template-columns: 100px 1fr; gap: 4px 10px; align-items: center; }
+.lf-cond > .faint { grid-column: 2; }
+.lf-label { font-size: 12px; color: var(--muted); font-weight: 600; }
+.lf-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.lf-chip { background: #241b18; border: 1px solid var(--line); color: var(--muted); border-radius: 14px; padding: 2px 10px; font-size: 12px; cursor: pointer; }
+.lf-chip.on { border-color: var(--accent); background: rgba(232, 116, 44, .18); color: var(--text); }
+.lf-num { width: 64px !important; padding: 2px 6px; }
+.item-cell { position: relative; }
+.lf-badge { position: absolute; top: 2px; left: 3px; font-size: 11px; filter: drop-shadow(0 1px 1px #000); }
+.lf-verdict { margin: 8px 0; padding: 6px 8px; border-radius: 6px; background: var(--panel2); }
+.lf-log { display: grid; gap: 2px; max-height: 70vh; overflow: auto; }
+.lf-log-row { display: flex; align-items: center; gap: 10px; padding: 5px 4px; border-bottom: 1px solid var(--line); }
+.lf-ago { min-width: 60px; text-align: right; }
+@media (max-width: 600px) { .lf-cond { grid-template-columns: 1fr; } .lf-conds, .lf-summary { margin-left: 0; } .lf-name { width: 120px; } }
+
+/* ---- installable app */
+.install-link { margin-top: 12px; }
+.install-steps { padding-left: 20px; display: grid; gap: 8px; line-height: 1.45; }
+.kbd { display: inline-block; border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; background: var(--panel2); font-size: 12px; }
+/* phones with a notch when running as an installed app */
+html.standalone { --topbar-h: calc(56px + env(safe-area-inset-top)); }
+html.standalone .topbar { padding-top: env(safe-area-inset-top); }
+html.standalone body { padding-bottom: env(safe-area-inset-bottom); padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); }
+.lf-top label.switch-row { display: inline-flex !important; flex-direction: row !important; align-items: center; gap: 8px; margin: 0; }
+.lf-top label.switch-row input { width: auto !important; margin: 0; }
+.lf-top label.inline { display: inline-flex; align-items: center; gap: 8px; }

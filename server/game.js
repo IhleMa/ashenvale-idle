@@ -230,6 +230,9 @@ export class Game {
     unequip(s, d) { L.unequip(s.player, d); },
     sell_item(s, d) { return { gold: L.sellItem(s.player, d) }; },
     sell_by_rarity(s, d) { return L.sellByRarity(s.player, d); },
+    loot_filter_save(s, d) { return L.setLootFilter(s.player, { filter: d.filter }); },
+    loot_filter_apply(s, d) { return L.applyLootFilter(s.player, { dryRun: !!d.dryRun }); },
+    loot_log_clear(s) { s.player.lootLog = []; },
     toggle_lock(s, d) { L.toggleLock(s.player, d); },
     set_settings(s, d) { L.setSettings(s.player, d); },
     // ---- town

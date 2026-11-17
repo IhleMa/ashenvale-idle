@@ -8,17 +8,24 @@ import { SLOTS, canEquip, itemSellValue } from '/shared/data/items.js';
 import { CLASSES } from '/shared/data/classes.js';
 import { MATERIALS } from '/shared/data/town.js';
 import { salvageYield } from '/shared/town.js';
+import { FILTER_ACTIONS } from '/shared/lootfilter.js';
+import { filterHtml, logHtml, inventoryVerdicts, handleFilterClick, handleFilterChange, filterIsDirty } from './lootfilter.js';
 
 let filterSlot = 'all';
 let filterRarity = 'all';
 let sortBy = 'rarity';
 let selectedUid = null;
 let compareCharId = null;
+let tab = 'items'; // items | filter | log
 
 export const inventoryView = {
   id: 'inventory', label: 'Inventory', icon: '🎒',
   mount(root) {
+    const rerender = () => this.render(root, true);
     root.addEventListener('click', async e => {
+      const tb = e.target.closest('[data-inv-tab]');
+      if (tb) { e.preventDefault(); tab = tb.dataset.invTab; rerender(); return; }
+      if (await handleFilterClick(e, rerender)) return;
       const t = e.target.closest('[data-item], button');
       if (!t) return;
       const d = t.dataset;
@@ -40,18 +47,24 @@ export const inventoryView = {
       }
     });
     root.addEventListener('change', async e => {
+      if (await handleFilterChange(e, rerender)) return;
       const t = e.target;
       if (t.matches('[data-f-slot]')) filterSlot = t.value;
       else if (t.matches('[data-f-rarity]')) filterRarity = t.value;
       else if (t.matches('[data-f-sort]')) sortBy = t.value;
       else if (t.matches('[data-compare]')) compareCharId = t.value;
-      else if (t.matches('[data-autosell]')) { await run(act('set_settings', { autoSellBelow: t.value || null }), 'Auto-sell updated.'); return; }
       else return;
       this.render(root);
     });
   },
-  render(root) {
+  render(root, force = false) {
+    // don't rebuild the filter editor while the player is typing in it
+    if (!force && tab === 'filter' && root.querySelector('.lf-editor')?.contains(document.activeElement) && document.activeElement.matches('input, select')) return;
     const p = state.player;
+    const tabs = `<div class="tabs inv-tabs">${[['items', `🎒 Items <span class="muted small">${p.inventory.length}/${CONFIG.inventory.limit}</span>`], ['filter', `🧹 Loot filter ${p.lootFilter?.enabled ? '<span class="tag done">ON</span>' : '<span class="tag">OFF</span>'}${filterIsDirty() ? ' •' : ''}`], ['log', `📜 Filtered loot${(p.lootLog || []).length ? ` <span class="muted small">${p.lootLog.length}</span>` : ''}`]].map(([id, l]) => `<button class="tab ${tab === id ? 'active' : ''}" data-inv-tab="${id}">${l}</button>`).join('')}</div>`;
+    if (tab === 'filter') { root.innerHTML = tabs + filterHtml(); return; }
+    if (tab === 'log') { root.innerHTML = tabs + logHtml(); return; }
+    const verdicts = inventoryVerdicts(p);
     let items = [...p.inventory];
     if (filterSlot !== 'all') items = items.filter(i => i.slot === filterSlot);
     if (filterRarity === 'special') items = items.filter(i => i.unique || i.set);
@@ -60,7 +73,7 @@ export const inventoryView = {
       : sortBy === 'slot' ? (a, b) => a.slot.localeCompare(b.slot) || b.level - a.level
         : (a, b) => rarityIndex(b.rarity) - rarityIndex(a.rarity) || b.level - a.level);
     const sel = p.inventory.find(i => i.uid === selectedUid) || null;
-    root.innerHTML = `
+    root.innerHTML = `${tabs}
       <div class="inventory-layout">
         <section class="panel">
           <div class="panel-head"><h3>Inventory <span class="muted small">${p.inventory.length}/${CONFIG.inventory.limit}</span></h3>
@@ -69,24 +82,24 @@ export const inventoryView = {
               <select data-f-rarity><option value="all">All rarities</option><option value="special" ${filterRarity === 'special' ? 'selected' : ''}>Uniques & set items</option>${CONFIG.rarities.map(r => `<option value="${r.id}" ${filterRarity === r.id ? 'selected' : ''}>${esc(r.label)}</option>`).join('')}</select>
               <select data-f-sort>${[['rarity', 'Sort: rarity'], ['level', 'Sort: level'], ['slot', 'Sort: slot']].map(([v, l]) => `<option value="${v}" ${sortBy === v ? 'selected' : ''}>${l}</option>`).join('')}</select>
             </div></div>
-          ${p.inventory.length >= CONFIG.inventory.limit ? '<div class="notice">Inventory full — new loot is sold automatically.</div>' : ''}
-          <div class="item-grid">${items.map(i => `<button class="item-cell ${i.uid === selectedUid ? 'active' : ''} ${i.unique ? 'unique' : ''} ${i.set ? 'set' : ''}" data-item="${i.uid}" ${tipAttr(itemTooltipHtml(i))}>${itemIcon(i, 'md')}${i.locked ? '<span class="lock">🔒</span>' : ''}<span class="ilvl">${i.level}</span></button>`).join('') || '<p class="muted pad">No items match.</p>'}</div>
+          ${p.inventory.length >= CONFIG.inventory.limit ? `<div class="notice">Inventory full — new loot is ${p.settings.autoLootAction === 'salvage' ? 'salvaged' : 'sold'} automatically. Set up the <a href="#" data-inv-tab="filter">loot filter</a> to decide what to keep.</div>` : ''}
+          <div class="item-grid">${items.map(i => `<button class="item-cell ${i.uid === selectedUid ? 'active' : ''} ${i.unique ? 'unique' : ''} ${i.set ? 'set' : ''}" data-item="${i.uid}" ${tipAttr(itemTooltipHtml(i))}>${itemIcon(i, 'md')}${i.locked ? '<span class="lock">🔒</span>' : ''}${verdicts.get(i.uid)?.action !== 'keep' ? `<span class="lf-badge" title="Loot filter: ${FILTER_ACTIONS[verdicts.get(i.uid).action].label}">${FILTER_ACTIONS[verdicts.get(i.uid).action].icon}</span>` : ''}<span class="ilvl">${i.level}</span></button>`).join('') || '<p class="muted pad">No items match.</p>'}</div>
           <div class="row gap wrap small sell-bar">
             <span class="muted">Quick sell:</span>${CONFIG.rarities.slice(0, 4).map(r => `<button class="btn tiny ghost" data-sell-rarity="${r.id}">≤ ${esc(r.label)}</button>`).join('')}
             <a class="small" href="#/town">Salvage Yard →</a>
             <span class="grow"></span>
-            <label class="inline">Auto-${p.settings.autoLootAction === 'salvage' ? 'salvage' : 'sell'} loot up to
-              <select data-autosell><option value="">(off)</option>${CONFIG.rarities.slice(0, 4).map(r => `<option value="${r.id}" ${p.settings.autoSellBelow === r.id ? 'selected' : ''}>${esc(r.label)}</option>`).join('')}</select></label>
+            ${[...verdicts.values()].some(v => v.action !== 'keep') ? `<span class="muted">🔨/💰 = your loot filter would remove it</span>` : ''}
+            <button class="btn tiny" data-inv-tab="filter">🧹 Loot filter: ${p.lootFilter?.enabled ? `${p.lootFilter.rules.filter(r => r.enabled).length} rule(s)` : 'off'}</button>
           </div>
         </section>
         <section class="panel item-detail">
-          ${sel ? detailHtml(sel, p) : '<p class="muted">Select an item to see details, compare it and equip it.</p>'}
+          ${sel ? detailHtml(sel, p, verdicts.get(sel.uid)) : '<p class="muted">Select an item to see details, compare it and equip it.</p>'}
         </section>
       </div>`;
   },
 };
 
-function detailHtml(item, p) {
+function detailHtml(item, p, verdict) {
   const users = chars().filter(c => canEquip(item, c));
   const cmpChar = p.characters[compareCharId] && users.includes(p.characters[compareCharId]) ? p.characters[compareCharId] : users[0];
   const equipped = cmpChar?.equipment[item.slot] || null;
@@ -99,6 +112,7 @@ function detailHtml(item, p) {
       <h4>Equip on</h4>
       <div class="row gap wrap">${users.map(c => `<button class="btn small" data-equip-to="${c.id}">${esc(c.name)}</button>`).join('')}</div>`
     : '<p class="muted small">None of your characters can use this item yet.</p>'}
+    ${verdict ? `<div class="small lf-verdict">🧹 Loot filter: <b>${FILTER_ACTIONS[verdict.action].icon} ${FILTER_ACTIONS[verdict.action].label}</b> <span class="muted">— ${esc(verdict.reason)}</span></div>` : ''}
     <div class="row gap end">
       <button class="btn small ghost" data-lock>${item.locked ? 'Unlock' : 'Lock'}</button>
       <button class="btn small" data-salvage ${item.locked ? 'disabled' : ''} ${tipAttr('Break down into: ' + esc(Object.entries(salvageYield(item, p.town?.buildings?.salvage_yard?.level || 1)).map(([k, v]) => `${v} ${MATERIALS[k].name}`).join(', ')))}>Salvage</button>

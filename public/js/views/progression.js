@@ -1,6 +1,7 @@
 // Progression: levels, class titles, zones, achievements, statistics and settings.
 import { state, chars } from '../state.js';
 import { act } from '../net.js';
+import { openInstallHelp } from '../pwa.js';
 import { esc, fmt, bar, run, tipAttr } from '../ui.js';
 import { portrait, achievementIcon, loadAssets, enemyArt } from '../assets.js';
 import { CONFIG, xpToNext } from '/shared/config.js';
@@ -19,6 +20,7 @@ export const progressionView = {
     root.addEventListener('click', async e => {
       const t = e.target.closest('button');
       if (!t) return;
+      if ('installHelp' in t.dataset) { openInstallHelp(); return; }
       if ('reloadArt' in t.dataset) { await loadAssets(); this.render(root); import('../ui.js').then(u => u.toast('Artwork reloaded.', 'success')); }
       if ('logout' in t.dataset) (await import('../main.js')).logout();
     });
@@ -76,7 +78,7 @@ export const progressionView = {
           <label class="switch"><input type="checkbox" data-setting="autoDevelopHero" ${p.settings.autoDevelopHero ? 'checked' : ''}><span></span> Hero spends skill tree points automatically</label>
           <label class="switch"><input type="checkbox" data-setting="publicProfile" ${p.settings.publicProfile !== false ? 'checked' : ''}><span></span> Let other players inspect my build (gear, skill tree, behaviour rules)</label>
           <p class="muted small">Offline progress: your active party keeps fighting in the current zone for up to ${CONFIG.offline.maxHours} hours while you're away, using the exact same combat rules (calculated by the server).</p>
-          <div class="row gap"><button class="btn small" data-reload-art>Reload artwork</button><button class="btn small ghost danger" data-logout>Log out</button></div>
+          <div class="row gap"><button class="btn small" data-install-help>📲 Install as app</button><button class="btn small" data-reload-art>Reload artwork</button><button class="btn small ghost danger" data-logout>Log out</button></div>
         </section>
       </div>`;
   },

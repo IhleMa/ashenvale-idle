@@ -47,9 +47,9 @@ export function modal(innerHtml, { onClose, wide = false } = {}) {
   return { el: wrap.querySelector('.modal'), close };
 }
 
-export function confirmBox(text, okLabel = 'Confirm') {
+export function confirmBox(text, okLabel = 'Confirm', { html = false } = {}) {
   return new Promise(resolve => {
-    const m = modal(`<p>${esc(text)}</p><div class="row end gap"><button class="btn" data-close>Cancel</button><button class="btn primary" data-ok>${esc(okLabel)}</button></div>`, { onClose: () => resolve(false) });
+    const m = modal(`<p>${html ? text : esc(text)}</p><div class="row end gap"><button class="btn" data-close>Cancel</button><button class="btn primary" data-ok>${esc(okLabel)}</button></div>`, { onClose: () => resolve(false) });
     m.el.querySelector('[data-ok]').addEventListener('click', () => { resolve(true); m.el.parentElement.remove(); });
   });
 }

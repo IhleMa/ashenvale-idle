@@ -4,6 +4,7 @@ import { connect, disconnect, apiPost, getToken, setToken, act } from './net.js'
 import { loadAssets, portrait } from './assets.js';
 import { esc, fmt, toast, modal, initTooltips, duration, bar } from './ui.js';
 import { xpToNext } from '/shared/config.js';
+import { initPwa } from './pwa.js';
 import { CLASSES } from '/shared/data/classes.js';
 import { hasAbilityAction } from '/shared/character.js';
 import { combatView } from './views/combat.js';
@@ -281,6 +282,7 @@ window.addEventListener('hashchange', route);
 
 // ------------------------------------------------------------------ boot
 initTooltips();
+initPwa();
 loadAssets().then(() => {
   // views that were rendered before artwork loaded get refreshed
   if (current) requestRender();

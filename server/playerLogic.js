@@ -6,6 +6,8 @@ import { ABILITIES, abilityPriority } from '../shared/data/abilities.js';
 import { ZONES } from '../shared/data/zones.js';
 import { ENEMIES } from '../shared/data/enemies.js';
 import { masteryLevel } from '../shared/bestiary.js';
+import { track as trackQuest } from './questLogic.js';
+import { evaluateItem, makeContext, sanitizeFilter, filterFromLegacy } from '../shared/lootfilter.js';
 import { ACHIEVEMENTS } from '../shared/data/achievements.js';
 import { SLOT_IDS, generateItem, canEquip, itemSellValue, ITEM_BASES } from '../shared/data/items.js';
 import { createCharacter, addXp, autoDevelop, autoLoadout, syncTree, abilitySlots, cloneRule, treeRefundCost, treeResetCost } from '../shared/character.js';
@@ -38,6 +40,8 @@ export function newPlayer(account) {
     bestiary: {},       // enemyId -> { kills, seen }
     quests: null,       // daily/weekly quests (questLogic)
     rift: { best: 0, bestTimes: {}, runs: 0, timed: 0, history: [], auto: 'off' },
+    lootFilter: { enabled: false, protectUpgrades: true, rules: [] },
+    lootLog: [],        // recent items handled by the loot filter
   };
 }
 
@@ -48,6 +52,8 @@ export function migratePlayer(p) {
   p.stats = { ...base.stats, ...p.stats };
   p.settings = { ...base.settings, ...p.settings };
   p.rift = { ...base.rift, ...p.rift };
+  if (!p.lootFilter) { p.lootFilter = filterFromLegacy(p.settings); p.settings.autoSellBelow = null; }
+  p.lootLog ||= [];
   migrateTown(p);
   while (p.parties.length < CONFIG.party.presets) p.parties.push({ name: `Party ${p.parties.length + 1}`, members: p.heroId ? [p.heroId] : [] });
   for (const ch of Object.values(p.characters)) {
@@ -250,15 +256,65 @@ export function receiveItem(p, item) {
     p.inventory.push(item);
     return 'kept';
   }
-  const below = p.settings.autoSellBelow;
-  if ((below && r <= rarityIndex(below)) || p.inventory.length >= CONFIG.inventory.limit) {
-    // auto-loot: salvage into materials (Salvage Yard) or sell for gold
-    if (p.settings.autoLootAction === 'salvage' && p.town && !item.locked) { autoSalvage(p, item); return 'salvaged'; }
-    p.gold += itemSellValue(item);
-    return 'sold';
+  // loot filter: first matching rule decides
+  const verdict = evaluateItem(p.lootFilter, item, makeContext(p));
+  if (verdict.action !== 'keep') return disposeItem(p, item, verdict.action, verdict.reason);
+  if (p.inventory.length >= CONFIG.inventory.limit) {
+    // inventory full: salvage or sell (setting "when inventory is full")
+    return disposeItem(p, item, p.settings.autoLootAction === 'salvage' ? 'salvage' : 'sell', 'Inventory full');
   }
   p.inventory.push(item);
   return 'kept';
+}
+
+// Salvages or sells an item that never enters the inventory, and logs it for the player
+function disposeItem(p, item, action, reason) {
+  const entry = { name: item.name, rarity: item.rarity, level: item.level, slot: item.slot, baseId: item.baseId, reason, at: Date.now() };
+  if (action === 'salvage' && p.town) {
+    entry.action = 'salvaged';
+    entry.materials = autoSalvage(p, item);
+    p.stats.autoSalvaged = (p.stats.autoSalvaged || 0) + 1;
+    trackQuest(p, 'salvage', 1);
+  } else {
+    entry.action = 'sold';
+    entry.gold = itemSellValue(item);
+    p.gold += entry.gold;
+    p.stats.autoSold = (p.stats.autoSold || 0) + 1;
+  }
+  p.lootLog ||= [];
+  p.lootLog.unshift(entry);
+  if (p.lootLog.length > 60) p.lootLog.length = 60;
+  return entry.action;
+}
+
+// ---------------------------------------------------------------- loot filter
+export function setLootFilter(p, { filter }) {
+  p.lootFilter = sanitizeFilter(filter);
+  return { rules: p.lootFilter.rules.length };
+}
+
+// Runs the filter over the current inventory (dryRun: only report)
+export function applyLootFilter(p, { dryRun = false } = {}) {
+  const ctx = makeContext(p);
+  const filter = { ...p.lootFilter, enabled: true };
+  const hits = [];
+  for (const item of p.inventory) {
+    const v = evaluateItem(filter, item, ctx);
+    if (v.action !== 'keep') hits.push({ item, action: v.action, reason: v.reason });
+  }
+  const summary = { salvage: hits.filter(h => h.action === 'salvage').length, sell: hits.filter(h => h.action === 'sell').length, items: hits.map(h => ({ uid: h.item.uid, action: h.action, reason: h.reason })) };
+  if (dryRun) return summary;
+  if (!hits.length) fail('Nothing in your inventory matches the filter');
+  const gone = new Set(hits.map(h => h.item.uid));
+  p.inventory = p.inventory.filter(i => !gone.has(i.uid));
+  const materials = {};
+  let gold = 0;
+  for (const h of hits) {
+    if (h.action === 'salvage' && p.town) for (const [k, v] of Object.entries(autoSalvage(p, h.item))) materials[k] = (materials[k] || 0) + v;
+    else { const g = itemSellValue(h.item); gold += g; p.gold += g; }
+  }
+  if (summary.salvage) trackQuest(p, 'salvage', summary.salvage);
+  return { ...summary, items: undefined, gold, materials };
 }
 
 // --------------------------------------------------------------------------- mailbox
@@ -483,7 +539,7 @@ export function publicPlayer(p) {
     recruitment: { ...p.recruitment, costs: Object.fromEntries(p.recruitment.offers.map(o => [o.offerId, recruitCost(p, o)])) },
     stats: p.stats, achievements: p.achievements, settings: p.settings, coopChars: p.coopChars,
     town: p.town, expeditions: p.expeditions || [], mailbox: p.mailbox || [], serverTime: Date.now(),
-    bestiary: p.bestiary || {}, quests: p.quests, rift: p.rift,
+    bestiary: p.bestiary || {}, quests: p.quests, rift: p.rift, lootFilter: p.lootFilter, lootLog: p.lootLog || [],
   };
 }
 
