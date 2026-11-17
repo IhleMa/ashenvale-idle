@@ -163,6 +163,8 @@ The game is **data-driven**: items, classes, abilities, enemies, zones, uniques,
 
    With *Auto Update = 1*, every restart also runs `git pull`. Player data in `data/` is never touched.
 
+   If `update` ever says *"Your local changes … would be overwritten"*, a file from the repository was edited on the server. Use **Settings → Reinstall Server** in the panel: it resets the game files to the newest version and keeps `data/` (saves, content overrides, certificates) and uploaded images. (`package-lock.json`, which `npm install` used to rewrite, is now handled automatically.)
+
    Other console commands: `players` (who is online), `say <message>` (announcement from "Server", e.g. `say Restarting in 2 minutes!`; players who are offline still see it on their next login within 24 h), `reload-clients` (refresh every open page), `content [reload]` (check the content files / apply them live), `tls [renew]` (HTTPS status / new certificate now), `admin add|remove|list <username>`, `bots [add <n> [type] | remove <name|all> | on | off]`, `backup` (database snapshot now), `db` (database size and counts), `help`.
 7. **Admins:** set the server variable **Admin Users** (e.g. `alice,bob`) or type `admin add alice` in the console. Admins get an extra **🛡 Admin** page in the sidebar after refreshing.
 5. **Images on the server:** commit them to `public/assets/` in the repo (recommended, so they arrive with updates), or upload them with the panel's File Manager into `public/assets/<folder>/`. Uploaded files sit outside git and survive updates. Don't upload a file with the same name as one that's also committed to the repo, or `git pull` will refuse to update.

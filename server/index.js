@@ -289,7 +289,14 @@ async function runUpdate() {
   try {
     const before = await git(['rev-parse', 'HEAD']);
     log('Pulling latest version from git...');
-    await git(['pull', '--ff-only']);
+    // package-lock.json is rewritten by "npm install" on start (other npm version) — that is never a real
+    // local change, so throw it away instead of letting it block the update
+    await git(['checkout', '--', 'package-lock.json']).catch(() => {});
+    try { await git(['pull', '--ff-only']); } catch (e) {
+      const files = [...e.message.matchAll(/^\s+(\S+)$/gm)].map(m => m[1]).filter(f => !/^(error|Please|Aborting)/.test(f));
+      if (/local changes/.test(e.message)) throw new Error(`these files were changed on the server and would be overwritten: ${files.join(', ') || '(see above)'}. Move your changes to data/ (overrides) or public/assets/, or use "Reinstall Server" in the panel (keeps data/ and uploaded images) — then run update again.\n${e.message}`);
+      throw e;
+    }
     const after = await git(['rev-parse', 'HEAD']);
     if (before === after) return log('Already up to date.');
     const changed = (await git(['diff', '--name-only', before, after])).split('\n').filter(Boolean);
