@@ -65,7 +65,10 @@ async function checkServer({ port, host, ca, label }) {
   const r = await request(`http://${host}:${port}/bestiary?x=1`);
   assert.equal(r.status, 308);
   assert.equal(r.headers.location, `https://${host}:${port}/bestiary?x=1`);
-  ok(`${label}: http:// on the same port redirects to https://`);
+  // behind a proxy (Cloudflare forwards http://host on port 80 to the game port): no port in the redirect
+  const viaProxy = await request(`http://${host}:${port}/x`, { headers: { Host: host } });
+  assert.equal(viaProxy.headers.location, `https://${host}/x`);
+  ok(`${label}: http:// on the same port redirects to https:// (keeping the port the visitor used)`);
   const reg = await request(`${base}/api/register`, { ca, method: 'POST', body: { username: `tls${port}`, password: 'secret123' } });
   const token = JSON.parse(reg.body).token;
   assert.ok(token, reg.body);

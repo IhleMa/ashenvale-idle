@@ -17,10 +17,16 @@ export function createListener({ handler, onUpgrade, creds = null, tls = null, p
     res.end(answer);
     return true;
   };
-  const redirect = targetPort => (req, res) => {
+  // samePort: the request came in on the game port itself. Keep whatever port the visitor used — none when
+  // a proxy like Cloudflare forwarded it from port 80 (then https:// on 443 is right), the game port when they
+  // typed http://host:PORT. Requests on HTTP_PORT always go to the game port.
+  const redirect = (targetPort, samePort = false) => (req, res) => {
     if (answerChallenge(req, res)) return;
-    const host = String(req.headers.host || tls?.config.domain || 'localhost').replace(/:\d+$/, '').replace(/^\[|\]$/g, '');
-    const portPart = targetPort === 443 ? '' : `:${targetPort}`;
+    const rawHost = String(req.headers.host || tls?.config.domain || 'localhost');
+    const hostPort = /:(\d+)$/.exec(rawHost)?.[1];
+    const host = rawHost.replace(/:\d+$/, '').replace(/^\[|\]$/g, '');
+    const port = samePort ? (hostPort ? Number(hostPort) : 443) : targetPort;
+    const portPart = port === 443 ? '' : `:${port}`;
     res.writeHead(308, { Location: `https://${host.includes(':') ? `[${host}]` : host}${portPart}${req.url || '/'}`, 'Content-Type': 'text/plain' });
     res.end('This server uses HTTPS.\n');
   };
@@ -34,7 +40,7 @@ export function createListener({ handler, onUpgrade, creds = null, tls = null, p
     const secure = https.createServer({ ...creds, minVersion: 'TLSv1.2' }, handler);
     secure.on('upgrade', onUpgrade);
     secure.on('tlsClientError', () => { /* scanners, old clients — not worth logging */ });
-    const plain = http.createServer(redirect(port));
+    const plain = http.createServer(redirect(port, true));
     // one port, both protocols
     main = net.createServer(socket => {
       socket.setTimeout(30_000, () => socket.destroy());
