@@ -41,6 +41,23 @@ export function validateContent(C) {
   // ---- config
   if (obj('config', cfg)) {
     num('config.levelCap', cfg.levelCap, { min: 1, max: 1000 });
+    num('config.xp.base', cfg.xp?.base, { min: 1 });
+    num('config.xp.exponent', cfg.xp?.exponent, { min: 0, max: 10 });
+    if (cfg.xp?.curve !== undefined) {
+      const c = cfg.xp.curve;
+      if (!Array.isArray(c) || c.length < 2) err('config.xp.curve', 'must be a list of at least 2 points [level, xp]');
+      else {
+        let last = 0, lastXp = 0;
+        c.forEach((pt, i) => {
+          if (!Array.isArray(pt) || pt.length !== 2 || !Number.isInteger(pt[0]) || !isNum(pt[1])) return err(`config.xp.curve[${i}]`, `must be [level, xp] with a whole level (got ${JSON.stringify(pt)})`);
+          if (pt[0] < 1) err(`config.xp.curve[${i}]`, 'level must be at least 1');
+          if (pt[0] <= last) err(`config.xp.curve[${i}]`, `levels must increase (level ${pt[0]} comes after ${last})`);
+          if (pt[1] < 1) err(`config.xp.curve[${i}]`, 'xp must be at least 1');
+          else if (pt[1] < lastXp) warn(`config.xp.curve[${i}]`, `level ${pt[0]} needs less XP than level ${last} — players level up faster there`);
+          last = pt[0]; lastXp = Math.max(lastXp, pt[1]);
+        });
+      }
+    }
     if (!Array.isArray(cfg.rarities) || !cfg.rarities.length) err('config.rarities', 'needs at least one rarity');
     (cfg.rarities || []).forEach((r, i) => { str(`config.rarities[${i}].id`, r.id); num(`config.rarities[${i}].weight`, r.weight, { min: 0 }); num(`config.rarities[${i}].mult`, r.mult, { min: 0 }); num(`config.rarities[${i}].affixes`, r.affixes, { min: 0 }); });
     for (const k of ['common', 'uncommon', 'rare', 'epic', 'legendary', 'mythic']) if (!rarities.has(k)) err('config.rarities', `the game relies on the rarity "${k}"`);

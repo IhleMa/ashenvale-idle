@@ -161,6 +161,10 @@ The validator tells you if a piece is missing.
 | `onEnemyHit` | `status`, `duration`, `basicAttacksOnly` | enemy hits apply a status |
 | `periodic` | `every` (s), `target` (randomHero/allHeroes), `status`+`duration`+`pctMaxHp` and/or `damagePctMaxHp`+`school`, `message` | timed effects |
 
+### Change the XP needed per level
+
+Easiest: **Admin → 📈 XP curve** (drag the points, save — live). In the file it is `content/config.json → xp`: without `curve`, a level needs `base × level^exponent` XP. With `"curve": [[1, 80], [10, 5600], [30, 37000], [59, 151000]]` (pairs of level and XP needed for the next level) the game draws a smooth, rising curve through those points (straight lines in a log-log sense, so two points already give a classic power curve). Changing it never changes anyone's level, only how much the following levels need.
+
 ### Change the tutorial
 
 `content/tutorial.json` lists the steps in order. Each step has a `title`, a `text` (`**bold**` works, `{count}` is the goal count), the page it happens on (`view`), the pages it makes visible (`unlocks`; `"*"` = everything — used by the last step), CSS selectors of what to make glow (`highlight`), a `goal` and an optional `reward`.

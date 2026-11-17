@@ -9,6 +9,7 @@ import { ITEM_BASES } from '/shared/data/items.js';
 import { UNIQUES, SETS } from '/shared/data/legendaries.js';
 import { CONFIG } from '/shared/config.js';
 import { mountContentEditor, contentEditorDirty } from './admin-content.js';
+import { mountCurveEditor, curveEditorDirty } from './admin-curve.js';
 
 const ui = { tab: 'dashboard', query: '', sort: 'online' };
 let overview = null;
@@ -111,7 +112,7 @@ function playersHtml() {
 function render(root) {
   const host = root.querySelector('.admin-body');
   if (!host) return;
-  if (ui.tab === 'content') return; // the content editor draws itself
+  if (ui.tab === 'content' || ui.tab === 'curve') return; // these editors draw themselves
   if (host.contains(document.activeElement) && /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) return;
   host.innerHTML = ui.tab === 'dashboard' ? dashboardHtml() : ui.tab === 'bots' ? botsHtml() : playersHtml();
 }
@@ -189,11 +190,12 @@ export const adminView = {
   id: 'admin', label: 'Admin', icon: '🛡', adminOnly: true,
   mount(root) {
     root.innerHTML = `<section class="panel"><div class="panel-head"><h3>🛡 Admin</h3><span class="muted small">Only visible to admins. All actions are logged.</span></div>
-      <div class="tabs">${[['dashboard', 'Dashboard'], ['players', 'Players'], ['bots', '🤖 Bots'], ['content', '📦 Content']].map(([id, l]) => `<button class="tab ${ui.tab === id ? 'active' : ''}" data-tab="${id}">${l}</button>`).join('')}</div>
+      <div class="tabs">${[['dashboard', 'Dashboard'], ['players', 'Players'], ['bots', '🤖 Bots'], ['content', '📦 Content'], ['curve', '📈 XP curve']].map(([id, l]) => `<button class="tab ${ui.tab === id ? 'active' : ''}" data-tab="${id}">${l}</button>`).join('')}</div>
       <div class="admin-body"></div></section>`;
     const reload = () => {
       root.querySelector('.admin-body').classList.toggle('wide', ui.tab === 'content');
       if (ui.tab === 'content') return mountContentEditor(root.querySelector('.admin-body'));
+      if (ui.tab === 'curve') return mountCurveEditor(root.querySelector('.admin-body'));
       return ui.tab === 'dashboard' ? loadOverview(root) : ui.tab === 'bots' ? loadBots(root) : loadPlayers(root);
     };
     clearInterval(botTimer);
@@ -201,7 +203,7 @@ export const adminView = {
     root.addEventListener('click', async e => {
       const t = e.target.closest('button, tr[data-player]');
       if (!t) return;
-      if (t.dataset.tab && t.dataset.tab !== ui.tab && contentEditorDirty() && !(await confirmBox('Discard your unsaved content changes?', 'Discard'))) return;
+      if (t.dataset.tab && t.dataset.tab !== ui.tab && (contentEditorDirty() || curveEditorDirty()) && !(await confirmBox('Discard your unsaved content changes?', 'Discard'))) return;
       if (t.dataset.tab) { ui.tab = t.dataset.tab; root.querySelectorAll('[data-tab]').forEach(b => b.classList.toggle('active', b === t)); reload(); return; }
       if (t.dataset.player) { openPlayer(t.dataset.player, root); return; }
       if ('sendBroadcast' in t.dataset) {

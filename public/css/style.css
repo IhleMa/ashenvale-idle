@@ -188,7 +188,7 @@ label.inline input, label.inline select { display: inline-block; width: auto; ma
 .toast.success { border-left-color: var(--good); } .toast.error { border-left-color: var(--danger); } .toast.achievement { border-left-color: var(--gold); background: linear-gradient(90deg, #3a2c10, var(--panel2)); }
 .toast.out { opacity: 0; transform: translateX(30px); }
 @keyframes toastIn { from { opacity: 0; transform: translateY(10px); } }
-.modal-backdrop { position: fixed; inset: 0; background: rgba(0, 0, 0, .65); display: grid; place-items: center; z-index: 90; padding: 16px; animation: fade .15s; }
+.modal-backdrop { position: fixed; inset: 0; background: rgba(0, 0, 0, .65); display: grid; place-items: center; z-index: 130; padding: 16px; animation: fade .15s; }
 @keyframes fade { from { opacity: 0; } }
 .modal { position: relative; background: linear-gradient(180deg, var(--panel2), var(--panel)); border: 1px solid var(--line2); border-radius: 14px; padding: 24px; width: min(520px, 100%); max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow); }
 .modal.wide { width: min(760px, 100%); }
@@ -1002,7 +1002,7 @@ html.standalone body { padding-bottom: env(safe-area-inset-bottom); padding-left
 @media (max-width: 720px) { .ce { grid-template-columns: 1fr; } .ce-types { max-height: 200px; grid-row: auto; } .ce-editor { grid-column: auto; } .ce-field { grid-template-columns: 1fr auto; } .ce-field .ce-key { grid-column: span 2; } }
 
 /* ---------------------------------------------------------------- tutorial */
-#tutorial { position: fixed; z-index: 90; left: calc(var(--sidebar-w, 220px) + 24px); bottom: 20px; width: min(400px, calc(100vw - 32px)); }
+#tutorial { position: fixed; z-index: 80; left: calc(var(--sidebar-w, 220px) + 24px); bottom: 20px; width: min(400px, calc(100vw - 32px)); }
 #tutorial.tut-center { inset: 0; width: auto; display: flex; align-items: center; justify-content: center; z-index: 120; }
 .tut-backdrop { position: absolute; inset: 0; background: rgba(8, 5, 4, .72); backdrop-filter: blur(2px); }
 .tut-box { position: relative; background: linear-gradient(180deg, #2a1d17, #1d1513); border: 1px solid #8a5a2b; border-radius: 14px; padding: 14px 16px 12px; box-shadow: 0 10px 40px rgba(0, 0, 0, .6), 0 0 0 1px rgba(242, 193, 78, .08) inset; }
@@ -1043,3 +1043,31 @@ html.standalone body { padding-bottom: env(safe-area-inset-bottom); padding-left
   #tutorial { left: 8px; right: 8px; bottom: 8px; width: auto; }
   body.in-tutorial #toasts { bottom: 150px; }
 }
+
+/* ---------------------------------------------------------------- admin: XP curve editor */
+.xc-chart-wrap { position: relative; margin: 8px 0; }
+.xc-chart { background: #120d0c; border: 1px solid var(--line); border-radius: var(--radius); touch-action: none; user-select: none; }
+.xc-svg { display: block; width: 100%; height: auto; }
+.xc-grid { stroke: #2a201c; stroke-width: 1; } .xc-grid.v { stroke-dasharray: 2 4; }
+.xc-tick { fill: var(--faint); font-size: 11px; } .xc-axis { fill: var(--muted); font-size: 11px; }
+.xc-area { fill: rgba(242, 193, 78, .07); }
+.xc-old { fill: none; stroke: #8a7a6c; stroke-width: 2; stroke-dasharray: 6 5; }
+.xc-cur { fill: none; stroke: var(--gold); stroke-width: 3; }
+.xc-hover { stroke: rgba(255, 255, 255, .25); stroke-width: 1; } .xc-hdot { fill: var(--gold); }
+.xc-pt { cursor: grab; } .xc-pt .hit { fill: transparent; }
+.xc-pt circle:not(.hit) { fill: #1d1513; stroke: var(--gold); stroke-width: 3; transition: r .1s; }
+.xc-pt:hover circle:not(.hit), .xc-pt.sel circle:not(.hit) { fill: var(--gold); }
+.xc-pt.end circle:not(.hit) { stroke: var(--accent2); }
+.xc-tip { position: absolute; pointer-events: none; background: #1d1513; border: 1px solid var(--line2); border-radius: 8px; padding: 6px 10px; font-size: 12px; min-width: 190px; box-shadow: var(--shadow); line-height: 1.5; }
+.xc-tip .bad, .xc-mile .bad, .xc-full .bad { color: #ff8a73; } .xc-tip .good, .xc-mile .good, .xc-full .good { color: var(--good); }
+.xc-tools { align-items: center; margin: 4px 0 10px; }
+.xc-tools select { margin-left: 4px; }
+.xc-grid2 { display: grid; grid-template-columns: minmax(260px, 1fr) minmax(260px, 1fr); gap: 18px; margin-bottom: 10px; }
+.xc-grid2 h4 { margin: 4px 0 6px; }
+.xc-pts, .xc-mile, .xc-full { width: 100%; border-collapse: collapse; font-size: 13px; }
+.xc-pts th, .xc-mile th, .xc-full th { text-align: left; font-weight: 600; color: var(--muted); font-size: 11px; padding: 4px 6px; border-bottom: 1px solid var(--line); }
+.xc-pts td, .xc-mile td, .xc-full td { padding: 3px 6px; border-bottom: 1px solid #241b18; }
+.xc-pts input { width: 100%; max-width: 140px; }
+.xc-pts tr.sel td { background: rgba(242, 193, 78, .08); }
+.xc-full { margin-top: 8px; } .xc-full tr.is-pt td:first-child { color: var(--gold); font-weight: 600; }
+@media (max-width: 820px) { .xc-grid2 { grid-template-columns: 1fr; } }

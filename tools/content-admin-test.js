@@ -143,6 +143,22 @@ assert.ok(!exists('items/_settings.json'));
 assert.ok(Object.keys(CONTENT.items.bases).length > 10, 'saving settings keeps the collections');
 ok('settings');
 
+// ---- XP curve (Admin → 📈 XP curve saves config.xp.curve)
+{
+  const { xpToNext } = await import('../shared/config.js');
+  const f10 = xpToNext(10);
+  const conf = cm.get('settings', 'config').data;
+  cm.save('settings', 'config', { ...conf, xp: { ...conf.xp, curve: [[1, 100], [10, 1000], [59, 200000]] } });
+  assert.equal(xpToNext(1), 100); assert.equal(xpToNext(10), 1000); assert.equal(xpToNext(59), 200000);
+  assert.ok(xpToNext(5) > 100 && xpToNext(5) < 1000 && xpToNext(30) > 1000 && xpToNext(30) < 200000, 'smooth between the points');
+  for (let L = 2; L < 59; L++) assert.ok(xpToNext(L) >= xpToNext(L - 1), `never drops (level ${L})`);
+  assert.throws(() => cm.save('settings', 'config', { ...conf, xp: { ...conf.xp, curve: [[1, 100], [1, 50]] } }), e => e.errors?.some(m => m.includes('levels must increase')));
+  assert.equal(xpToNext(10), 1000, 'invalid curve rejected, the old one stays');
+  cm.reset('settings', 'config');
+  assert.equal(xpToNext(10), f10, 'back to the formula');
+  ok('XP curve: saved live, smooth and rising, invalid curves rejected, reset to the formula');
+}
+
 // ---- a class needs abilities and a skill tree: an empty one is rejected with a clear message …
 assert.throws(() => cm.create('classes', 'paladin', { data: { name: 'Paladin' } }), e => e.errors?.some(m => m.includes('paladin.json')));
 assert.ok(!exists('classes/paladin.json'));
