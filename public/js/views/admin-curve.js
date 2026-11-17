@@ -138,7 +138,7 @@ function html() {
   const usingCurve = !!savedCurve();
   return `<section class="panel xc">
     <div class="panel-head"><h3>📈 XP needed per level ${dirty() ? '<span class="ce-badge st-unsaved">Unsaved</span>' : ''}</h3>
-      <div class="row gap"><button class="btn small ghost" data-xc-discard ${dirty() ? '' : 'disabled'}>Discard</button>
+      <div class="row gap"><button class="btn small ghost" data-xc-jump title="Simulate how long levelling takes with this curve">⏱ Test with bots ↓</button><button class="btn small ghost" data-xc-discard ${dirty() ? '' : 'disabled'}>Discard</button>
       <button class="btn small primary" data-xc-save ${dirty() && !S.busy ? '' : 'disabled'}>💾 Save — live for everyone</button></div></div>
     <p class="muted small">Drag the points up or down (and sideways) to shape the curve — it bends smoothly through them. <b>Double-click</b> the chart to add a point, double-click a point to remove it. The dashed line is what the game uses right now${usingCurve ? '' : ` (the formula ${esc(String(savedXp().base))} × level<sup>${esc(String(savedXp().exponent))}</sup>)`}. Hover for details.</p>
     ${S.problems ? `<div class="ce-note bad"><b>Not saved:</b><ul>${S.problems.map(p => `<li>${esc(p)}</li>`).join('')}</ul></div>` : ''}
@@ -349,6 +349,7 @@ function bind(el) {
       try { SIM.status = await act('admin_levelsim_start', { curve, hours: SIM.hours, schedule: SIM.schedule, label }); } catch (err) { toast(err.message, 'error'); }
       return pollSim();
     }
+    if ('xcJump' in t.dataset) { host.querySelector('.xc-simbox')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
     if ('simCancel' in t.dataset) { try { SIM.status = await act('admin_levelsim_cancel'); } catch { /* ignore */ } return pollSim(); }
     if ('xcSave' in t.dataset) return save();
     if ('xcDiscard' in t.dataset) { S.pts = JSON.parse(S.baseJson); S.problems = null; return draw(); }
