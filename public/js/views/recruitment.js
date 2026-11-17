@@ -9,6 +9,9 @@ import { CLASSES, TRAITS } from '/shared/data/classes.js';
 import { computeStats, powerRating } from '/shared/stats.js';
 import { createCharacter } from '/shared/character.js';
 import { rosterLimit } from '/shared/town.js';
+import { busyWith } from '/shared/expeditions.js';
+import { BUILDINGS as TOWN_BUILDINGS } from '/shared/data/town.js';
+import { EXPEDITIONS } from '/shared/data/expeditions.js';
 import { PROFESSIONS } from '/shared/data/town.js';
 import { professionIcon } from '../assets.js';
 
@@ -50,8 +53,10 @@ export const recruitmentView = {
         <div class="panel-head"><h3>Your roster <span class="muted small">${roster.length}/${rosterLimit(p)} · <a href="#/town">upgrade the Inn for more rooms</a></span></h3></div>
         <div class="roster-list">${roster.length ? roster.map(c => {
           const inParty = p.parties.some(pt => pt.members.includes(c.id));
+          const busy = busyWith(p, c.id);
+          const busyTxt = busy ? (busy.type === 'work' ? ` · working at the ${TOWN_BUILDINGS[busy.buildingId]?.name}` : ` · on expedition (${EXPEDITIONS[busy.destId]?.name})`) : '';
           return `<div class="bench-row">${portrait(c, 'sm')}<div class="grow"><b>${esc(c.name)}</b> ${classBadge(c.classId)} ${roleBadge(c.role)}
-            <div class="muted small">${c.profession ? `${professionIcon(c.profession.id, 'xxs')} ${esc(PROFESSIONS[c.profession.id].name)} ${c.profession.level} · ` : ''}Lv ${c.level} · ${c.trait ? esc(TRAITS[c.trait].name) : ''} · Power ${fmt(powerRating(computeStats(c)))}${inParty ? ' · in a party' : ''}</div></div>
+            <div class="muted small">${c.profession ? `${professionIcon(c.profession.id, 'xxs')} ${esc(PROFESSIONS[c.profession.id].name)} ${c.profession.level} · ` : ''}Lv ${c.level} · ${c.trait ? esc(TRAITS[c.trait].name) : ''} · Power ${fmt(powerRating(computeStats(c)))}${inParty ? ' · in a party' : ''}<span class="warn-text">${esc(busyTxt)}</span></div></div>
             <button class="btn tiny" data-view="${c.id}">View</button><button class="btn tiny danger ghost" data-dismiss="${c.id}">Dismiss</button></div>`;
         }).join('') : '<p class="muted">No companions yet.</p>'}</div>
       </section>`;

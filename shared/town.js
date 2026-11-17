@@ -2,13 +2,13 @@
 import { rarityIndex, rarityById } from './config.js';
 import { AFFIXES, ITEM_BASES } from './data/items.js';
 import {
-  BUILDINGS, BUILD_TIME, INN_ROSTER, INN_OFFERS, SALVAGE_BONUS, GATHER_RATE, GATHER_NO_WORKER, GATHER_HOURS,
+  BUILDINGS, BUILD_TIME, INN_ROSTER, INN_OFFERS, SALVAGE_BONUS,
   CRAFT_LEVEL_CAP, ITEM_MATERIAL, MATERIAL_OF_TYPE, QUALITIES, ELIXIRS, ELIXIR_BASE_MINUTES, enchantPower,
 } from './data/town.js';
 
 export function newTown() {
   const buildings = {};
-  for (const [id, b] of Object.entries(BUILDINGS)) buildings[id] = { level: b.start, upgrade: null, worker: null, stored: {}, updatedAt: Date.now() };
+  for (const [id, b] of Object.entries(BUILDINGS)) buildings[id] = { level: b.start, upgrade: null, worker: null };
   return { buildings, materials: {}, elixirs: {} };
 }
 
@@ -62,26 +62,6 @@ export function upgradeBlocker(p, id) {
   if (activeBuilds(p) >= max) return `Only ${max} construction${max > 1 ? 's' : ''} at a time — upgrade the Town Hall for more`;
   if (!canAfford(p, upgradeCost(id, b.level + 1))) return 'Not enough gold or materials';
   return null;
-}
-
-// ---------------------------------------------------------------- gathering
-export function gatherPerHour(p, id) {
-  const def = BUILDINGS[id];
-  const L = bLevel(p, id);
-  if (def.kind !== 'gather' || L < 1) return {};
-  const w = worker(p, id);
-  const mult = (w ? 1 + w.profession.level * 0.02 : GATHER_NO_WORKER);
-  return Object.fromEntries(Object.entries(def.produces).map(([m, f]) => [m, GATHER_RATE[L] * f * mult]));
-}
-
-// Stored amounts right now (production accumulates since updatedAt, capped)
-export function gatherStored(p, id, now = Date.now()) {
-  const b = p.town.buildings[id];
-  const rate = gatherPerHour(p, id);
-  const hours = Math.max(0, (now - (b.updatedAt || now)) / 3600000);
-  const out = {};
-  for (const [m, r] of Object.entries(rate)) out[m] = Math.min(r * GATHER_HOURS, (b.stored?.[m] || 0) + r * hours);
-  return out;
 }
 
 // ---------------------------------------------------------------- salvage

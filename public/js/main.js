@@ -17,9 +17,10 @@ import { multiplayerView } from './views/multiplayer.js';
 import { progressionView } from './views/progression.js';
 import { rankingsView } from './views/rankings.js';
 import { townView } from './views/town.js';
+import { expeditionsView } from './views/expeditions.js';
 import { createView } from './views/create.js';
 
-const VIEWS = [combatView, characterView, skilltreeView, abilitiesView, partyView, recruitmentView, townView, inventoryView, multiplayerView, rankingsView, progressionView];
+const VIEWS = [combatView, characterView, skilltreeView, abilitiesView, partyView, recruitmentView, townView, expeditionsView, inventoryView, multiplayerView, rankingsView, progressionView];
 const viewEl = () => document.getElementById('view');
 let current = null;
 let root = null; // per-view container (listeners attached to it die with it)
@@ -128,6 +129,8 @@ function renderTopbar() {
   const t = Date.now() + (state.timeOffset || 0);
   const townReady = p.town && Object.values(p.town.buildings).some(b => b.upgrade && b.upgrade.endsAt <= t);
   setBadge('town', townReady ? '✓' : '');
+  const expReady = (p.expeditions || []).filter(x => x.endsAt <= t).length;
+  setBadge('expeditions', expReady ? String(expReady) : '');
 }
 function setBadge(id, text) {
   const b = document.querySelector(`[data-badge="${id}"]`);

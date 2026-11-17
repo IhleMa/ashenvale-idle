@@ -12,6 +12,8 @@ import { createRng, randomSeed } from '../shared/rng.js';
 import { ABILITIES } from '../shared/data/abilities.js';
 import { Rankings } from './rankings.js';
 import * as TL from './townLogic.js';
+import * as XL from './expeditionLogic.js';
+import { EXPEDITIONS } from '../shared/data/expeditions.js';
 import { elixirBonuses } from '../shared/town.js';
 import * as L from './playerLogic.js';
 
@@ -201,8 +203,20 @@ export class Game {
     set_settings(s, d) { L.setSettings(s.player, d); },
     // ---- town
     town_upgrade(s, d) { const r = TL.upgradeBuilding(s.player, { buildingId: String(d.buildingId) }); return r; },
-    town_assign(s, d) { TL.assignWorker(s.player, { buildingId: String(d.buildingId), charId: d.charId ? String(d.charId) : null }); },
-    town_collect(s, d) { const r = d.buildingId ? TL.collect(s.player, { buildingId: String(d.buildingId) }) : TL.collectAll(s.player); this.profToast(s, r.msg || r.msgs); return r; },
+    town_assign(s, d) { this.ensureNotInCoop(s.player.id); TL.assignWorker(s.player, { buildingId: String(d.buildingId), charId: d.charId ? String(d.charId) : null }); this.abortSoloIfUsing(s, d.charId); },
+    expedition_start(s, d) {
+      this.ensureNotInCoop(s.player.id);
+      const ex = XL.startExpedition(s.player, { destId: String(d.destId), charIds: d.charIds, hours: Number(d.hours) });
+      for (const id of ex.charIds) this.abortSoloIfUsing(s, id);
+      return ex;
+    },
+    expedition_cancel(s, d) { XL.cancelExpedition(s.player, { id: String(d.id) }); },
+    expedition_claim(s, d) {
+      const r = d.id ? XL.claimExpedition(s.player, { id: String(d.id) }) : XL.claimAll(s.player);
+      this.profToast(s, r.messages);
+      L.checkAchievements(s.player);
+      return r;
+    },
     salvage_items(s, d) { return TL.salvageItems(s.player, d); },
     salvage_by_rarity(s, d) { return TL.salvageByRarity(s.player, d); },
     craft_item(s, d) { const r = TL.craft(s.player, d, L.hero(s.player).level); this.profToast(s, r.msg); return r; },
@@ -300,6 +314,11 @@ export class Game {
     },
     group_start(s, d) { this.startCoop(s, d.encounterId); },
   };
+
+  // A companion who just left for work/expedition must not keep fighting in the running battle
+  abortSoloIfUsing(s, charId) {
+    if (charId && s.solo?.battle && s.solo.chars?.includes(String(charId))) this.abortSolo(s);
+  }
 
   profToast(s, msg) {
     for (const m of [].concat(msg || [])) if (m) this.toast(s.player.id, m, 'success');
@@ -401,6 +420,7 @@ export class Game {
       for (const s of this.sessions.values()) {
         if (!s.player.town) continue;
         for (const d of TL.finishConstructions(s.player, now)) { this.toast(s.player.id, `🏗 ${d.name} upgraded to level ${d.level}!`, 'success'); this.markDirty(s); }
+        for (const ex of XL.newlyReturned(s.player, now)) { this.toast(s.player.id, `🧭 Your expedition to ${EXPEDITIONS[ex.destId]?.name} has returned — claim the rewards!`, 'success'); this.markDirty(s); }
       }
     }
     for (const s of this.sessions.values()) {

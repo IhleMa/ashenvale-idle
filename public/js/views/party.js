@@ -8,6 +8,15 @@ import { CONFIG } from '/shared/config.js';
 import { computeStats, powerRating } from '/shared/stats.js';
 import { partyBonuses } from '/shared/party.js';
 import { CLASSES } from '/shared/data/classes.js';
+import { busyWith } from '/shared/expeditions.js';
+import { BUILDINGS } from '/shared/data/town.js';
+import { EXPEDITIONS } from '/shared/data/expeditions.js';
+
+function busyLabel(p, c) {
+  const b = busyWith(p, c.id);
+  if (!b) return '';
+  return b.type === 'work' ? `Working at the ${BUILDINGS[b.buildingId]?.name}` : `On expedition: ${EXPEDITIONS[b.destId]?.name}`;
+}
 
 let editingIndex = null;
 
@@ -97,7 +106,7 @@ export const partyView = {
         <section class="panel">
           <h3>Roster</h3>
           <div class="bench">${bench.length ? bench.map(c => `<div class="bench-row">${portrait(c, 'sm')}<div class="grow"><b>${esc(c.name)}</b><div class="muted small">Lv ${c.level} ${esc(CLASSES[c.classId].name)} · ${esc(CONFIG.roles[c.role].label)}</div></div>
-            <button class="btn tiny" data-add="${c.id}" ${members.length >= CONFIG.party.size ? 'disabled' : ''}>Add</button></div>`).join('') : '<p class="muted small">Everyone is already in this party. <a href="#/recruitment">Recruit more companions.</a></p>'}</div>
+            ${busyLabel(p, c) ? `<span class="small warn-text">${esc(busyLabel(p, c))}</span>` : `<button class="btn tiny" data-add="${c.id}" ${members.length >= CONFIG.party.size ? 'disabled' : ''}>Add</button>`}</div>`).join('') : '<p class="muted small">Everyone is already in this party. <a href="#/recruitment">Recruit more companions.</a></p>'}</div>
         </section>
       </div>`;
   },

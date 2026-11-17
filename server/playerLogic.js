@@ -12,6 +12,9 @@ import { sanitizeRule } from '../shared/rules.js';
 import { createRng, randomSeed } from '../shared/rng.js';
 import { migrateTown, rollProfession, autoSalvage } from './townLogic.js';
 import { rosterLimit, recruitOffers, bLevel } from '../shared/town.js';
+import { busyWith } from '../shared/expeditions.js';
+import { EXPEDITIONS } from '../shared/data/expeditions.js';
+import { BUILDINGS } from '../shared/data/town.js';
 
 const NAMES = ['Aldric', 'Brienna', 'Cassian', 'Dagna', 'Elowen', 'Fenris', 'Gwyn', 'Halvard', 'Isolde', 'Jorah', 'Kael', 'Liora', 'Merrick', 'Nyx', 'Orin', 'Perrin', 'Quill', 'Rowan', 'Sable', 'Thane', 'Ulric', 'Vesna', 'Wren', 'Xander', 'Yara', 'Zephyr', 'Ashka', 'Bram', 'Corin', 'Delia', 'Edda', 'Faelan', 'Garrick', 'Hesper', 'Ivo', 'Juniper', 'Kestrel', 'Lysa', 'Mordecai', 'Nessa', 'Oswin', 'Petra', 'Ronan', 'Selka', 'Tamsin', 'Vale'];
 
@@ -66,7 +69,13 @@ export function migratePlayer(p) {
 export function hero(p) { return p.heroId ? p.characters[p.heroId] : null; }
 export function getChar(p, id) { return p.characters[id] || fail('Character not found'); }
 export function activePartyChars(p) {
-  return (p.parties[p.activeParty]?.members || []).map(id => p.characters[id]).filter(Boolean);
+  return (p.parties[p.activeParty]?.members || []).map(id => p.characters[id]).filter(c => c && !busyWith(p, c.id));
+}
+
+function busyText(p, ch) {
+  const b = busyWith(p, ch.id);
+  if (!b) return null;
+  return b.type === 'work' ? `${ch.name} is working at the ${BUILDINGS[b.buildingId]?.name || 'town'}` : `${ch.name} is away on an expedition to ${EXPEDITIONS[b.destId]?.name || '…'}`;
 }
 
 // --------------------------------------------------------------------------- hero creation
@@ -303,12 +312,14 @@ export function recruit(p, { offerId }) {
 export function dismiss(p, { charId }) {
   const ch = getChar(p, charId);
   if (ch.isMain) fail('Your hero cannot be dismissed');
+  if (busyWith(p, charId)?.type === 'expedition') fail(`${ch.name} is away on an expedition`);
   for (const item of Object.values(ch.equipment)) if (item) receiveItem(p, item);
   delete p.characters[charId];
   for (const party of p.parties) party.members = party.members.filter(id => id !== charId);
   p.coopChars = p.coopChars.filter(id => id !== charId);
   for (const b of Object.values(p.town?.buildings || {})) if (b.worker === charId) b.worker = null;
 }
+// note: dismissing is blocked while a companion is on an expedition (see dismiss)
 
 export function renameCharacter(p, { charId, name }) {
   const ch = getChar(p, charId);
@@ -322,7 +333,7 @@ export function setParty(p, { index, members }) {
   if (!Array.isArray(members)) fail('Invalid members');
   const clean = [...new Set(members)];
   if (clean.length > CONFIG.party.size) fail(`Party size is limited to ${CONFIG.party.size}`);
-  for (const id of clean) getChar(p, id);
+  for (const id of clean) { const ch = getChar(p, id); const busy = busyText(p, ch); if (busy) fail(busy); }
   if (!clean.includes(p.heroId)) fail('Your hero must be in every party');
   party.members = clean;
 }
@@ -342,12 +353,13 @@ export function activateParty(p, { index }) {
 export function setCoopChars(p, { charIds }) {
   if (!Array.isArray(charIds)) fail('Invalid selection');
   const clean = [...new Set(charIds)].filter(id => p.characters[id] && id !== p.heroId);
+  for (const id of clean) { const busy = busyText(p, p.characters[id]); if (busy) fail(busy); }
   p.coopChars = clean.slice(0, CONFIG.coop.charactersPerPlayer - 1);
 }
 
 export function coopCharacters(p) {
   // default to companions from the active party when nothing was chosen
-  const picks = p.coopChars.length ? p.coopChars : (p.parties[p.activeParty]?.members || []).filter(id => id !== p.heroId);
+  const picks = (p.coopChars.length ? p.coopChars : (p.parties[p.activeParty]?.members || []).filter(id => id !== p.heroId)).filter(id => !busyWith(p, id));
   return [p.heroId, ...picks].map(id => p.characters[id]).filter(Boolean).slice(0, CONFIG.coop.charactersPerPlayer);
 }
 
@@ -415,7 +427,7 @@ export function publicPlayer(p) {
     parties: p.parties, activeParty: p.activeParty, zone: p.zone, unlockedZones: p.unlockedZones, bossKills: p.bossKills,
     recruitment: { ...p.recruitment, costs: Object.fromEntries(p.recruitment.offers.map(o => [o.offerId, recruitCost(p, o)])) },
     stats: p.stats, achievements: p.achievements, settings: p.settings, coopChars: p.coopChars,
-    town: p.town, serverTime: Date.now(),
+    town: p.town, expeditions: p.expeditions || [], serverTime: Date.now(),
   };
 }
 

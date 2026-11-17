@@ -105,7 +105,7 @@ export function backgroundStyle(...keys) {
 
 // --- Town ------------------------------------------------------------------------
 import { BUILDINGS, MATERIALS, PROFESSIONS, ELIXIRS } from '/shared/data/town.js';
-const BUILDING_GLYPH = { town_hall: '🏰', inn: '🍺', salvage_yard: '🔨', mine: '⛏', herb_garden: '🌿', blacksmith: '⚒', leatherworker: '🪡', tailor: '🧶', jeweler: '💍', enchanter: '✨', alchemy_lab: '⚗' };
+const BUILDING_GLYPH = { town_hall: '🏰', inn: '🍺', salvage_yard: '🔨', expedition_camp: '🧭', blacksmith: '⚒', leatherworker: '🪡', tailor: '🧶', jeweler: '💍', enchanter: '✨', alchemy_lab: '⚗' };
 export function buildingArt(id, cls = '') {
   return render(assetUrl(`buildings/${id}`), { cls: `building-art ${cls}`, color: '#6b4a32', glyph: BUILDING_GLYPH[id] || '🏠', title: BUILDINGS[id]?.name });
 }

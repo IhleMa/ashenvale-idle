@@ -13,6 +13,7 @@ import { ACHIEVEMENTS } from '../shared/data/achievements.js';
 import { CONFIG } from '../shared/config.js';
 import { AssetIndex } from '../server/assets.js';
 import { BUILDINGS, MATERIALS, PROFESSIONS, ELIXIRS } from '../shared/data/town.js';
+import { EXPEDITIONS } from '../shared/data/expeditions.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const index = new AssetIndex(path.join(ROOT, 'public', 'assets')).get();
@@ -53,6 +54,7 @@ md += section('Town buildings', 'buildings', Object.entries(BUILDINGS).map(([id,
 md += section('Materials', 'materials', Object.entries(MATERIALS).map(([id, m]) => [id, m.name]), 'Small square icons (64 px).');
 md += section('Professions', 'professions', Object.entries(PROFESSIONS).map(([id, p]) => [id, p.name]), 'Small square icons.');
 md += section('Elixirs', 'elixirs', Object.entries(ELIXIRS).map(([id, e]) => [id, e.name]), 'Small square icons.');
+md += section('Expedition destinations', 'expeditions', Object.entries(EXPEDITIONS).map(([id, e]) => [id, e.name]), 'Wide or square images; also used as the background of the expedition planner.');
 md += section('Interface', 'ui', [['logo', 'Game logo (top bar & login screen)'], ['background', 'Full-page background image']]);
 
 const header = `# Asset checklist

@@ -5,6 +5,7 @@ import { BUILDINGS, MATERIALS, PROFESSIONS, PROFESSION_IDS, PROFESSION_MAX, prof
 import { ITEM_BASES, generateItem, canEquip } from '../shared/data/items.js';
 import * as T from '../shared/town.js';
 import { createRng, randomSeed } from '../shared/rng.js';
+import { busyWith } from '../shared/expeditions.js';
 import { GameError } from './playerLogic.js';
 
 const fail = m => { throw new GameError(m); };
@@ -19,17 +20,35 @@ export function migrateTown(p) {
     while (inn < 5 && INN_ROSTER[inn] < recruits) inn++;
     p.town.buildings.inn.level = inn;
   }
-  for (const [id, def] of Object.entries(BUILDINGS)) {
-    if (!p.town.buildings[id]) p.town.buildings[id] = { level: def.start, upgrade: null, worker: null, stored: {}, updatedAt: Date.now() };
+  // v0.5: Mine & Herb Garden were replaced by expeditions — refund what was spent on them
+  const LEGACY = { mine: { gold: 200, metal_scrap: 10, leather_scrap: 6 }, herb_garden: { gold: 200, leather_scrap: 8, cloth_scrap: 8 } };
+  for (const [id, cost] of Object.entries(LEGACY)) {
+    const old = p.town.buildings[id];
+    if (!old) continue;
+    const lvl = old.upgrade ? old.upgrade.to : old.level;
+    for (let L = 1; L <= lvl; L++) for (const [k, v] of Object.entries(cost)) {
+      if (k === 'gold') p.gold += Math.round(v * Math.pow(L, 2.2));
+      else p.town.materials[k] = (p.town.materials[k] || 0) + Math.ceil(v * Math.pow(L, 1.5));
+    }
+    for (const [k, v] of Object.entries(old.stored || {})) p.town.materials[k] = (p.town.materials[k] || 0) + Math.floor(v);
+    delete p.town.buildings[id];
   }
+  for (const [id, def] of Object.entries(BUILDINGS)) {
+    if (!p.town.buildings[id]) p.town.buildings[id] = { level: def.start, upgrade: null, worker: null };
+  }
+  p.expeditions ||= [];
   p.town.materials ||= {};
   p.town.elixirs ||= {};
   const rng = createRng(randomSeed());
   for (const ch of Object.values(p.characters)) {
     if (!ch.isMain && !ch.profession) ch.profession = { id: rng.pick(PROFESSION_IDS), level: 1 + Math.floor(ch.level / 6), xp: 0 };
   }
-  // drop workers that no longer exist
-  for (const b of Object.values(p.town.buildings)) if (b.worker && !p.characters[b.worker]) b.worker = null;
+  // drop workers that no longer exist; busy companions can't be in a party
+  for (const b of Object.values(p.town.buildings)) {
+    if (b.worker && !p.characters[b.worker]) b.worker = null;
+    if (b.worker) removeFromParties(p, b.worker);
+  }
+  for (const ex of p.expeditions) for (const id of ex.charIds) removeFromParties(p, id);
 }
 
 export function rollProfession(rng, innLevel) {
@@ -93,7 +112,6 @@ export function finishConstructions(p, now = Date.now()) {
   const done = [];
   for (const [id, b] of Object.entries(p.town.buildings)) {
     if (b.upgrade && b.upgrade.endsAt <= now) {
-      if (BUILDINGS[id].kind === 'gather') settleGather(p, id, b.upgrade.endsAt);
       b.level = b.upgrade.to;
       b.upgrade = null;
       done.push({ id, level: b.level, name: BUILDINGS[id].name });
@@ -113,49 +131,26 @@ export function upgradeBuilding(p, { buildingId }) {
   return { endsAt: b.upgrade.endsAt };
 }
 
-// ---------------------------------------------------------------- workers & gathering
-function settleGather(p, id, at = Date.now()) {
-  const b = p.town.buildings[id];
-  b.stored = T.gatherStored(p, id, at);
-  b.updatedAt = at;
+// ---------------------------------------------------------------- workers
+// Workers live in town: they leave every party and co-op team and cannot fight.
+export function removeFromParties(p, charId) {
+  for (const party of p.parties) party.members = party.members.filter(id => id !== charId);
+  p.coopChars = (p.coopChars || []).filter(id => id !== charId);
 }
 
 export function assignWorker(p, { buildingId, charId }) {
   const def = BUILDINGS[buildingId] || fail('Unknown building');
   if (!def.profession) fail('This building has no worker slot');
   if (T.bLevel(p, buildingId) < 1) fail(`Build the ${def.name} first`);
-  if (def.kind === 'gather') settleGather(p, buildingId);
   if (!charId) { p.town.buildings[buildingId].worker = null; return; }
   const ch = p.characters[charId] || fail('Character not found');
   if (ch.isMain) fail('Your hero leads the town — assign a companion');
   if (ch.profession?.id !== def.profession) fail(`${ch.name} doesn't know ${PROFESSIONS[def.profession].name}`);
-  for (const [id, b] of Object.entries(p.town.buildings)) {
-    if (b.worker === charId) { if (BUILDINGS[id].kind === 'gather') settleGather(p, id); b.worker = null; }
-  }
+  const busy = busyWith(p, charId);
+  if (busy?.type === 'expedition') fail(`${ch.name} is away on an expedition`);
+  for (const b of Object.values(p.town.buildings)) if (b.worker === charId) b.worker = null;
   p.town.buildings[buildingId].worker = charId;
-}
-
-export function collect(p, { buildingId }) {
-  requireBuilding(p, buildingId, 'gather');
-  settleGather(p, buildingId);
-  const b = p.town.buildings[buildingId];
-  const got = {};
-  for (const [m, v] of Object.entries(b.stored)) { const n = Math.floor(v); if (n > 0) { got[m] = n; b.stored[m] = v - n; } }
-  if (!Object.keys(got).length) fail('Nothing to collect yet');
-  addMaterials(p, got);
-  const msg = gainProfessionXp(T.worker(p, buildingId), Object.values(got).reduce((a, x) => a + x, 0) * 0.6);
-  return { got, msg };
-}
-
-export function collectAll(p) {
-  const got = {};
-  const msgs = [];
-  for (const [id, def] of Object.entries(BUILDINGS)) {
-    if (def.kind !== 'gather' || T.bLevel(p, id) < 1) continue;
-    try { const r = collect(p, { buildingId: id }); for (const [k, v] of Object.entries(r.got)) got[k] = (got[k] || 0) + v; if (r.msg) msgs.push(r.msg); } catch { /* nothing stored */ }
-  }
-  if (!Object.keys(got).length) fail('Nothing to collect yet');
-  return { got, msgs };
+  removeFromParties(p, charId);
 }
 
 // ---------------------------------------------------------------- salvage

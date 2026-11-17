@@ -665,3 +665,30 @@ ul.plus li::marker { content: '+ '; color: var(--good); } ul.minus li::marker { 
 .elixir.active { border-color: #2f7a3a; } .elixir.locked { opacity: .5; }
 .building-specific h4 { margin: 6px 0; }
 @media (max-width: 1100px) { .town-layout { grid-template-columns: 1fr; } .town-detail { position: static; } }
+
+/* ---------- expeditions ---------- */
+.exp-active { display: flex; flex-direction: column; gap: 8px; }
+.exp-run { display: flex; gap: 10px; align-items: center; background: #120d0c; border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; }
+.exp-run.done { border-color: #2f7a3a; box-shadow: 0 0 12px rgba(79, 191, 90, .15); }
+.exp-run .bar { width: 100%; max-width: 360px; margin-top: 4px; }
+.exp-layout { display: grid; grid-template-columns: minmax(260px, .8fr) minmax(0, 1.4fr); gap: 16px; align-items: start; }
+.exp-dests { display: flex; flex-direction: column; gap: 6px; }
+.exp-dest { display: flex; gap: 10px; align-items: center; padding: 8px; background: #120d0c; border: 1px solid var(--line); border-radius: 10px; color: var(--text); text-align: left; cursor: pointer; font: inherit; }
+.exp-dest .grow { display: flex; flex-direction: column; gap: 2px; }
+.exp-dest small { color: var(--muted); font-size: 11px; display: inline-flex; gap: 3px; align-items: center; }
+.exp-dest.active { border-color: var(--accent); }
+.exp-dest.locked { opacity: .5; }
+.exp-planner { background-size: cover; background-position: center; display: flex; flex-direction: column; gap: 8px; }
+.exp-planner h2 { margin: 0 0 4px; }
+.exp-planner h4 { margin: 6px 0 2px; }
+.exp-team { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 6px; }
+.exp-pick { position: relative; display: flex; gap: 8px; align-items: center; background: #120d0c; border: 1px solid var(--line); border-radius: 10px; padding: 6px; color: var(--text); text-align: left; cursor: pointer; font: inherit; }
+.exp-pick span { display: flex; flex-direction: column; min-width: 0; }
+.exp-pick small { color: var(--muted); font-size: 11px; display: inline-flex; gap: 3px; align-items: center; }
+.exp-pick.match { border-color: #5a4510; }
+.exp-pick.on { border-color: var(--good); background: #142a18; }
+.exp-pick:disabled { opacity: .5; cursor: not-allowed; }
+.exp-pick .check { position: absolute; top: 4px; right: 8px; color: var(--good); font-weight: 700; }
+.exp-estimate { background: rgba(18, 13, 12, .85); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; display: flex; flex-direction: column; gap: 4px; }
+.cost.rare { color: #c98aff; }
+@media (max-width: 1100px) { .exp-layout { grid-template-columns: 1fr; } }

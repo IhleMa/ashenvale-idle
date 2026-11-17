@@ -5,6 +5,7 @@ import { esc, run, tipAttr } from '../ui.js';
 import { portrait, classIcon, backgroundStyle } from '../assets.js';
 import { classBadge } from '../components.js';
 import { openInspect } from '../inspect.js';
+import { busyWith } from '/shared/expeditions.js';
 import { CONFIG } from '/shared/config.js';
 import { COOP_ENCOUNTERS } from '/shared/data/zones.js';
 import { ENEMIES } from '/shared/data/enemies.js';
@@ -80,8 +81,9 @@ export const multiplayerView = {
             <div class="panel-head"><h3>Your co-op team</h3><span class="muted small">Hero + up to ${CONFIG.coop.charactersPerPlayer - 1}</span></div>
             <div class="coop-team">${chars().map(c => {
               const picks = p.coopChars.length ? p.coopChars : p.parties[p.activeParty].members.filter(id => id !== p.heroId).slice(0, CONFIG.coop.charactersPerPlayer - 1);
-              const on = c.isMain || picks.includes(c.id);
-              return `<button class="coop-pick ${on ? 'on' : ''}" ${c.isMain ? 'disabled' : `data-coop-toggle="${c.id}"`}>${portrait(c, 'sm')}<span><b>${esc(c.name)}</b><small>Lv ${c.level} ${esc(CLASSES[c.classId].name)}</small></span>${on ? '<span class="check">✓</span>' : ''}</button>`;
+              const busy = busyWith(p, c.id);
+              const on = !busy && (c.isMain || picks.includes(c.id));
+              return `<button class="coop-pick ${on ? 'on' : ''}" ${c.isMain || busy ? 'disabled' : `data-coop-toggle="${c.id}"`} ${busy ? `title="${busy.type === 'work' ? 'Working in town' : 'On an expedition'}"` : ''}>${portrait(c, 'sm')}<span><b>${esc(c.name)}</b><small>Lv ${c.level} ${esc(CLASSES[c.classId].name)}</small></span>${on ? '<span class="check">✓</span>' : ''}</button>`;
             }).join('')}</div>
           </section>
 

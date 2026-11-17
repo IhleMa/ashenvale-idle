@@ -1,10 +1,11 @@
-// Town (garrison): buildings, construction, workers, gathering, salvage, crafting, enchanting, alchemy.
+// Town (garrison): buildings, construction, workers, salvage, crafting, enchanting, alchemy.
+// Gathering happens through expeditions (views/expeditions.js).
 import { state, hero } from '../state.js';
 import { act } from '../net.js';
 import { esc, fmt, run, toast, tipAttr, itemTooltipHtml, duration, bar, confirmBox, statValue } from '../ui.js';
 import { buildingArt, materialIcon, professionIcon, elixirIcon, itemIcon, portrait } from '../assets.js';
 import { CONFIG, rarityIndex } from '/shared/config.js';
-import { BUILDINGS, BUILDING_IDS, MATERIALS, MATERIAL_IDS, PROFESSIONS, ELIXIRS, QUALITIES, ITEM_MATERIAL, ENCHANT_STATS_BY_LEVEL, GATHER_HOURS, professionXpToNext, CRAFT_LEVEL_CAP } from '/shared/data/town.js';
+import { BUILDINGS, BUILDING_IDS, MATERIALS, MATERIAL_IDS, PROFESSIONS, ELIXIRS, QUALITIES, ITEM_MATERIAL, ENCHANT_STATS_BY_LEVEL, professionXpToNext, CRAFT_LEVEL_CAP } from '/shared/data/town.js';
 import { ITEM_BASES, SLOTS, STAT_LABELS } from '/shared/data/items.js';
 import { CLASSES } from '/shared/data/classes.js';
 import * as T from '/shared/town.js';
@@ -44,9 +45,9 @@ function cardHtml(p, id) {
     const total = b.upgrade.endsAt - b.upgrade.startedAt;
     status = `<div class="build-progress" data-progress-start="${b.upgrade.startedAt}" data-progress-end="${b.upgrade.endsAt}">${bar(0, 1, 'build', '')}<small>🏗 Lv ${b.upgrade.to} in ${countdown(b.upgrade.endsAt)}</small></div>`;
     void total;
-  } else if (def.kind === 'gather' && b.level > 0) {
-    const st = T.gatherStored(p, id, now());
-    status = `<small class="muted" data-gather="${id}">${Object.entries(st).map(([m, v]) => `${materialIcon(m, 'xxs')} ${Math.floor(v)}`).join(' ')} ready</small>`;
+  } else if (id === 'expedition_camp') {
+    const ex = p.expeditions || [];
+    status = `<small class="muted">${ex.length} underway${ex.some(x => x.endsAt <= now()) ? ' · <span class="up">rewards ready</span>' : ''}</small>`;
   }
   const needsWorker = def.profession && b.level > 0 && !T.worker(p, id);
   return `<button class="building-card ${ui.selected === id ? 'active' : ''} ${b.level ? '' : 'unbuilt'}" data-building="${id}">
@@ -84,15 +85,18 @@ function workerHtml(p, id) {
   const prof = PROFESSIONS[def.profession];
   const b = p.town.buildings[id];
   const w = b.worker ? p.characters[b.worker] : null;
-  const eligible = Object.values(p.characters).filter(c => !c.isMain && c.profession?.id === def.profession);
+  const eligible = Object.values(p.characters).filter(c => !c.isMain && c.profession?.id === def.profession && !(p.expeditions || []).some(x => x.charIds.includes(c.id)));
+  const inParty = c => p.parties.some(pt => pt.members.includes(c.id));
   const elsewhere = c => Object.entries(p.town.buildings).find(([bid, bb]) => bb.worker === c.id && bid !== id);
   return `<div class="worker-box">
     <h4>Worker · ${professionIcon(def.profession, 'xxs')} ${esc(prof.name)}</h4>
     ${w ? `<div class="row gap">${portrait(w, 'sm')}<div class="grow"><b>${esc(w.name)}</b> <span class="muted small">Lv ${w.level} ${esc(CLASSES[w.classId].name)}</span>
         <div class="small">${esc(prof.name)} skill <b>${w.profession.level}</b></div>${bar(w.profession.xp, professionXpToNext(w.profession.level), 'xp thin', '')}</div>
         <button class="btn tiny ghost" data-unassign="${id}">Remove</button></div>`
-      : `<p class="small ${b.level ? 'warn-text' : 'muted'}">${def.kind === 'gather' ? `No worker — producing at ${Math.round(30)}% speed.` : `A companion with ${esc(prof.name)} must work here before you can use it.`}</p>`}
-    ${eligible.length ? `<div class="row gap wrap">${eligible.filter(c => c.id !== b.worker).map(c => `<button class="btn tiny" data-assign="${id}" data-char="${c.id}" ${b.level ? '' : 'disabled'} ${elsewhere(c) ? tipAttr(`Currently working at the ${esc(BUILDINGS[elsewhere(c)[0]].name)}`) : ''}>${esc(c.name)} (${c.profession.level})${elsewhere(c) ? ' ↺' : ''}</button>`).join('')}</div>`
+      : `<p class="small ${b.level ? 'warn-text' : 'muted'}">A companion with ${esc(prof.name)} must work here before you can use it.</p>`}
+    <p class="faint small">Workers live in town: they leave your party and can't fight while assigned.</p>
+    ${eligible.length ? `<div class="row gap wrap">${eligible.filter(c => c.id !== b.worker).map(c => `<button class="btn tiny" data-assign="${id}" data-char="${c.id}" ${b.level ? '' : 'disabled'} ${elsewhere(c) ? tipAttr(`Currently working at the ${esc(BUILDINGS[elsewhere(c)[0]].name)}`) : ''}>${esc(c.name)} (${c.profession.level})${elsewhere(c) ? ' ↺' : ''}${inParty(c) ? ' ⚔' : ''}</button>`).join('')}</div>
+      ${eligible.some(inParty) ? '<p class="faint small">⚔ = currently in a party (will be removed from it)</p>' : ''}`
       : `<p class="muted small">None of your companions knows ${esc(prof.name)}. <a href="#/recruitment">Recruit one at the Inn</a> — every recruit has a profession.</p>`}
   </div>`;
 }
@@ -131,12 +135,9 @@ function specificHtml(p, id) {
       <label class="inline small" style="margin-top:8px">Auto-loot (items below your auto threshold / when inventory is full):
         <select data-autoloot><option value="sell" ${p.settings.autoLootAction !== 'salvage' ? 'selected' : ''}>Sell for gold</option><option value="salvage" ${p.settings.autoLootAction === 'salvage' ? 'selected' : ''}>Salvage into materials</option></select></label>`;
   }
-  if (def.kind === 'gather') {
-    const rate = T.gatherPerHour(p, id);
-    const st = T.gatherStored(p, id, now());
-    return `<h4>Production</h4>
-      <div class="gather-box">${Object.entries(rate).map(([m, r]) => `<div class="gather-row">${materialIcon(m, 'sm')}<div class="grow"><b data-gather-amt="${id}:${m}">${Math.floor(st[m] || 0)}</b> / ${Math.floor(r * GATHER_HOURS)} ${esc(MATERIALS[m].name)}<div class="muted small">${r.toFixed(1)} per hour</div></div></div>`).join('')}</div>
-      <button class="btn primary small" data-collect="${id}">Collect</button>`;
+  if (id === 'expedition_camp') {
+    return `<h4>Expeditions</h4><p>${(p.expeditions || []).length} of ${[0, 1, 2, 3, 4, 5][b.level]} expedition slots in use. Ore, herbs, gems and arcane materials are brought back by recruits you send out.</p>
+      <a class="btn primary small" href="#/expeditions">Open Expeditions →</a>`;
   }
   if (def.kind === 'craft') {
     const w = T.worker(p, id);
@@ -220,7 +221,7 @@ function resourcesHtml(p) {
     <div class="res-list">${MATERIAL_IDS.map(m => `<span class="res" ${tipAttr(`<b>${esc(MATERIALS[m].name)}</b><br>${esc(MATERIALS[m].description)}`)}>${materialIcon(m, 'xs')}<b>${fmt(Math.floor(p.town.materials[m] || 0))}</b></span>`).join('')}</div>
     <div class="row gap wrap">
       ${elixirs.map(([eid, exp]) => `<span class="active-elixir" ${tipAttr(esc(ELIXIRS[eid].description))}>${elixirIcon(eid, 'xxs')} ${countdown(exp)}</span>`).join('')}
-      <button class="btn small" data-collect-all>Collect all</button>
+      <a class="btn small" href="#/expeditions">🧭 Expeditions</a>
     </div>
   </div>`;
 }
@@ -239,8 +240,6 @@ export const townView = {
       if (d.upgrade) { await run(act('town_upgrade', { buildingId: d.upgrade }), 'Construction started!'); return; }
       if (d.assign) { await run(act('town_assign', { buildingId: d.assign, charId: d.char }), 'Worker assigned.'); return; }
       if (d.unassign) { await run(act('town_assign', { buildingId: d.unassign, charId: null })); return; }
-      if (d.collect) { const r = await run(act('town_collect', { buildingId: d.collect })); if (r) toast(`Collected ${Object.entries(r.got).map(([k, v]) => `${v} ${MATERIALS[k].name}`).join(', ')}`, 'success'); return; }
-      if ('collectAll' in d) { const r = await run(act('town_collect', {})); if (r) toast(`Collected ${Object.entries(r.got).map(([k, v]) => `${v} ${MATERIALS[k].name}`).join(', ')}`, 'success'); return; }
       if (d.salv) {
         const it = p.inventory.find(i => i.uid === d.salv);
         if (it?.locked) return toast('That item is locked.', 'error');
@@ -283,7 +282,7 @@ export const townView = {
       else if (t.matches('[data-enchant-stat]')) { ui.enchantStat = t.value; rerender(); }
       else if (t.matches('[data-autoloot]')) await run(act('set_settings', { autoLootAction: t.value }), 'Auto-loot updated.');
     });
-    // live countdowns, progress bars and gathering counters
+    // live countdowns and progress bars
     timer = setInterval(() => {
       const p = state.player;
       if (!p?.town) return;
@@ -293,10 +292,6 @@ export const townView = {
         const f = el.querySelector('.fill');
         if (f) f.style.width = `${Math.min(100, ((now() - s) / Math.max(1, en - s)) * 100)}%`;
       });
-      root.querySelectorAll('[data-gather-amt]').forEach(el => {
-        const [bid, m] = el.dataset.gatherAmt.split(':');
-        el.textContent = Math.floor(T.gatherStored(p, bid, now())[m] || 0);
-      });
     }, 1000);
   },
   unmount() { clearInterval(timer); },
@@ -305,7 +300,6 @@ export const townView = {
     if (!p?.town) return;
     const groups = [
       ['Core', BUILDING_IDS.filter(id => BUILDINGS[id].kind === 'core')],
-      ['Gathering', BUILDING_IDS.filter(id => BUILDINGS[id].kind === 'gather')],
       ['Crafting', BUILDING_IDS.filter(id => BUILDINGS[id].kind === 'craft')],
       ['Arcane', BUILDING_IDS.filter(id => BUILDINGS[id].kind === 'special')],
     ];

@@ -5,9 +5,9 @@ export const MATERIALS = {
   metal_scrap:     { name: 'Metal Scrap',     glyph: '⛓', color: '#8a9099', description: 'Salvaged from weapons, plate armor and shields.' },
   leather_scrap:   { name: 'Leather Scrap',   glyph: '🟫', color: '#9a6a3a', description: 'Salvaged from leather armor, bows and quivers.' },
   cloth_scrap:     { name: 'Cloth Scrap',     glyph: '🧵', color: '#a88ac2', description: 'Salvaged from cloth armor, staves, wands and tomes.' },
-  gem_fragment:    { name: 'Gem Fragment',    glyph: '💎', color: '#5ac8d8', description: 'Salvaged from jewelry; also found in the Mine.' },
-  ore:             { name: 'Ore',             glyph: '⛏', color: '#b07a4a', description: 'Mined in the town Mine.' },
-  herb:            { name: 'Herb',            glyph: '🌿', color: '#5fbf5a', description: 'Grown in the Herb Garden.' },
+  gem_fragment:    { name: 'Gem Fragment',    glyph: '💎', color: '#5ac8d8', description: 'Salvaged from jewelry; also brought back from expeditions.' },
+  ore:             { name: 'Ore',             glyph: '⛏', color: '#b07a4a', description: 'Brought back by recruits on mining expeditions.' },
+  herb:            { name: 'Herb',            glyph: '🌿', color: '#5fbf5a', description: 'Gathered by recruits on herb expeditions.' },
   arcane_dust:     { name: 'Arcane Dust',     glyph: '✨', color: '#c9b8ff', description: 'Disenchanted from Uncommon or better items.' },
   magic_essence:   { name: 'Magic Essence',   glyph: '🔮', color: '#6ea4ff', description: 'Disenchanted from Rare or better items.' },
   prismatic_shard: { name: 'Prismatic Shard', glyph: '🔷', color: '#c98aff', description: 'Disenchanted from Epic or better items.' },
@@ -22,8 +22,8 @@ export const PROFESSIONS = {
   jewelcrafting:  { name: 'Jewelcrafting',  glyph: '💍', building: 'jeweler' },
   enchanting:     { name: 'Enchanting',     glyph: '✨', building: 'enchanter' },
   alchemy:        { name: 'Alchemy',        glyph: '⚗', building: 'alchemy_lab' },
-  mining:         { name: 'Mining',         glyph: '⛏', building: 'mine' },
-  herbalism:      { name: 'Herbalism',      glyph: '🌿', building: 'herb_garden' },
+  mining:         { name: 'Mining',         glyph: '⛏', building: null, expedition: true },
+  herbalism:      { name: 'Herbalism',      glyph: '🌿', building: null, expedition: true },
 };
 export const PROFESSION_IDS = Object.keys(PROFESSIONS);
 export const PROFESSION_MAX = 50;
@@ -65,19 +65,11 @@ export const BUILDINGS = {
     cost: { gold: 150, metal_scrap: 6, leather_scrap: 4 },
     effects: L => [`+${Math.round(SALVAGE_BONUS[L] * 100)}% salvage yield`, 'Enchanter worker: +25% arcane materials'],
   },
-  mine: {
-    name: 'Mine', kind: 'gather', profession: 'mining', maxLevel: 5, start: 0,
-    description: 'Produces Ore and Gem Fragments over time. A worker with Mining greatly speeds it up.',
-    cost: { gold: 200, metal_scrap: 10, leather_scrap: 6 },
-    produces: { ore: 1, gem_fragment: 0.25 },
-    effects: L => [`${GATHER_RATE[L]} Ore per hour (with worker)`, `Stores up to ${GATHER_HOURS} hours of output`],
-  },
-  herb_garden: {
-    name: 'Herb Garden', kind: 'gather', profession: 'herbalism', maxLevel: 5, start: 0,
-    description: 'Grows Herbs for alchemy. A worker with Herbalism greatly speeds it up.',
-    cost: { gold: 200, leather_scrap: 8, cloth_scrap: 8 },
-    produces: { herb: 1 },
-    effects: L => [`${GATHER_RATE[L]} Herbs per hour (with worker)`, `Stores up to ${GATHER_HOURS} hours of output`],
+  expedition_camp: {
+    name: 'Expedition Camp', kind: 'core', maxLevel: 5, start: 1,
+    description: 'Send recruits out to gather ore, herbs, gems and arcane materials. Recruits on an expedition cannot fight or work.',
+    cost: { gold: 200, leather_scrap: 8, metal_scrap: 6 },
+    effects: L => [`${[0, 1, 2, 3, 4, 5][L]} expedition${L > 1 ? 's' : ''} at a time`, `Up to ${[0, 1, 2, 2, 3, 3][L]} recruit${[0, 1, 2, 2, 3, 3][L] > 1 ? 's' : ''} per expedition`, 'Unlocks farther destinations'],
   },
   blacksmith: {
     name: 'Blacksmith', kind: 'craft', profession: 'blacksmithing', type: 'metal', maxLevel: 5, start: 0,
@@ -121,9 +113,6 @@ export const BUILDING_IDS = Object.keys(BUILDINGS);
 export const INN_ROSTER = [0, 3, 5, 7, 9, 12];
 export const INN_OFFERS = [0, 3, 4, 4, 5, 6];
 export const SALVAGE_BONUS = [0, 0, 0.1, 0.2, 0.35, 0.5];
-export const GATHER_RATE = [0, 10, 16, 24, 34, 46];   // per hour with a worker
-export const GATHER_NO_WORKER = 0.3;                 // fraction of the rate without a worker
-export const GATHER_HOURS = 10;                      // storage cap in hours of production
 export const CRAFT_LEVEL_CAP = [0, 12, 24, 36, 48, 60];
 export const concurrentBuilds = L => [0, 1, 1, 2, 2, 3][L] || 1;
 
