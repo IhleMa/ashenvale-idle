@@ -11,6 +11,7 @@ import { createRng, randomSeed } from '../shared/rng.js';
 import { SETTING_DEFS } from './settings.js';
 import { GameError, hero, sendMail } from './playerLogic.js';
 import { setPassword } from './auth.js';
+import { ContentError } from './content-admin.js';
 
 const fail = m => { throw new GameError(m); };
 
@@ -66,7 +67,40 @@ export function adminActions(game) {
     for (const ws of s.sockets) { game.send(ws, { t: 'toast', text: reason, kind: 'error' }); ws.close(4001, reason.slice(0, 100)); }
   };
 
+  // ---- content editor (server/content-admin.js); errors carry the validator's messages
+  const content = () => game.content || fail('The content editor is not available');
+  const contentCall = fn => {
+    try { return fn(); } catch (e) {
+      if (e instanceof ContentError) { const g = new GameError(e.message); g.details = e.errors; throw g; }
+      throw e;
+    }
+  };
+  const str = (v, what) => { const x = String(v ?? '').trim(); if (!x) fail(`Missing ${what}`); return x; };
+
   return {
+    admin_content_index() { return contentCall(() => content().index()); },
+    admin_content_list(s, d) { return contentCall(() => content().list(str(d.type, 'type'))); },
+    admin_content_get(s, d) { return contentCall(() => content().get(str(d.type, 'type'), str(d.id, 'id'))); },
+    admin_content_save(s, d) {
+      const r = contentCall(() => content().save(str(d.type, 'type'), str(d.id, 'id'), d.data));
+      admins.audit(s.player.name, 'content_save', `${d.type}/${d.id}`, r.files.join(', '));
+      return r;
+    },
+    admin_content_create(s, d) {
+      const r = contentCall(() => content().create(str(d.type, 'type'), str(d.id, 'id'), { from: d.from || null }));
+      admins.audit(s.player.name, 'content_create', `${d.type}/${d.id}`, d.from ? `copy of ${d.from}` : '');
+      return r;
+    },
+    admin_content_delete(s, d) {
+      const r = contentCall(() => content().delete(str(d.type, 'type'), str(d.id, 'id'), { force: !!d.force }));
+      if (!r.needsConfirm) admins.audit(s.player.name, 'content_delete', `${d.type}/${d.id}`, '');
+      return r;
+    },
+    admin_content_reset(s, d) {
+      const r = contentCall(() => content().reset(str(d.type, 'type'), str(d.id, 'id')));
+      admins.audit(s.player.name, 'content_reset', `${d.type}/${d.id}`, '');
+      return r;
+    },
     // ---- bot players
     admin_bots() {
       const b = game.bots || fail('Bots are not available');

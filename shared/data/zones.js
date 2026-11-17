@@ -1,5 +1,5 @@
 // Zones and co-op encounters — defined in content/zones.json.
-import { CONTENT, withIds } from '../content.js';
+import { CONTENT, withIds, onContentReload } from '../content.js';
 
 export const ZONES = withIds(CONTENT.zones.zones);
 
@@ -10,3 +10,4 @@ export function bossWave(zone) {
 
 // Co-op encounters. waves: arrays of enemy ids fought in sequence (HP carries over between waves).
 export const COOP_ENCOUNTERS = withIds(CONTENT.zones.coopEncounters);
+onContentReload(() => { withIds(ZONES); withIds(COOP_ENCOUNTERS); });

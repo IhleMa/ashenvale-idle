@@ -1,15 +1,18 @@
 // Town data — materials, professions, buildings, crafting, enchanting and alchemy.
 // Everything is defined in content/town.json; this module only adds derived values.
-import { CONTENT, withIds } from '../content.js';
+import { CONTENT, withIds, onContentReload, refillArray, refillObject } from '../content.js';
 import { ITEM_BASES } from './items.js';
 
 const T = CONTENT.town;
 
 export const MATERIALS = T.materials;
 // Stat shards: every stat on a salvaged item turns into shards of that stat; the Jeweler cuts them into gems (shared/gems.js)
-for (const { stat, label, color } of T.shardStats) {
-  MATERIALS[`shard_${stat}`] = { name: `${label} Shard`, glyph: '◆', color, group: 'shard', stat, description: `Salvaged from items with ${label}. The Jeweler cuts these into gems.` };
+function addShards() {
+  for (const { stat, label, color } of T.shardStats) {
+    MATERIALS[`shard_${stat}`] = { name: `${label} Shard`, glyph: '◆', color, group: 'shard', stat, description: `Salvaged from items with ${label}. The Jeweler cuts these into gems.` };
+  }
 }
+addShards();
 export const MATERIAL_IDS = Object.keys(MATERIALS);
 
 export const PROFESSIONS = withIds(T.professions);
@@ -18,7 +21,8 @@ export const PROFESSION_MAX = T.professionMax;
 export const professionXpToNext = lvl => T.professionXp.base + lvl * T.professionXp.perLevel;
 
 // Which material an item base is made of (salvage output + which crafting building handles it): "material" on each base
-export const ITEM_MATERIAL = Object.fromEntries(Object.entries(ITEM_BASES).map(([id, b]) => [id, b.material || 'metal']));
+const itemMaterials = () => Object.fromEntries(Object.entries(ITEM_BASES).map(([id, b]) => [id, b.material || 'metal']));
+export const ITEM_MATERIAL = itemMaterials();
 export const MATERIAL_OF_TYPE = T.materialOfType;
 export const CRAFT_BUILDING_OF_TYPE = T.craftBuildingOfType;
 
@@ -28,6 +32,13 @@ export const BUILD_TIME = T.buildTime;
 // kind: 'core' | 'craft' | 'gather' | 'special' — see shared/town.js for cost formulas
 export const BUILDINGS = withIds(T.buildings);
 export const BUILDING_IDS = Object.keys(BUILDINGS);
+onContentReload(() => {
+  addShards();
+  refillArray(MATERIAL_IDS, Object.keys(MATERIALS));
+  withIds(PROFESSIONS); refillArray(PROFESSION_IDS, Object.keys(PROFESSIONS));
+  refillObject(ITEM_MATERIAL, itemMaterials());
+  withIds(BUILDINGS); refillArray(BUILDING_IDS, Object.keys(BUILDINGS));
+});
 
 export const INN_ROSTER = T.innRoster;
 export const INN_OFFERS = T.innOffers;

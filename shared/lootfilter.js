@@ -3,7 +3,7 @@
 import { CONFIG, rarityIndex } from './config.js';
 import { SLOTS, AFFIXES, canEquip } from './data/items.js';
 import { computeStats, powerRating } from './stats.js';
-import { CONTENT } from './content.js';
+import { CONTENT, onContentReload, refillArray } from './content.js';
 
 export const FILTER_ACTIONS = {
   keep: { label: 'Keep', icon: '✋' },
@@ -12,6 +12,7 @@ export const FILTER_ACTIONS = {
 };
 export const MAX_RULES = CONTENT.lootfilter.maxRules;
 export const FILTER_STATS = Object.keys(AFFIXES);
+onContentReload(() => refillArray(FILTER_STATS, Object.keys(AFFIXES)));
 
 export function defaultFilter() {
   return { enabled: false, protectUpgrades: true, rules: [] };

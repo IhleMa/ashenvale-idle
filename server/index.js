@@ -7,8 +7,9 @@ import { WebSocketServer } from 'ws';
 import { Store } from './store.js';
 import { AssetIndex } from './assets.js';
 import { Game } from './game.js';
-import { CONTENT } from '../shared/content.js';
+import { CONTENT, replaceContent } from '../shared/content.js';
 import { validateContent } from './content-check.js';
+import { ContentManager } from './content-admin.js';
 import { BotManager, ARCHETYPES } from './bots.js';
 import { computeBuildId } from './version.js';
 import { Settings } from './settings.js';
@@ -45,11 +46,21 @@ const admins = new AdminManager(store, process.env.ADMIN_USERS || '');
   }
   if (CONTENT._meta.overrides.length) log(`Content overrides loaded from ${CONTENT._meta.overrideDir}: ${CONTENT._meta.overrides.join(', ')}`);
 }
-const contentJson = JSON.stringify(CONTENT);
+let contentJson = JSON.stringify(CONTENT);
 const buildId = () => `${computeBuildId(ROOT).slice(0, 8)}${CONTENT._meta.hash.slice(0, 4)}`;
 const game = new Game({ store, assets, log, settings, admins, buildId: buildId() });
 const bots = new BotManager(game, { log });
 game.bots = bots;
+// ---- admin content editor: changes are saved as overrides and applied live
+function applyContent(fresh) {
+  replaceContent(fresh);
+  contentJson = JSON.stringify(CONTENT);
+  game.buildId = buildId();
+  // open pages fetch the new content and redraw — no reload needed
+  game.broadcast({ t: 'content_update', buildId: game.buildId, hash: CONTENT._meta.hash });
+  log(`Content updated live (${CONTENT._meta.hash}).`);
+}
+game.content = new ContentManager({ apply: applyContent, usage: id => store.countPlayersMentioning(id) });
 game.loadGroups();
 const authLimiter = new RateLimiter(20, 60_000);
 
@@ -275,9 +286,9 @@ async function runUpdate() {
 }
 
 const COMMANDS = {
-  help: () => log('Commands: update | reload-clients | players | say <message> | admin add|remove|list <name> | bots [add <n> [type] | remove <name|all> | on | off] | content | backup | db | stop'),
-  content: async () => {
-    // re-read the content files from disk and check them (applied on the next restart)
+  help: () => log('Commands: update | reload-clients | players | say <message> | admin add|remove|list <name> | bots [add <n> [type] | remove <name|all> | on | off] | content [reload] | backup | db | stop'),
+  content: async args => {
+    // "content" checks the files on disk; "content reload" also switches the running server to them
     try {
       const { loadContentFromDisk } = await import('./content-loader.js');
       const fresh = loadContentFromDisk();
@@ -285,7 +296,13 @@ const COMMANDS = {
       for (const w of warnings) log(`  ! ${w}`);
       for (const e of errors) log(`  ✘ ${e}`);
       const changed = fresh._meta.hash !== CONTENT._meta.hash;
-      log(errors.length ? `Content has ${errors.length} error(s) — the server would refuse to start with it.` : `Content OK${changed ? ' — it differs from the running version: restart the server to apply it.' : ' (same as the running version).'}`);
+      if (args.trim() === 'reload') {
+        if (errors.length) return log(`Not reloaded — content has ${errors.length} error(s).`);
+        if (!changed) return log('Content is unchanged.');
+        game.content.refresh();
+        return applyContent(fresh);
+      }
+      log(errors.length ? `Content has ${errors.length} error(s) — the server would refuse to start with it.` : `Content OK${changed ? ' — it differs from the running version: type "content reload" to apply it now.' : ' (same as the running version).'}`);
     } catch (e) { log(`Content could not be loaded: ${e.message}`); }
   },
   bots: args => {

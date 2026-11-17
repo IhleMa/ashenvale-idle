@@ -6,15 +6,16 @@
 import { AFFIXES, PCT_STATS, SLOTS, maxSockets, rollSockets } from './data/items.js';
 import { rarityIndex } from './config.js';
 
-import { CONTENT } from './content.js';
+import { CONTENT, onContentReload, refillArray } from './content.js';
 
 const G = CONTENT.gems;
 export const GEM_STATS = Object.keys(AFFIXES);
 export const GEM_KINDS = G.kinds;                 // one gem per stat
 export const GEM_TIERS = [null, ...G.tiers];      // index = tier (1-based)
-export const MAX_GEM_TIER = GEM_TIERS.length - 1;
+export let MAX_GEM_TIER = GEM_TIERS.length - 1;
 export const GEM_VALUE_FACTOR = G.valueFactor;
 export const GEM_CONFIG = G.config;
+onContentReload(() => { refillArray(GEM_STATS, Object.keys(AFFIXES)); refillArray(GEM_TIERS, [null, ...G.tiers]); MAX_GEM_TIER = GEM_TIERS.length - 1; });
 
 // { base, perLevel, perLevels, perItemLevel, perItemLevels } → number
 const scaled = (v, level = 0) => (typeof v === 'number' ? v : (v.base || 0) + (v.perItemLevel || 0) * level + (v.perItemLevels ? Math.floor(level / v.perItemLevels) : 0));

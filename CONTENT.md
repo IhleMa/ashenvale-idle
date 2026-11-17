@@ -53,12 +53,13 @@ Rules:
 | Survives `update` (git pull) | Only if you commit your changes, otherwise the pull conflicts | **Yes**: the folder is outside the repository |
 | Best for | Developing the game, bigger additions | Server owners tweaking or adding content on Pterodactyl |
 
-`data/content/` uses **the same layout**. On Pterodactyl it's `data/content/` in the File Manager; create the folders you need.
+The easiest way to make overrides is the **in-game editor: Admin → 📦 Content** (see below). It writes exactly these files for you. You can also write them by hand: `data/content/` uses **the same layout**. On Pterodactyl it's `data/content/` in the File Manager; create the folders you need.
 
 - **Change an entry:** create a file with the same id that contains only what changes. It's merged into the original: objects key by key, while lists and values replace. The subfolder doesn't matter.
 - **Add an entry:** create a new file with a new id, written in full.
 - **Remove an entry:** create a file with the same id that contains just `null`.
 - **Settings:** `data/content/config.json`, `data/content/items/_settings.json`, … are merged the same way. A whole-system file like `data/content/items.json` (`{ "bases": { … }, "naming": { … } }`) works too.
+- **Setting a value to `null`:** since `null` means "remove this key", an object containing `"$replace": true` replaces the original object instead of being merged into it, e.g. `{ "$replace": true, "name": "Ring", "slot": "ring", "classes": null, … }`. The editor uses this automatically when needed.
 
 ```jsonc
 // data/content/config.json — level 70 cap and a bigger inventory
@@ -70,6 +71,22 @@ Rules:
 // data/content/items/dagger.json — remove the dagger (the validator reports anything that still uses it)
 null
 ```
+
+## Editing in the admin panel (📦 Content)
+
+Admins find a content editor under **Admin → 📦 Content**:
+
+- **Left:** every kind of content (classes, abilities, items, uniques, sets, gems, enemies, zones, rift affixes, town, quests, achievements, bots …) plus **Settings & tables** (the `_settings.json` of each system and `config.json`). A yellow number shows how many entries are changed on this server.
+- **Middle:** the entries, grouped by subfolder, with search and an "only changed" filter. Badges: **Modified** (changed on this server), **New** (added on this server), **Removed** (hidden on this server). No badge means unchanged.
+- **Right:** the entry as a **form**: text, numbers, yes/no switches, lists (add, remove, reorder, duplicate), nested groups (collapse, add/remove fields) and suggestions for ids (statuses, enemies, item bases, abilities, zones, stats, rarities, …) and for values used elsewhere (`kind`, `target`, `school` …). **{ } JSON** edits the raw data. **Δ Changes** shows the unsaved changes, what differs from the original, and the override file that is stored.
+- **💾 Save** (Ctrl+S) checks the whole content first. If the change would break something, nothing is saved and you see the problems (e.g. `zones/frostpeak.json → boss: unknown enemy "frost_queen"`). Otherwise it is **live right away**: the server switches to the new content and every open game page loads it without reloading.
+- **+ New / ⧉ Duplicate** create an entry as a copy of another (or empty). Copying a **class** also copies its abilities (as `<newclass>_<ability>`) and its skill tree, so the class is playable at once.
+- **🗑 Remove** hides an original entry (you can **↺ Restore** it) or deletes one you created. Removing a class also removes its abilities and skill tree. If player saves mention the id (items, characters, progress), you're warned first, because removing things players own can break their saves.
+- **↺ Reset to original** throws away all changes to an entry.
+
+Everything is stored as minimal override files in `data/content/` (an edited entry only stores the fields that differ), so `update` never touches your changes and the files stay readable if you want to copy them into `content/` later. Every change is in the admin audit log.
+
+The console command `content` checks the files on disk; `content reload` also applies them to the running server (useful after editing override files by hand). A few low-level numbers that are read once at start (for example `combat.tickMs`) still need a restart.
 
 ## What's in each part
 

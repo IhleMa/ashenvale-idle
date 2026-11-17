@@ -13,8 +13,62 @@ if (typeof window === 'undefined' && typeof process !== 'undefined' && process.v
 }
 export const CONTENT = content;
 
+// helpers for derived values that must be refreshed on live reload
+export const refillArray = (arr, list) => { arr.length = 0; arr.push(...list); return arr; };
+export const refillObject = (obj, src) => { for (const k of Object.keys(obj)) delete obj[k]; Object.assign(obj, src); return obj; };
+
 // collections keyed by id also carry their id inside each entry
 export function withIds(obj) {
   for (const [id, v] of Object.entries(obj || {})) if (v && typeof v === 'object') v.id = id;
   return obj;
+}
+
+// ---------------------------------------------------------------- live reload (server)
+// The admin content editor changes content while the server runs. replaceContent() updates CONTENT in
+// place — every object keeps its identity, so modules holding references see the new data — and then
+// runs the refresh hooks that recompute derived values (id lists, lookup tables, caches).
+const reloadHooks = [];
+export function onContentReload(fn) { reloadHooks.push(fn); }
+
+const isPlain = v => v !== null && typeof v === 'object' && !Array.isArray(v);
+function syncInPlace(target, src) {
+  if (Array.isArray(target) && Array.isArray(src)) {
+    target.length = 0;
+    for (const v of src) target.push(v);
+    return target;
+  }
+  for (const k of Object.keys(target)) if (!(k in src)) delete target[k];
+  for (const [k, v] of Object.entries(src)) {
+    const cur = target[k];
+    if ((isPlain(cur) && isPlain(v)) || (Array.isArray(cur) && Array.isArray(v))) syncInPlace(cur, v);
+    else target[k] = v;
+  }
+  return target;
+}
+
+export function replaceContent(fresh) {
+  // collections whose entries carry their id (set by withIds in the data modules) keep doing so
+  const hadIds = [];
+  for (const [system, sys] of Object.entries(content)) {
+    if (!isPlain(sys)) continue;
+    for (const [k, coll] of Object.entries(sys)) {
+      if (isPlain(coll) && Object.entries(coll).some(([id, v]) => isPlain(v) && v.id === id)) hadIds.push([system, k]);
+    }
+  }
+  // keep the key order of fresh collections (it is the display order)
+  for (const system of Object.keys(fresh)) {
+    if (!isPlain(content[system])) content[system] = {};
+    syncInPlace(content[system], fresh[system]);
+    for (const [k, v] of Object.entries(fresh[system])) {
+      if (isPlain(v) && isPlain(content[system][k])) {
+        const obj = content[system][k];
+        const entries = Object.keys(v).map(id => [id, obj[id]]);
+        for (const id of Object.keys(obj)) delete obj[id];
+        for (const [id, val] of entries) obj[id] = val;
+      }
+    }
+  }
+  for (const [system, k] of hadIds) if (isPlain(content[system]?.[k])) withIds(content[system][k]);
+  if (fresh._meta) Object.defineProperty(content, '_meta', { value: fresh._meta, enumerable: false, configurable: true });
+  for (const fn of reloadHooks) fn();
 }

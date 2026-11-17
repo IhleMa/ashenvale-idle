@@ -95,8 +95,8 @@ export function validateContent(C) {
     if (!obj(`${w}.scaling`, c.scaling)) continue;
     if (!c.resource?.id) err(`${w}.resource`, 'needs { id, name, max, start, regen }');
     if (!c.basicAttack?.stat) err(`${w}.basicAttack`, 'needs { name, stat, power, school }');
-    if (!Object.values(abilities).some(a => a.classId === id)) err(w, 'has no abilities (add some with "classId" in abilities.json)');
-    if (!C.skilltree?.specs?.[id]) err(w, 'has no skill tree (add a spec in skilltree.json → specs)');
+    if (!Object.values(abilities).some(a => a.classId === id)) err(w, `has no abilities (add abilities with "classId": "${id}" in content/abilities/)`);
+    if (!C.skilltree?.specs?.[id]) err(w, `has no skill tree (add content/skilltree/${id}.json)`);
   }
   for (const [id, t] of Object.entries(C.classes?.traits || {})) { str(`classes.traits.${id}.name`, t.name); obj(`classes.traits.${id}.bonus`, t.bonus); }
 

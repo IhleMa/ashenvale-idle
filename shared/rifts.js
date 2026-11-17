@@ -8,7 +8,7 @@ import { ZONES } from './data/zones.js';
 import { ENEMIES } from './data/enemies.js';
 import { createRng } from './rng.js';
 import { CONFIG } from './config.js';
-import { CONTENT } from './content.js';
+import { CONTENT, onContentReload } from './content.js';
 
 const DT = CONFIG.combat.tickMs / 1000;
 
@@ -26,6 +26,7 @@ export const RIFT = RF.config;
 //   periodic          { every, target: randomHero|allHeroes, status?, duration?, pctMaxHp?, damagePctMaxHp?, school?, message? }
 export const AFFIXES = RF.affixes;
 for (const [id, a] of Object.entries(AFFIXES)) a.id = id;
+onContentReload(() => { for (const [id, a] of Object.entries(AFFIXES)) a.id = id; });
 
 const whoMatches = (who, u) => !who || who === 'all' || (who === 'boss' ? !!u.boss : !u.boss);
 const fill = (text, u) => String(text || '').replace('{name}', u?.name || '');

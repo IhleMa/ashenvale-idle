@@ -14,7 +14,7 @@
 //   damagePct, healingPct, damageTakenPct (combat)  ·  rank: { abilityId: +ranks }
 import { ABILITIES } from './abilities.js';
 
-import { CONTENT } from '../content.js';
+import { CONTENT, onContentReload } from '../content.js';
 
 export const TREE_CONFIG = CONTENT.skilltree.config;
 export const TREE_SPECS = CONTENT.skilltree.specs;
@@ -22,6 +22,7 @@ const ATTR_NAMES = CONTENT.skilltree.attributeNames;
 
 // --------------------------------------------------------------------------- generator
 const cache = new Map();
+onContentReload(() => cache.clear());
 
 export function getTree(classId) {
   if (cache.has(classId)) return cache.get(classId);

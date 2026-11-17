@@ -2,7 +2,7 @@
 // Item images are looked up by base id (assets/items/<baseId>.png) and optionally by rarity
 // (assets/items/<baseId>_<rarity>.png) — see public/assets/README.md.
 import { CONFIG, rarityIndex, rarityById } from '../config.js';
-import { CONTENT, withIds } from '../content.js';
+import { CONTENT, withIds, onContentReload, refillArray, refillObject } from '../content.js';
 
 const I = CONTENT.items;
 export const SLOTS = I.slots;
@@ -19,6 +19,12 @@ export const STAT_LABELS = {
   ...I.extraStatLabels,
 };
 export const PCT_STATS = new Set(I.pctStats);
+onContentReload(() => {
+  withIds(ITEM_BASES);
+  refillArray(SLOT_IDS, Object.keys(SLOTS));
+  refillObject(STAT_LABELS, { ...Object.fromEntries(Object.entries(AFFIXES).map(([k, v]) => [k, v.label])), ...I.extraStatLabels });
+  PCT_STATS.clear(); for (const s of I.pctStats) PCT_STATS.add(s);
+});
 
 export function itemSellValue(item) {
   const v = I.sellValue;

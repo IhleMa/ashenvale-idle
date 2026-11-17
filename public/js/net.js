@@ -34,7 +34,7 @@ export function connect() {
     if (msg.t === 'server_restart') { restartingUntil = Date.now() + 180_000; reconnectDelay = 1000; }
     if (msg.t === 'result') {
       const p = pending.get(msg.id);
-      if (p) { pending.delete(msg.id); msg.ok ? p.resolve(msg.result) : p.reject(new Error(msg.error)); }
+      if (p) { pending.delete(msg.id); msg.ok ? p.resolve(msg.result) : p.reject(Object.assign(new Error(msg.error), { details: msg.details || null })); }
       return;
     }
     bus.emit('msg:' + msg.t, msg);

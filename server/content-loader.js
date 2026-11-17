@@ -8,7 +8,8 @@
 // Overrides (survive "update"): the same layout under data/content/. An entry file there is merged into
 // the entry with the same id (or adds a new one); a file containing just  null  removes the entry.
 // A whole-system file like data/content/config.json or data/content/items.json is merged too.
-// Merge rules: objects merge key by key, lists and values replace, null removes a key.
+// Merge rules: objects merge key by key, lists and values replace, null removes a key,
+// an object with "$replace": true replaces instead of merging.
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -58,7 +59,10 @@ export function overrideDir() {
   return path.join(path.resolve(ROOT, process.env.DATA_DIR || 'data'), 'content');
 }
 
+// "$replace": true in an override object replaces that object instead of merging into it
+// (used by the admin content editor when a value is set to null, which would otherwise mean "remove")
 export function deepMerge(base, over) {
+  if (over && typeof over === 'object' && !Array.isArray(over) && over.$replace) { const { $replace, ...rest } = over; return rest; }
   if (over === null || typeof over !== 'object' || Array.isArray(over) || base === null || typeof base !== 'object' || Array.isArray(base)) return over;
   const out = { ...base };
   for (const [k, v] of Object.entries(over)) {
@@ -80,7 +84,7 @@ function readJson(file) {
 }
 
 // all entry files of a collection folder (recursive, skipping "_" files and README etc.)
-function entryFiles(dir) {
+export function entryFiles(dir) {
   const out = [];
   const walk = d => {
     let list = [];
@@ -118,7 +122,7 @@ function sortEntries(obj) {
   return Object.fromEntries(list);
 }
 
-export function loadContentFromDisk() {
+export function loadContentFromDisk({ overrides: useOverrides = true } = {}) {
   const content = {};
   const files = {};       // "system.key.id" or "system" → file (for error messages)
   const overrides = [];
@@ -142,7 +146,7 @@ export function loadContentFromDisk() {
   }
 
   // overrides
-  if (fs.existsSync(odir)) {
+  if (useOverrides && fs.existsSync(odir)) {
     for (const [system, rel] of Object.entries(SETTINGS_FILES)) {
       const file = path.join(odir, rel);
       if (fs.existsSync(file)) { content[system] = deepMerge(content[system], stripAbout(readJson(file))); overrides.push(rel); }
@@ -153,7 +157,7 @@ export function loadContentFromDisk() {
       for (const [id, { file, data }] of readCollection(dir, { allowNull: true })) {
         const coll = content[system][key];
         if (data === null) delete coll[id];
-        else { coll[id] = id in coll ? deepMerge(coll[id], data) : data; files[`${system}.${key}.${id}`] = shown(file); }
+        else { coll[id] = id in coll ? deepMerge(coll[id], data) : deepMerge(undefined, data); files[`${system}.${key}.${id}`] = shown(file); }
         overrides.push(path.relative(odir, file));
       }
     }
@@ -168,6 +172,6 @@ export function loadContentFromDisk() {
   for (const [system, key] of COLLECTIONS) content[system][key] = sortEntries(content[system][key] || {});
 
   const hash = crypto.createHash('sha1').update(JSON.stringify(content)).digest('hex').slice(0, 12);
-  Object.defineProperty(content, '_meta', { value: { hash, overrides, overrideDir: odir, files }, enumerable: false });
+  Object.defineProperty(content, '_meta', { value: { hash, overrides, overrideDir: odir, files }, enumerable: false, configurable: true });
   return content;
 }

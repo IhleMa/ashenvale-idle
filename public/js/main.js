@@ -6,6 +6,7 @@ import { esc, fmt, toast, modal, initTooltips, duration, bar } from './ui.js';
 import { xpToNext } from '/shared/config.js';
 import { initPwa } from './pwa.js';
 import { CLASSES } from '/shared/data/classes.js';
+import { replaceContent } from '/shared/content.js';
 import { hasAbilityAction } from '/shared/character.js';
 import { combatView } from './views/combat.js';
 import { characterView } from './views/character.js';
@@ -179,6 +180,18 @@ bus.on('msg:welcome', m => {
   if (m.motd && !motdShown) { motdShown = true; modal(`<h2>📜 Message of the day</h2><p class="motd">${esc(m.motd)}</p><div class="row end"><button class="btn primary" data-close>OK</button></div>`); }
   if (buildId && m.buildId && m.buildId !== buildId) return reloadSoon('The game was updated — refreshing…');
   buildId = m.buildId;
+});
+// an admin changed game content: fetch it and redraw — no page reload
+bus.on('msg:content_update', async m => {
+  try {
+    const res = await fetch('/api/content', { cache: 'no-cache' });
+    if (!res.ok) throw new Error(res.status);
+    replaceContent(await res.json());
+    buildId = m.buildId || buildId;
+    bus.emit('content:updated', m);
+    renderTopbar();
+    requestRender();
+  } catch { reloadSoon('The game content was updated — refreshing…'); }
 });
 bus.on('msg:client_update', m => {
   if (m.force || (m.buildId && m.buildId !== buildId)) reloadSoon('A new version of the game is available — refreshing…');

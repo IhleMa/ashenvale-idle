@@ -125,6 +125,14 @@ export class Store {
     this.dirtyDocs.clear();
   }
 
+  // how many saved players mention this string as a JSON value (used to warn before removing content)
+  countPlayersMentioning(id) {
+    this.flush();
+    const esc = String(id).replace(/[\\%_]/g, c => '\\' + c);
+    if (!this.q.countMention) this.q.countMention = this.db.prepare("SELECT COUNT(*) AS n FROM players WHERE data LIKE ? ESCAPE '\\'");
+    return this.q.countMention.get(`%"${esc}"%`).n;
+  }
+
   deleteAccount(acc) {
     const key = acc.username.toLowerCase();
     delete this.accounts[key];

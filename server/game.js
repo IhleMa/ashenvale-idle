@@ -201,7 +201,7 @@ export class Game {
       this.flushState(s);
     } catch (e) {
       if (!(e instanceof GameError)) this.log('Action error', msg.type, e);
-      this.send(ws, { t: 'result', id: msg.id, ok: false, error: e instanceof GameError ? e.message : 'Server error' });
+      this.send(ws, { t: 'result', id: msg.id, ok: false, error: e instanceof GameError ? e.message : 'Server error', ...(e instanceof GameError && e.details ? { details: e.details } : {}) });
     }
   }
 

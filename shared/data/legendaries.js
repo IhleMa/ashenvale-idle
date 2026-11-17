@@ -12,12 +12,13 @@
 // Images: assets/items/unique_<id>.png and assets/items/set_<setId>_<baseId>.png (fall back to the base item image)
 import { generateItem, ITEM_BASES, AFFIXES } from './items.js';
 
-import { CONTENT, withIds } from '../content.js';
+import { CONTENT, withIds, onContentReload } from '../content.js';
 
 const LG = CONTENT.legendaries;
 export const UNIQUES = withIds(LG.uniques);
 export const SETS = withIds(LG.sets);
 export const DROP_CHANCE = LG.dropChance;
+onContentReload(() => { withIds(UNIQUES); withIds(SETS); });
 
 // ---------------------------------------------------------------- generation
 export function generateUnique(rng, level, uniqueId = null) {
