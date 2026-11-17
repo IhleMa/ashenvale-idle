@@ -1,0 +1,17 @@
+{
+  "name": "Dirty Stab",
+  "classId": "enemy",
+  "type": "damage",
+  "cost": 0,
+  "cooldown": 5,
+  "target": "enemy",
+  "effects": [{ "kind": "damage", "stat": "physPower", "power": 1.5, "school": "physical" }],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [{ "type": "always" }],
+    "target": { "selector": "enemy_lowest_hp_pct" },
+    "targetConditions": []
+  },
+  "order": 380
+}

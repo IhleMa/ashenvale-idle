@@ -1,0 +1,10 @@
+{
+  "name": "Magma Golem",
+  "tags": ["elemental", "minion"],
+  "stats": { "hp": 210, "physPower": 15, "magPower": 8, "defense": 12, "critChance": 0.03, "attackSpeed": 0.7 },
+  "abilities": ["e_slam"],
+  "xp": 24,
+  "gold": [5, 10],
+  "loot": { "chance": 0.14 },
+  "order": 120
+}

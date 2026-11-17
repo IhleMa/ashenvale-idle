@@ -1,0 +1,9 @@
+{
+  "title": "Complete {n} rifts in time",
+  "icon": "⏱",
+  "weight": 2,
+  "weekly": true,
+  "weeklyTarget": 8,
+  "requires": "rift",
+  "order": 70
+}

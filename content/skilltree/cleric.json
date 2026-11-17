@@ -1,0 +1,42 @@
+{
+  "start": "heal",
+  "branches": [
+    {
+      "name": "Restoration",
+      "attrs": ["int", "vit"],
+      "abilities": { "1": "renew", "5": "prayer_of_healing" },
+      "notables": {
+        "4": { "name": "Mending", "stats": { "healPowerPct": 0.1 } },
+        "8": { "name": "Saintly Grace", "stats": { "healingPct": 0.15 } }
+      }
+    },
+    {
+      "name": "Holy Fire",
+      "attrs": ["int", "str"],
+      "abilities": { "1": "smite" },
+      "notables": {
+        "4": { "name": "Zeal", "stats": { "magPowerPct": 0.1 } },
+        "8": { "name": "Wrath of Heaven", "stats": { "damagePct": 0.15 } }
+      }
+    },
+    {
+      "name": "Protection",
+      "attrs": ["vit", "int"],
+      "abilities": { "3": "power_word_barrier", "7": "divine_blessing" },
+      "notables": {
+        "4": { "name": "Sanctuary", "stats": { "defensePct": 0.15 } },
+        "8": { "name": "Aegis", "stats": { "hpPct": 0.15 } }
+      }
+    },
+    {
+      "name": "Purity",
+      "attrs": ["int", "dex"],
+      "abilities": { "2": "purify" },
+      "notables": {
+        "4": { "name": "Clarity", "stats": { "attackSpeed": 0.06 } },
+        "8": { "name": "Divine Favor", "stats": { "critChance": 0.05, "healingPct": 0.06 } }
+      }
+    }
+  ],
+  "order": 40
+}

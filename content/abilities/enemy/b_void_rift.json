@@ -1,0 +1,21 @@
+{
+  "name": "Void Rift",
+  "classId": "enemy",
+  "type": "damage",
+  "cost": 0,
+  "cooldown": 14,
+  "target": "enemy",
+  "area": true,
+  "effects": [
+    { "kind": "damage", "stat": "magPower", "power": 1.6, "school": "magical" },
+    { "kind": "status", "status": "exposed", "duration": 8 }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [{ "type": "always" }],
+    "target": { "selector": "all_enemies" },
+    "targetConditions": []
+  },
+  "order": 550
+}

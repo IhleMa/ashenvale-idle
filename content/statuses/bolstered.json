@@ -1,0 +1,8 @@
+{
+  "name": "Bolstered",
+  "type": "buff",
+  "mods": { "damagePct": 0.08 },
+  "maxStacks": 10,
+  "description": "Empowered by a fallen ally: +8% damage per stack.",
+  "order": 240
+}

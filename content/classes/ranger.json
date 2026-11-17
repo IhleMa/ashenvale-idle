@@ -1,0 +1,30 @@
+{
+  "name": "Ranger",
+  "role": "damage",
+  "color": "#9ad14a",
+  "glyph": "➶",
+  "description": "Ranged marksman. Sustained physical damage, multi-target shots and damage over time.",
+  "strengths": ["Consistent sustained damage", "Hits multiple enemies", "Damage over time"],
+  "weaknesses": ["Lower burst than Rogue", "Modest defenses"],
+  "resource": { "id": "focus", "name": "Focus", "color": "#f08a3a", "max": 100, "start": 60, "regen": 6 },
+  "baseAttributes": { "str": 6, "int": 5, "dex": 14, "vit": 10 },
+  "growth": { "str": 0.8, "int": 0.5, "dex": 2.8, "vit": 1.9 },
+  "scaling": {
+    "hp": { "vit": 11 },
+    "physPower": { "dex": 2.1, "str": 0.4 },
+    "magPower": { "int": 1 },
+    "healPower": { "int": 0.5 },
+    "defense": { "str": 0.25, "vit": 0.45 },
+    "critChance": { "dex": 0.0011 },
+    "attackSpeed": { "dex": 0.0026 }
+  },
+  "basicAttack": { "name": "Shoot", "stat": "physPower", "power": 1, "school": "physical" },
+  "threatMult": 1,
+  "tiers": [
+    { "level": 1, "title": "Scout" },
+    { "level": 10, "title": "Pathfinder", "bonus": { "dexPct": 0.05 } },
+    { "level": 25, "title": "Sharpshooter", "bonus": { "attackSpeed": 0.08, "critChance": 0.02 } },
+    { "level": 40, "title": "Warden of Ashenvale", "mainOnly": true, "bonus": { "allPct": 0.06 } }
+  ],
+  "order": 50
+}

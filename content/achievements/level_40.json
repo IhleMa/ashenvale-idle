@@ -1,0 +1,8 @@
+{
+  "name": "Legend of Ashenvale",
+  "description": "Reach level 40 with your hero.",
+  "stat": "heroLevel",
+  "goal": 40,
+  "reward": { "gold": 8000 },
+  "order": 90
+}

@@ -1,0 +1,16 @@
+{
+  "name": "Quaking",
+  "icon": "💥",
+  "description": "Every 14 seconds the rift quakes, dealing 8% of max health as damage to every hero.",
+  "mechanics": [
+    {
+      "type": "periodic",
+      "every": 14,
+      "target": "allHeroes",
+      "damagePctMaxHp": 0.08,
+      "school": "physical",
+      "message": "The rift quakes!"
+    }
+  ],
+  "order": 100
+}

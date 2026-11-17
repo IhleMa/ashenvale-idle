@@ -1,0 +1,27 @@
+{
+  "name": "Regalia of the Archmage",
+  "minLevel": 10,
+  "pieces": {
+    "cloth_hat": "Archmage Circlet",
+    "robe": "Archmage Robe",
+    "cloth_gloves": "Archmage Handwraps",
+    "cloth_boots": "Archmage Slippers"
+  },
+  "bonuses": {
+    "2": { "description": "+10% Magic Power", "stats": { "magPowerPct": 0.1 } },
+    "4": {
+      "description": "Area abilities have a 30% chance to refund 20 resource.",
+      "procs": [
+        {
+          "name": "Archmage",
+          "trigger": "cast",
+          "chance": 0.3,
+          "filter": { "area": true },
+          "target": "self",
+          "effect": { "kind": "resource", "amount": 20 }
+        }
+      ]
+    }
+  },
+  "order": 20
+}

@@ -1,0 +1,20 @@
+{
+  "name": "Shadow Flurry",
+  "classId": "rogue",
+  "unlockLevel": 22,
+  "type": "damage",
+  "description": "Strike 5 times for 65% damage each.",
+  "cost": 50,
+  "cooldown": 14,
+  "target": "enemy",
+  "effects": [{ "kind": "damage", "stat": "physPower", "power": 0.65, "school": "physical", "hits": 5 }],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [{ "type": "always" }],
+    "target": { "selector": "enemy_current" },
+    "targetConditions": []
+  },
+  "priority": 75,
+  "order": 210
+}

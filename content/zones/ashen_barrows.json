@@ -1,0 +1,9 @@
+{
+  "name": "Ashen Barrows",
+  "levelRange": [6, 14],
+  "order": 2,
+  "description": "Burial mounds where the dead refuse to rest.",
+  "enemies": ["skeleton_warrior", "bone_archer", "ghoul", "barrow_wight"],
+  "boss": "barrow_king",
+  "unlock": "whispering_woods"
+}

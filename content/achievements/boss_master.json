@@ -1,0 +1,8 @@
+{
+  "name": "Boss Master",
+  "description": "Defeat 25 bosses.",
+  "stat": "bossKills",
+  "goal": 25,
+  "reward": { "gold": 2500 },
+  "order": 60
+}

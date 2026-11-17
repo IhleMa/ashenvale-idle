@@ -1,0 +1,8 @@
+{
+  "name": "Quiver",
+  "slot": "offhand",
+  "classes": ["ranger"],
+  "stats": { "dex": [2, 0.6], "attackSpeed": [0.01, 0.0004] },
+  "material": "leather",
+  "order": 110
+}

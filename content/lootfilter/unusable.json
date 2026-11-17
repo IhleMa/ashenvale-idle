@@ -1,0 +1,5 @@
+{
+  "label": "Salvage gear nobody in my roster can use",
+  "rule": { "name": "Not for my classes", "action": "salvage", "unusable": true },
+  "order": 20
+}

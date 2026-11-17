@@ -1,0 +1,20 @@
+{
+  "name": "Heal",
+  "classId": "cleric",
+  "unlockLevel": 1,
+  "type": "heal",
+  "description": "Restore health to one ally (220% healing power).",
+  "cost": 15,
+  "cooldown": 2.5,
+  "target": "ally",
+  "effects": [{ "kind": "heal", "stat": "healPower", "power": 2.2 }],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [{ "type": "ally_hp_below", "value": 70 }],
+    "target": { "selector": "ally_lowest_hp_pct" },
+    "targetConditions": [{ "type": "target_hp_below", "value": 70 }]
+  },
+  "priority": 90,
+  "order": 220
+}

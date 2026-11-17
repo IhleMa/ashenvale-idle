@@ -1,0 +1,7 @@
+{
+  "name": "Ironhide",
+  "icon": "🪨",
+  "description": "Enemies take 25% less physical damage. Spellcasters shine.",
+  "mechanics": [{ "type": "enemyDamageTaken", "school": "physical", "mult": 0.75 }],
+  "order": 90
+}

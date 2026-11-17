@@ -1,0 +1,27 @@
+{
+  "name": "Band of the Last Breath",
+  "baseId": "ring",
+  "minLevel": 15,
+  "flavor": "Not yet.",
+  "stats": { "vit": [2, 0.5], "hp": [10, 4] },
+  "procs": [
+    {
+      "name": "Last Breath",
+      "trigger": "lowHp",
+      "chance": 1,
+      "once": true,
+      "target": "self",
+      "effect": { "kind": "healPct", "pct": 0.25 }
+    },
+    {
+      "name": "Last Breath",
+      "trigger": "lowHp",
+      "chance": 1,
+      "once": true,
+      "target": "self",
+      "effect": { "kind": "status", "status": "shield_wall", "duration": 6 }
+    }
+  ],
+  "description": "Once per fight, when you drop below 30% health: heal 25% of max health and gain Shield Wall for 6s.",
+  "order": 70
+}

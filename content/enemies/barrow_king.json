@@ -1,0 +1,24 @@
+{
+  "name": "The Barrow King",
+  "tags": ["undead", "boss"],
+  "boss": true,
+  "stats": { "hp": 1100, "physPower": 21, "magPower": 16, "defense": 10, "critChance": 0.08, "attackSpeed": 0.9 },
+  "abilities": ["b_war_stomp", "b_crushing_blow", "e_curse"],
+  "xp": 220,
+  "gold": [60, 100],
+  "loot": { "chance": 1, "count": 2, "boost": 1.8, "minRarity": "uncommon" },
+  "phases": [
+    {
+      "hpBelow": 60,
+      "message": "raises the dead!",
+      "effects": [{ "kind": "summon", "enemyId": "skeleton_warrior", "count": 2, "max": 4 }]
+    },
+    {
+      "hpBelow": 30,
+      "message": "hardens into bone!",
+      "effects": [{ "kind": "status", "status": "stone_skin", "duration": 6, "self": true }]
+    }
+  ],
+  "enrageAfter": 140,
+  "order": 100
+}

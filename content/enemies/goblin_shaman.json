@@ -1,0 +1,11 @@
+{
+  "name": "Goblin Shaman",
+  "tags": ["humanoid", "caster"],
+  "stats": { "hp": 90, "physPower": 6, "magPower": 12, "defense": 2, "critChance": 0.05, "attackSpeed": 0.9 },
+  "basicSchool": "magical",
+  "abilities": ["e_dark_mend", "e_firebolt"],
+  "xp": 17,
+  "gold": [3, 8],
+  "loot": { "chance": 0.13 },
+  "order": 40
+}

@@ -1,0 +1,30 @@
+{
+  "name": "Warrior",
+  "role": "tank",
+  "color": "#c0533a",
+  "glyph": "⚔",
+  "description": "Armored frontliner. High health and defense, taunts enemies and protects allies.",
+  "strengths": ["Very durable", "Taunts & damage mitigation", "Steady physical damage"],
+  "weaknesses": ["Low burst damage", "Rage starts low"],
+  "resource": { "id": "rage", "name": "Rage", "color": "#d9452b", "max": 100, "start": 20, "regen": 1, "onHit": 7, "onDamaged": 4 },
+  "baseAttributes": { "str": 12, "int": 4, "dex": 6, "vit": 15 },
+  "growth": { "str": 2.3, "int": 0.5, "dex": 1, "vit": 2.9 },
+  "scaling": {
+    "hp": { "vit": 13 },
+    "physPower": { "str": 2, "dex": 0.4 },
+    "magPower": { "int": 1 },
+    "healPower": { "int": 0.5, "vit": 0.2 },
+    "defense": { "str": 0.45, "vit": 0.7 },
+    "critChance": { "dex": 0.0007 },
+    "attackSpeed": { "dex": 0.0012 }
+  },
+  "basicAttack": { "name": "Strike", "stat": "physPower", "power": 1, "school": "physical" },
+  "threatMult": 1.5,
+  "tiers": [
+    { "level": 1, "title": "Squire" },
+    { "level": 10, "title": "Knight", "bonus": { "vitPct": 0.05 } },
+    { "level": 25, "title": "Warlord", "bonus": { "strPct": 0.06, "defensePct": 0.05 } },
+    { "level": 40, "title": "Bulwark of Ashenvale", "mainOnly": true, "bonus": { "allPct": 0.06 } }
+  ],
+  "order": 10
+}

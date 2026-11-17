@@ -1,0 +1,20 @@
+{
+  "name": "Arcane Missiles",
+  "classId": "mage",
+  "unlockLevel": 3,
+  "type": "damage",
+  "description": "Fire 3 missiles, each dealing 70% magic damage.",
+  "cost": 25,
+  "cooldown": 7,
+  "target": "enemy",
+  "effects": [{ "kind": "damage", "stat": "magPower", "power": 0.7, "school": "magical", "hits": 3 }],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [{ "type": "always" }],
+    "target": { "selector": "enemy_lowest_hp_pct" },
+    "targetConditions": []
+  },
+  "priority": 45,
+  "order": 100
+}

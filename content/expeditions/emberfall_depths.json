@@ -1,0 +1,10 @@
+{
+  "name": "Emberfall Depths",
+  "campLevel": 4,
+  "level": 28,
+  "bonus": "mining",
+  "description": "Rich, dangerous volcanic seams. Strong recruits come back with much more.",
+  "yields": { "ore": 14, "gem_fragment": 4, "metal_scrap": 3 },
+  "rare": { "prismatic_shard": 0.15, "void_crystal": 0.02 },
+  "order": 60
+}

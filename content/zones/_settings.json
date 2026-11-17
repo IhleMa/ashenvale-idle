@@ -1,0 +1,4 @@
+{
+  "_about": "Zone settings. Every zone is its own file in this folder; co-op encounters are in content/coop/.",
+  "bossWaveEscorts": 1
+}

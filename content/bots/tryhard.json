@@ -1,0 +1,10 @@
+{
+  "label": "Tryhard",
+  "skill": 0.95,
+  "activity": 0.85,
+  "trader": 0.5,
+  "crafter": 0.6,
+  "rifter": 0.9,
+  "social": 0.5,
+  "order": 60
+}

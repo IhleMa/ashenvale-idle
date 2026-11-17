@@ -1,5 +1,5 @@
 {
-  "_about": "Global balance numbers (levels, XP curve, combat, party, offline progress, rarities, premium currency). See CONTENT.md.",
+  "_about": "Global balance numbers (levels, XP curve, combat, party, offline progress, rarities, premium currency).",
   "version": "0.1.0",
   "levelCap": 60,
   "xp": { "base": 80, "exponent": 1.85 },

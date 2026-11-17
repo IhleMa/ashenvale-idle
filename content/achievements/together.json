@@ -1,0 +1,8 @@
+{
+  "name": "Stronger Together",
+  "description": "Win a co-op encounter.",
+  "stat": "coopWins",
+  "goal": 1,
+  "reward": { "gold": 400 },
+  "order": 140
+}

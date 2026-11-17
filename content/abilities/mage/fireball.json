@@ -1,0 +1,23 @@
+{
+  "name": "Fireball",
+  "classId": "mage",
+  "unlockLevel": 1,
+  "type": "damage",
+  "description": "Hurl a fireball for 170% magic damage that burns for 6 seconds.",
+  "cost": 18,
+  "cooldown": 3,
+  "target": "enemy",
+  "effects": [
+    { "kind": "damage", "stat": "magPower", "power": 1.7, "school": "magical" },
+    { "kind": "status", "status": "burn", "duration": 6, "stat": "magPower", "power": 0.15 }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [{ "type": "always" }],
+    "target": { "selector": "enemy_current" },
+    "targetConditions": []
+  },
+  "priority": 20,
+  "order": 80
+}

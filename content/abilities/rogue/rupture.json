@@ -1,0 +1,20 @@
+{
+  "name": "Rupture",
+  "classId": "rogue",
+  "unlockLevel": 10,
+  "type": "debuff",
+  "description": "Open a wound that bleeds heavily for 10 seconds.",
+  "cost": 25,
+  "cooldown": 10,
+  "target": "enemy",
+  "effects": [{ "kind": "status", "status": "bleed", "duration": 10, "stat": "physPower", "power": 0.45 }],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [{ "type": "always" }],
+    "target": { "selector": "enemy_highest_hp" },
+    "targetConditions": [{ "type": "target_missing_status", "status": "bleed" }, { "type": "target_hp_above", "value": 40 }]
+  },
+  "priority": 60,
+  "order": 190
+}

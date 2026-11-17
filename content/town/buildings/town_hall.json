@@ -1,0 +1,12 @@
+{
+  "name": "Town Hall",
+  "kind": "core",
+  "maxLevel": 5,
+  "start": 1,
+  "timeMult": 1.5,
+  "description": "The heart of your town. Its level is the maximum level of every other building, and it allows more simultaneous constructions.",
+  "cost": { "gold": 400, "metal_scrap": 10, "leather_scrap": 6, "cloth_scrap": 6, "ore": 0, "gem_fragment": 0 },
+  "costFrom": { "ore": [2, 10], "gem_fragment": [3, 4] },
+  "effects": ["Other buildings up to level {level}", "{concurrentBuilds} construction{concurrentBuilds:s} at a time"],
+  "order": 10
+}

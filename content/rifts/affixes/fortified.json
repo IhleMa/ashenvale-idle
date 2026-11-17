@@ -1,0 +1,7 @@
+{
+  "name": "Fortified",
+  "icon": "🛡",
+  "description": "Non-boss enemies have 25% more health and deal 15% more damage.",
+  "mechanics": [{ "type": "enemyStats", "who": "nonBoss", "hpPct": 0.25, "damagePct": 0.15 }],
+  "order": 10
+}

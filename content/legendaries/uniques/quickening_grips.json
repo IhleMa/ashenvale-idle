@@ -1,0 +1,19 @@
+{
+  "name": "Grips of Quickening",
+  "baseId": "leather_gloves",
+  "minLevel": 12,
+  "flavor": "Faster than thought.",
+  "stats": { "dex": [2, 0.6], "critChance": [0.01, 0.0003] },
+  "procs": [
+    {
+      "name": "Quickening",
+      "trigger": "crit",
+      "chance": 0.5,
+      "icd": 8,
+      "target": "self",
+      "effect": { "kind": "status", "status": "rapid_fire", "duration": 4 }
+    }
+  ],
+  "description": "Critical hits have a 50% chance to grant +40% attack speed for 4s (8s cooldown).",
+  "order": 90
+}

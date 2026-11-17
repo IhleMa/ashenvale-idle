@@ -1,0 +1,7 @@
+{
+  "name": "Hunter's Mark",
+  "type": "debuff",
+  "mods": { "damageTakenPct": 0.1 },
+  "description": "Takes 10% more damage.",
+  "order": 80
+}

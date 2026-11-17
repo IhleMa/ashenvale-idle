@@ -1,0 +1,21 @@
+{
+  "name": "Battle Cry",
+  "classId": "warrior",
+  "unlockLevel": 15,
+  "type": "buff",
+  "description": "Rally the party: all allies deal 15% more damage for 10 seconds.",
+  "cost": 30,
+  "cooldown": 30,
+  "target": "ally",
+  "area": true,
+  "effects": [{ "kind": "status", "status": "battle_cry", "duration": 10 }],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [{ "type": "self_missing_status", "status": "battle_cry" }],
+    "target": { "selector": "all_allies" },
+    "targetConditions": []
+  },
+  "priority": 75,
+  "order": 60
+}

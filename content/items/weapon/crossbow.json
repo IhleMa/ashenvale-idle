@@ -1,0 +1,8 @@
+{
+  "name": "Crossbow",
+  "slot": "weapon",
+  "classes": ["ranger"],
+  "stats": { "physPower": [5, 1.7] },
+  "material": "metal",
+  "order": 80
+}

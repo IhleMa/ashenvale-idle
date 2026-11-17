@@ -1,0 +1,8 @@
+{
+  "name": "Tome",
+  "slot": "offhand",
+  "classes": ["mage", "cleric"],
+  "stats": { "int": [2, 0.6], "magPower": [1, 0.5] },
+  "material": "cloth",
+  "order": 100
+}

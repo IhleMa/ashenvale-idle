@@ -1,0 +1,20 @@
+{
+  "name": "Chilling Touch",
+  "classId": "enemy",
+  "type": "debuff",
+  "cost": 0,
+  "cooldown": 7,
+  "target": "enemy",
+  "effects": [
+    { "kind": "damage", "stat": "magPower", "power": 1, "school": "magical" },
+    { "kind": "status", "status": "frostbite", "duration": 6 }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [{ "type": "always" }],
+    "target": { "selector": "enemy_highest_threat" },
+    "targetConditions": []
+  },
+  "order": 460
+}

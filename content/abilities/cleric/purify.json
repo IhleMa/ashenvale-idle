@@ -1,0 +1,20 @@
+{
+  "name": "Purify",
+  "classId": "cleric",
+  "unlockLevel": 6,
+  "type": "utility",
+  "description": "Remove up to 2 harmful effects from an ally and heal them slightly.",
+  "cost": 12,
+  "cooldown": 6,
+  "target": "ally",
+  "effects": [{ "kind": "cleanse", "count": 2 }, { "kind": "heal", "stat": "healPower", "power": 0.6 }],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [{ "type": "always" }],
+    "target": { "selector": "ally_lowest_hp_pct" },
+    "targetConditions": [{ "type": "target_has_debuff" }]
+  },
+  "priority": 70,
+  "order": 250
+}

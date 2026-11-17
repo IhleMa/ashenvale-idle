@@ -1,0 +1,10 @@
+{
+  "name": "Ley Line Nexus",
+  "campLevel": 3,
+  "level": 20,
+  "bonus": "enchanting",
+  "description": "Where ley lines cross, raw magic crystallizes. Enchanters harvest it best.",
+  "yields": { "arcane_dust": 6, "magic_essence": 1.2 },
+  "rare": { "prismatic_shard": 0.15 },
+  "order": 50
+}

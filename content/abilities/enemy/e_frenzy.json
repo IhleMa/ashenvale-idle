@@ -1,0 +1,17 @@
+{
+  "name": "Frenzy",
+  "classId": "enemy",
+  "type": "buff",
+  "cost": 0,
+  "cooldown": 25,
+  "target": "self",
+  "effects": [{ "kind": "status", "status": "battle_cry", "duration": 8 }],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [{ "type": "self_hp_below", "value": 60 }],
+    "target": { "selector": "self" },
+    "targetConditions": []
+  },
+  "order": 480
+}

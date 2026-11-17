@@ -1,0 +1,23 @@
+{
+  "name": "Poison Blade",
+  "classId": "rogue",
+  "unlockLevel": 1,
+  "type": "debuff",
+  "description": "90% damage and applies a stacking poison for 8 seconds.",
+  "cost": 25,
+  "cooldown": 4,
+  "target": "enemy",
+  "effects": [
+    { "kind": "damage", "stat": "physPower", "power": 0.9, "school": "physical" },
+    { "kind": "status", "status": "poison", "duration": 8, "stat": "physPower", "power": 0.18 }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [{ "type": "always" }],
+    "target": { "selector": "enemy_highest_hp" },
+    "targetConditions": []
+  },
+  "priority": 35,
+  "order": 160
+}

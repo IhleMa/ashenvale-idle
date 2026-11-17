@@ -1,103 +1,139 @@
 # Game content (data-driven)
 
-Everything that makes up the game world is **data** in `content/*.json`. That covers classes, abilities, items, enemies, zones, uniques and sets, skill trees, the town, expeditions, quests, rifts, gems, the bestiary, loot filter presets, bots and the balance numbers. The code is only the *engine* that interprets this data. Both the server and the browser read the same files: the browser loads them from `/api/content`.
+Everything that makes up the game world is **data** in `content/`. **Every ability, item, enemy, zone, unique, set, building, quest type, rift affix … is its own JSON file**, named after its id. The code is only the *engine* that interprets this data. The server and the browser both use the same assembled content; the browser loads it from `/api/content`.
 
 - **Every id you can use** (abilities, statuses, stats, materials, enemies, conditions, target selectors, …) is listed in [CONTENT_REFERENCE.md](CONTENT_REFERENCE.md). Regenerate it with `npm run content:docs`.
-- **Check your changes:** `npm run content:check`, or type `content` in the server console. The server also checks the content on every start and **refuses to start** if something is wrong. It prints exactly what and where, e.g. `zones.whispering_woods.enemies: unknown enemy "wolff"`.
+- **New entry from a copy:** `npm run content:new -- <type> <newId> <copyFromId>`, e.g. `npm run content:new -- ability shadow_strike backstab`.
+- **Check your changes:** `npm run content:check`, or type `content` in the server console. The server also checks everything on every start and **refuses to start** if something is wrong. The message names the file and the field, e.g. `content/zones/whispering_woods.json → enemies: unknown enemy "wolff"`.
 - **Apply changes:** restart the server. Players reconnect automatically and their pages reload with the new content.
+
+## Folder layout
+
+```
+content/
+  config.json                         balance numbers (levels, XP, combat, rarities, …)
+  bestiary.json                       mastery, targeting wording, "How to prepare" tip rules
+  classes/warrior.json …              one file per class
+  traits/brute.json …                 recruit traits
+  abilities/<class>/<id>.json         abilities, sorted into a folder per class ("enemy" = enemy abilities)
+  statuses/burn.json …                buffs and debuffs
+  items/_settings.json                slots, affix stats, naming, sell value, socket rules
+  items/<slot>/<id>.json              item bases, sorted into a folder per slot
+  enemies/_settings.json              enemy tuning and defaults
+  enemies/<id>.json                   enemies and bosses
+  zones/_settings.json + zones/<id>.json
+  coop/<id>.json                      co-op encounters
+  legendaries/_settings.json          drop chances
+  legendaries/uniques/<id>.json       unique items
+  legendaries/sets/<id>.json          item sets
+  skilltree/_settings.json            tree generator settings and labels
+  skilltree/<class>.json              one skill tree per class
+  town/_settings.json                 tables per building level, formulas, enchanting, salvage
+  town/materials|professions|buildings|qualities|elixirs/<id>.json
+  expeditions/_settings.json + expeditions/<id>.json
+  achievements/<id>.json
+  quests/_settings.json + quests/<type>.json
+  rifts/_settings.json + rifts/affixes/<id>.json
+  gems/_settings.json + gems/<stat>.json
+  lootfilter/_settings.json + lootfilter/<preset>.json
+  bots/_settings.json + bots/<archetype>.json
+```
+
+Rules:
+- **File name = id.** Use lowercase letters, digits and `_`. The id is what other files refer to, e.g. `"abilities": ["e_bite"]`.
+- **Subfolders are only for tidiness.** You can move `abilities/mage/fireball.json` to any folder below `abilities/` and nothing changes. Ids must be unique within a type.
+- **`_settings.json`** (files starting with `_`) hold the non-entry data of a system; they start with an `"_about"` text explaining them.
+- **`"order"`** (optional) sets the position in lists and menus; lower comes first. Entries without it come last, sorted by id. Zones also use `order` for their progression order.
 
 ## Where to edit: `content/` vs. overrides
 
-| | `content/*.json` (in the repository) | `data/content/*.json` (overrides) |
+| | `content/` (in the repository) | `data/content/` (overrides) |
 | --- | --- | --- |
-| What | The complete base content | Only the parts you want to change |
+| What | The complete base content | Only what you want to change |
 | Survives `update` (git pull) | Only if you commit your changes, otherwise the pull conflicts | **Yes**: the folder is outside the repository |
-| Best for | Developing the game, bigger additions | Server owners tweaking balance on Pterodactyl |
+| Best for | Developing the game, bigger additions | Server owners tweaking or adding content on Pterodactyl |
 
-Overrides use the same file names and structure, and are **merged** on top of the base content:
+`data/content/` uses **the same layout**. On Pterodactyl it's `data/content/` in the File Manager; create the folders you need.
 
-- objects are merged key by key, so you only write what changes;
-- lists and single values replace the original;
-- `null` removes something.
-
-On Pterodactyl, the folder is `data/content/` in the File Manager. Create it if it doesn't exist.
+- **Change an entry:** create a file with the same id that contains only what changes. It's merged into the original: objects key by key, while lists and values replace. The subfolder doesn't matter.
+- **Add an entry:** create a new file with a new id, written in full.
+- **Remove an entry:** create a file with the same id that contains just `null`.
+- **Settings:** `data/content/config.json`, `data/content/items/_settings.json`, … are merged the same way. A whole-system file like `data/content/items.json` (`{ "bases": { … }, "naming": { … } }`) works too.
 
 ```jsonc
-// data/content/config.json — double the inventory and make level 70 the cap
+// data/content/config.json — level 70 cap and a bigger inventory
 { "levelCap": 70, "inventory": { "limit": 160 } }
 
-// data/content/abilities.json — make Fireball hit harder, nothing else changes
-{ "abilities": { "fireball": { "effects": [{ "kind": "damage", "stat": "magPower", "power": 2.2, "school": "magical" }] } } }
+// data/content/abilities/fireball.json — Fireball hits harder, everything else stays
+{ "effects": [{ "kind": "damage", "stat": "magPower", "power": 2.2, "school": "magical" }] }
 
-// data/content/items.json — remove the dagger from the loot pool
-{ "items": { "bases": { "dagger": null } } }
+// data/content/items/dagger.json — remove the dagger (the validator reports anything that still uses it)
+null
 ```
 
-Each file starts with an `"_about"` text that explains it. JSON has no comments, so `_about` is ignored by the game.
+## What's in each part
 
-## The files
-
-| File | What's inside |
+| Part | What's inside |
 | --- | --- |
 | `config.json` | Level cap, XP curve, party size, combat timing, armor formula, offline progress, recruitment, co-op scaling, **rarities** (weights, multipliers, affix counts), premium currency name |
-| `classes.json` | Classes (role, resource, attributes, growth, how attributes become combat stats, basic attack, tiers) and recruit traits |
-| `abilities.json` | All player and enemy abilities: cost, cooldown, target, `effects`, default behaviour rule, loadout priority |
-| `statuses.json` | Buffs and debuffs: stat modifiers (`mods`), damage or heal per second (`tick`), stacking |
-| `items.json` | Slots, item bases (`stats: [base, perLevel]`, `classes`, `material`), affixes, naming (level prefixes, suffixes), sell value, socket chances |
-| `enemies.json` | Enemies and bosses: level-1 stats, growth, tags, abilities, boss `phases`, `enrageAfter` |
-| `zones.json` | Zones (level range, enemies, boss, which zone unlocks it) and co-op encounters (waves) |
-| `legendaries.json` | Unique items (fixed stats + procs/passives), item sets (piece names, bonuses at 2/4 pieces), drop chances |
-| `skilltree.json` | Passive tree generator settings and one spec per class (4 branches: attributes, ability nodes, notables) |
-| `town.json` | Materials, professions, buildings (costs, effects text), crafting qualities, enchanting, elixirs, salvage yields |
-| `expeditions.json` | Destinations (yields per hour, rare finds, profession bonus), durations, camp limits |
-| `achievements.json` | Goals on player counters (`kills`, `bossKills`, `heroLevel`, …) with gold rewards |
-| `quests.json` | Daily/weekly quest settings, title templates, targets, weights and rewards |
-| `rifts.json` | Rift scaling, time limit, wave composition, rewards, weekly rotation and **affixes** |
-| `gems.json` | Gem names/colours per stat, tiers with cut/fuse costs, shard yield, socket drilling and removal costs |
+| `classes/`, `traits/` | Classes (role, resource, attributes, growth, how attributes become combat stats, basic attack, tiers) and recruit traits |
+| `abilities/` | All player and enemy abilities: cost, cooldown, target, `effects`, default behaviour rule, loadout priority |
+| `statuses/` | Buffs and debuffs: stat modifiers (`mods`), damage or heal per second (`tick`), stacking |
+| `items/` | Slots, item bases (`stats: [base, perLevel]`, `classes`, `material`), affixes, naming (level prefixes, suffixes), sell value, socket chances |
+| `enemies/` | Enemies and bosses: level-1 stats, growth, tags, abilities, boss `phases`, `enrageAfter` |
+| `zones/`, `coop/` | Zones (level range, enemies, boss, which zone unlocks it) and co-op encounters (waves) |
+| `legendaries/` | Unique items (fixed stats + procs/passives), item sets (piece names, bonuses at 2/4 pieces), drop chances |
+| `skilltree/` | Passive tree generator settings and one tree per class (4 branches: attributes, ability nodes, notables) |
+| `town/` | Materials, professions, buildings (costs, effects text), crafting qualities, enchanting, elixirs, salvage yields |
+| `expeditions/` | Destinations (yields per hour, rare finds, profession bonus), durations, camp limits |
+| `achievements/` | Goals on player counters (`kills`, `bossKills`, `heroLevel`, …) with gold rewards |
+| `quests/` | Daily/weekly quest settings, title templates, targets, weights and rewards |
+| `rifts/` | Rift scaling, time limit, wave composition, rewards, weekly rotation and **affixes** |
+| `gems/` | Gem names/colours per stat, tiers with cut/fuse costs, shard yield, socket drilling and removal costs |
 | `bestiary.json` | Mastery tiers, wording for enemy targeting and the rules for "How to prepare" tips |
-| `lootfilter.json` | Rule limit and the presets in the loot filter menu |
-| `bots.json` | Bot name pool, chat lines and personality archetypes |
+| `lootfilter/` | Rule limit and the presets in the loot filter menu |
+| `bots/` | Bot name pool, chat lines and personality archetypes |
 
 Numbers like `{ "base": 120, "perLevel": 45 }` scale with the hero level. `{ "base": 5, "perLevels": 3 }` means +1 every 3 levels.
 
 ## How to …
 
 ### Add an item base
-`items.json → bases`:
+`content/items/weapon/war_scythe.json` (or `npm run content:new -- item war_scythe axe`):
 ```json
-"war_scythe": { "name": "War Scythe", "slot": "weapon", "material": "metal", "classes": ["warrior", "rogue"],
-                "stats": { "physPower": [4, 1.3], "critDamage": [0.05, 0.002] } }
+{ "name": "War Scythe", "slot": "weapon", "material": "metal", "classes": ["warrior", "rogue"],
+  "stats": { "physPower": [4, 1.3], "critDamage": [0.05, 0.002] } }
 ```
 It starts dropping right away at every rarity. For a picture, add `public/assets/items/war_scythe.png`.
 
 ### Add an ability to a class
-1. `abilities.json → abilities`: give it `classId`, `unlockLevel`, `cost`, `cooldown`, `target` (`enemy`/`ally`/`self`), `effects` and a `defaultRule`. Copy a similar ability as a starting point.
-2. `skilltree.json → specs.<class>.branches[n].abilities`: put it on a ring, e.g. `"5": "war_cry"`, so players can learn it.
+1. `content/abilities/<class>/<id>.json`: give it `classId`, `unlockLevel`, `cost`, `cooldown`, `target` (`enemy`/`ally`/`self`), `effects` and a `defaultRule`. Copy a similar ability as a starting point.
+2. `content/skilltree/<class>.json → branches[n].abilities`: put it on a ring, e.g. `"5": "war_cry"`, so players can learn it.
 
 ### Add an enemy and a zone
-1. `enemies.json → enemies`: stats, `tags` (e.g. `["beast"]`), `abilities` (enemy abilities in `abilities.json` with `"classId": "enemy"`). Bosses get `"boss": true`, plus `phases` and `enrageAfter` if you like.
-2. `zones.json → zones`: `levelRange`, `enemies`, `boss`, `order`, and `"unlock": "<previous zone>"`.
+1. `content/enemies/<id>.json`: stats, `tags` (e.g. `["beast"]`), `abilities` (enemy abilities in `content/abilities/enemy/` with `"classId": "enemy"`). Bosses get `"boss": true`, plus `phases` and `enrageAfter` if you like.
+2. `content/zones/<id>.json`: `levelRange`, `enemies`, `boss`, `order`, and `"unlock": "<previous zone>"`.
 
 The bestiary picks the new enemy up automatically, including its tips.
 
 ### Add a unique item
-`legendaries.json → uniques`: `baseId`, `minLevel`, `stats` (`[base, perLevel]`), a `description`, and `procs` or `passive`.
+`content/legendaries/uniques/<id>.json`: `baseId`, `minLevel`, `stats` (`[base, perLevel]`), a `description`, and `procs` or `passive`.
 ```json
-"stormcaller": { "name": "Stormcaller", "baseId": "wand", "minLevel": 20, "description": "Crits call lightning.",
+{ "name": "Stormcaller", "baseId": "wand", "minLevel": 20, "description": "Crits call lightning.",
   "stats": { "int": [4, 0.8] },
   "procs": [{ "name": "Stormcaller", "trigger": "crit", "chance": 0.25, "target": "target",
               "effect": { "kind": "damage", "stat": "magPower", "power": 1.5, "school": "magical" } }] }
 ```
 
 ### Add a class
-1. `classes.json → classes`: copy an existing class and change it. `role` must be one of the roles in `config.json`.
+1. `npm run content:new -- class paladin warrior`, then edit `content/classes/paladin.json`. `role` must be one of the roles in `config.json`.
 2. Abilities with `"classId": "<new class>"`.
-3. A skill tree spec in `skilltree.json → specs` with exactly 4 branches. The `start` ability is learned at level 1.
+3. A skill tree `content/skilltree/<class>.json` with exactly 4 branches (`npm run content:new -- skilltree paladin warrior`). The `start` ability is learned at level 1.
 
 The validator tells you if a piece is missing.
 
 ### Add a rift affix
-`rifts.json → affixes`. Combine one or more mechanics:
+`content/rifts/affixes/<id>.json` with `name`, `icon`, `description` and a list of `mechanics`:
 
 | mechanic | fields | effect |
 | --- | --- | --- |
@@ -109,7 +145,7 @@ The validator tells you if a piece is missing.
 | `periodic` | `every` (s), `target` (randomHero/allHeroes), `status`+`duration`+`pctMaxHp` and/or `damagePctMaxHp`+`school`, `message` | timed effects |
 
 ### Change building texts
-`town.json → buildings.<id>.effects` is a list of templates such as `"Roster: {innRoster} companions"` or `{ "minLevel": 3, "text": "…" }`. The available values are listed in CONTENT_REFERENCE.md.
+`content/town/buildings/<id>.json → effects` is a list of templates such as `"Roster: {innRoster} companions"` or `{ "minLevel": 3, "text": "…" }`. The available values are listed in CONTENT_REFERENCE.md.
 
 ## What stays in code
 - How things *work*: the combat engine, rule conditions and target selectors, formulas that combine the numbers, and saving.

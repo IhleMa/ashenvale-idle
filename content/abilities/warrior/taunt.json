@@ -1,0 +1,20 @@
+{
+  "name": "Taunt",
+  "classId": "warrior",
+  "unlockLevel": 1,
+  "type": "control",
+  "description": "Forces all enemies to attack you for 5 seconds and generates high threat.",
+  "cost": 0,
+  "cooldown": 10,
+  "target": "self",
+  "effects": [{ "kind": "taunt", "duration": 5 }],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [{ "type": "enemies_alive", "cmp": ">=", "value": 1 }],
+    "target": { "selector": "self" },
+    "targetConditions": [{ "type": "target_missing_status", "status": "taunting" }]
+  },
+  "priority": 90,
+  "order": 20
+}

@@ -1,0 +1,5 @@
+{
+  "label": "Sell Rare items without a main stat",
+  "rule": { "name": "Weak rares", "action": "sell", "rarities": ["rare"], "noStats": ["str", "int", "dex", "vit"] },
+  "order": 50
+}

@@ -1,0 +1,10 @@
+{
+  "name": "Yeti",
+  "tags": ["beast", "minion"],
+  "stats": { "hp": 180, "physPower": 16, "magPower": 4, "defense": 6, "critChance": 0.08, "attackSpeed": 1 },
+  "abilities": ["e_bite", "e_frenzy"],
+  "xp": 26,
+  "gold": [5, 11],
+  "loot": { "chance": 0.14 },
+  "order": 170
+}

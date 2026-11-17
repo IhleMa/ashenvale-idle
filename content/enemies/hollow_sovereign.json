@@ -1,0 +1,33 @@
+{
+  "name": "The Hollow Sovereign",
+  "tags": ["void", "boss"],
+  "boss": true,
+  "stats": { "hp": 1800, "physPower": 24, "magPower": 26, "defense": 13, "critChance": 0.1, "attackSpeed": 0.9 },
+  "abilities": ["b_void_rift", "b_annihilate", "e_weaken"],
+  "basicSchool": "magical",
+  "xp": 420,
+  "gold": [140, 220],
+  "loot": { "chance": 1, "count": 3, "boost": 2.5, "minRarity": "epic" },
+  "phases": [
+    {
+      "hpBelow": 75,
+      "message": "tears open the void!",
+      "effects": [{ "kind": "summon", "enemyId": "void_stalker", "count": 2, "max": 4 }]
+    },
+    {
+      "hpBelow": 50,
+      "message": "shields itself in darkness!",
+      "effects": [{ "kind": "status", "status": "stone_skin", "duration": 8, "self": true }]
+    },
+    {
+      "hpBelow": 25,
+      "message": "unleashes its full power!",
+      "effects": [
+        { "kind": "status", "status": "enrage", "duration": 999, "self": true },
+        { "kind": "summon", "enemyId": "abyssal_priest", "count": 1, "max": 4 }
+      ]
+    }
+  ],
+  "enrageAfter": 180,
+  "order": 220
+}

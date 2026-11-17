@@ -1,0 +1,7 @@
+{
+  "name": "Enrage",
+  "type": "buff",
+  "mods": { "damagePct": 0.5, "attackSpeedPct": 0.3 },
+  "description": "Greatly increased damage and speed.",
+  "order": 220
+}

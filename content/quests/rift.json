@@ -1,0 +1,11 @@
+{
+  "title": "Complete {n} rifts",
+  "icon": "🌀",
+  "weight": 3,
+  "daily": true,
+  "target": 2,
+  "weekly": true,
+  "weeklyTarget": 12,
+  "requires": "rift",
+  "order": 60
+}

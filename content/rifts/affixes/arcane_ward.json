@@ -1,0 +1,7 @@
+{
+  "name": "Arcane Ward",
+  "icon": "🔮",
+  "description": "Enemies take 25% less magical damage. Physical damage dealers shine.",
+  "mechanics": [{ "type": "enemyDamageTaken", "school": "magical", "mult": 0.75 }],
+  "order": 80
+}

@@ -1,0 +1,20 @@
+{
+  "name": "Rapid Fire",
+  "classId": "ranger",
+  "unlockLevel": 10,
+  "type": "buff",
+  "description": "Increase attack speed by 40% for 10 seconds.",
+  "cost": 20,
+  "cooldown": 30,
+  "target": "self",
+  "effects": [{ "kind": "status", "status": "rapid_fire", "duration": 10 }],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [{ "type": "always" }],
+    "target": { "selector": "self" },
+    "targetConditions": [{ "type": "target_missing_status", "status": "rapid_fire" }]
+  },
+  "priority": 85,
+  "order": 330
+}

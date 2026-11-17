@@ -1,0 +1,8 @@
+{
+  "name": "The Stuff of Legends",
+  "description": "Find a Legendary or better item.",
+  "stat": "legendaryFound",
+  "goal": 1,
+  "reward": { "gold": 2000 },
+  "order": 130
+}

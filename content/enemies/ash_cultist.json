@@ -1,0 +1,11 @@
+{
+  "name": "Ash Cultist",
+  "tags": ["humanoid", "caster", "minion"],
+  "stats": { "hp": 115, "physPower": 8, "magPower": 13, "defense": 4, "critChance": 0.06, "attackSpeed": 0.95 },
+  "basicSchool": "magical",
+  "abilities": ["e_dark_mend", "e_curse"],
+  "xp": 21,
+  "gold": [4, 10],
+  "loot": { "chance": 0.13 },
+  "order": 130
+}

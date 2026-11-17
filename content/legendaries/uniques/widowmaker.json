@@ -1,0 +1,25 @@
+{
+  "name": "Widowmaker",
+  "baseId": "dagger",
+  "minLevel": 10,
+  "flavor": "Quick, quiet, and never the first strike.",
+  "stats": { "dex": [3, 0.7], "critDamage": [0.1, 0.004] },
+  "procs": [
+    {
+      "name": "Widowmaker",
+      "trigger": "kill",
+      "chance": 1,
+      "target": "self",
+      "effect": { "kind": "resource", "amount": 30 }
+    },
+    {
+      "name": "Widowmaker",
+      "trigger": "kill",
+      "chance": 1,
+      "target": "self",
+      "effect": { "kind": "cooldowns", "seconds": 3 }
+    }
+  ],
+  "description": "Killing an enemy restores 30 resource and reduces all your cooldowns by 3 seconds.",
+  "order": 30
+}

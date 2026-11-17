@@ -1,0 +1,10 @@
+{
+  "name": "Copper Hills",
+  "campLevel": 1,
+  "level": 1,
+  "bonus": "mining",
+  "description": "Rolling hills riddled with shallow ore veins. A safe first trip for any recruit.",
+  "yields": { "ore": 9, "gem_fragment": 1.5 },
+  "rare": { "magic_essence": 0.05 },
+  "order": 10
+}

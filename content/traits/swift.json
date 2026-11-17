@@ -1,0 +1,1 @@
+{ "name": "Swift", "description": "+6% Attack Speed", "bonus": { "attackSpeed": 0.06 }, "order": 60 }

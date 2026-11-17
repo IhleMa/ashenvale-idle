@@ -1,5 +1,5 @@
 {
-  "_about": "Bestiary: kill mastery tiers and bonuses, wording for enemy targeting, and the rules that generate \"How to prepare\" tips (first matching rules are shown in order).",
+  "_about": "Bestiary: kill mastery, wording for enemy targeting, and the ordered rules that generate \"How to prepare\" tips.",
   "mastery": { "normal": [25, 150, 500], "boss": [3, 15, 40], "bonus": [0.02, 0.04, 0.06] },
   "targetText": {
     "enemy_highest_threat": "the hero with the most threat (your tank, if it holds aggro)",

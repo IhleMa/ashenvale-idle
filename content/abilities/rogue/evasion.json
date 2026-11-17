@@ -1,0 +1,20 @@
+{
+  "name": "Evasion",
+  "classId": "rogue",
+  "unlockLevel": 3,
+  "type": "buff",
+  "description": "Gain 50% dodge chance for 6 seconds.",
+  "cost": 20,
+  "cooldown": 25,
+  "target": "self",
+  "effects": [{ "kind": "status", "status": "evasion", "duration": 6 }],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [{ "type": "self_hp_below", "value": 50 }],
+    "target": { "selector": "self" },
+    "targetConditions": [{ "type": "target_missing_status", "status": "evasion" }]
+  },
+  "priority": 100,
+  "order": 170
+}

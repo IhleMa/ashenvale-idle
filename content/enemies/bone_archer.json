@@ -1,0 +1,10 @@
+{
+  "name": "Bone Archer",
+  "tags": ["undead", "minion"],
+  "stats": { "hp": 100, "physPower": 14, "magPower": 4, "defense": 3, "critChance": 0.1, "attackSpeed": 1 },
+  "abilities": ["e_bone_arrow"],
+  "xp": 17,
+  "gold": [3, 8],
+  "loot": { "chance": 0.12 },
+  "order": 70
+}

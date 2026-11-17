@@ -1,0 +1,8 @@
+{
+  "name": "First Blood",
+  "description": "Defeat your first enemy.",
+  "stat": "kills",
+  "goal": 1,
+  "reward": { "gold": 25 },
+  "order": 10
+}

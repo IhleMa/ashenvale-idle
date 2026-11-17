@@ -1,0 +1,11 @@
+{
+  "title": "Craft, reforge, enchant or brew {n} times",
+  "icon": "⚒",
+  "weight": 2,
+  "daily": true,
+  "target": 2,
+  "weekly": true,
+  "weeklyTarget": 12,
+  "requires": "workers",
+  "order": 100
+}

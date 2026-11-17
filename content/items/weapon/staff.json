@@ -1,0 +1,8 @@
+{
+  "name": "Staff",
+  "slot": "weapon",
+  "classes": ["mage", "cleric"],
+  "stats": { "magPower": [5, 1.6], "healPower": [3, 1] },
+  "material": "cloth",
+  "order": 50
+}

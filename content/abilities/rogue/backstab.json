@@ -1,0 +1,20 @@
+{
+  "name": "Backstab",
+  "classId": "rogue",
+  "unlockLevel": 1,
+  "type": "damage",
+  "description": "180% physical damage with +20% critical chance.",
+  "cost": 35,
+  "cooldown": 3,
+  "target": "enemy",
+  "effects": [{ "kind": "damage", "stat": "physPower", "power": 1.8, "school": "physical", "bonusCrit": 0.2 }],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [{ "type": "always" }],
+    "target": { "selector": "enemy_current" },
+    "targetConditions": []
+  },
+  "priority": 20,
+  "order": 150
+}

@@ -1,0 +1,19 @@
+{
+  "name": "Bulwark of Ages",
+  "baseId": "shield",
+  "minLevel": 10,
+  "flavor": "Generations of defenders have bled behind it.",
+  "stats": { "vit": [3, 0.7], "defense": [2, 0.6] },
+  "procs": [
+    {
+      "name": "Bulwark of Ages",
+      "trigger": "struck",
+      "chance": 0.12,
+      "icd": 6,
+      "target": "self",
+      "effect": { "kind": "shieldPct", "pct": 0.08, "duration": 6 }
+    }
+  ],
+  "description": "When struck, 12% chance to gain a barrier absorbing 8% of your max health (6s cooldown).",
+  "order": 40
+}

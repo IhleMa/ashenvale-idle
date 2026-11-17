@@ -1,0 +1,30 @@
+{
+  "name": "Cleric",
+  "role": "healer",
+  "color": "#f0d27a",
+  "glyph": "✚",
+  "description": "Holy healer. Heals single allies or the whole party, shields, buffs and cleanses.",
+  "strengths": ["Powerful healing", "Shields & buffs", "Removes debuffs"],
+  "weaknesses": ["Low damage", "Mana management"],
+  "resource": { "id": "mana", "name": "Mana", "color": "#3a7bff", "max": 100, "start": 100, "regen": 5 },
+  "baseAttributes": { "str": 6, "int": 13, "dex": 5, "vit": 11 },
+  "growth": { "str": 0.7, "int": 2.5, "dex": 0.7, "vit": 2.2 },
+  "scaling": {
+    "hp": { "vit": 11 },
+    "physPower": { "str": 1.2 },
+    "magPower": { "int": 1.6 },
+    "healPower": { "int": 2.3, "vit": 0.3 },
+    "defense": { "str": 0.35, "vit": 0.55 },
+    "critChance": { "dex": 0.0007, "int": 0.0002 },
+    "attackSpeed": { "dex": 0.001 }
+  },
+  "basicAttack": { "name": "Mace Strike", "stat": "magPower", "power": 0.7, "school": "magical" },
+  "threatMult": 1,
+  "tiers": [
+    { "level": 1, "title": "Acolyte" },
+    { "level": 10, "title": "Priest", "bonus": { "healPowerPct": 0.06 } },
+    { "level": 25, "title": "High Priest", "bonus": { "intPct": 0.05, "vitPct": 0.05 } },
+    { "level": 40, "title": "Saint of Ashenvale", "mainOnly": true, "bonus": { "allPct": 0.06 } }
+  ],
+  "order": 40
+}

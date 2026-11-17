@@ -1,0 +1,5 @@
+{
+  "label": "Salvage Common & Uncommon",
+  "rule": { "name": "Junk", "action": "salvage", "rarities": ["common", "uncommon"] },
+  "order": 10
+}

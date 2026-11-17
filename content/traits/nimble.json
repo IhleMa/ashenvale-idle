@@ -1,0 +1,1 @@
+{ "name": "Nimble", "description": "+6% Dexterity", "bonus": { "dexPct": 0.06 }, "order": 30 }

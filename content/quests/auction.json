@@ -1,0 +1,8 @@
+{
+  "title": "List {n} items or materials on the Auction House",
+  "icon": "⚖",
+  "weight": 1,
+  "daily": true,
+  "target": 1,
+  "order": 120
+}

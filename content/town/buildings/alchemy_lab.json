@@ -1,0 +1,11 @@
+{
+  "name": "Alchemy Lab",
+  "kind": "special",
+  "profession": "alchemy",
+  "maxLevel": 5,
+  "start": 0,
+  "description": "Brew elixirs that empower your whole party for a while — online and offline.",
+  "cost": { "gold": 250, "cloth_scrap": 8, "herb": 10 },
+  "effects": ["Elixirs: {elixirs}", "Duration +{elixirDurationPct}%"],
+  "order": 100
+}

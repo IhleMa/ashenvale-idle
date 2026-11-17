@@ -1,0 +1,8 @@
+{
+  "name": "Raid Veteran",
+  "description": "Win 20 co-op encounters.",
+  "stat": "coopWins",
+  "goal": 20,
+  "reward": { "gold": 4000 },
+  "order": 150
+}

@@ -1,0 +1,10 @@
+{
+  "name": "Forest Spider",
+  "tags": ["beast", "minion"],
+  "stats": { "hp": 95, "physPower": 10, "magPower": 6, "defense": 2, "critChance": 0.05, "attackSpeed": 1.1 },
+  "abilities": ["e_venom"],
+  "xp": 13,
+  "gold": [2, 4],
+  "loot": { "chance": 0.1 },
+  "order": 30
+}

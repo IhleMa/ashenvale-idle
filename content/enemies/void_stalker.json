@@ -1,0 +1,10 @@
+{
+  "name": "Void Stalker",
+  "tags": ["void", "minion"],
+  "stats": { "hp": 150, "physPower": 17, "magPower": 8, "defense": 5, "critChance": 0.15, "attackSpeed": 1.2 },
+  "abilities": ["e_stab", "e_weaken"],
+  "xp": 30,
+  "gold": [6, 13],
+  "loot": { "chance": 0.14 },
+  "order": 190
+}

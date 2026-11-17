@@ -1,0 +1,1 @@
+{ "name": "Barrier", "type": "buff", "absorb": true, "description": "Absorbs incoming damage.", "order": 170 }

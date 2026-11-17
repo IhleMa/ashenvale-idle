@@ -1,0 +1,9 @@
+{
+  "name": "Frostpeak",
+  "levelRange": [22, 34],
+  "order": 4,
+  "description": "Frozen mountain passes ruled by trolls and the Frost Matriarch.",
+  "enemies": ["ice_wraith", "frost_troll", "yeti"],
+  "boss": "frost_matriarch",
+  "unlock": "emberfall_caverns"
+}

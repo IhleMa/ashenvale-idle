@@ -1,0 +1,8 @@
+{
+  "name": "Longbow",
+  "slot": "weapon",
+  "classes": ["ranger"],
+  "stats": { "physPower": [4, 1.5], "attackSpeed": [0.02, 0.0005] },
+  "material": "leather",
+  "order": 70
+}

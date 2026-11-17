@@ -1,0 +1,21 @@
+{
+  "name": "War Stomp",
+  "classId": "enemy",
+  "type": "control",
+  "cost": 0,
+  "cooldown": 18,
+  "target": "enemy",
+  "area": true,
+  "effects": [
+    { "kind": "damage", "stat": "physPower", "power": 1.1, "school": "physical" },
+    { "kind": "status", "status": "stun", "duration": 1.5 }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [{ "type": "always" }],
+    "target": { "selector": "all_enemies" },
+    "targetConditions": []
+  },
+  "order": 510
+}

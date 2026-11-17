@@ -1,0 +1,11 @@
+{
+  "name": "Elixir of Might",
+  "level": 1,
+  "glyph": "🗡",
+  "description": "Party deals +10% damage.",
+  "bonus": { "damagePct": 0.1 },
+  "herbs": 6,
+  "dust": 2,
+  "gold": 60,
+  "order": 10
+}

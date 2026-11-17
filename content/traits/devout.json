@@ -1,0 +1,1 @@
+{ "name": "Devout", "description": "+8% Healing Power", "bonus": { "healPowerPct": 0.08 }, "order": 70 }

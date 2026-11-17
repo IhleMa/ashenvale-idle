@@ -1,0 +1,5 @@
+{
+  "_about": "Enemy tuning and defaults. Every enemy is its own file in this folder.",
+  "tuning": { "hp": 10, "damage": 2, "bossHp": 6, "bossDamage": 1.9 },
+  "defaults": { "growth": { "hp": 0.3, "power": 0.235, "defense": 0.18 }, "basicSchool": "physical" }
+}

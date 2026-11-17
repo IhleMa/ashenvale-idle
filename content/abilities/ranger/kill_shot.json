@@ -1,0 +1,20 @@
+{
+  "name": "Kill Shot",
+  "classId": "ranger",
+  "unlockLevel": 22,
+  "type": "damage",
+  "description": "200% damage, quadrupled against enemies under 20% health.",
+  "cost": 30,
+  "cooldown": 10,
+  "target": "enemy",
+  "effects": [{ "kind": "damage", "stat": "physPower", "power": 2, "school": "physical", "executeBelow": 0.2, "executeMult": 4 }],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [{ "type": "enemy_hp_below", "value": 20 }],
+    "target": { "selector": "enemy_lowest_hp_pct" },
+    "targetConditions": [{ "type": "target_hp_below", "value": 20 }]
+  },
+  "priority": 78,
+  "order": 350
+}

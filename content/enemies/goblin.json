@@ -1,0 +1,10 @@
+{
+  "name": "Goblin Cutthroat",
+  "tags": ["humanoid", "minion"],
+  "stats": { "hp": 105, "physPower": 13, "magPower": 4, "defense": 4, "critChance": 0.1, "attackSpeed": 1 },
+  "abilities": ["e_stab"],
+  "xp": 15,
+  "gold": [3, 7],
+  "loot": { "chance": 0.12 },
+  "order": 20
+}

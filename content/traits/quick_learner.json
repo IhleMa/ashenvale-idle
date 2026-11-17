@@ -1,0 +1,1 @@
+{ "name": "Quick Learner", "description": "+10% experience gained", "bonus": { "xpPct": 0.1 }, "order": 90 }

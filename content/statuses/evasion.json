@@ -1,0 +1,7 @@
+{
+  "name": "Evasion",
+  "type": "buff",
+  "mods": { "dodge": 0.5 },
+  "description": "50% chance to dodge attacks.",
+  "order": 190
+}

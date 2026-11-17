@@ -1,0 +1,7 @@
+{
+  "name": "Frostbite",
+  "type": "debuff",
+  "mods": { "attackSpeedPct": -0.25 },
+  "description": "Attack speed reduced by 25%.",
+  "order": 40
+}

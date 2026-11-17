@@ -1,0 +1,7 @@
+{
+  "name": "Battle Cry",
+  "type": "buff",
+  "mods": { "damagePct": 0.15 },
+  "description": "Deals 15% more damage.",
+  "order": 150
+}

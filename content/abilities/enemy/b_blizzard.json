@@ -1,0 +1,21 @@
+{
+  "name": "Blizzard",
+  "classId": "enemy",
+  "type": "damage",
+  "cost": 0,
+  "cooldown": 16,
+  "target": "enemy",
+  "area": true,
+  "effects": [
+    { "kind": "damage", "stat": "magPower", "power": 1.2, "school": "magical" },
+    { "kind": "status", "status": "frostbite", "duration": 8 }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [{ "type": "always" }],
+    "target": { "selector": "all_enemies" },
+    "targetConditions": []
+  },
+  "order": 540
+}

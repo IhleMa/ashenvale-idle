@@ -1,0 +1,8 @@
+{
+  "name": "Sabatons",
+  "slot": "feet",
+  "classes": ["warrior", "cleric"],
+  "stats": { "defense": [2, 0.7], "vit": [1, 0.3] },
+  "material": "metal",
+  "order": 160
+}

@@ -1,0 +1,10 @@
+{
+  "name": "Crystal Caverns",
+  "campLevel": 2,
+  "level": 12,
+  "bonus": "jewelcrafting",
+  "description": "Glittering caves where gems grow from the walls — a jeweler knows where to look.",
+  "yields": { "gem_fragment": 6, "ore": 5 },
+  "rare": { "magic_essence": 0.2, "prismatic_shard": 0.03 },
+  "order": 40
+}

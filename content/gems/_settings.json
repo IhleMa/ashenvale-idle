@@ -1,0 +1,66 @@
+{
+  "_about": "Gem tiers (cut/fuse costs), shard yield, drilling and removal costs. Every gem kind (one per stat) is its own file in this folder.",
+  "tiers": [
+    {
+      "name": "Chipped",
+      "refLevel": 8,
+      "jeweler": 1,
+      "boost": 1,
+      "cutCost": { "gold": 150, "mats": { "gem_fragment": 4 } }
+    },
+    {
+      "name": "Flawed",
+      "refLevel": 18,
+      "jeweler": 2,
+      "boost": 1.1,
+      "fuseCost": { "gold": 600, "mats": { "gem_fragment": 8, "arcane_dust": 6 } }
+    },
+    {
+      "name": "Polished",
+      "refLevel": 30,
+      "jeweler": 3,
+      "boost": 1.2,
+      "fuseCost": { "gold": 2000, "mats": { "gem_fragment": 12, "magic_essence": 4 } }
+    },
+    {
+      "name": "Flawless",
+      "refLevel": 44,
+      "jeweler": 4,
+      "boost": 1.35,
+      "fuseCost": { "gold": 6000, "mats": { "gem_fragment": 16, "prismatic_shard": 2 } }
+    },
+    {
+      "name": "Perfect",
+      "refLevel": 60,
+      "jeweler": 5,
+      "boost": 1.5,
+      "fuseCost": { "gold": 15000, "mats": { "gem_fragment": 20, "void_crystal": 1, "prismatic_shard": 3 } }
+    }
+  ],
+  "valueFactor": 0.6,
+  "config": { "shardsPerGem": 50, "fuseCount": 3 },
+  "shardYield": { "base": 0.6, "levelDivisor": 25, "perRarity": 0.6, "perSalvageLevel": 0.05 },
+  "bonusGemChance": { "levelDivisor": 250, "max": 0.2 },
+  "drill": {
+    "gold": { "base": 200, "perItemLevel": 25 },
+    "sockets": [
+      { "jeweler": 2, "goldMult": 1, "mats": { "gem_fragment": 6, "arcane_dust": { "base": 4, "perItemLevels": 5 } } },
+      {
+        "jeweler": 3,
+        "goldMult": 2.5,
+        "mats": { "gem_fragment": 12, "arcane_dust": { "base": 4, "perItemLevels": 5 }, "prismatic_shard": 2 }
+      },
+      {
+        "jeweler": 5,
+        "goldMult": 4,
+        "mats": {
+          "gem_fragment": 18,
+          "arcane_dust": { "base": 4, "perItemLevels": 5 },
+          "prismatic_shard": 4,
+          "void_crystal": 1
+        }
+      }
+    ]
+  },
+  "unsocketCost": { "perTierSquared": 30, "perItemLevel": 4 }
+}

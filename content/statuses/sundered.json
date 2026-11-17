@@ -1,0 +1,7 @@
+{
+  "name": "Sundered",
+  "type": "debuff",
+  "mods": { "defensePct": -0.3 },
+  "description": "Defense reduced by 30%.",
+  "order": 90
+}

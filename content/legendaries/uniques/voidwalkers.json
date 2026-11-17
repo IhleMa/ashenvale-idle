@@ -1,0 +1,10 @@
+{
+  "name": "Voidwalkers",
+  "baseId": "cloth_boots",
+  "minLevel": 20,
+  "flavor": "Each step costs a little less.",
+  "stats": { "int": [2, 0.6], "magPower": [1, 0.5] },
+  "passive": { "costPct": -0.15 },
+  "description": "Your abilities cost 15% less resource.",
+  "order": 110
+}

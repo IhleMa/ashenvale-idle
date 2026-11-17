@@ -1,0 +1,7 @@
+{
+  "name": "Sanguine",
+  "icon": "🩸",
+  "description": "When an enemy dies, the other enemies are healed for 15% of their max health.",
+  "mechanics": [{ "type": "onEnemyDeath", "action": "healAllies", "pctMaxHp": 0.15 }],
+  "order": 40
+}

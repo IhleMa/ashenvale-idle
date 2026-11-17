@@ -1,0 +1,20 @@
+{
+  "name": "Arcane Power",
+  "classId": "mage",
+  "unlockLevel": 15,
+  "type": "buff",
+  "description": "Increase your damage by 25% for 10 seconds.",
+  "cost": 10,
+  "cooldown": 35,
+  "target": "self",
+  "effects": [{ "kind": "status", "status": "arcane_power", "duration": 10 }],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [{ "type": "resource_above", "value": 60 }],
+    "target": { "selector": "self" },
+    "targetConditions": [{ "type": "target_missing_status", "status": "arcane_power" }]
+  },
+  "priority": 85,
+  "order": 130
+}

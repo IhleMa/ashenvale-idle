@@ -1,0 +1,8 @@
+{
+  "name": "Boss Hunter",
+  "description": "Defeat a zone boss.",
+  "stat": "bossKills",
+  "goal": 1,
+  "reward": { "gold": 150 },
+  "order": 50
+}

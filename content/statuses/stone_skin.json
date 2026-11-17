@@ -1,0 +1,7 @@
+{
+  "name": "Stone Skin",
+  "type": "buff",
+  "mods": { "damageTakenPct": -0.7 },
+  "description": "Takes 70% less damage.",
+  "order": 230
+}

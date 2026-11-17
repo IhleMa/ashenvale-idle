@@ -1,0 +1,10 @@
+{
+  "title": "Defeat {n} enemies",
+  "icon": "⚔",
+  "weight": 3,
+  "daily": true,
+  "target": 150,
+  "weekly": true,
+  "weeklyTarget": 1500,
+  "order": 20
+}

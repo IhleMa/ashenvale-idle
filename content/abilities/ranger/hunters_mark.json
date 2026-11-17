@@ -1,0 +1,20 @@
+{
+  "name": "Hunter's Mark",
+  "classId": "ranger",
+  "unlockLevel": 6,
+  "type": "debuff",
+  "description": "Mark a target: it takes 10% more damage for 15 seconds.",
+  "cost": 10,
+  "cooldown": 8,
+  "target": "enemy",
+  "effects": [{ "kind": "status", "status": "marked", "duration": 15 }],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [{ "type": "always" }],
+    "target": { "selector": "enemy_highest_hp" },
+    "targetConditions": [{ "type": "target_missing_status", "status": "marked" }]
+  },
+  "priority": 55,
+  "order": 320
+}

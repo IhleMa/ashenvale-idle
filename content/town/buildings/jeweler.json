@@ -1,0 +1,17 @@
+{
+  "name": "Jeweler",
+  "kind": "craft",
+  "profession": "jewelcrafting",
+  "type": "gem",
+  "maxLevel": 5,
+  "start": 0,
+  "description": "Cut rings and amulets, and reforge jewelry.",
+  "cost": { "gold": 300, "gem_fragment": 8, "metal_scrap": 8 },
+  "effects": [
+    "Craft up to item level {craftLevelCap}",
+    "Best quality: {bestQuality} ({bestQualityRarity}+)",
+    { "minLevel": 5, "text": "Greatly increased mythic chance" },
+    { "maxLevel": 4, "text": "Reforge old gear to a higher level" }
+  ],
+  "order": 80
+}

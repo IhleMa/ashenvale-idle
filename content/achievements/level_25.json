@@ -1,0 +1,8 @@
+{
+  "name": "Veteran",
+  "description": "Reach level 25 with your hero.",
+  "stat": "heroLevel",
+  "goal": 25,
+  "reward": { "gold": 2000 },
+  "order": 80
+}

@@ -1,0 +1,7 @@
+{
+  "name": "Shield Wall",
+  "type": "buff",
+  "mods": { "damageTakenPct": -0.45 },
+  "description": "Takes 45% less damage.",
+  "order": 120
+}

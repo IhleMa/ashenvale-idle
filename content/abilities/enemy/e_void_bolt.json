@@ -1,0 +1,17 @@
+{
+  "name": "Void Bolt",
+  "classId": "enemy",
+  "type": "damage",
+  "cost": 0,
+  "cooldown": 4,
+  "target": "enemy",
+  "effects": [{ "kind": "damage", "stat": "magPower", "power": 1.5, "school": "magical" }],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [{ "type": "always" }],
+    "target": { "selector": "enemy_lowest_hp_pct" },
+    "targetConditions": []
+  },
+  "order": 500
+}

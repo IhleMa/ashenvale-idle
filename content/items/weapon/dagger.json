@@ -1,0 +1,8 @@
+{
+  "name": "Dagger",
+  "slot": "weapon",
+  "classes": ["rogue"],
+  "stats": { "physPower": [3, 1.3], "critChance": [0.02, 0.0004] },
+  "material": "metal",
+  "order": 40
+}

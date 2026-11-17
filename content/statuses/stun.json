@@ -1,0 +1,1 @@
+{ "name": "Stun", "type": "debuff", "control": "stun", "description": "Cannot act.", "order": 50 }

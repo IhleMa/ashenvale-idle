@@ -1,0 +1,29 @@
+{
+  "name": "Malgrath, Lord of the Crypt",
+  "tags": ["undead", "boss"],
+  "boss": true,
+  "stats": { "hp": 2400, "physPower": 24, "magPower": 20, "defense": 12, "critChance": 0.1, "attackSpeed": 0.9 },
+  "abilities": ["b_war_stomp", "b_crushing_blow", "e_curse", "e_dark_mend"],
+  "xp": 500,
+  "gold": [150, 240],
+  "loot": { "chance": 1, "count": 3, "boost": 2.5, "minRarity": "rare" },
+  "phases": [
+    {
+      "hpBelow": 70,
+      "message": "summons his honor guard!",
+      "effects": [{ "kind": "summon", "enemyId": "barrow_wight", "count": 2, "max": 5 }]
+    },
+    {
+      "hpBelow": 40,
+      "message": "becomes a wall of bone!",
+      "effects": [{ "kind": "status", "status": "stone_skin", "duration": 8, "self": true }]
+    },
+    {
+      "hpBelow": 20,
+      "message": "enters a deathly rage!",
+      "effects": [{ "kind": "status", "status": "enrage", "duration": 999, "self": true }]
+    }
+  ],
+  "enrageAfter": 200,
+  "order": 230
+}

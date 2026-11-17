@@ -1,0 +1,9 @@
+{
+  "name": "Burn",
+  "type": "debuff",
+  "tick": "damage",
+  "school": "magical",
+  "maxStacks": 3,
+  "description": "Burning for magical damage every second.",
+  "order": 30
+}

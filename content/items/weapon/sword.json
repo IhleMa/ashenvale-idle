@@ -1,0 +1,8 @@
+{
+  "name": "Sword",
+  "slot": "weapon",
+  "classes": ["warrior", "rogue"],
+  "stats": { "physPower": [4, 1.5] },
+  "material": "metal",
+  "order": 10
+}

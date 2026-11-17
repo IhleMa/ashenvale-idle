@@ -1,0 +1,8 @@
+{
+  "name": "Seasoned",
+  "description": "Reach level 10 with your hero.",
+  "stat": "heroLevel",
+  "goal": 10,
+  "reward": { "gold": 300 },
+  "order": 70
+}

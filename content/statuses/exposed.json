@@ -1,0 +1,7 @@
+{
+  "name": "Exposed",
+  "type": "debuff",
+  "mods": { "damageTakenPct": 0.15 },
+  "description": "Takes 15% more damage.",
+  "order": 70
+}

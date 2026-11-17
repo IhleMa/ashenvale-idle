@@ -1,0 +1,8 @@
+{
+  "name": "Plate Helm",
+  "slot": "head",
+  "classes": ["warrior", "cleric"],
+  "stats": { "defense": [3, 0.9], "vit": [1, 0.3] },
+  "material": "metal",
+  "order": 130
+}

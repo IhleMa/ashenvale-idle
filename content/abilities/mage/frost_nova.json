@@ -1,0 +1,24 @@
+{
+  "name": "Frost Nova",
+  "classId": "mage",
+  "unlockLevel": 10,
+  "type": "control",
+  "description": "Freeze all enemies: 60% magic damage and stun for 1.5 seconds.",
+  "cost": 30,
+  "cooldown": 20,
+  "target": "enemy",
+  "area": true,
+  "effects": [
+    { "kind": "damage", "stat": "magPower", "power": 0.6, "school": "magical" },
+    { "kind": "status", "status": "stun", "duration": 1.5 }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [{ "type": "ally_hp_below", "value": 50 }],
+    "target": { "selector": "all_enemies" },
+    "targetConditions": []
+  },
+  "priority": 95,
+  "order": 120
+}

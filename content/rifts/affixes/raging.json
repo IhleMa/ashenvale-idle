@@ -1,0 +1,15 @@
+{
+  "name": "Raging",
+  "icon": "😡",
+  "description": "Non-boss enemies enrage below 30% health (+50% damage, +30% attack speed). Kill them quickly once they get low.",
+  "mechanics": [
+    {
+      "type": "enemyLowHealth",
+      "who": "nonBoss",
+      "below": 0.3,
+      "status": "enrage",
+      "message": "{name} becomes enraged!"
+    }
+  ],
+  "order": 50
+}

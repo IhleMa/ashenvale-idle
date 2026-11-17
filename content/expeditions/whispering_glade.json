@@ -1,0 +1,10 @@
+{
+  "name": "Whispering Glade",
+  "campLevel": 1,
+  "level": 1,
+  "bonus": "herbalism",
+  "description": "A quiet glade deep in the Whispering Woods, thick with medicinal plants.",
+  "yields": { "herb": 10, "leather_scrap": 1 },
+  "rare": { "arcane_dust": 0.4 },
+  "order": 20
+}

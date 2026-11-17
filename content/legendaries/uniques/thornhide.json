@@ -1,0 +1,19 @@
+{
+  "name": "Thornhide Carapace",
+  "baseId": "plate_chest",
+  "minLevel": 14,
+  "flavor": "Whoever strikes it, bleeds.",
+  "stats": { "vit": [2, 0.6], "defense": [2, 0.5] },
+  "procs": [
+    {
+      "name": "Thornhide",
+      "trigger": "struck",
+      "chance": 1,
+      "filter": { "school": "physical" },
+      "target": "source",
+      "effect": { "kind": "reflect", "pct": 0.2 }
+    }
+  ],
+  "description": "Reflects 20% of physical damage taken back at the attacker.",
+  "order": 50
+}

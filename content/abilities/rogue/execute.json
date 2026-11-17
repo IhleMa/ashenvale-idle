@@ -1,0 +1,20 @@
+{
+  "name": "Execute",
+  "classId": "rogue",
+  "unlockLevel": 6,
+  "type": "damage",
+  "description": "150% damage. Deals triple damage to enemies below 30% health.",
+  "cost": 30,
+  "cooldown": 6,
+  "target": "enemy",
+  "effects": [{ "kind": "damage", "stat": "physPower", "power": 1.5, "school": "physical", "executeBelow": 0.3, "executeMult": 3 }],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [{ "type": "always" }],
+    "target": { "selector": "enemy_lowest_hp" },
+    "targetConditions": []
+  },
+  "priority": 50,
+  "order": 180
+}

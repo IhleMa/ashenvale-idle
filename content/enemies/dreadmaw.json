@@ -1,0 +1,19 @@
+{
+  "name": "Dreadmaw the Ravager",
+  "tags": ["beast", "elite", "boss"],
+  "boss": true,
+  "stats": { "hp": 1900, "physPower": 26, "magPower": 6, "defense": 10, "critChance": 0.15, "attackSpeed": 1.1 },
+  "abilities": ["e_bite", "e_cleave", "b_crushing_blow", "e_frenzy"],
+  "xp": 380,
+  "gold": [110, 180],
+  "loot": { "chance": 1, "count": 2, "boost": 2.2, "minRarity": "rare" },
+  "phases": [
+    {
+      "hpBelow": 30,
+      "message": "goes into a blood frenzy!",
+      "effects": [{ "kind": "status", "status": "enrage", "duration": 999, "self": true }]
+    }
+  ],
+  "enrageAfter": 150,
+  "order": 240
+}

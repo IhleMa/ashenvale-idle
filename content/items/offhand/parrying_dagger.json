@@ -1,0 +1,8 @@
+{
+  "name": "Parrying Dagger",
+  "slot": "offhand",
+  "classes": ["rogue"],
+  "stats": { "dex": [2, 0.6], "defense": [1, 0.4] },
+  "material": "leather",
+  "order": 120
+}

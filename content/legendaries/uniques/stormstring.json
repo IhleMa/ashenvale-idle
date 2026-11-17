@@ -1,0 +1,19 @@
+{
+  "name": "Stormstring",
+  "baseId": "bow",
+  "minLevel": 12,
+  "flavor": "Every arrow calls a second one.",
+  "stats": { "dex": [3, 0.7], "attackSpeed": [0.02, 0.0006] },
+  "procs": [
+    {
+      "name": "Stormstring",
+      "trigger": "hit",
+      "chance": 0.15,
+      "icd": 0.5,
+      "target": "randomEnemy",
+      "effect": { "kind": "damage", "stat": "physPower", "power": 0.8, "school": "physical" }
+    }
+  ],
+  "description": "Hits have a 15% chance to loose an extra arrow at a random enemy for 80% Physical Power.",
+  "order": 60
+}

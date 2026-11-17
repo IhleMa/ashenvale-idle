@@ -1,0 +1,19 @@
+{
+  "name": "Grukk the Goblin Chieftain",
+  "tags": ["humanoid", "boss"],
+  "boss": true,
+  "stats": { "hp": 900, "physPower": 20, "magPower": 8, "defense": 7, "critChance": 0.1, "attackSpeed": 0.9 },
+  "abilities": ["b_crushing_blow", "e_frenzy"],
+  "xp": 160,
+  "gold": [40, 70],
+  "loot": { "chance": 1, "count": 2, "boost": 1.5, "minRarity": "uncommon" },
+  "phases": [
+    {
+      "hpBelow": 50,
+      "message": "calls for reinforcements!",
+      "effects": [{ "kind": "summon", "enemyId": "goblin", "count": 2, "max": 4 }]
+    }
+  ],
+  "enrageAfter": 120,
+  "order": 50
+}

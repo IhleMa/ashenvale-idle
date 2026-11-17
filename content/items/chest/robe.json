@@ -1,0 +1,8 @@
+{
+  "name": "Robe",
+  "slot": "chest",
+  "classes": null,
+  "stats": { "defense": [2, 0.6], "int": [2, 0.6] },
+  "material": "cloth",
+  "order": 220
+}

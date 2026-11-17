@@ -1,0 +1,10 @@
+{
+  "name": "Ravenous Ghoul",
+  "tags": ["undead", "minion"],
+  "stats": { "hp": 135, "physPower": 14, "magPower": 4, "defense": 4, "critChance": 0.08, "attackSpeed": 1.2 },
+  "abilities": ["e_bite", "e_frenzy"],
+  "xp": 18,
+  "gold": [3, 8],
+  "loot": { "chance": 0.12 },
+  "order": 80
+}

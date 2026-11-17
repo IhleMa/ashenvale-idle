@@ -1,0 +1,10 @@
+{
+  "name": "Poison",
+  "type": "debuff",
+  "tick": "damage",
+  "school": "physical",
+  "ignoreArmor": true,
+  "maxStacks": 5,
+  "description": "Takes physical damage every second. Stacks.",
+  "order": 10
+}

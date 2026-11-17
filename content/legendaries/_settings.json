@@ -1,0 +1,7 @@
+{
+  "_about": "Drop chances of unique and set items. Uniques: legendaries/uniques/, sets: legendaries/sets/.",
+  "dropChance": {
+    "unique": { "boss": 0.04, "elite": 0.01, "normal": 0.0004 },
+    "set": { "boss": 0.06, "elite": 0.015, "normal": 0.0008 }
+  }
+}

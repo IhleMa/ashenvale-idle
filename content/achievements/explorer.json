@@ -1,0 +1,8 @@
+{
+  "name": "Explorer",
+  "description": "Unlock all zones.",
+  "stat": "zonesUnlocked",
+  "goal": 5,
+  "reward": { "gold": 5000 },
+  "order": 160
+}

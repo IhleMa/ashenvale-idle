@@ -1,0 +1,25 @@
+{
+  "name": "Cinder Wyrm",
+  "tags": ["dragon", "boss"],
+  "boss": true,
+  "stats": { "hp": 1300, "physPower": 20, "magPower": 22, "defense": 11, "critChance": 0.08, "attackSpeed": 0.85 },
+  "abilities": ["b_inferno", "b_crushing_blow"],
+  "basicSchool": "magical",
+  "xp": 280,
+  "gold": [80, 130],
+  "loot": { "chance": 1, "count": 2, "boost": 2, "minRarity": "rare" },
+  "phases": [
+    {
+      "hpBelow": 70,
+      "message": "summons fire imps!",
+      "effects": [{ "kind": "summon", "enemyId": "fire_imp", "count": 2, "max": 4 }]
+    },
+    {
+      "hpBelow": 35,
+      "message": "is enraged!",
+      "effects": [{ "kind": "status", "status": "enrage", "duration": 999, "self": true }]
+    }
+  ],
+  "enrageAfter": 150,
+  "order": 140
+}

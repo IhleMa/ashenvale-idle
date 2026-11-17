@@ -1,0 +1,10 @@
+{
+  "name": "Skeleton Warrior",
+  "tags": ["undead", "minion"],
+  "stats": { "hp": 150, "physPower": 13, "magPower": 4, "defense": 8, "critChance": 0.05, "attackSpeed": 0.95 },
+  "abilities": ["e_shield_bash"],
+  "xp": 18,
+  "gold": [3, 8],
+  "loot": { "chance": 0.12 },
+  "order": 60
+}

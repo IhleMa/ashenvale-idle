@@ -1,0 +1,11 @@
+{
+  "name": "Elixir of Wisdom",
+  "level": 2,
+  "glyph": "📖",
+  "description": "+15% experience from fights.",
+  "bonus": { "xpPct": 0.15 },
+  "herbs": 9,
+  "dust": 4,
+  "gold": 120,
+  "order": 30
+}

@@ -1,0 +1,10 @@
+{
+  "name": "Kingslayer Pendant",
+  "baseId": "amulet",
+  "minLevel": 18,
+  "flavor": "Worn by those who end dynasties.",
+  "stats": { "critChance": [0.01, 0.0003], "physPower": [1, 0.4], "magPower": [1, 0.4] },
+  "passive": { "damageVsBossPct": 0.15 },
+  "description": "You deal 15% more damage to bosses.",
+  "order": 80
+}

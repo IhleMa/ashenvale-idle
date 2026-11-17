@@ -1,0 +1,7 @@
+{
+  "name": "Blessing",
+  "type": "buff",
+  "mods": { "damagePct": 0.08, "defensePct": 0.15 },
+  "description": "+8% damage, +15% defense.",
+  "order": 180
+}

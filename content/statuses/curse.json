@@ -1,0 +1,9 @@
+{
+  "name": "Curse",
+  "type": "debuff",
+  "tick": "damage",
+  "school": "magical",
+  "mods": { "healingTakenPct": -0.5 },
+  "description": "Shadow damage over time, healing received halved.",
+  "order": 110
+}

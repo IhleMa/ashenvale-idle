@@ -1,0 +1,13 @@
+{
+  "name": "Expedition Camp",
+  "kind": "core",
+  "maxLevel": 5,
+  "start": 1,
+  "description": "Send recruits out to gather ore, herbs, gems and arcane materials. Recruits on an expedition cannot fight or work.",
+  "cost": { "gold": 200, "leather_scrap": 8, "metal_scrap": 6 },
+  "effects": [
+    "{campSlots} expedition{campSlots:s} at a time", "Up to {campMembers} recruit{campMembers:s} per expedition",
+    "Unlocks farther destinations"
+  ],
+  "order": 40
+}

@@ -49,7 +49,7 @@ export function validateContent(C) {
 
   // ---- statuses
   for (const [id, s] of Object.entries(statuses)) {
-    const w = `statuses.${id}`;
+    const w = `statuses.statuses.${id}`;
     str(`${w}.name`, s.name);
     if (!['buff', 'debuff'].includes(s.type)) err(`${w}.type`, 'must be "buff" or "debuff"');
     if (s.tick && !['damage', 'heal'].includes(s.tick)) err(`${w}.tick`, 'must be "damage" or "heal"');
@@ -72,7 +72,7 @@ export function validateContent(C) {
     if (r.target?.selector && !(r.target.selector in SELECTORS)) err(`${w}.target.selector`, `unknown target "${r.target.selector}"`);
   };
   for (const [id, a] of Object.entries(abilities)) {
-    const w = `abilities.${id}`;
+    const w = `abilities.abilities.${id}`;
     str(`${w}.name`, a.name);
     if (a.classId !== 'enemy') ref(`${w}.classId`, a.classId, classes, 'class');
     if (!['enemy', 'ally', 'self'].includes(a.target)) err(`${w}.target`, 'must be "enemy", "ally" or "self"');
@@ -88,7 +88,7 @@ export function validateContent(C) {
   // ---- classes
   const roles = cfg?.roles || {};
   for (const [id, c] of Object.entries(classes)) {
-    const w = `classes.${id}`;
+    const w = `classes.classes.${id}`;
     str(`${w}.name`, c.name);
     ref(`${w}.role`, c.role, roles, 'role (config.roles)');
     for (const a of ATTRS) { num(`${w}.baseAttributes.${a}`, c.baseAttributes?.[a], { min: 0 }); num(`${w}.growth.${a}`, c.growth?.[a], { min: 0 }); }
@@ -98,7 +98,7 @@ export function validateContent(C) {
     if (!Object.values(abilities).some(a => a.classId === id)) err(w, 'has no abilities (add some with "classId" in abilities.json)');
     if (!C.skilltree?.specs?.[id]) err(w, 'has no skill tree (add a spec in skilltree.json → specs)');
   }
-  for (const [id, t] of Object.entries(C.classes?.traits || {})) { str(`traits.${id}.name`, t.name); obj(`traits.${id}.bonus`, t.bonus); }
+  for (const [id, t] of Object.entries(C.classes?.traits || {})) { str(`classes.traits.${id}.name`, t.name); obj(`classes.traits.${id}.bonus`, t.bonus); }
 
   // ---- items
   const slots = items.slots || {};
@@ -121,7 +121,7 @@ export function validateContent(C) {
 
   // ---- enemies
   for (const [id, e] of Object.entries(enemies)) {
-    const w = `enemies.${id}`;
+    const w = `enemies.enemies.${id}`;
     str(`${w}.name`, e.name);
     for (const k of ['hp', 'physPower', 'magPower', 'defense']) num(`${w}.stats.${k}`, e.stats?.[k], { min: 0 });
     if (!Array.isArray(e.tags)) err(`${w}.tags`, 'must be a list, e.g. ["beast"]');
@@ -131,7 +131,7 @@ export function validateContent(C) {
 
   // ---- zones & co-op
   for (const [id, z] of Object.entries(zones)) {
-    const w = `zones.${id}`;
+    const w = `zones.zones.${id}`;
     str(`${w}.name`, z.name);
     if (!Array.isArray(z.levelRange) || z.levelRange.length !== 2) err(`${w}.levelRange`, 'must be [min, max]');
     for (const e of z.enemies || []) ref(`${w}.enemies`, e, enemies, 'enemy');
@@ -141,8 +141,8 @@ export function validateContent(C) {
   }
   if (!Object.values(zones).some(z => !z.unlock)) err('zones', 'at least one zone must be open from the start (no "unlock")');
   for (const [id, e] of Object.entries(C.zones?.coopEncounters || {})) {
-    (e.waves || []).forEach((wave, i) => wave.forEach(en => ref(`coopEncounters.${id}.waves[${i}]`, en, enemies, 'enemy')));
-    num(`coopEncounters.${id}.minLevel`, e.minLevel, { min: 1 });
+    (e.waves || []).forEach((wave, i) => wave.forEach(en => ref(`zones.coopEncounters.${id}.waves[${i}]`, en, enemies, 'enemy')));
+    num(`zones.coopEncounters.${id}.minLevel`, e.minLevel, { min: 1 });
   }
 
   // ---- uniques & sets
@@ -152,15 +152,15 @@ export function validateContent(C) {
     checkEffect(`${w}.effect`, p.effect, PROC_EFFECT_KINDS);
   };
   for (const [id, u] of Object.entries(C.legendaries?.uniques || {})) {
-    const w = `uniques.${id}`;
+    const w = `legendaries.uniques.${id}`;
     ref(`${w}.baseId`, u.baseId, items.bases, 'item base');
     for (const k of Object.keys(u.stats || {})) if (!(k in affixStats)) err(`${w}.stats.${k}`, 'unknown stat');
     (u.procs || []).forEach((p, i) => checkProc(`${w}.procs[${i}]`, p));
     for (const k of Object.keys(u.passive || {})) if (!PASSIVES.includes(k)) err(`${w}.passive.${k}`, `unknown passive (use ${PASSIVES.join(', ')})`);
   }
   for (const [id, s] of Object.entries(C.legendaries?.sets || {})) {
-    for (const b of Object.keys(s.pieces || {})) ref(`sets.${id}.pieces`, b, items.bases, 'item base');
-    for (const [n, bonus] of Object.entries(s.bonuses || {})) (bonus.procs || []).forEach((p, i) => checkProc(`sets.${id}.bonuses.${n}.procs[${i}]`, p));
+    for (const b of Object.keys(s.pieces || {})) ref(`legendaries.sets.${id}.pieces`, b, items.bases, 'item base');
+    for (const [n, bonus] of Object.entries(s.bonuses || {})) (bonus.procs || []).forEach((p, i) => checkProc(`legendaries.sets.${id}.bonuses.${n}.procs[${i}]`, p));
   }
 
   // ---- skill trees
@@ -197,13 +197,13 @@ export function validateContent(C) {
 
   // ---- expeditions
   for (const [id, x] of Object.entries(C.expeditions?.expeditions || {})) {
-    for (const k of Object.keys(x.yields || {})) ref(`expeditions.${id}.yields`, k, materials, 'material');
-    for (const k of Object.keys(x.rare || {})) ref(`expeditions.${id}.rare`, k, materials, 'material');
-    if (x.bonus) ref(`expeditions.${id}.bonus`, x.bonus, town.professions, 'profession');
+    for (const k of Object.keys(x.yields || {})) ref(`expeditions.expeditions.${id}.yields`, k, materials, 'material');
+    for (const k of Object.keys(x.rare || {})) ref(`expeditions.expeditions.${id}.rare`, k, materials, 'material');
+    if (x.bonus) ref(`expeditions.expeditions.${id}.bonus`, x.bonus, town.professions, 'profession');
   }
 
   // ---- achievements
-  for (const [id, a] of Object.entries(C.achievements?.achievements || {})) { str(`achievements.${id}.stat`, a.stat); num(`achievements.${id}.goal`, a.goal, { min: 1 }); }
+  for (const [id, a] of Object.entries(C.achievements?.achievements || {})) { str(`achievements.achievements.${id}.stat`, a.stat); num(`achievements.achievements.${id}.goal`, a.goal, { min: 1 }); }
 
   // ---- quests
   const qc = C.quests?.config || {};
@@ -263,5 +263,14 @@ export function validateContent(C) {
   for (const [id, a] of Object.entries(C.bots?.archetypes || {})) for (const k of ['skill', 'activity', 'trader', 'crafter', 'rifter', 'social']) num(`bots.archetypes.${id}.${k}`, a[k], { min: 0, max: 1 });
   if (!(C.bots?.names || []).length) err('bots.names', 'needs at least one name');
 
-  return { errors, warnings };
+  // point messages at the file that contains the problem, e.g. "content/abilities/cleric/heal.json → effects[0].power: …"
+  const files = C._meta?.files || {};
+  const keys = Object.keys(files).sort((x, y) => y.length - x.length);
+  const locate = msg => {
+    const k = keys.find(key => msg.startsWith(`${key}.`) || msg.startsWith(`${key}:`) || msg.startsWith(`${key}[`));
+    if (!k) return msg;
+    const rest = msg.slice(k.length).replace(/^\./, '');
+    return `${files[k]} → ${rest.startsWith(':') ? rest.slice(1).trim() : rest}`;
+  };
+  return { errors: errors.map(locate), warnings: warnings.map(locate) };
 }

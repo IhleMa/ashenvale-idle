@@ -1,0 +1,21 @@
+{
+  "name": "Prayer of Healing",
+  "classId": "cleric",
+  "unlockLevel": 10,
+  "type": "heal",
+  "description": "Heal all allies for 120% healing power.",
+  "cost": 35,
+  "cooldown": 10,
+  "target": "ally",
+  "area": true,
+  "effects": [{ "kind": "heal", "stat": "healPower", "power": 1.2 }],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [{ "type": "allies_below_hp", "value": 75, "count": 2 }],
+    "target": { "selector": "all_allies" },
+    "targetConditions": []
+  },
+  "priority": 95,
+  "order": 260
+}

@@ -1,0 +1,17 @@
+{
+  "name": "Venom Spit",
+  "classId": "enemy",
+  "type": "debuff",
+  "cost": 0,
+  "cooldown": 7,
+  "target": "enemy",
+  "effects": [{ "kind": "status", "status": "poison", "duration": 8, "stat": "physPower", "power": 0.2 }],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [{ "type": "always" }],
+    "target": { "selector": "enemy_random" },
+    "targetConditions": []
+  },
+  "order": 370
+}

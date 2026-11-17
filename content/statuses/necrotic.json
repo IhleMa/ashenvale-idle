@@ -1,0 +1,8 @@
+{
+  "name": "Necrotic Wound",
+  "type": "debuff",
+  "mods": { "healingTakenPct": -0.08 },
+  "maxStacks": 8,
+  "description": "Healing received reduced by 8% per stack.",
+  "order": 100
+}

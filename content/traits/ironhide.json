@@ -1,0 +1,1 @@
+{ "name": "Ironhide", "description": "+10% Defense", "bonus": { "defensePct": 0.1 }, "order": 80 }

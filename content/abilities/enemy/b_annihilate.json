@@ -1,0 +1,17 @@
+{
+  "name": "Annihilate",
+  "classId": "enemy",
+  "type": "damage",
+  "cost": 0,
+  "cooldown": 20,
+  "target": "enemy",
+  "effects": [{ "kind": "damage", "stat": "magPower", "power": 4, "school": "magical" }],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [{ "type": "always" }],
+    "target": { "selector": "enemy_lowest_hp_pct" },
+    "targetConditions": []
+  },
+  "order": 560
+}

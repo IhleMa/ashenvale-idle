@@ -1,0 +1,10 @@
+{
+  "name": "Voidscar Rift",
+  "campLevel": 5,
+  "level": 38,
+  "bonus": "alchemy",
+  "description": "A tear in the world leaking strange reagents. Only veterans should go.",
+  "yields": { "herb": 8, "arcane_dust": 8, "magic_essence": 2 },
+  "rare": { "prismatic_shard": 0.3, "void_crystal": 0.06 },
+  "order": 70
+}

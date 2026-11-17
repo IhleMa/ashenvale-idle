@@ -1,0 +1,11 @@
+{
+  "name": "Barrow Wight",
+  "tags": ["undead", "caster", "elite"],
+  "stats": { "hp": 220, "physPower": 8, "magPower": 16, "defense": 5, "critChance": 0.06, "attackSpeed": 0.9 },
+  "basicSchool": "magical",
+  "abilities": ["e_curse", "e_chill", "e_dark_mend"],
+  "xp": 30,
+  "gold": [6, 14],
+  "loot": { "chance": 0.25, "boost": 0.5 },
+  "order": 90
+}

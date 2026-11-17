@@ -1,0 +1,7 @@
+{
+  "name": "Volcanic",
+  "icon": "🌋",
+  "description": "Every 9 seconds the ground erupts under a random hero, burning them (3% of their max health per second for 5s).",
+  "mechanics": [{ "type": "periodic", "every": 9, "target": "randomHero", "status": "burn", "duration": 5, "pctMaxHp": 0.03 }],
+  "order": 60
+}

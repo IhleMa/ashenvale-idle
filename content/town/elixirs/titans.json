@@ -1,0 +1,12 @@
+{
+  "name": "Titan's Draught",
+  "level": 4,
+  "glyph": "⛰",
+  "description": "Party gains +8% to all stats.",
+  "bonus": { "allStatsPct": 0.08 },
+  "herbs": 14,
+  "dust": 6,
+  "essence": 1,
+  "gold": 250,
+  "order": 50
+}

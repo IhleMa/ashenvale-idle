@@ -1,0 +1,18 @@
+{
+  "name": "Ground Slam",
+  "classId": "enemy",
+  "type": "damage",
+  "cost": 0,
+  "cooldown": 10,
+  "target": "enemy",
+  "area": true,
+  "effects": [{ "kind": "damage", "stat": "physPower", "power": 0.9, "school": "physical" }],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [{ "type": "always" }],
+    "target": { "selector": "all_enemies" },
+    "targetConditions": []
+  },
+  "order": 420
+}

@@ -1,0 +1,23 @@
+{
+  "name": "Sunder Armor",
+  "classId": "warrior",
+  "unlockLevel": 20,
+  "type": "debuff",
+  "description": "Deal 110% damage and reduce the target's defense by 30% for 10 seconds.",
+  "cost": 20,
+  "cooldown": 8,
+  "target": "enemy",
+  "effects": [
+    { "kind": "damage", "stat": "physPower", "power": 1.1, "school": "physical" },
+    { "kind": "status", "status": "sundered", "duration": 10 }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [{ "type": "always" }],
+    "target": { "selector": "enemy_highest_hp" },
+    "targetConditions": [{ "type": "target_missing_status", "status": "sundered" }]
+  },
+  "priority": 55,
+  "order": 70
+}

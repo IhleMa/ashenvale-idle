@@ -1,0 +1,8 @@
+{
+  "name": "Recruiter",
+  "description": "Recruit 3 companions.",
+  "stat": "recruited",
+  "goal": 3,
+  "reward": { "gold": 150 },
+  "order": 100
+}

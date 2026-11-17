@@ -1,0 +1,5 @@
+{
+  "label": "Salvage items 5+ levels below my hero",
+  "rule": { "name": "Outdated", "action": "salvage", "levelsBelowHero": 5, "rarities": ["common", "uncommon", "rare"] },
+  "order": 30
+}

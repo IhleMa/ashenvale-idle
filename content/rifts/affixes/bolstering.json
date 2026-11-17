@@ -1,0 +1,15 @@
+{
+  "name": "Bolstering",
+  "icon": "💪",
+  "description": "When an enemy dies, the other enemies gain +8% damage (stacks) and 8% more max health.",
+  "mechanics": [
+    {
+      "type": "onEnemyDeath",
+      "action": "bolster",
+      "status": "bolstered",
+      "maxHpPct": 0.08,
+      "message": "Bolstering: the remaining enemies grow stronger!"
+    }
+  ],
+  "order": 30
+}

@@ -1,0 +1,17 @@
+{
+  "name": "Dark Mend",
+  "classId": "enemy",
+  "type": "heal",
+  "cost": 0,
+  "cooldown": 8,
+  "target": "ally",
+  "effects": [{ "kind": "heal", "stat": "magPower", "power": 2 }],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [{ "type": "ally_hp_below", "value": 60 }],
+    "target": { "selector": "ally_lowest_hp_pct" },
+    "targetConditions": [{ "type": "target_hp_below", "value": 60 }]
+  },
+  "order": 430
+}

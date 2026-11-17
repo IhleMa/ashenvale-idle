@@ -1,0 +1,7 @@
+{
+  "name": "Arcane Power",
+  "type": "buff",
+  "mods": { "damagePct": 0.25 },
+  "description": "Deals 25% more damage.",
+  "order": 210
+}

@@ -1,0 +1,20 @@
+{
+  "name": "Expose Weakness",
+  "classId": "rogue",
+  "unlockLevel": 15,
+  "type": "debuff",
+  "description": "The target takes 15% more damage from all sources for 10 seconds.",
+  "cost": 20,
+  "cooldown": 15,
+  "target": "enemy",
+  "effects": [{ "kind": "status", "status": "exposed", "duration": 10 }],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [{ "type": "always" }],
+    "target": { "selector": "enemy_highest_hp" },
+    "targetConditions": [{ "type": "target_missing_status", "status": "exposed" }]
+  },
+  "priority": 70,
+  "order": 200
+}

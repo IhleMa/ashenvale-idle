@@ -1,0 +1,24 @@
+{
+  "name": "Meteor",
+  "classId": "mage",
+  "unlockLevel": 22,
+  "type": "damage",
+  "description": "Call down a meteor: 260% magic damage to all enemies and burns them.",
+  "cost": 60,
+  "cooldown": 30,
+  "target": "enemy",
+  "area": true,
+  "effects": [
+    { "kind": "damage", "stat": "magPower", "power": 2.6, "school": "magical" },
+    { "kind": "status", "status": "burn", "duration": 6, "stat": "magPower", "power": 0.2 }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [{ "type": "always" }],
+    "target": { "selector": "all_enemies" },
+    "targetConditions": []
+  },
+  "priority": 80,
+  "order": 140
+}

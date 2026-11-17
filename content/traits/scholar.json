@@ -1,0 +1,1 @@
+{ "name": "Scholar", "description": "+6% Intelligence", "bonus": { "intPct": 0.06 }, "order": 40 }

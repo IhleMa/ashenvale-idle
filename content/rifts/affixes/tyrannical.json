@@ -1,0 +1,7 @@
+{
+  "name": "Tyrannical",
+  "icon": "👑",
+  "description": "The Rift Guardian has 35% more health and deals 15% more damage.",
+  "mechanics": [{ "type": "enemyStats", "who": "boss", "hpPct": 0.35, "damagePct": 0.15 }],
+  "order": 20
+}

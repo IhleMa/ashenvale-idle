@@ -1,0 +1,9 @@
+{
+  "title": "Salvage {n} items",
+  "icon": "🔨",
+  "weight": 2,
+  "daily": true,
+  "target": 10,
+  "requires": "town",
+  "order": 90
+}

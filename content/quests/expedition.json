@@ -1,0 +1,11 @@
+{
+  "title": "Complete {n} expeditions",
+  "icon": "🧭",
+  "weight": 2,
+  "daily": true,
+  "target": 2,
+  "weekly": true,
+  "weeklyTarget": 10,
+  "requires": "expedition",
+  "order": 80
+}

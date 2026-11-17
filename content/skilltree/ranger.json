@@ -1,0 +1,42 @@
+{
+  "start": "aimed_shot",
+  "branches": [
+    {
+      "name": "Marksmanship",
+      "attrs": ["dex", "str"],
+      "abilities": { "3": "hunters_mark", "7": "kill_shot" },
+      "notables": {
+        "4": { "name": "Steady Aim", "stats": { "critChance": 0.04 } },
+        "8": { "name": "Deadeye", "stats": { "critDamage": 0.35 } }
+      }
+    },
+    {
+      "name": "Barrage",
+      "attrs": ["dex", "vit"],
+      "abilities": { "2": "multi_shot", "6": "volley" },
+      "notables": {
+        "4": { "name": "Barbed Arrows", "stats": { "physPowerPct": 0.08 } },
+        "8": { "name": "Arrowstorm", "stats": { "damagePct": 0.1 } }
+      }
+    },
+    {
+      "name": "Wilds",
+      "attrs": ["dex", "int"],
+      "abilities": { "1": "serpent_sting" },
+      "notables": {
+        "4": { "name": "Venomcraft", "stats": { "damagePct": 0.06 } },
+        "8": { "name": "Apex Predator", "stats": { "physPowerPct": 0.12 } }
+      }
+    },
+    {
+      "name": "Swiftness",
+      "attrs": ["dex", "vit"],
+      "abilities": { "5": "rapid_fire" },
+      "notables": {
+        "4": { "name": "Quickdraw", "stats": { "attackSpeed": 0.08 } },
+        "8": { "name": "Wind Runner", "stats": { "attackSpeed": 0.1, "hpPct": 0.06 } }
+      }
+    }
+  ],
+  "order": 50
+}

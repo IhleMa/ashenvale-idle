@@ -1,0 +1,10 @@
+{
+  "label": "Trader",
+  "skill": 0.6,
+  "activity": 0.5,
+  "trader": 0.9,
+  "crafter": 0.5,
+  "rifter": 0.2,
+  "social": 0.3,
+  "order": 30
+}

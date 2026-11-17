@@ -1,0 +1,7 @@
+{
+  "name": "Necrotic",
+  "icon": "☠",
+  "description": "Enemy attacks inflict Necrotic Wounds: healing received −8% per stack (up to 8). Hits your tank hardest — strong healing and cleanses help.",
+  "mechanics": [{ "type": "onEnemyHit", "basicAttacksOnly": true, "status": "necrotic", "duration": 6 }],
+  "order": 70
+}

@@ -1,0 +1,10 @@
+{
+  "label": "Keep Rare+ with crit stats",
+  "rule": {
+    "name": "Crit gear",
+    "action": "keep",
+    "rarities": ["rare", "epic", "legendary", "mythic"],
+    "anyStats": ["critChance", "critDamage"]
+  },
+  "order": 40
+}

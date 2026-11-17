@@ -1,0 +1,9 @@
+{
+  "name": "Emberfall Caverns",
+  "levelRange": [13, 23],
+  "order": 3,
+  "description": "Volcanic tunnels swarming with imps, golems and fanatics.",
+  "enemies": ["fire_imp", "magma_golem", "ash_cultist"],
+  "boss": "cinder_wyrm",
+  "unlock": "ashen_barrows"
+}

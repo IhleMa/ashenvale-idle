@@ -1,0 +1,20 @@
+{
+  "name": "Emberheart",
+  "baseId": "staff",
+  "minLevel": 8,
+  "flavor": "Still warm from the forge of the Cinder Wyrm.",
+  "stats": { "int": [3, 0.7], "critChance": [0.02, 0.0004] },
+  "procs": [
+    {
+      "name": "Emberheart",
+      "trigger": "hit",
+      "chance": 0.2,
+      "icd": 1,
+      "filter": { "school": "magical" },
+      "target": "target",
+      "effect": { "kind": "status", "status": "burn", "duration": 5, "stat": "magPower", "power": 0.3 }
+    }
+  ],
+  "description": "Magic damage has a 20% chance to ignite the target, burning for 30% Magic Power per second for 5s.",
+  "order": 10
+}

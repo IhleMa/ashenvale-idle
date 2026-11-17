@@ -7,11 +7,11 @@ See [CONTENT.md](CONTENT.md) for how the files work.
 
 | id | name | role | resource |
 | --- | --- | --- | --- |
-| `warrior` | Warrior | tank | Rage |
-| `mage` | Mage | damage | Mana |
-| `rogue` | Rogue | damage | Energy |
-| `cleric` | Cleric | healer | Mana |
-| `ranger` | Ranger | damage | Focus |
+| [`warrior`](content/classes/warrior.json) | Warrior | tank | Rage |
+| [`mage`](content/classes/mage.json) | Mage | damage | Mana |
+| [`rogue`](content/classes/rogue.json) | Rogue | damage | Energy |
+| [`cleric`](content/classes/cleric.json) | Cleric | healer | Mana |
+| [`ranger`](content/classes/ranger.json) | Ranger | damage | Focus |
 
 Roles (config.json → roles): `tank`, `healer`, `damage`, `support`
 
@@ -19,62 +19,62 @@ Roles (config.json → roles): `tank`, `healer`, `damage`, `support`
 
 | id | name | class | type | cooldown | target |
 | --- | --- | --- | --- | --- | --- |
-| `heroic_strike` | Heroic Strike | warrior | damage | 3 | enemy |
-| `taunt` | Taunt | warrior | control | 10 | self |
-| `shield_wall` | Shield Wall | warrior | buff | 25 | self |
-| `cleave` | Cleave | warrior | damage | 6 | enemy |
-| `shield_bash` | Shield Bash | warrior | control | 14 | enemy |
-| `battle_cry` | Battle Cry | warrior | buff | 30 | ally |
-| `sunder_armor` | Sunder Armor | warrior | debuff | 8 | enemy |
-| `fireball` | Fireball | mage | damage | 3 | enemy |
-| `frost_bolt` | Frost Bolt | mage | debuff | 4 | enemy |
-| `arcane_missiles` | Arcane Missiles | mage | damage | 7 | enemy |
-| `flame_wave` | Flame Wave | mage | damage | 9 | enemy |
-| `frost_nova` | Frost Nova | mage | control | 20 | enemy |
-| `arcane_power` | Arcane Power | mage | buff | 35 | self |
-| `meteor` | Meteor | mage | damage | 30 | enemy |
-| `backstab` | Backstab | rogue | damage | 3 | enemy |
-| `poison_blade` | Poison Blade | rogue | debuff | 4 | enemy |
-| `evasion` | Evasion | rogue | buff | 25 | self |
-| `execute` | Execute | rogue | damage | 6 | enemy |
-| `rupture` | Rupture | rogue | debuff | 10 | enemy |
-| `expose_weakness` | Expose Weakness | rogue | debuff | 15 | enemy |
-| `shadow_flurry` | Shadow Flurry | rogue | damage | 14 | enemy |
-| `heal` | Heal | cleric | heal | 2.5 | ally |
-| `smite` | Smite | cleric | damage | 3 | enemy |
-| `renew` | Renew | cleric | heal | 4 | ally |
-| `purify` | Purify | cleric | utility | 6 | ally |
-| `prayer_of_healing` | Prayer of Healing | cleric | heal | 10 | ally |
-| `power_word_barrier` | Power Word: Barrier | cleric | buff | 12 | ally |
-| `divine_blessing` | Divine Blessing | cleric | buff | 35 | ally |
-| `aimed_shot` | Aimed Shot | ranger | damage | 4 | enemy |
-| `serpent_sting` | Serpent Sting | ranger | debuff | 3 | enemy |
-| `multi_shot` | Multi-Shot | ranger | damage | 6 | enemy |
-| `hunters_mark` | Hunter's Mark | ranger | debuff | 8 | enemy |
-| `rapid_fire` | Rapid Fire | ranger | buff | 30 | self |
-| `volley` | Volley | ranger | damage | 14 | enemy |
-| `kill_shot` | Kill Shot | ranger | damage | 10 | enemy |
-| `e_bite` | Savage Bite | enemy | damage | 6 | enemy |
-| `e_venom` | Venom Spit | enemy | debuff | 7 | enemy |
-| `e_stab` | Dirty Stab | enemy | damage | 5 | enemy |
-| `e_shield_bash` | Shield Bash | enemy | control | 12 | enemy |
-| `e_bone_arrow` | Bone Arrow | enemy | damage | 5 | enemy |
-| `e_firebolt` | Firebolt | enemy | damage | 4 | enemy |
-| `e_slam` | Ground Slam | enemy | damage | 10 | enemy |
-| `e_dark_mend` | Dark Mend | enemy | heal | 8 | ally |
-| `e_curse` | Curse of Ash | enemy | debuff | 10 | enemy |
-| `e_regenerate` | Regenerate | enemy | heal | 20 | self |
-| `e_chill` | Chilling Touch | enemy | debuff | 7 | enemy |
-| `e_weaken` | Enfeeble | enemy | debuff | 12 | enemy |
-| `e_frenzy` | Frenzy | enemy | buff | 25 | self |
-| `e_cleave` | Brutal Cleave | enemy | damage | 8 | enemy |
-| `e_void_bolt` | Void Bolt | enemy | damage | 4 | enemy |
-| `b_war_stomp` | War Stomp | enemy | control | 18 | enemy |
-| `b_crushing_blow` | Crushing Blow | enemy | damage | 12 | enemy |
-| `b_inferno` | Inferno | enemy | damage | 15 | enemy |
-| `b_blizzard` | Blizzard | enemy | damage | 16 | enemy |
-| `b_void_rift` | Void Rift | enemy | damage | 14 | enemy |
-| `b_annihilate` | Annihilate | enemy | damage | 20 | enemy |
+| [`heroic_strike`](content/abilities/warrior/heroic_strike.json) | Heroic Strike | warrior | damage | 3 | enemy |
+| [`taunt`](content/abilities/warrior/taunt.json) | Taunt | warrior | control | 10 | self |
+| [`shield_wall`](content/abilities/warrior/shield_wall.json) | Shield Wall | warrior | buff | 25 | self |
+| [`cleave`](content/abilities/warrior/cleave.json) | Cleave | warrior | damage | 6 | enemy |
+| [`shield_bash`](content/abilities/warrior/shield_bash.json) | Shield Bash | warrior | control | 14 | enemy |
+| [`battle_cry`](content/abilities/warrior/battle_cry.json) | Battle Cry | warrior | buff | 30 | ally |
+| [`sunder_armor`](content/abilities/warrior/sunder_armor.json) | Sunder Armor | warrior | debuff | 8 | enemy |
+| [`fireball`](content/abilities/mage/fireball.json) | Fireball | mage | damage | 3 | enemy |
+| [`frost_bolt`](content/abilities/mage/frost_bolt.json) | Frost Bolt | mage | debuff | 4 | enemy |
+| [`arcane_missiles`](content/abilities/mage/arcane_missiles.json) | Arcane Missiles | mage | damage | 7 | enemy |
+| [`flame_wave`](content/abilities/mage/flame_wave.json) | Flame Wave | mage | damage | 9 | enemy |
+| [`frost_nova`](content/abilities/mage/frost_nova.json) | Frost Nova | mage | control | 20 | enemy |
+| [`arcane_power`](content/abilities/mage/arcane_power.json) | Arcane Power | mage | buff | 35 | self |
+| [`meteor`](content/abilities/mage/meteor.json) | Meteor | mage | damage | 30 | enemy |
+| [`backstab`](content/abilities/rogue/backstab.json) | Backstab | rogue | damage | 3 | enemy |
+| [`poison_blade`](content/abilities/rogue/poison_blade.json) | Poison Blade | rogue | debuff | 4 | enemy |
+| [`evasion`](content/abilities/rogue/evasion.json) | Evasion | rogue | buff | 25 | self |
+| [`execute`](content/abilities/rogue/execute.json) | Execute | rogue | damage | 6 | enemy |
+| [`rupture`](content/abilities/rogue/rupture.json) | Rupture | rogue | debuff | 10 | enemy |
+| [`expose_weakness`](content/abilities/rogue/expose_weakness.json) | Expose Weakness | rogue | debuff | 15 | enemy |
+| [`shadow_flurry`](content/abilities/rogue/shadow_flurry.json) | Shadow Flurry | rogue | damage | 14 | enemy |
+| [`heal`](content/abilities/cleric/heal.json) | Heal | cleric | heal | 2.5 | ally |
+| [`smite`](content/abilities/cleric/smite.json) | Smite | cleric | damage | 3 | enemy |
+| [`renew`](content/abilities/cleric/renew.json) | Renew | cleric | heal | 4 | ally |
+| [`purify`](content/abilities/cleric/purify.json) | Purify | cleric | utility | 6 | ally |
+| [`prayer_of_healing`](content/abilities/cleric/prayer_of_healing.json) | Prayer of Healing | cleric | heal | 10 | ally |
+| [`power_word_barrier`](content/abilities/cleric/power_word_barrier.json) | Power Word: Barrier | cleric | buff | 12 | ally |
+| [`divine_blessing`](content/abilities/cleric/divine_blessing.json) | Divine Blessing | cleric | buff | 35 | ally |
+| [`aimed_shot`](content/abilities/ranger/aimed_shot.json) | Aimed Shot | ranger | damage | 4 | enemy |
+| [`serpent_sting`](content/abilities/ranger/serpent_sting.json) | Serpent Sting | ranger | debuff | 3 | enemy |
+| [`multi_shot`](content/abilities/ranger/multi_shot.json) | Multi-Shot | ranger | damage | 6 | enemy |
+| [`hunters_mark`](content/abilities/ranger/hunters_mark.json) | Hunter's Mark | ranger | debuff | 8 | enemy |
+| [`rapid_fire`](content/abilities/ranger/rapid_fire.json) | Rapid Fire | ranger | buff | 30 | self |
+| [`volley`](content/abilities/ranger/volley.json) | Volley | ranger | damage | 14 | enemy |
+| [`kill_shot`](content/abilities/ranger/kill_shot.json) | Kill Shot | ranger | damage | 10 | enemy |
+| [`e_bite`](content/abilities/enemy/e_bite.json) | Savage Bite | enemy | damage | 6 | enemy |
+| [`e_venom`](content/abilities/enemy/e_venom.json) | Venom Spit | enemy | debuff | 7 | enemy |
+| [`e_stab`](content/abilities/enemy/e_stab.json) | Dirty Stab | enemy | damage | 5 | enemy |
+| [`e_shield_bash`](content/abilities/enemy/e_shield_bash.json) | Shield Bash | enemy | control | 12 | enemy |
+| [`e_bone_arrow`](content/abilities/enemy/e_bone_arrow.json) | Bone Arrow | enemy | damage | 5 | enemy |
+| [`e_firebolt`](content/abilities/enemy/e_firebolt.json) | Firebolt | enemy | damage | 4 | enemy |
+| [`e_slam`](content/abilities/enemy/e_slam.json) | Ground Slam | enemy | damage | 10 | enemy |
+| [`e_dark_mend`](content/abilities/enemy/e_dark_mend.json) | Dark Mend | enemy | heal | 8 | ally |
+| [`e_curse`](content/abilities/enemy/e_curse.json) | Curse of Ash | enemy | debuff | 10 | enemy |
+| [`e_regenerate`](content/abilities/enemy/e_regenerate.json) | Regenerate | enemy | heal | 20 | self |
+| [`e_chill`](content/abilities/enemy/e_chill.json) | Chilling Touch | enemy | debuff | 7 | enemy |
+| [`e_weaken`](content/abilities/enemy/e_weaken.json) | Enfeeble | enemy | debuff | 12 | enemy |
+| [`e_frenzy`](content/abilities/enemy/e_frenzy.json) | Frenzy | enemy | buff | 25 | self |
+| [`e_cleave`](content/abilities/enemy/e_cleave.json) | Brutal Cleave | enemy | damage | 8 | enemy |
+| [`e_void_bolt`](content/abilities/enemy/e_void_bolt.json) | Void Bolt | enemy | damage | 4 | enemy |
+| [`b_war_stomp`](content/abilities/enemy/b_war_stomp.json) | War Stomp | enemy | control | 18 | enemy |
+| [`b_crushing_blow`](content/abilities/enemy/b_crushing_blow.json) | Crushing Blow | enemy | damage | 12 | enemy |
+| [`b_inferno`](content/abilities/enemy/b_inferno.json) | Inferno | enemy | damage | 15 | enemy |
+| [`b_blizzard`](content/abilities/enemy/b_blizzard.json) | Blizzard | enemy | damage | 16 | enemy |
+| [`b_void_rift`](content/abilities/enemy/b_void_rift.json) | Void Rift | enemy | damage | 14 | enemy |
+| [`b_annihilate`](content/abilities/enemy/b_annihilate.json) | Annihilate | enemy | damage | 20 | enemy |
 
 ### Effect kinds (abilities, boss phases)
 
@@ -151,31 +151,31 @@ Target selectors (`target.selector`):
 
 | id | name | type | description |
 | --- | --- | --- | --- |
-| `poison` | Poison | debuff | Takes physical damage every second. Stacks. |
-| `bleed` | Bleed | debuff | Bleeding for damage every second. |
-| `burn` | Burn | debuff | Burning for magical damage every second. |
-| `frostbite` | Frostbite | debuff | Attack speed reduced by 25%. |
-| `stun` | Stun | debuff | Cannot act. |
-| `weakened` | Weakened | debuff | Deals 20% less damage. |
-| `exposed` | Exposed | debuff | Takes 15% more damage. |
-| `marked` | Hunter's Mark | debuff | Takes 10% more damage. |
-| `sundered` | Sundered | debuff | Defense reduced by 30%. |
-| `necrotic` | Necrotic Wound | debuff | Healing received reduced by 8% per stack. |
-| `curse` | Curse | debuff | Shadow damage over time, healing received halved. |
-| `shield_wall` | Shield Wall | buff | Takes 45% less damage. |
-| `taunting` | Taunting | buff | Enemies are forced to attack this unit. |
-| `fortified` | Fortified | buff | Defense increased by 35%. |
-| `battle_cry` | Battle Cry | buff | Deals 15% more damage. |
-| `renew` | Renew | buff | Restores health every second. |
-| `barrier` | Barrier | buff | Absorbs incoming damage. |
-| `blessing` | Blessing | buff | +8% damage, +15% defense. |
-| `evasion` | Evasion | buff | 50% chance to dodge attacks. |
-| `rapid_fire` | Rapid Fire | buff | Attack speed +40%. |
-| `arcane_power` | Arcane Power | buff | Deals 25% more damage. |
-| `enrage` | Enrage | buff | Greatly increased damage and speed. |
-| `stone_skin` | Stone Skin | buff | Takes 70% less damage. |
-| `bolstered` | Bolstered | buff | Empowered by a fallen ally: +8% damage per stack. |
-| `regeneration` | Regeneration | buff | Regenerating health. |
+| [`poison`](content/statuses/poison.json) | Poison | debuff | Takes physical damage every second. Stacks. |
+| [`bleed`](content/statuses/bleed.json) | Bleed | debuff | Bleeding for damage every second. |
+| [`burn`](content/statuses/burn.json) | Burn | debuff | Burning for magical damage every second. |
+| [`frostbite`](content/statuses/frostbite.json) | Frostbite | debuff | Attack speed reduced by 25%. |
+| [`stun`](content/statuses/stun.json) | Stun | debuff | Cannot act. |
+| [`weakened`](content/statuses/weakened.json) | Weakened | debuff | Deals 20% less damage. |
+| [`exposed`](content/statuses/exposed.json) | Exposed | debuff | Takes 15% more damage. |
+| [`marked`](content/statuses/marked.json) | Hunter's Mark | debuff | Takes 10% more damage. |
+| [`sundered`](content/statuses/sundered.json) | Sundered | debuff | Defense reduced by 30%. |
+| [`necrotic`](content/statuses/necrotic.json) | Necrotic Wound | debuff | Healing received reduced by 8% per stack. |
+| [`curse`](content/statuses/curse.json) | Curse | debuff | Shadow damage over time, healing received halved. |
+| [`shield_wall`](content/statuses/shield_wall.json) | Shield Wall | buff | Takes 45% less damage. |
+| [`taunting`](content/statuses/taunting.json) | Taunting | buff | Enemies are forced to attack this unit. |
+| [`fortified`](content/statuses/fortified.json) | Fortified | buff | Defense increased by 35%. |
+| [`battle_cry`](content/statuses/battle_cry.json) | Battle Cry | buff | Deals 15% more damage. |
+| [`renew`](content/statuses/renew.json) | Renew | buff | Restores health every second. |
+| [`barrier`](content/statuses/barrier.json) | Barrier | buff | Absorbs incoming damage. |
+| [`blessing`](content/statuses/blessing.json) | Blessing | buff | +8% damage, +15% defense. |
+| [`evasion`](content/statuses/evasion.json) | Evasion | buff | 50% chance to dodge attacks. |
+| [`rapid_fire`](content/statuses/rapid_fire.json) | Rapid Fire | buff | Attack speed +40%. |
+| [`arcane_power`](content/statuses/arcane_power.json) | Arcane Power | buff | Deals 25% more damage. |
+| [`enrage`](content/statuses/enrage.json) | Enrage | buff | Greatly increased damage and speed. |
+| [`stone_skin`](content/statuses/stone_skin.json) | Stone Skin | buff | Takes 70% less damage. |
+| [`bolstered`](content/statuses/bolstered.json) | Bolstered | buff | Empowered by a fallen ally: +8% damage per stack. |
+| [`regeneration`](content/statuses/regeneration.json) | Regeneration | buff | Regenerating health. |
 
 ## Stats
 
@@ -189,32 +189,32 @@ Slots: `weapon`, `offhand`, `head`, `chest`, `hands`, `feet`, `ring`, `amulet`
 
 | id | name | slot | material | classes |
 | --- | --- | --- | --- | --- |
-| `sword` | Sword | weapon | metal | warrior, rogue |
-| `axe` | Battleaxe | weapon | metal | warrior |
-| `mace` | Mace | weapon | metal | warrior, cleric |
-| `dagger` | Dagger | weapon | metal | rogue |
-| `staff` | Staff | weapon | cloth | mage, cleric |
-| `wand` | Wand | weapon | cloth | mage, cleric |
-| `bow` | Longbow | weapon | leather | ranger |
-| `crossbow` | Crossbow | weapon | metal | ranger |
-| `shield` | Shield | offhand | metal | warrior, cleric |
-| `tome` | Tome | offhand | cloth | mage, cleric |
-| `quiver` | Quiver | offhand | leather | ranger |
-| `parrying_dagger` | Parrying Dagger | offhand | leather | rogue |
-| `plate_helm` | Plate Helm | head | metal | warrior, cleric |
-| `plate_chest` | Plate Armor | chest | metal | warrior, cleric |
-| `plate_gloves` | Gauntlets | hands | metal | warrior, cleric |
-| `plate_boots` | Sabatons | feet | metal | warrior, cleric |
-| `leather_hood` | Leather Hood | head | leather | rogue, ranger, warrior |
-| `leather_chest` | Leather Jerkin | chest | leather | rogue, ranger, warrior |
-| `leather_gloves` | Leather Gloves | hands | leather | rogue, ranger, warrior |
-| `leather_boots` | Leather Boots | feet | leather | rogue, ranger, warrior |
-| `cloth_hat` | Cloth Hat | head | cloth | all |
-| `robe` | Robe | chest | cloth | all |
-| `cloth_gloves` | Silk Gloves | hands | cloth | all |
-| `cloth_boots` | Sandals | feet | cloth | all |
-| `ring` | Ring | ring | gem | all |
-| `amulet` | Amulet | amulet | gem | all |
+| [`sword`](content/items/weapon/sword.json) | Sword | weapon | metal | warrior, rogue |
+| [`axe`](content/items/weapon/axe.json) | Battleaxe | weapon | metal | warrior |
+| [`mace`](content/items/weapon/mace.json) | Mace | weapon | metal | warrior, cleric |
+| [`dagger`](content/items/weapon/dagger.json) | Dagger | weapon | metal | rogue |
+| [`staff`](content/items/weapon/staff.json) | Staff | weapon | cloth | mage, cleric |
+| [`wand`](content/items/weapon/wand.json) | Wand | weapon | cloth | mage, cleric |
+| [`bow`](content/items/weapon/bow.json) | Longbow | weapon | leather | ranger |
+| [`crossbow`](content/items/weapon/crossbow.json) | Crossbow | weapon | metal | ranger |
+| [`shield`](content/items/offhand/shield.json) | Shield | offhand | metal | warrior, cleric |
+| [`tome`](content/items/offhand/tome.json) | Tome | offhand | cloth | mage, cleric |
+| [`quiver`](content/items/offhand/quiver.json) | Quiver | offhand | leather | ranger |
+| [`parrying_dagger`](content/items/offhand/parrying_dagger.json) | Parrying Dagger | offhand | leather | rogue |
+| [`plate_helm`](content/items/head/plate_helm.json) | Plate Helm | head | metal | warrior, cleric |
+| [`plate_chest`](content/items/chest/plate_chest.json) | Plate Armor | chest | metal | warrior, cleric |
+| [`plate_gloves`](content/items/hands/plate_gloves.json) | Gauntlets | hands | metal | warrior, cleric |
+| [`plate_boots`](content/items/feet/plate_boots.json) | Sabatons | feet | metal | warrior, cleric |
+| [`leather_hood`](content/items/head/leather_hood.json) | Leather Hood | head | leather | rogue, ranger, warrior |
+| [`leather_chest`](content/items/chest/leather_chest.json) | Leather Jerkin | chest | leather | rogue, ranger, warrior |
+| [`leather_gloves`](content/items/hands/leather_gloves.json) | Leather Gloves | hands | leather | rogue, ranger, warrior |
+| [`leather_boots`](content/items/feet/leather_boots.json) | Leather Boots | feet | leather | rogue, ranger, warrior |
+| [`cloth_hat`](content/items/head/cloth_hat.json) | Cloth Hat | head | cloth | all |
+| [`robe`](content/items/chest/robe.json) | Robe | chest | cloth | all |
+| [`cloth_gloves`](content/items/hands/cloth_gloves.json) | Silk Gloves | hands | cloth | all |
+| [`cloth_boots`](content/items/feet/cloth_boots.json) | Sandals | feet | cloth | all |
+| [`ring`](content/items/ring/ring.json) | Ring | ring | gem | all |
+| [`amulet`](content/items/amulet/amulet.json) | Amulet | amulet | gem | all |
 
 ## Materials
 
@@ -255,73 +255,73 @@ Building effect template values: `{level}`, `{concurrentBuilds}`, `{innRoster}`,
 
 | id | name | tags | abilities |
 | --- | --- | --- | --- |
-| `wolf` | Grey Wolf | beast, minion | e_bite |
-| `goblin` | Goblin Cutthroat | humanoid, minion | e_stab |
-| `forest_spider` | Forest Spider | beast, minion | e_venom |
-| `goblin_shaman` | Goblin Shaman | humanoid, caster | e_dark_mend, e_firebolt |
-| `goblin_chieftain` | Grukk the Goblin Chieftain (boss) | humanoid, boss | b_crushing_blow, e_frenzy |
-| `skeleton_warrior` | Skeleton Warrior | undead, minion | e_shield_bash |
-| `bone_archer` | Bone Archer | undead, minion | e_bone_arrow |
-| `ghoul` | Ravenous Ghoul | undead, minion | e_bite, e_frenzy |
-| `barrow_wight` | Barrow Wight | undead, caster, elite | e_curse, e_chill, e_dark_mend |
-| `barrow_king` | The Barrow King (boss) | undead, boss | b_war_stomp, b_crushing_blow, e_curse |
-| `fire_imp` | Fire Imp | demon, caster, minion | e_firebolt |
-| `magma_golem` | Magma Golem | elemental, minion | e_slam |
-| `ash_cultist` | Ash Cultist | humanoid, caster, minion | e_dark_mend, e_curse |
-| `cinder_wyrm` | Cinder Wyrm (boss) | dragon, boss | b_inferno, b_crushing_blow |
-| `ice_wraith` | Ice Wraith | undead, caster, minion | e_chill |
-| `frost_troll` | Frost Troll | giant, minion | e_regenerate, e_cleave |
-| `yeti` | Yeti | beast, minion | e_bite, e_frenzy |
-| `frost_matriarch` | The Frost Matriarch (boss) | giant, boss | b_blizzard, b_war_stomp, e_regenerate |
-| `void_stalker` | Void Stalker | void, minion | e_stab, e_weaken |
-| `abyssal_priest` | Abyssal Priest | void, caster, minion | e_dark_mend, e_void_bolt, e_curse |
-| `void_horror` | Void Horror | void, elite | e_cleave, e_void_bolt |
-| `hollow_sovereign` | The Hollow Sovereign (boss) | void, boss | b_void_rift, b_annihilate, e_weaken |
-| `crypt_lord` | Malgrath, Lord of the Crypt (boss) | undead, boss | b_war_stomp, b_crushing_blow, e_curse, e_dark_mend |
-| `dreadmaw` | Dreadmaw the Ravager (boss) | beast, elite, boss | e_bite, e_cleave, b_crushing_blow, e_frenzy |
-| `ashen_colossus` | The Ashen Colossus (boss) | giant, boss, world_boss | b_war_stomp, b_inferno, b_crushing_blow, b_annihilate |
+| [`wolf`](content/enemies/wolf.json) | Grey Wolf | beast, minion | e_bite |
+| [`goblin`](content/enemies/goblin.json) | Goblin Cutthroat | humanoid, minion | e_stab |
+| [`forest_spider`](content/enemies/forest_spider.json) | Forest Spider | beast, minion | e_venom |
+| [`goblin_shaman`](content/enemies/goblin_shaman.json) | Goblin Shaman | humanoid, caster | e_dark_mend, e_firebolt |
+| [`goblin_chieftain`](content/enemies/goblin_chieftain.json) | Grukk the Goblin Chieftain (boss) | humanoid, boss | b_crushing_blow, e_frenzy |
+| [`skeleton_warrior`](content/enemies/skeleton_warrior.json) | Skeleton Warrior | undead, minion | e_shield_bash |
+| [`bone_archer`](content/enemies/bone_archer.json) | Bone Archer | undead, minion | e_bone_arrow |
+| [`ghoul`](content/enemies/ghoul.json) | Ravenous Ghoul | undead, minion | e_bite, e_frenzy |
+| [`barrow_wight`](content/enemies/barrow_wight.json) | Barrow Wight | undead, caster, elite | e_curse, e_chill, e_dark_mend |
+| [`barrow_king`](content/enemies/barrow_king.json) | The Barrow King (boss) | undead, boss | b_war_stomp, b_crushing_blow, e_curse |
+| [`fire_imp`](content/enemies/fire_imp.json) | Fire Imp | demon, caster, minion | e_firebolt |
+| [`magma_golem`](content/enemies/magma_golem.json) | Magma Golem | elemental, minion | e_slam |
+| [`ash_cultist`](content/enemies/ash_cultist.json) | Ash Cultist | humanoid, caster, minion | e_dark_mend, e_curse |
+| [`cinder_wyrm`](content/enemies/cinder_wyrm.json) | Cinder Wyrm (boss) | dragon, boss | b_inferno, b_crushing_blow |
+| [`ice_wraith`](content/enemies/ice_wraith.json) | Ice Wraith | undead, caster, minion | e_chill |
+| [`frost_troll`](content/enemies/frost_troll.json) | Frost Troll | giant, minion | e_regenerate, e_cleave |
+| [`yeti`](content/enemies/yeti.json) | Yeti | beast, minion | e_bite, e_frenzy |
+| [`frost_matriarch`](content/enemies/frost_matriarch.json) | The Frost Matriarch (boss) | giant, boss | b_blizzard, b_war_stomp, e_regenerate |
+| [`void_stalker`](content/enemies/void_stalker.json) | Void Stalker | void, minion | e_stab, e_weaken |
+| [`abyssal_priest`](content/enemies/abyssal_priest.json) | Abyssal Priest | void, caster, minion | e_dark_mend, e_void_bolt, e_curse |
+| [`void_horror`](content/enemies/void_horror.json) | Void Horror | void, elite | e_cleave, e_void_bolt |
+| [`hollow_sovereign`](content/enemies/hollow_sovereign.json) | The Hollow Sovereign (boss) | void, boss | b_void_rift, b_annihilate, e_weaken |
+| [`crypt_lord`](content/enemies/crypt_lord.json) | Malgrath, Lord of the Crypt (boss) | undead, boss | b_war_stomp, b_crushing_blow, e_curse, e_dark_mend |
+| [`dreadmaw`](content/enemies/dreadmaw.json) | Dreadmaw the Ravager (boss) | beast, elite, boss | e_bite, e_cleave, b_crushing_blow, e_frenzy |
+| [`ashen_colossus`](content/enemies/ashen_colossus.json) | The Ashen Colossus (boss) | giant, boss, world_boss | b_war_stomp, b_inferno, b_crushing_blow, b_annihilate |
 
 ## Zones and co-op encounters
 
 | id | name | levels | enemies | boss | unlocked by |
 | --- | --- | --- | --- | --- | --- |
-| `whispering_woods` | Whispering Woods | 1–7 | wolf, goblin, forest_spider, goblin_shaman | goblin_chieftain | start |
-| `ashen_barrows` | Ashen Barrows | 6–14 | skeleton_warrior, bone_archer, ghoul, barrow_wight | barrow_king | whispering_woods |
-| `emberfall_caverns` | Emberfall Caverns | 13–23 | fire_imp, magma_golem, ash_cultist | cinder_wyrm | ashen_barrows |
-| `frostpeak` | Frostpeak | 22–34 | ice_wraith, frost_troll, yeti | frost_matriarch | emberfall_caverns |
-| `voidscar` | The Voidscar | 33–60 | void_stalker, abyssal_priest, void_horror | hollow_sovereign | frostpeak |
+| [`whispering_woods`](content/zones/whispering_woods.json) | Whispering Woods | 1–7 | wolf, goblin, forest_spider, goblin_shaman | goblin_chieftain | start |
+| [`ashen_barrows`](content/zones/ashen_barrows.json) | Ashen Barrows | 6–14 | skeleton_warrior, bone_archer, ghoul, barrow_wight | barrow_king | whispering_woods |
+| [`emberfall_caverns`](content/zones/emberfall_caverns.json) | Emberfall Caverns | 13–23 | fire_imp, magma_golem, ash_cultist | cinder_wyrm | ashen_barrows |
+| [`frostpeak`](content/zones/frostpeak.json) | Frostpeak | 22–34 | ice_wraith, frost_troll, yeti | frost_matriarch | emberfall_caverns |
+| [`voidscar`](content/zones/voidscar.json) | The Voidscar | 33–60 | void_stalker, abyssal_priest, void_horror | hollow_sovereign | frostpeak |
 
 | co-op id | name | min level | waves |
 | --- | --- | --- | --- |
-| `ashen_crypt` | Ashenvale Crypt | 6 | skeleton_warrior + bone_archer + ghoul → barrow_wight + skeleton_warrior + skeleton_warrior → crypt_lord + bone_archer |
-| `dreadmaw_hunt` | Hunt: Dreadmaw | 10 | dreadmaw + wolf + wolf |
-| `void_incursion` | Void Incursion | 25 | void_stalker + void_stalker + abyssal_priest → void_horror + abyssal_priest → void_horror + void_stalker + void_stalker → hollow_sovereign |
-| `ashen_colossus` | World Boss: The Ashen Colossus | 15 | ashen_colossus |
+| [`ashen_crypt`](content/coop/ashen_crypt.json) | Ashenvale Crypt | 6 | skeleton_warrior + bone_archer + ghoul → barrow_wight + skeleton_warrior + skeleton_warrior → crypt_lord + bone_archer |
+| [`dreadmaw_hunt`](content/coop/dreadmaw_hunt.json) | Hunt: Dreadmaw | 10 | dreadmaw + wolf + wolf |
+| [`void_incursion`](content/coop/void_incursion.json) | Void Incursion | 25 | void_stalker + void_stalker + abyssal_priest → void_horror + abyssal_priest → void_horror + void_stalker + void_stalker → hollow_sovereign |
+| [`ashen_colossus`](content/coop/ashen_colossus.json) | World Boss: The Ashen Colossus | 15 | ashen_colossus |
 
 ## Uniques and sets
 
 | unique id | name | base |
 | --- | --- | --- |
-| `emberheart` | Emberheart | staff |
-| `dawnbringer` | Dawnbringer | mace |
-| `widowmaker` | Widowmaker | dagger |
-| `bulwark_of_ages` | Bulwark of Ages | shield |
-| `thornhide` | Thornhide Carapace | plate_chest |
-| `stormstring` | Stormstring | bow |
-| `last_breath` | Band of the Last Breath | ring |
-| `kingslayer` | Kingslayer Pendant | amulet |
-| `quickening_grips` | Grips of Quickening | leather_gloves |
-| `cowl_of_whispers` | Cowl of Whispers | leather_hood |
-| `voidwalkers` | Voidwalkers | cloth_boots |
-| `titans_cleaver` | Titan's Cleaver | axe |
+| [`emberheart`](content/legendaries/uniques/emberheart.json) | Emberheart | staff |
+| [`dawnbringer`](content/legendaries/uniques/dawnbringer.json) | Dawnbringer | mace |
+| [`widowmaker`](content/legendaries/uniques/widowmaker.json) | Widowmaker | dagger |
+| [`bulwark_of_ages`](content/legendaries/uniques/bulwark_of_ages.json) | Bulwark of Ages | shield |
+| [`thornhide`](content/legendaries/uniques/thornhide.json) | Thornhide Carapace | plate_chest |
+| [`stormstring`](content/legendaries/uniques/stormstring.json) | Stormstring | bow |
+| [`last_breath`](content/legendaries/uniques/last_breath.json) | Band of the Last Breath | ring |
+| [`kingslayer`](content/legendaries/uniques/kingslayer.json) | Kingslayer Pendant | amulet |
+| [`quickening_grips`](content/legendaries/uniques/quickening_grips.json) | Grips of Quickening | leather_gloves |
+| [`cowl_of_whispers`](content/legendaries/uniques/cowl_of_whispers.json) | Cowl of Whispers | leather_hood |
+| [`voidwalkers`](content/legendaries/uniques/voidwalkers.json) | Voidwalkers | cloth_boots |
+| [`titans_cleaver`](content/legendaries/uniques/titans_cleaver.json) | Titan's Cleaver | axe |
 
 | set id | name | pieces |
 | --- | --- | --- |
-| `juggernaut` | Juggernaut's Bulwark | plate_helm, plate_chest, plate_gloves, plate_boots |
-| `archmage` | Regalia of the Archmage | cloth_hat, robe, cloth_gloves, cloth_boots |
-| `nightstalker` | Nightstalker Garb | leather_hood, leather_chest, leather_gloves, leather_boots |
-| `lightbringer` | Vestments of the Lightbringer | cloth_hat, robe, tome, cloth_boots |
-| `wildwood` | Wildwood Trappings | bow, quiver, leather_chest, leather_boots |
+| [`juggernaut`](content/legendaries/sets/juggernaut.json) | Juggernaut's Bulwark | plate_helm, plate_chest, plate_gloves, plate_boots |
+| [`archmage`](content/legendaries/sets/archmage.json) | Regalia of the Archmage | cloth_hat, robe, cloth_gloves, cloth_boots |
+| [`nightstalker`](content/legendaries/sets/nightstalker.json) | Nightstalker Garb | leather_hood, leather_chest, leather_gloves, leather_boots |
+| [`lightbringer`](content/legendaries/sets/lightbringer.json) | Vestments of the Lightbringer | cloth_hat, robe, tome, cloth_boots |
+| [`wildwood`](content/legendaries/sets/wildwood.json) | Wildwood Trappings | bow, quiver, leather_chest, leather_boots |
 
 Proc triggers: `hit`, `crit`, `struck`, `heal`, `kill`, `cast`, `lowHp` · targets: `self`, `target`, `source`, `randomEnemy`, `lowestAlly`, `allAllies` · passives: `damageVsBossPct`, `damageVsHighHpPct`, `costPct`
 
@@ -329,16 +329,16 @@ Proc triggers: `hit`, `crit`, `struck`, `heal`, `kill`, `cast`, `lowHp` · targe
 
 | id | name | mechanics |
 | --- | --- | --- |
-| `fortified` | Fortified | enemyStats |
-| `tyrannical` | Tyrannical | enemyStats |
-| `bolstering` | Bolstering | onEnemyDeath |
-| `sanguine` | Sanguine | onEnemyDeath |
-| `raging` | Raging | enemyLowHealth |
-| `volcanic` | Volcanic | periodic |
-| `necrotic` | Necrotic | onEnemyHit |
-| `arcane_ward` | Arcane Ward | enemyDamageTaken |
-| `ironhide` | Ironhide | enemyDamageTaken |
-| `quaking` | Quaking | periodic |
+| [`fortified`](content/rifts/affixes/fortified.json) | Fortified | enemyStats |
+| [`tyrannical`](content/rifts/affixes/tyrannical.json) | Tyrannical | enemyStats |
+| [`bolstering`](content/rifts/affixes/bolstering.json) | Bolstering | onEnemyDeath |
+| [`sanguine`](content/rifts/affixes/sanguine.json) | Sanguine | onEnemyDeath |
+| [`raging`](content/rifts/affixes/raging.json) | Raging | enemyLowHealth |
+| [`volcanic`](content/rifts/affixes/volcanic.json) | Volcanic | periodic |
+| [`necrotic`](content/rifts/affixes/necrotic.json) | Necrotic | onEnemyHit |
+| [`arcane_ward`](content/rifts/affixes/arcane_ward.json) | Arcane Ward | enemyDamageTaken |
+| [`ironhide`](content/rifts/affixes/ironhide.json) | Ironhide | enemyDamageTaken |
+| [`quaking`](content/rifts/affixes/quaking.json) | Quaking | periodic |
 
 Mechanic types: `enemyStats`, `enemyDamageTaken`, `onEnemyDeath` (bolster | healAllies), `enemyLowHealth`, `onEnemyHit`, `periodic` — fields in CONTENT.md.
 
@@ -346,18 +346,18 @@ Mechanic types: `enemyStats`, `enemyDamageTaken`, `onEnemyDeath` (bolster | heal
 
 | id | title | daily | weekly | requires |
 | --- | --- | --- | --- | --- |
-| `kill_tag` | Slay {n} {tag} | 45 | 400 |  |
-| `kill_any` | Defeat {n} enemies | 150 | 1500 |  |
-| `win_fights` | Win {n} fights | 50 |  |  |
-| `boss` | Defeat {n} bosses | 2 | 15 |  |
-| `gold` | Earn {n} gold from battles | {"base":120,"perLevel":45} |  |  |
-| `rift` | Complete {n} rifts | 2 | 12 | rift |
-| `rift_timed` | Complete {n} rifts in time |  | 8 | rift |
-| `expedition` | Complete {n} expeditions | 2 | 10 | expedition |
-| `salvage` | Salvage {n} items | 10 |  | town |
-| `craft` | Craft, reforge, enchant or brew {n} times | 2 | 12 | workers |
-| `coop` | Win {n} co-op encounters |  | 3 |  |
-| `auction` | List {n} items or materials on the Auction House | 1 |  |  |
+| [`kill_tag`](content/quests/kill_tag.json) | Slay {n} {tag} | 45 | 400 |  |
+| [`kill_any`](content/quests/kill_any.json) | Defeat {n} enemies | 150 | 1500 |  |
+| [`win_fights`](content/quests/win_fights.json) | Win {n} fights | 50 |  |  |
+| [`boss`](content/quests/boss.json) | Defeat {n} bosses | 2 | 15 |  |
+| [`gold`](content/quests/gold.json) | Earn {n} gold from battles | {"base":120,"perLevel":45} |  |  |
+| [`rift`](content/quests/rift.json) | Complete {n} rifts | 2 | 12 | rift |
+| [`rift_timed`](content/quests/rift_timed.json) | Complete {n} rifts in time |  | 8 | rift |
+| [`expedition`](content/quests/expedition.json) | Complete {n} expeditions | 2 | 10 | expedition |
+| [`salvage`](content/quests/salvage.json) | Salvage {n} items | 10 |  | town |
+| [`craft`](content/quests/craft.json) | Craft, reforge, enchant or brew {n} times | 2 | 12 | workers |
+| [`coop`](content/quests/coop.json) | Win {n} co-op encounters |  | 3 |  |
+| [`auction`](content/quests/auction.json) | List {n} items or materials on the Auction House | 1 |  |  |
 
 The quest type ids are fixed (the game tracks progress for exactly these); titles, targets, weights and rewards are free to change.
 

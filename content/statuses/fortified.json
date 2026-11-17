@@ -1,0 +1,7 @@
+{
+  "name": "Fortified",
+  "type": "buff",
+  "mods": { "defensePct": 0.35 },
+  "description": "Defense increased by 35%.",
+  "order": 140
+}

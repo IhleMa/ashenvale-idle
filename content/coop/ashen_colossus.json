@@ -1,0 +1,9 @@
+{
+  "name": "World Boss: The Ashen Colossus",
+  "type": "world_boss",
+  "minLevel": 15,
+  "rewardMult": 2.5,
+  "description": "A titanic world boss. Bring friends — it scales with the group.",
+  "waves": [["ashen_colossus"]],
+  "order": 40
+}

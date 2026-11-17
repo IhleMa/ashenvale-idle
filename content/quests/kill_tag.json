@@ -1,0 +1,10 @@
+{
+  "title": "Slay {n} {tag}",
+  "icon": "🗡",
+  "weight": 4,
+  "daily": true,
+  "target": 45,
+  "weekly": true,
+  "weeklyTarget": 400,
+  "order": 10
+}

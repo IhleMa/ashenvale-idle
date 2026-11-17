@@ -1,0 +1,8 @@
+{
+  "name": "Hunter",
+  "description": "Defeat 100 enemies.",
+  "stat": "kills",
+  "goal": 100,
+  "reward": { "gold": 200 },
+  "order": 20
+}

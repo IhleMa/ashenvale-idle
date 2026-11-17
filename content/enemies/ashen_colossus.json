@@ -1,0 +1,34 @@
+{
+  "name": "The Ashen Colossus",
+  "tags": ["giant", "boss", "world_boss"],
+  "boss": true,
+  "stats": { "hp": 5200, "physPower": 26, "magPower": 26, "defense": 15, "critChance": 0.08, "attackSpeed": 0.75 },
+  "abilities": ["b_war_stomp", "b_inferno", "b_crushing_blow", "b_annihilate"],
+  "xp": 900,
+  "gold": [300, 500],
+  "loot": { "chance": 1, "count": 4, "boost": 3, "minRarity": "epic" },
+  "phases": [
+    {
+      "hpBelow": 80,
+      "message": "sheds burning fragments!",
+      "effects": [{ "kind": "summon", "enemyId": "magma_golem", "count": 2, "max": 5 }]
+    },
+    {
+      "hpBelow": 55,
+      "message": "hardens its ashen shell!",
+      "effects": [{ "kind": "status", "status": "stone_skin", "duration": 10, "self": true }]
+    },
+    {
+      "hpBelow": 30,
+      "message": "erupts!",
+      "effects": [{ "kind": "summon", "enemyId": "fire_imp", "count": 3, "max": 6 }]
+    },
+    {
+      "hpBelow": 15,
+      "message": "is consumed by fury!",
+      "effects": [{ "kind": "status", "status": "enrage", "duration": 999, "self": true }]
+    }
+  ],
+  "enrageAfter": 240,
+  "order": 250
+}

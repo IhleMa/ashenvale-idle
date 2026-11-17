@@ -1,0 +1,42 @@
+{
+  "start": "fireball",
+  "branches": [
+    {
+      "name": "Pyromancy",
+      "attrs": ["int", "vit"],
+      "abilities": { "2": "flame_wave", "7": "meteor" },
+      "notables": {
+        "4": { "name": "Kindling", "stats": { "magPowerPct": 0.1 } },
+        "8": { "name": "Heart of Fire", "stats": { "damagePct": 0.12 } }
+      }
+    },
+    {
+      "name": "Cryomancy",
+      "attrs": ["int", "dex"],
+      "abilities": { "1": "frost_bolt", "5": "frost_nova" },
+      "notables": {
+        "4": { "name": "Cold Precision", "stats": { "critChance": 0.04 } },
+        "8": { "name": "Absolute Zero", "stats": { "critDamage": 0.3, "critChance": 0.02 } }
+      }
+    },
+    {
+      "name": "Arcana",
+      "attrs": ["int", "dex"],
+      "abilities": { "3": "arcane_missiles", "6": "arcane_power" },
+      "notables": {
+        "4": { "name": "Arcane Flow", "stats": { "attackSpeed": 0.06 } },
+        "8": { "name": "Archmage", "stats": { "magPowerPct": 0.15 } }
+      }
+    },
+    {
+      "name": "Wardings",
+      "attrs": ["vit", "int"],
+      "abilities": {},
+      "notables": {
+        "4": { "name": "Mana Shield", "stats": { "hpPct": 0.1 } },
+        "8": { "name": "Spellward", "stats": { "damageTakenPct": -0.08, "defensePct": 0.2 } }
+      }
+    }
+  ],
+  "order": 20
+}

@@ -1,0 +1,17 @@
+{
+  "name": "Curse of Ash",
+  "classId": "enemy",
+  "type": "debuff",
+  "cost": 0,
+  "cooldown": 10,
+  "target": "enemy",
+  "effects": [{ "kind": "status", "status": "curse", "duration": 10, "stat": "magPower", "power": 0.25 }],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [{ "type": "always" }],
+    "target": { "selector": "enemy_random" },
+    "targetConditions": [{ "type": "target_missing_status", "status": "curse" }]
+  },
+  "order": 440
+}

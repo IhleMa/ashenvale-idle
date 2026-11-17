@@ -1,0 +1,8 @@
+{
+  "name": "Slayer",
+  "description": "Defeat 1,000 enemies.",
+  "stat": "kills",
+  "goal": 1000,
+  "reward": { "gold": 1500 },
+  "order": 30
+}

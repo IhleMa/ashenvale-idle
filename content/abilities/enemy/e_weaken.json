@@ -1,0 +1,17 @@
+{
+  "name": "Enfeeble",
+  "classId": "enemy",
+  "type": "debuff",
+  "cost": 0,
+  "cooldown": 12,
+  "target": "enemy",
+  "effects": [{ "kind": "status", "status": "weakened", "duration": 8 }],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [{ "type": "always" }],
+    "target": { "selector": "enemy_random" },
+    "targetConditions": [{ "type": "target_missing_status", "status": "weakened" }]
+  },
+  "order": 470
+}

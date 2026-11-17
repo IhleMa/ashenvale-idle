@@ -1,0 +1,20 @@
+{
+  "name": "Serpent Sting",
+  "classId": "ranger",
+  "unlockLevel": 1,
+  "type": "debuff",
+  "description": "Poisons the target for 12 seconds.",
+  "cost": 15,
+  "cooldown": 3,
+  "target": "enemy",
+  "effects": [{ "kind": "status", "status": "poison", "duration": 12, "stat": "physPower", "power": 0.2, "stacks": 1 }],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [{ "type": "always" }],
+    "target": { "selector": "enemy_highest_hp" },
+    "targetConditions": [{ "type": "target_missing_status", "status": "poison" }]
+  },
+  "priority": 45,
+  "order": 300
+}

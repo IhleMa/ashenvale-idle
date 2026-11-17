@@ -107,10 +107,10 @@ public/assets/
 ## Project structure
 
 ```
-content/           ← ALL game content as JSON: classes, abilities, items, enemies, zones, uniques, quests,
-                     rifts, gems, town, balance numbers … (see CONTENT.md and CONTENT_REFERENCE.md)
+content/           ← ALL game content as JSON — one file per ability, item, enemy, zone, unique, set, building,
+                     quest, rift affix, … plus _settings.json per system (see CONTENT.md and CONTENT_REFERENCE.md)
 shared/            Game engine, used by both the server and the browser
-  content.js       loads content/*.json (server: from disk + data/content overrides; browser: /api/content)
+  content.js       loads the content (server: content/ + data/content overrides; browser: /api/content)
   data/            thin modules exposing the content (+ derived values) to the rest of the code
   skilltree.js     passive tree rules (allocation, refunds, paths, auto-allocate)
   rules.js         behaviour rule engine (conditions, target selectors, validation)
@@ -130,10 +130,11 @@ pterodactyl/       Pterodactyl egg
 
 ### Adding and changing content
 
-The game is **data-driven**: items, classes, abilities, enemies, zones, uniques, sets, skill trees, town, expeditions, quests, rifts and their affixes, gems, achievements, bestiary tips, loot filter presets, bots and all balance numbers are JSON in `content/`. **[CONTENT.md](CONTENT.md)** explains every file, with step-by-step examples (new item, ability, enemy, zone, unique, class, rift affix). **[CONTENT_REFERENCE.md](CONTENT_REFERENCE.md)** lists every id you can use.
+The game is **data-driven**: items, classes, abilities, enemies, zones, uniques, sets, skill trees, town, expeditions, quests, rifts and their affixes, gems, achievements, bestiary tips, loot filter presets, bots and all balance numbers are JSON in `content/`, **one file per entry** (e.g. `content/abilities/mage/fireball.json`, `content/items/weapon/sword.json`, `content/enemies/wolf.json`). **[CONTENT.md](CONTENT.md)** explains every file, with step-by-step examples (new item, ability, enemy, zone, unique, class, rift affix). **[CONTENT_REFERENCE.md](CONTENT_REFERENCE.md)** lists every id you can use.
 
 - **Check your changes:** `npm run content:check`, or type `content` in the server console. The server validates the content on every start and refuses to start with clear error messages (e.g. `zones.whispering_woods.enemies: unknown enemy "wolff"`) instead of breaking at runtime.
-- **Server owners:** put your changes in **`data/content/<file>.json`**. Only the parts you change are needed (e.g. `{ "levelCap": 70 }` in `config.json`). They're merged on top of the base content and survive `update`.
+- **New entry:** `npm run content:new -- <type> <newId> <copyFromId>`, e.g. `npm run content:new -- item war_scythe axe`.
+- **Server owners:** put your changes in **`data/content/`**, using the same layout. A file with an existing id only needs the fields you change (e.g. `data/content/abilities/fireball.json`); a new id adds an entry; a file containing `null` removes one; `data/content/config.json` tweaks balance numbers. Everything there survives `update`.
 - **Apply:** restart the server. Clients reload with the new content automatically.
 - **Code is only needed for new kinds of behaviour:** a new effect kind, behaviour condition or target selector (`shared/rules.js`), quest type, rift mechanic or bestiary tip condition. The validator names anything unknown.
 - **Balance:** check the result with `npm run simulate` and `node tools/rift-sim.js <level> <zone>`.

@@ -1,0 +1,7 @@
+{
+  "name": "Weakened",
+  "type": "debuff",
+  "mods": { "damagePct": -0.2 },
+  "description": "Deals 20% less damage.",
+  "order": 60
+}

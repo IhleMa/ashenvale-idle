@@ -1,0 +1,11 @@
+{
+  "name": "Elixir of Fortitude",
+  "level": 1,
+  "glyph": "🛡",
+  "description": "Party takes 8% less damage.",
+  "bonus": { "damageTakenPct": -0.08 },
+  "herbs": 6,
+  "dust": 2,
+  "gold": 60,
+  "order": 20
+}

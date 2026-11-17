@@ -1,0 +1,8 @@
+{
+  "name": "Cloth Hat",
+  "slot": "head",
+  "classes": null,
+  "stats": { "defense": [1, 0.3], "int": [1, 0.4] },
+  "material": "cloth",
+  "order": 210
+}

@@ -1,0 +1,20 @@
+{
+  "name": "Power Word: Barrier",
+  "classId": "cleric",
+  "unlockLevel": 15,
+  "type": "buff",
+  "description": "Shield an ally, absorbing damage for 10 seconds.",
+  "cost": 20,
+  "cooldown": 12,
+  "target": "ally",
+  "effects": [{ "kind": "shield", "stat": "healPower", "power": 2.5, "duration": 10 }],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [{ "type": "always" }],
+    "target": { "selector": "ally_tank" },
+    "targetConditions": [{ "type": "target_missing_status", "status": "barrier" }]
+  },
+  "priority": 65,
+  "order": 270
+}

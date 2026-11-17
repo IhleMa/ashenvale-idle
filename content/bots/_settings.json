@@ -1,0 +1,17 @@
+{
+  "_about": "Bot name pool and chat lines. Every personality archetype is its own file in this folder.",
+  "names": [
+    "Aldric", "Brynja", "Cedric", "Dagny", "Eamon", "Freya", "Garrick", "Hilde", "Ivor", "Jorunn", "Kael", "Liora",
+    "Magnus", "Nessa", "Orrin", "Perrin", "Quill", "Rowena", "Soren", "Thyra", "Ulric", "Vala", "Wren", "Ysolde",
+    "Zarek", "Alys", "Bram", "Corin", "Dorn", "Elspeth", "Fenwick", "Gwyn", "Halvar", "Isolde", "Jarek", "Kestrel",
+    "Lucan", "Mira", "Nyle", "Osric", "Petra", "Rook", "Sable", "Tamsin", "Torvin", "Ulla", "Varis", "Wynne", "Yorick",
+    "Zelda", "Ashka", "Bastian", "Cyra", "Draven", "Elowen", "Faelan", "Greer", "Hakon", "Inga", "Jory", "Kira"
+  ],
+  "suffixes": ["", "", "", "x", "son", "a", "ir", "en", "77", "42", "_", "TV", "GG"],
+  "chat": {
+    "hello": ["hi all", "hey!", "o/", "yo", "hello there", "ready when you are"],
+    "win": ["gg", "gg wp", "nice", "easy", "that was close", "ty for the group", "loot!"],
+    "lose": ["oof", "wipe :(", "we need more healing", "that boss hits hard", "again?", "my bad"],
+    "bye": ["gtg, cya", "thanks for the runs", "bye o/", "gonna farm solo a bit"]
+  }
+}

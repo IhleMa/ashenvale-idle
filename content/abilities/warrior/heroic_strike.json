@@ -1,0 +1,20 @@
+{
+  "name": "Heroic Strike",
+  "classId": "warrior",
+  "unlockLevel": 1,
+  "type": "damage",
+  "description": "A powerful blow dealing 160% physical damage.",
+  "cost": 20,
+  "cooldown": 3,
+  "target": "enemy",
+  "effects": [{ "kind": "damage", "stat": "physPower", "power": 1.6, "school": "physical" }],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [{ "type": "always" }],
+    "target": { "selector": "enemy_current" },
+    "targetConditions": []
+  },
+  "priority": 20,
+  "order": 10
+}

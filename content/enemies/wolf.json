@@ -1,0 +1,10 @@
+{
+  "name": "Grey Wolf",
+  "tags": ["beast", "minion"],
+  "stats": { "hp": 120, "physPower": 12, "magPower": 4, "defense": 3, "critChance": 0.08, "attackSpeed": 1.15 },
+  "abilities": ["e_bite"],
+  "xp": 14,
+  "gold": [2, 5],
+  "loot": { "chance": 0.1 },
+  "order": 10
+}

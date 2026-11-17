@@ -1,0 +1,11 @@
+{
+  "name": "Fire Imp",
+  "tags": ["demon", "caster", "minion"],
+  "stats": { "hp": 95, "physPower": 6, "magPower": 15, "defense": 3, "critChance": 0.08, "attackSpeed": 1.1 },
+  "basicSchool": "magical",
+  "abilities": ["e_firebolt"],
+  "xp": 20,
+  "gold": [4, 9],
+  "loot": { "chance": 0.12 },
+  "order": 110
+}

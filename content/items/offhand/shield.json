@@ -1,0 +1,8 @@
+{
+  "name": "Shield",
+  "slot": "offhand",
+  "classes": ["warrior", "cleric"],
+  "stats": { "defense": [4, 1.4], "hp": [10, 3] },
+  "material": "metal",
+  "order": 90
+}

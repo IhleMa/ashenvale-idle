@@ -1,0 +1,23 @@
+{
+  "name": "Shield Bash",
+  "classId": "warrior",
+  "unlockLevel": 10,
+  "type": "control",
+  "description": "Bash an enemy for 80% damage and stun it for 2 seconds.",
+  "cost": 20,
+  "cooldown": 14,
+  "target": "enemy",
+  "effects": [
+    { "kind": "damage", "stat": "physPower", "power": 0.8, "school": "physical" },
+    { "kind": "status", "status": "stun", "duration": 2 }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [{ "type": "always" }],
+    "target": { "selector": "enemy_highest_threat" },
+    "targetConditions": [{ "type": "target_missing_status", "status": "stun" }]
+  },
+  "priority": 70,
+  "order": 50
+}

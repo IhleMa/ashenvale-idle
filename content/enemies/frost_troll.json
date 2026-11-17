@@ -1,0 +1,10 @@
+{
+  "name": "Frost Troll",
+  "tags": ["giant", "minion"],
+  "stats": { "hp": 230, "physPower": 16, "magPower": 4, "defense": 9, "critChance": 0.05, "attackSpeed": 0.8 },
+  "abilities": ["e_regenerate", "e_cleave"],
+  "xp": 28,
+  "gold": [6, 12],
+  "loot": { "chance": 0.15 },
+  "order": 160
+}

@@ -1,0 +1,10 @@
+{
+  "name": "Void Horror",
+  "tags": ["void", "elite"],
+  "stats": { "hp": 320, "physPower": 19, "magPower": 15, "defense": 10, "critChance": 0.08, "attackSpeed": 0.9 },
+  "abilities": ["e_cleave", "e_void_bolt"],
+  "xp": 45,
+  "gold": [10, 20],
+  "loot": { "chance": 0.3, "boost": 0.6 },
+  "order": 210
+}

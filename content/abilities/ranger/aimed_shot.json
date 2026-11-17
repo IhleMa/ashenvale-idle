@@ -1,0 +1,20 @@
+{
+  "name": "Aimed Shot",
+  "classId": "ranger",
+  "unlockLevel": 1,
+  "type": "damage",
+  "description": "A carefully aimed shot for 175% physical damage.",
+  "cost": 25,
+  "cooldown": 4,
+  "target": "enemy",
+  "effects": [{ "kind": "damage", "stat": "physPower", "power": 1.75, "school": "physical" }],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [{ "type": "always" }],
+    "target": { "selector": "enemy_current" },
+    "targetConditions": []
+  },
+  "priority": 20,
+  "order": 290
+}

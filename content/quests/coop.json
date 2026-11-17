@@ -1,0 +1,9 @@
+{
+  "title": "Win {n} co-op encounters",
+  "icon": "⚑",
+  "weight": 2,
+  "weekly": true,
+  "weeklyTarget": 3,
+  "hint": "You can also start a group on your own.",
+  "order": 110
+}

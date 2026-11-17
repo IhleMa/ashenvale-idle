@@ -1,0 +1,8 @@
+{
+  "name": "Gauntlets",
+  "slot": "hands",
+  "classes": ["warrior", "cleric"],
+  "stats": { "defense": [2, 0.6], "str": [1, 0.3] },
+  "material": "metal",
+  "order": 150
+}

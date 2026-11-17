@@ -1,0 +1,18 @@
+{
+  "name": "Dawnbringer",
+  "baseId": "mace",
+  "minLevel": 8,
+  "flavor": "Its light remembers every wound it closed.",
+  "stats": { "healPower": [3, 0.8], "vit": [2, 0.5] },
+  "procs": [
+    {
+      "name": "Dawnbringer",
+      "trigger": "heal",
+      "chance": 1,
+      "target": "target",
+      "effect": { "kind": "status", "status": "renew", "duration": 6, "stat": "healPower", "power": 0.25 }
+    }
+  ],
+  "description": "Your healing abilities also apply Renew (25% Healing Power per second for 6s).",
+  "order": 20
+}

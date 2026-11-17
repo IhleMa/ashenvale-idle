@@ -1,0 +1,10 @@
+{
+  "name": "Bleed",
+  "type": "debuff",
+  "tick": "damage",
+  "school": "physical",
+  "ignoreArmor": true,
+  "maxStacks": 3,
+  "description": "Bleeding for damage every second.",
+  "order": 20
+}

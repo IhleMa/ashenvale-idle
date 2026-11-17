@@ -1,0 +1,34 @@
+{
+  "_about": "Skill tree generator settings and labels. Every class tree is its own file in this folder (named after the class).",
+  "config": {
+    "rings": [1, 2, 3, 3, 4, 4, 5, 5],
+    "ringSpacing": 95,
+    "smallNodeValue": 4,
+    "bridgeRings": [3, 5, 7],
+    "lateralRings": [2, 4, 6, 8],
+    "rankNodesPerAbility": 2
+  },
+  "attributeNames": { "str": "Strength", "int": "Intelligence", "dex": "Dexterity", "vit": "Vitality" },
+  "statLabels": {
+    "str": ["Strength", "flat"],
+    "int": ["Intelligence", "flat"],
+    "dex": ["Dexterity", "flat"],
+    "vit": ["Vitality", "flat"],
+    "strPct": ["Strength", "pct"],
+    "intPct": ["Intelligence", "pct"],
+    "dexPct": ["Dexterity", "pct"],
+    "vitPct": ["Vitality", "pct"],
+    "allPct": ["all attributes & health", "pct"],
+    "physPowerPct": ["Physical Power", "pct"],
+    "magPowerPct": ["Magic Power", "pct"],
+    "healPowerPct": ["Healing Power", "pct"],
+    "defensePct": ["Defense", "pct"],
+    "hpPct": ["maximum Health", "pct"],
+    "critChance": ["Critical Chance", "pct"],
+    "critDamage": ["Critical Damage", "pct"],
+    "attackSpeed": ["Attack Speed", "pct"],
+    "damagePct": ["damage dealt", "pct"],
+    "healingPct": ["healing done", "pct"],
+    "damageTakenPct": ["damage taken", "pct"]
+  }
+}

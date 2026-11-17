@@ -1,0 +1,8 @@
+{
+  "title": "Earn {n} gold from battles",
+  "icon": "💰",
+  "weight": 2,
+  "daily": true,
+  "target": { "base": 120, "perLevel": 45 },
+  "order": 50
+}

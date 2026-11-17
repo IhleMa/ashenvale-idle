@@ -1,0 +1,8 @@
+{
+  "name": "Treasure Hunter",
+  "description": "Find an Epic or better item.",
+  "stat": "epicFound",
+  "goal": 1,
+  "reward": { "gold": 300 },
+  "order": 120
+}

@@ -1,0 +1,21 @@
+{
+  "name": "Multi-Shot",
+  "classId": "ranger",
+  "unlockLevel": 3,
+  "type": "damage",
+  "description": "Shoot all enemies for 80% physical damage.",
+  "cost": 30,
+  "cooldown": 6,
+  "target": "enemy",
+  "area": true,
+  "effects": [{ "kind": "damage", "stat": "physPower", "power": 0.8, "school": "physical" }],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [{ "type": "enemies_alive", "cmp": ">=", "value": 2 }],
+    "target": { "selector": "all_enemies" },
+    "targetConditions": []
+  },
+  "priority": 65,
+  "order": 310
+}

@@ -1,0 +1,20 @@
+{
+  "name": "Smite",
+  "classId": "cleric",
+  "unlockLevel": 1,
+  "type": "damage",
+  "description": "Holy damage equal to 150% magic power.",
+  "cost": 10,
+  "cooldown": 3,
+  "target": "enemy",
+  "effects": [{ "kind": "damage", "stat": "magPower", "power": 1.5, "school": "magical" }],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [{ "type": "resource_above", "value": 50 }],
+    "target": { "selector": "enemy_current" },
+    "targetConditions": []
+  },
+  "priority": 10,
+  "order": 230
+}

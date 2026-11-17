@@ -1,0 +1,8 @@
+{
+  "name": "Silk Gloves",
+  "slot": "hands",
+  "classes": null,
+  "stats": { "defense": [1, 0.2], "magPower": [1, 0.4] },
+  "material": "cloth",
+  "order": 230
+}

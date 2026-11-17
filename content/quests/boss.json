@@ -1,0 +1,11 @@
+{
+  "title": "Defeat {n} bosses",
+  "icon": "☠",
+  "weight": 3,
+  "daily": true,
+  "target": 2,
+  "weekly": true,
+  "weeklyTarget": 15,
+  "hint": "Zone bosses, rift guardians and co-op bosses all count.",
+  "order": 40
+}

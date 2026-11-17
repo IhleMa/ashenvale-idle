@@ -1,0 +1,1 @@
+{ "name": "Regeneration", "type": "buff", "tick": "heal", "description": "Regenerating health.", "order": 250 }

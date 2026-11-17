@@ -1,0 +1,20 @@
+{
+  "name": "Shield Wall",
+  "classId": "warrior",
+  "unlockLevel": 3,
+  "type": "buff",
+  "description": "Raise your shield, taking 45% less damage for 8 seconds.",
+  "cost": 15,
+  "cooldown": 25,
+  "target": "self",
+  "effects": [{ "kind": "status", "status": "shield_wall", "duration": 8 }],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [{ "type": "self_hp_below", "value": 40 }, { "type": "self_missing_status", "status": "shield_wall" }],
+    "target": { "selector": "self" },
+    "targetConditions": []
+  },
+  "priority": 100,
+  "order": 30
+}

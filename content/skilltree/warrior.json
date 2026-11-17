@@ -1,0 +1,42 @@
+{
+  "start": "heroic_strike",
+  "branches": [
+    {
+      "name": "Bulwark",
+      "attrs": ["vit", "str"],
+      "abilities": { "1": "taunt", "3": "shield_wall" },
+      "notables": {
+        "4": { "name": "Iron Skin", "stats": { "defensePct": 0.12, "hpPct": 0.05 } },
+        "8": { "name": "Unbreakable", "stats": { "hpPct": 0.15, "damageTakenPct": -0.06 } }
+      }
+    },
+    {
+      "name": "Warmonger",
+      "attrs": ["str", "dex"],
+      "abilities": { "2": "cleave", "6": "battle_cry" },
+      "notables": {
+        "4": { "name": "Brutality", "stats": { "physPowerPct": 0.1 } },
+        "8": { "name": "Bloodlust", "stats": { "damagePct": 0.1, "critDamage": 0.2 } }
+      }
+    },
+    {
+      "name": "Tactician",
+      "attrs": ["dex", "str"],
+      "abilities": { "3": "shield_bash" },
+      "notables": {
+        "4": { "name": "Precision", "stats": { "critChance": 0.04 } },
+        "8": { "name": "Relentless", "stats": { "attackSpeed": 0.1, "critChance": 0.02 } }
+      }
+    },
+    {
+      "name": "Vanguard",
+      "attrs": ["vit", "dex"],
+      "abilities": { "5": "sunder_armor" },
+      "notables": {
+        "4": { "name": "Second Wind", "stats": { "hpPct": 0.08, "defensePct": 0.05 } },
+        "8": { "name": "Warlord's Presence", "stats": { "allPct": 0.05 } }
+      }
+    }
+  ],
+  "order": 10
+}

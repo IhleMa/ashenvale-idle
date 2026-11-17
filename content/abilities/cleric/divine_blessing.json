@@ -1,0 +1,21 @@
+{
+  "name": "Divine Blessing",
+  "classId": "cleric",
+  "unlockLevel": 22,
+  "type": "buff",
+  "description": "Bless the party: +8% damage and +15% defense for 15 seconds.",
+  "cost": 35,
+  "cooldown": 35,
+  "target": "ally",
+  "area": true,
+  "effects": [{ "kind": "status", "status": "blessing", "duration": 15 }],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [{ "type": "self_missing_status", "status": "blessing" }],
+    "target": { "selector": "all_allies" },
+    "targetConditions": []
+  },
+  "priority": 75,
+  "order": 280
+}

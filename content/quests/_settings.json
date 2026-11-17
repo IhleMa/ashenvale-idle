@@ -1,0 +1,51 @@
+{
+  "_about": "Quest settings, enemy-type names and rewards. Every quest type is its own file in this folder (the ids are fixed — the game tracks them).",
+  "config": {
+    "dailyCount": 3,
+    "weeklyCount": 2,
+    "resetHourUtc": 3,
+    "freeRerollsPerDay": 1,
+    "rerollCost": 2,
+    "dailyCrystals": 2,
+    "allDailiesCrystals": 5,
+    "weeklyCrystals": 12
+  },
+  "tagNames": {
+    "beast": "Beasts",
+    "humanoid": "Humanoids",
+    "undead": "Undead",
+    "demon": "Demons",
+    "elemental": "Elementals",
+    "giant": "Giants",
+    "void": "Void creatures",
+    "caster": "Spellcasters",
+    "dragon": "Dragons"
+  },
+  "rewards": {
+    "daily": {
+      "gold": { "base": 80, "perLevel": 30 },
+      "xpKills": 25,
+      "crystals": "dailyCrystals",
+      "materials": [
+        {
+          "pool": ["ore", "herb", "metal_scrap", "leather_scrap", "cloth_scrap", "gem_fragment", "arcane_dust"],
+          "amount": { "base": 5, "perLevels": 3 }
+        }
+      ]
+    },
+    "weekly": {
+      "gold": { "base": 400, "perLevel": 160 },
+      "xpKills": 120,
+      "crystals": "weeklyCrystals",
+      "materials": [
+        {
+          "pool": ["ore", "herb", "metal_scrap", "leather_scrap", "cloth_scrap", "gem_fragment", "arcane_dust"],
+          "amount": { "base": 20, "perLevel": 1 }
+        },
+        { "id": "magic_essence", "amount": { "base": 3, "perLevels": 10 } }
+      ],
+      "item": "epic"
+    },
+    "dailyChest": { "crystals": "allDailiesCrystals", "item": "rare" }
+  }
+}

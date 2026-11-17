@@ -1,0 +1,7 @@
+{
+  "name": "Rapid Fire",
+  "type": "buff",
+  "mods": { "attackSpeedPct": 0.4 },
+  "description": "Attack speed +40%.",
+  "order": 200
+}

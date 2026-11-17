@@ -1,0 +1,34 @@
+{
+  "_about": "Rift scaling, time limit, wave composition, weekly rotation and rewards. Affixes: rifts/affixes/.",
+  "config": {
+    "minLevel": 8,
+    "maxTier": 150,
+    "trashWaves": 3,
+    "timeLimit": 210,
+    "baseHp": 0.55,
+    "baseDamage": 0.6,
+    "hpGrowth": 1.12,
+    "damageGrowth": 1.075,
+    "affixTiers": [2, 5, 10],
+    "untimedRewardMult": 0.5
+  },
+  "composition": { "minWaveSize": 3, "maxWaveSize": 5, "firstWaveFewer": 1, "guardianLevelBonus": 1, "guardianEscorts": 1 },
+  "rotation": {
+    "firstAffix": ["fortified", "tyrannical"],
+    "seed": 9173,
+    "seedPerWeek": 7919,
+    "mutuallyExclusive": [["arcane_ward", "ironhide"]]
+  },
+  "rewards": {
+    "rewardMult": { "base": 1.4, "perTier": 0.08 },
+    "lootBoost": { "perTier": 0.12, "max": 2.5 },
+    "chest": {
+      "extraItemAtTiers": [5, 12],
+      "rarityByTier": [[1, "uncommon"], [5, "rare"], [12, "epic"], [25, "legendary"]],
+      "itemLevelEveryTiers": 4,
+      "maxItemLevelBonus": 10,
+      "qualityBoostPerTier": 0.05
+    },
+    "firstClearCrystals": { "base": 2, "perTiers": 5 }
+  }
+}

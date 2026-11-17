@@ -1,0 +1,21 @@
+{
+  "name": "Inferno",
+  "classId": "enemy",
+  "type": "damage",
+  "cost": 0,
+  "cooldown": 15,
+  "target": "enemy",
+  "area": true,
+  "effects": [
+    { "kind": "damage", "stat": "magPower", "power": 1.4, "school": "magical" },
+    { "kind": "status", "status": "burn", "duration": 6, "stat": "magPower", "power": 0.2 }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [{ "type": "always" }],
+    "target": { "selector": "all_enemies" },
+    "targetConditions": []
+  },
+  "order": 530
+}

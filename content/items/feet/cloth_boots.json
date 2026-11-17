@@ -1,0 +1,8 @@
+{
+  "name": "Sandals",
+  "slot": "feet",
+  "classes": null,
+  "stats": { "defense": [1, 0.25], "healPower": [1, 0.4] },
+  "material": "cloth",
+  "order": 240
+}

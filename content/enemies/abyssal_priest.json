@@ -1,0 +1,11 @@
+{
+  "name": "Abyssal Priest",
+  "tags": ["void", "caster", "minion"],
+  "stats": { "hp": 130, "physPower": 6, "magPower": 16, "defense": 5, "critChance": 0.06, "attackSpeed": 0.9 },
+  "basicSchool": "magical",
+  "abilities": ["e_dark_mend", "e_void_bolt", "e_curse"],
+  "xp": 31,
+  "gold": [6, 13],
+  "loot": { "chance": 0.15 },
+  "order": 200
+}
