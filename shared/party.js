@@ -25,10 +25,15 @@ export function partyBonuses(characters) {
   return { allStatsPct, damagePct, list: bonuses };
 }
 
-export function buildPartyUnits(characters, { ownerId, ownerName, positionOffset = 0, extraBonuses = null } = {}) {
+// buffs: extra temporary bonuses (e.g. elixirs) { damagePct, damageTakenPct, allStatsPct }
+export function buildPartyUnits(characters, { ownerId, ownerName, positionOffset = 0, extraBonuses = null, buffs = null } = {}) {
   const pb = extraBonuses || partyBonuses(characters);
   return characters.map((ch, i) => makeCharacterUnit(ch, {
     ownerId, ownerName, position: positionOffset + i,
-    bonuses: { allStatsPct: pb.allStatsPct, damagePct: pb.damagePct },
+    bonuses: {
+      allStatsPct: pb.allStatsPct + (buffs?.allStatsPct || 0),
+      damagePct: pb.damagePct + (buffs?.damagePct || 0),
+      damageTakenPct: buffs?.damageTakenPct || 0,
+    },
   }));
 }

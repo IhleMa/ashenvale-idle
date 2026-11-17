@@ -9,7 +9,7 @@
     "dev": "node --watch server/index.js",
     "simulate": "node tools/simulate.js",
     "assets": "node tools/asset-checklist.js",
-    "test": "node tools/smoke-test.js"
+    "test": "node tools/smoke-test.js && node tools/town-test.js"
   },
   "engines": {
     "node": ">=20"

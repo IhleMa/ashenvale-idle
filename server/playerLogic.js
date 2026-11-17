@@ -10,6 +10,8 @@ import { createCharacter, addXp, autoDevelop, autoLoadout, syncTree, abilitySlot
 import { allocateNode as treeAllocate, refundNode as treeRefund, resetTree as treeReset, availablePoints } from '../shared/skilltree.js';
 import { sanitizeRule } from '../shared/rules.js';
 import { createRng, randomSeed } from '../shared/rng.js';
+import { migrateTown, rollProfession, autoSalvage } from './townLogic.js';
+import { rosterLimit, recruitOffers, bLevel } from '../shared/town.js';
 
 const NAMES = ['Aldric', 'Brienna', 'Cassian', 'Dagna', 'Elowen', 'Fenris', 'Gwyn', 'Halvard', 'Isolde', 'Jorah', 'Kael', 'Liora', 'Merrick', 'Nyx', 'Orin', 'Perrin', 'Quill', 'Rowan', 'Sable', 'Thane', 'Ulric', 'Vesna', 'Wren', 'Xander', 'Yara', 'Zephyr', 'Ashka', 'Bram', 'Corin', 'Delia', 'Edda', 'Faelan', 'Garrick', 'Hesper', 'Ivo', 'Juniper', 'Kestrel', 'Lysa', 'Mordecai', 'Nessa', 'Oswin', 'Petra', 'Ronan', 'Selka', 'Tamsin', 'Vale'];
 
@@ -26,7 +28,7 @@ export function newPlayer(account) {
     recruitment: { offers: [], refreshedAt: 0 },
     stats: { kills: 0, bossKills: 0, recruited: 0, epicFound: 0, legendaryFound: 0, coopWins: 0, heroLevel: 1, zonesUnlocked: 1, fights: 0 },
     achievements: {},
-    settings: { autoSellBelow: null, autoDevelopRecruits: true, autoDevelopHero: false, publicProfile: true },
+    settings: { autoSellBelow: null, autoLootAction: 'sell', autoDevelopRecruits: true, autoDevelopHero: false, publicProfile: true },
     coopChars: [],
   };
 }
@@ -37,6 +39,7 @@ export function migratePlayer(p) {
   for (const k of Object.keys(base)) if (p[k] === undefined) p[k] = base[k];
   p.stats = { ...base.stats, ...p.stats };
   p.settings = { ...base.settings, ...p.settings };
+  migrateTown(p);
   while (p.parties.length < CONFIG.party.presets) p.parties.push({ name: `Party ${p.parties.length + 1}`, members: p.heroId ? [p.heroId] : [] });
   for (const ch of Object.values(p.characters)) {
     for (const s of SLOT_IDS) if (!(s in ch.equipment)) ch.equipment[s] = null;
@@ -218,6 +221,7 @@ export function setSettings(p, s) {
   if ('autoDevelopRecruits' in s) p.settings.autoDevelopRecruits = !!s.autoDevelopRecruits;
   if ('autoDevelopHero' in s) p.settings.autoDevelopHero = !!s.autoDevelopHero;
   if ('publicProfile' in s) p.settings.publicProfile = !!s.publicProfile;
+  if ('autoLootAction' in s) p.settings.autoLootAction = s.autoLootAction === 'salvage' ? 'salvage' : 'sell';
 }
 
 // Adds an item (auto-sell rules & capacity respected). Returns 'kept' | 'sold'
@@ -227,6 +231,8 @@ export function receiveItem(p, item) {
   if (r >= 4) p.stats.legendaryFound++;
   const below = p.settings.autoSellBelow;
   if ((below && r <= rarityIndex(below)) || p.inventory.length >= CONFIG.inventory.limit) {
+    // auto-loot: salvage into materials (Salvage Yard) or sell for gold
+    if (p.settings.autoLootAction === 'salvage' && p.town && !item.locked) { autoSalvage(p, item); return 'salvaged'; }
     p.gold += itemSellValue(item);
     return 'sold';
   }
@@ -252,12 +258,14 @@ export function refreshRecruits(p, free = false, assetIndex = {}) {
   const offers = [];
   const classes = [...CLASS_IDS];
   // first offer set guarantees complementary classes for a new hero
-  for (let i = 0; i < CONFIG.recruitment.offers; i++) {
+  const innLevel = p.town ? bLevel(p, 'inn') : 1;
+  for (let i = 0; i < (p.town ? recruitOffers(p) : CONFIG.recruitment.offers); i++) {
     const classId = classes.length ? classes.splice(rng.int(0, classes.length - 1), 1)[0] : rng.pick(CLASS_IDS);
     const portraits = Object.keys(assetIndex).filter(k => k.startsWith(`portraits/${classId}`)).map(k => k.slice(10));
     offers.push({
       offerId: uid(), name: rng.pick(NAMES), classId, trait: rng.pick(Object.keys(TRAITS)),
       level: Math.max(1, lvl - rng.int(0, 2)), portrait: portraits.length ? rng.pick(portraits) : null,
+      profession: rollProfession(rng, innLevel),
     });
   }
   p.recruitment = { offers, refreshedAt: Date.now() };
@@ -276,12 +284,13 @@ export function recruit(p, { offerId }) {
   const idx = p.recruitment.offers.findIndex(o => o.offerId === offerId);
   if (idx < 0) fail('Recruit no longer available');
   const recruits = Object.values(p.characters).filter(c => !c.isMain).length;
-  if (recruits >= CONFIG.party.rosterLimit) fail('Your roster is full');
+  if (recruits >= rosterLimit(p)) fail(`Your Inn has room for ${rosterLimit(p)} companions — upgrade it in the Town`);
   const offer = p.recruitment.offers[idx];
   const cost = recruitCost(p, offer);
   if (p.gold < cost) fail(`Costs ${cost} gold`);
   p.gold -= cost;
   const ch = createCharacter({ id: uid(), name: offer.name, classId: offer.classId, level: offer.level, portrait: offer.portrait, trait: offer.trait });
+  ch.profession = offer.profession ? { ...offer.profession } : rollProfession(createRng(randomSeed()), 1);
   p.characters[ch.id] = ch;
   p.recruitment.offers.splice(idx, 1);
   p.stats.recruited++;
@@ -298,6 +307,7 @@ export function dismiss(p, { charId }) {
   delete p.characters[charId];
   for (const party of p.parties) party.members = party.members.filter(id => id !== charId);
   p.coopChars = p.coopChars.filter(id => id !== charId);
+  for (const b of Object.values(p.town?.buildings || {})) if (b.worker === charId) b.worker = null;
 }
 
 export function renameCharacter(p, { charId, name }) {
@@ -378,7 +388,7 @@ export function applyRewards(p, chars, rewards) {
   }
   p.gold += rewards.gold;
   let sold = 0, kept = 0;
-  for (const it of rewards.items) (receiveItem(p, it) === 'sold' ? sold++ : kept++);
+  for (const it of rewards.items) (receiveItem(p, it) === 'kept' ? kept++ : sold++);
   p.stats.kills += rewards.kills || 0;
   const h = hero(p);
   if (h) p.stats.heroLevel = h.level;
@@ -405,6 +415,7 @@ export function publicPlayer(p) {
     parties: p.parties, activeParty: p.activeParty, zone: p.zone, unlockedZones: p.unlockedZones, bossKills: p.bossKills,
     recruitment: { ...p.recruitment, costs: Object.fromEntries(p.recruitment.offers.map(o => [o.offerId, recruitCost(p, o)])) },
     stats: p.stats, achievements: p.achievements, settings: p.settings, coopChars: p.coopChars,
+    town: p.town, serverTime: Date.now(),
   };
 }
 

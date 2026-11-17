@@ -371,7 +371,7 @@ function renderResults() {
       <div><b>${r.result === 'victory' ? 'Victory' : 'Defeat'}</b> <span class="muted small">${esc(r.title || '')}</span></div>
       ${r.result === 'victory' ? `<div class="small"><span class="xp-text">+${fmt(r.xp)} XP</span> · <span class="gold-text">+${fmt(r.gold)}g</span>
         ${(r.items || []).map(i => `<div class="rarity-text rarity-${i.rarity}">${esc(i.name)}</div>`).join('')}
-        ${r.sold ? `<div class="muted">${r.sold} item(s) auto-sold</div>` : ''}
+        ${r.sold ? `<div class="muted">${r.sold} item(s) auto-sold/salvaged</div>` : ''}
         ${(r.levelUps || []).map(l => `<div class="lvlup">▲ ${esc(l.name)} → Lv ${l.level}</div>`).join('')}</div>` : ''}
     </div>`).join('') : '<div class="muted small">No fights yet.</div>';
 }

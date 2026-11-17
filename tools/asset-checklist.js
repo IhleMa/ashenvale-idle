@@ -12,6 +12,7 @@ import { ZONES, COOP_ENCOUNTERS } from '../shared/data/zones.js';
 import { ACHIEVEMENTS } from '../shared/data/achievements.js';
 import { CONFIG } from '../shared/config.js';
 import { AssetIndex } from '../server/assets.js';
+import { BUILDINGS, MATERIALS, PROFESSIONS, ELIXIRS } from '../shared/data/town.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const index = new AssetIndex(path.join(ROOT, 'public', 'assets')).get();
@@ -48,6 +49,10 @@ md += section('Co-op encounter art', 'encounters', Object.values(COOP_ENCOUNTERS
 md += section('Achievements', 'achievements', Object.values(ACHIEVEMENTS).map(a => [a.id, a.name]));
 md += section('Skill tree nodes (optional)', 'skilltree', [['keystone', 'Keystone node icon'], ['notable', 'Notable node icon'], ['rank', 'Ability-rank node icon (falls back to the ability icon)']],
   'Ability nodes use the ability icons above. Small attribute nodes are drawn as plain dots.');
+md += section('Town buildings', 'buildings', Object.entries(BUILDINGS).map(([id, b]) => [id, b.name]), 'Square or slightly wide images shown on the Town page.');
+md += section('Materials', 'materials', Object.entries(MATERIALS).map(([id, m]) => [id, m.name]), 'Small square icons (64 px).');
+md += section('Professions', 'professions', Object.entries(PROFESSIONS).map(([id, p]) => [id, p.name]), 'Small square icons.');
+md += section('Elixirs', 'elixirs', Object.entries(ELIXIRS).map(([id, e]) => [id, e.name]), 'Small square icons.');
 md += section('Interface', 'ui', [['logo', 'Game logo (top bar & login screen)'], ['background', 'Full-page background image']]);
 
 const header = `# Asset checklist

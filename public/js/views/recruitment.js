@@ -8,6 +8,9 @@ import { CONFIG } from '/shared/config.js';
 import { CLASSES, TRAITS } from '/shared/data/classes.js';
 import { computeStats, powerRating } from '/shared/stats.js';
 import { createCharacter } from '/shared/character.js';
+import { rosterLimit } from '/shared/town.js';
+import { PROFESSIONS } from '/shared/data/town.js';
+import { professionIcon } from '../assets.js';
 
 let timer = null;
 
@@ -44,11 +47,11 @@ export const recruitmentView = {
         <div class="recruit-grid">${p.recruitment.offers.map(o => offerCard(o, p)).join('') || '<p class="muted">No recruits right now. Check back soon.</p>'}</div>
       </section>
       <section class="panel">
-        <div class="panel-head"><h3>Your roster <span class="muted small">${roster.length}/${CONFIG.party.rosterLimit}</span></h3></div>
+        <div class="panel-head"><h3>Your roster <span class="muted small">${roster.length}/${rosterLimit(p)} · <a href="#/town">upgrade the Inn for more rooms</a></span></h3></div>
         <div class="roster-list">${roster.length ? roster.map(c => {
           const inParty = p.parties.some(pt => pt.members.includes(c.id));
           return `<div class="bench-row">${portrait(c, 'sm')}<div class="grow"><b>${esc(c.name)}</b> ${classBadge(c.classId)} ${roleBadge(c.role)}
-            <div class="muted small">Lv ${c.level} · ${c.trait ? esc(TRAITS[c.trait].name) : ''} · Power ${fmt(powerRating(computeStats(c)))}${inParty ? ' · in a party' : ''}</div></div>
+            <div class="muted small">${c.profession ? `${professionIcon(c.profession.id, 'xxs')} ${esc(PROFESSIONS[c.profession.id].name)} ${c.profession.level} · ` : ''}Lv ${c.level} · ${c.trait ? esc(TRAITS[c.trait].name) : ''} · Power ${fmt(powerRating(computeStats(c)))}${inParty ? ' · in a party' : ''}</div></div>
             <button class="btn tiny" data-view="${c.id}">View</button><button class="btn tiny danger ghost" data-dismiss="${c.id}">Dismiss</button></div>`;
         }).join('') : '<p class="muted">No companions yet.</p>'}</div>
       </section>`;
@@ -67,13 +70,14 @@ function offerCard(o, p) {
   const preview = createCharacter({ id: 'x', name: o.name, classId: o.classId, level: o.level, trait: o.trait, portrait: o.portrait });
   const s = computeStats(preview);
   const cost = p.recruitment.costs[o.offerId];
-  const full = Object.values(p.characters).filter(c => !c.isMain).length >= CONFIG.party.rosterLimit;
+  const full = Object.values(p.characters).filter(c => !c.isMain).length >= rosterLimit(p);
   return `<div class="recruit-card" style="--cc:${cls.color}">
     ${portrait(preview, 'lg')}
     <div class="recruit-body">
       <b class="recruit-name">${esc(o.name)}</b>
       <div>${classBadge(o.classId)} ${roleBadge(cls.role)}</div>
       <div class="muted small">Level ${o.level} · <span ${tipAttr(esc(TRAITS[o.trait].description))}>${esc(TRAITS[o.trait].name)}</span></div>
+      ${o.profession ? `<div class="prof-badge">${professionIcon(o.profession.id, 'xxs')} ${esc(PROFESSIONS[o.profession.id].name)} ${o.profession.level}</div>` : ''}
       <div class="mini-stats small"><span>HP ${fmt(s.maxHp)}</span><span>Power ${fmt(powerRating(s))}</span></div>
       <p class="small muted">${esc(cls.description)}</p>
     </div>

@@ -102,3 +102,22 @@ export function backgroundStyle(...keys) {
   const url = assetUrl(...keys);
   return url ? `background-image: linear-gradient(rgba(10,8,8,.55), rgba(10,8,8,.85)), url('${esc(url)}');` : '';
 }
+
+// --- Town ------------------------------------------------------------------------
+import { BUILDINGS, MATERIALS, PROFESSIONS, ELIXIRS } from '/shared/data/town.js';
+const BUILDING_GLYPH = { town_hall: '🏰', inn: '🍺', salvage_yard: '🔨', mine: '⛏', herb_garden: '🌿', blacksmith: '⚒', leatherworker: '🪡', tailor: '🧶', jeweler: '💍', enchanter: '✨', alchemy_lab: '⚗' };
+export function buildingArt(id, cls = '') {
+  return render(assetUrl(`buildings/${id}`), { cls: `building-art ${cls}`, color: '#6b4a32', glyph: BUILDING_GLYPH[id] || '🏠', title: BUILDINGS[id]?.name });
+}
+export function materialIcon(id, cls = '') {
+  const m = MATERIALS[id] || {};
+  return render(assetUrl(`materials/${id}`), { cls: `material-icon ${cls}`, color: m.color || '#555', glyph: m.glyph || '?', title: m.name });
+}
+export function professionIcon(id, cls = '') {
+  const pr = PROFESSIONS[id] || {};
+  return render(assetUrl(`professions/${id}`), { cls: `profession-icon ${cls}`, color: '#4a3a2a', glyph: pr.glyph || '?', title: pr.name });
+}
+export function elixirIcon(id, cls = '') {
+  const e = ELIXIRS[id] || {};
+  return render(assetUrl(`elixirs/${id}`), { cls: `elixir-icon ${cls}`, color: '#3a5a4a', glyph: e.glyph || '⚗', title: e.name });
+}

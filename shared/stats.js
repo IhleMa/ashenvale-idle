@@ -26,6 +26,7 @@ export function equipmentStats(ch) {
   for (const item of Object.values(ch.equipment || {})) {
     if (!item) continue;
     for (const [k, v] of Object.entries(item.stats)) out[k] = (out[k] || 0) + v;
+    if (item.enchant) out[item.enchant.stat] = (out[item.enchant.stat] || 0) + item.enchant.value; // Enchanter's Study
   }
   return out;
 }

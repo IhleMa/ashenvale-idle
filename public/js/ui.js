@@ -90,6 +90,8 @@ export function itemTooltipHtml(item, compareTo = null) {
       lines.push(`<div class="stat-line"><span>${esc(STAT_LABELS[k] || k)}</span><span class="down">(−${PCT_STATS.has(k) ? (v * 100).toFixed(1) + '%' : fmt(v)})</span></div>`);
     }
   }
+  if (item.enchant) lines.push(`<div class="stat-line enchant-line"><span>✨ Enchanted: ${esc(STAT_LABELS[item.enchant.stat] || item.enchant.stat)}</span><span>${statValue(item.enchant.stat, item.enchant.value)}</span></div>`);
+  if (item.crafted) lines.push(`<div class="muted small">Crafted by ${esc(item.crafted)}</div>`);
   const classes = item.classes ? item.classes.map(c => CLASSES[c]?.name).join(', ') : 'All classes';
   return `<div class="item-tip">
     <div class="item-name rarity-text rarity-${item.rarity}">${esc(item.name)}</div>

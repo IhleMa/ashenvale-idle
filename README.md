@@ -55,6 +55,10 @@ public/assets/
 ├── zones/          whispering_woods.png, …              (combat backgrounds)
 ├── encounters/     ashen_crypt.png, ashen_colossus.png, …
 ├── achievements/   first_blood.png, …
+├── buildings/      town_hall.png, inn.png, blacksmith.png, …
+├── materials/      ore.png, arcane_dust.png, …
+├── professions/    mining.png, alchemy.png, …
+├── elixirs/        might.png, wisdom.png, …
 └── ui/             logo.png, background.png
 ```
 
@@ -77,6 +81,7 @@ public/assets/
 | **Enemies** | 5 zones, each with a boss. Bosses have phases (summons, defensive shells, enrage) and an enrage timer. Beating a zone's boss unlocks the next zone. |
 | **Idle & offline** | The server runs your fights continuously while you're online. When you come back after being away (up to 8 h), the same combat engine fast-forwards those fights using server time. |
 | **Multiplayer** | Groups of up to 4 players with invitations, leader controls and chat. Co-op encounters: a dungeon, an elite hunt, a challenge and a world boss. Enemies scale with group size and every player gets their own loot. |
+| **Town & professions** | A garrison-style town you build up over time, with construction timers.<br>• **Town Hall:** caps building levels and allows more constructions at once.<br>• **Inn:** sets your roster size and how many recruits are offered.<br>• **Salvage Yard:** breaks items into materials (metal, leather, cloth, gems, plus arcane dust, essences, shards and void crystals from better items). Auto-loot can salvage instead of selling.<br>• **Mine** and **Herb Garden:** produce Ore, Gems and Herbs over time.<br>• **Blacksmith, Leatherworker, Tailor, Jeweler:** craft gear up to Masterwork quality and reforge old gear to a higher item level.<br>• **Enchanter's Study:** adds a permanent bonus stat to any item.<br>• **Alchemy Lab:** brews timed party elixirs (damage, defense, XP, gold, all stats) that also apply offline.<br>Every recruit has one of 8 professions with its own skill level, and crafting buildings need a worker with the matching profession. |
 | **Rankings & inspect** | Leaderboards for hero level, party power, hero power, kills, bosses, co-op wins, achievements and world progress. You can filter by class and search. Inspect any player to see their current activity, group, stats and progress, plus the full hero build: attributes, gear, a skill tree preview, notables, and the loadout with behaviour rules. You can also see their party and invite them from there. Gold and inventory are never shown, and players can make their build private in Settings. |
 | **Progression** | XP and levels up to 60, skill tree points, ability ranks, class titles, 16 achievements and statistics. |
 
@@ -108,6 +113,7 @@ pterodactyl/       Pterodactyl egg
 - **Skill tree:** each class tree is generated from a short spec in `shared/data/skilltree.js` (branches, attribute themes, ability rings, notables/keystones). Ring sizes, links and node values are in `TREE_CONFIG`. Changing the number of rings or branches changes node ids. Existing saves are cleaned up automatically, and points on removed nodes are refunded.
 - **New class:** add an entry to `shared/data/classes.js` and give it abilities with `classId: '<your class>'`.
 - **New enemy/zone/encounter:** add entries to `enemies.js` and `zones.js`.
+- **Town:** buildings, materials, professions, elixirs and costs are in `shared/data/town.js`. The formulas for salvage, crafting, enchanting and gathering are in `shared/town.js`.
 - **New behaviour condition or target selector:** add it to the registries in `shared/rules.js`. The editor dropdowns update themselves.
 - **Balance:** use `shared/config.js` and `ENEMY_TUNING` in `shared/data/enemies.js`, then check the result with `npm run simulate`.
 

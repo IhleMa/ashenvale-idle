@@ -16,9 +16,10 @@ import { inventoryView } from './views/inventory.js';
 import { multiplayerView } from './views/multiplayer.js';
 import { progressionView } from './views/progression.js';
 import { rankingsView } from './views/rankings.js';
+import { townView } from './views/town.js';
 import { createView } from './views/create.js';
 
-const VIEWS = [combatView, characterView, skilltreeView, abilitiesView, partyView, recruitmentView, inventoryView, multiplayerView, rankingsView, progressionView];
+const VIEWS = [combatView, characterView, skilltreeView, abilitiesView, partyView, recruitmentView, townView, inventoryView, multiplayerView, rankingsView, progressionView];
 const viewEl = () => document.getElementById('view');
 let current = null;
 let root = null; // per-view container (listeners attached to it die with it)
@@ -124,6 +125,9 @@ function renderTopbar() {
   setBadge('skilltree', treePts ? '!' : '');
   setBadge('multiplayer', state.invites.length ? String(state.invites.length) : '');
   setBadge('recruitment', p.stats.recruited === 0 ? '!' : '');
+  const t = Date.now() + (state.timeOffset || 0);
+  const townReady = p.town && Object.values(p.town.buildings).some(b => b.upgrade && b.upgrade.endsAt <= t);
+  setBadge('town', townReady ? '✓' : '');
 }
 function setBadge(id, text) {
   const b = document.querySelector(`[data-badge="${id}"]`);
@@ -176,6 +180,7 @@ bus.on('msg:state', m => {
   const first = !state.player;
   const hadHero = !!state.player?.heroId;
   state.player = m.player;
+  if (m.player.serverTime) state.timeOffset = m.player.serverTime - Date.now();
   renderTopbar();
   if (first || hadHero !== !!m.player.heroId) route(); else requestRender();
 });

@@ -10,6 +10,8 @@ import { SLOTS, SLOT_IDS, canEquip } from '/shared/data/items.js';
 import { computeStats, ATTRIBUTES, powerRating } from '/shared/stats.js';
 import { abilitySlots } from '/shared/character.js';
 import { availablePoints, treeStats } from '/shared/skilltree.js';
+import { PROFESSIONS, BUILDINGS, professionXpToNext } from '/shared/data/town.js';
+import { professionIcon } from '../assets.js';
 
 export const characterView = {
   id: 'character', label: 'Character', icon: '👤',
@@ -55,6 +57,7 @@ export const characterView = {
               <span class="muted small" ${tipAttr(roleTip(ch.role))}>ⓘ role bonus</span>
               ${ch.trait ? `<span class="trait" ${tipAttr(esc(TRAITS[ch.trait].description))}>Trait: ${esc(TRAITS[ch.trait].name)}</span>` : ''}
               <span class="muted small">Power ${fmt(powerRating(s))}</span>
+              ${ch.profession ? (() => { const wb = Object.entries(p.town?.buildings || {}).find(([, b]) => b.worker === ch.id); return `<span class="prof-badge" ${tipAttr(`${esc(PROFESSIONS[ch.profession.id].name)} skill ${ch.profession.level} (${ch.profession.xp}/${professionXpToNext(ch.profession.level)} XP)`)}>${professionIcon(ch.profession.id, 'xxs')} ${esc(PROFESSIONS[ch.profession.id].name)} ${ch.profession.level}${wb ? ` · works at the ${esc(BUILDINGS[wb[0]].name)}` : ''}</span>`; })() : ''}
             </div>
             ${ch.isMain ? `<div class="hero-perks small muted">Hero perks: +${Math.round(CONFIG.mainCharacter.attributeBonus * 100)}% attributes · ${abilitySlots(ch)} ability slots · +1 skill point every ${CONFIG.mainCharacter.bonusSkillPointEvery} levels · +${Math.round(CONFIG.mainCharacter.xpBonus * 100)}% XP · Leadership aura at Lv ${CONFIG.mainCharacter.leadershipAura.unlockLevel}</div>` : `<div class="row end"><button class="btn small danger ghost" data-act="dismiss">Dismiss</button></div>`}
           </div>

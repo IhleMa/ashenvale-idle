@@ -11,6 +11,8 @@ import { idleWaves, bossWaves, coopWaves, coopScale, computeRewards, zoneLevel }
 import { createRng, randomSeed } from '../shared/rng.js';
 import { ABILITIES } from '../shared/data/abilities.js';
 import { Rankings } from './rankings.js';
+import * as TL from './townLogic.js';
+import { elixirBonuses } from '../shared/town.js';
 import * as L from './playerLogic.js';
 
 const { GameError } = L;
@@ -197,6 +199,17 @@ export class Game {
     sell_by_rarity(s, d) { return L.sellByRarity(s.player, d); },
     toggle_lock(s, d) { L.toggleLock(s.player, d); },
     set_settings(s, d) { L.setSettings(s.player, d); },
+    // ---- town
+    town_upgrade(s, d) { const r = TL.upgradeBuilding(s.player, { buildingId: String(d.buildingId) }); return r; },
+    town_assign(s, d) { TL.assignWorker(s.player, { buildingId: String(d.buildingId), charId: d.charId ? String(d.charId) : null }); },
+    town_collect(s, d) { const r = d.buildingId ? TL.collect(s.player, { buildingId: String(d.buildingId) }) : TL.collectAll(s.player); this.profToast(s, r.msg || r.msgs); return r; },
+    salvage_items(s, d) { return TL.salvageItems(s.player, d); },
+    salvage_by_rarity(s, d) { return TL.salvageByRarity(s.player, d); },
+    craft_item(s, d) { const r = TL.craft(s.player, d, L.hero(s.player).level); this.profToast(s, r.msg); return r; },
+    reforge_item(s, d) { const r = TL.reforge(s.player, d, L.hero(s.player).level); this.profToast(s, r.msg); return r; },
+    enchant_item(s, d) { const r = TL.enchant(s.player, d); this.profToast(s, r.msg); return r; },
+    brew_elixir(s, d) { const r = TL.brew(s.player, d, L.hero(s.player).level); this.profToast(s, r.msg); return r; },
+
     get_rankings(s, d) {
       return this.rankings.board({ category: String(d.category || 'level'), classId: d.classId ? String(d.classId) : null, search: d.search, limit: Number(d.limit) || 100 }, s.player.id);
     },
@@ -288,6 +301,10 @@ export class Game {
     group_start(s, d) { this.startCoop(s, d.encounterId); },
   };
 
+  profToast(s, msg) {
+    for (const m of [].concat(msg || [])) if (m) this.toast(s.player.id, m, 'success');
+  }
+
   ensureNotInCoop(playerId) {
     if (this.groupOf(playerId)?.battle) fail('Not possible during a co-op encounter');
   }
@@ -326,7 +343,7 @@ export class Game {
     const rng = createRng(randomSeed());
     const waves = next.kind === 'boss' ? bossWaves(zone.id, h.level) : idleWaves(zone.id, h.level, rng, chars.length);
     const battle = createBattle({
-      seed: randomSeed(), allies: buildPartyUnits(chars, { ownerId: p.id, ownerName: p.name }), waves,
+      seed: randomSeed(), allies: buildPartyUnits(chars, { ownerId: p.id, ownerName: p.name, buffs: elixirBonuses(p) }), waves,
       scale: (next.kind === 'boss' ? zone.bossScale : zone.scale) || { hp: 1, damage: 1 },
       meta: { kind: next.kind, zoneId: zone.id, title: next.kind === 'boss' ? `Boss: ${zone.name}` : zone.name, level: zoneLevel(zone, h.level) },
     });
@@ -342,7 +359,7 @@ export class Game {
     const summary = { result: battle.state, kind, zoneId };
     p.stats.fights++;
     if (battle.state === 'victory') {
-      const rewards = computeRewards(battle.kills, createRng(randomSeed()));
+      const rewards = this.applyElixirRewards(p, computeRewards(battle.kills, createRng(randomSeed())));
       rewards.kills = battle.kills.length;
       const chars = s.solo.chars.map(id => p.characters[id]).filter(Boolean);
       if (kind === 'boss') {
@@ -362,6 +379,13 @@ export class Game {
     this.markDirty(s);
   }
 
+  applyElixirRewards(p, rewards, at = Date.now()) {
+    const eb = elixirBonuses(p, at);
+    rewards.xp = Math.round(rewards.xp * (1 + eb.xpPct));
+    rewards.gold = Math.round(rewards.gold * (1 + eb.goldPct));
+    return rewards;
+  }
+
   rewardSummary(rewards, res) {
     return {
       xp: rewards.xp, gold: rewards.gold,
@@ -372,6 +396,13 @@ export class Game {
 
   tick() {
     const now = Date.now();
+    if (!this.lastTownCheck || now - this.lastTownCheck > 1000) {
+      this.lastTownCheck = now;
+      for (const s of this.sessions.values()) {
+        if (!s.player.town) continue;
+        for (const d of TL.finishConstructions(s.player, now)) { this.toast(s.player.id, `🏗 ${d.name} upgraded to level ${d.level}!`, 'success'); this.markDirty(s); }
+      }
+    }
     for (const s of this.sessions.values()) {
       const p = s.player;
       if (!p.heroId || this.groupOf(p.id)?.battle) { this.flushState(s); continue; }
@@ -414,13 +445,14 @@ export class Game {
     const found = [];
     while (simTime < seconds && fights < CONFIG.offline.maxSimulatedFights) {
       const h = L.hero(p);
-      const b = createBattle({ seed: rng.int(1, 2 ** 31), allies: buildPartyUnits(chars, { ownerId: p.id, ownerName: p.name }), waves: idleWaves(zone.id, h.level, rng, chars.length), scale: zone.scale || { hp: 1, damage: 1 } });
+      const at = (p.lastActive || Date.now()) + simTime * 1000;
+      const b = createBattle({ seed: rng.int(1, 2 ** 31), allies: buildPartyUnits(chars, { ownerId: p.id, ownerName: p.name, buffs: elixirBonuses(p, at) }), waves: idleWaves(zone.id, h.level, rng, chars.length), scale: zone.scale || { hp: 1, damage: 1 } });
       runToEnd(b);
       fights++;
       simTime += b.time + (b.state === 'victory' ? CONFIG.combat.restBetweenFights : CONFIG.combat.reviveDelay);
       if (b.state !== 'victory') continue;
       wins++;
-      const r = computeRewards(b.kills, rng, { rewardMult: CONFIG.offline.efficiency });
+      const r = this.applyElixirRewards(p, computeRewards(b.kills, rng, { rewardMult: CONFIG.offline.efficiency }), at);
       r.kills = b.kills.length;
       xp += r.xp; gold += r.gold; kills += r.kills;
       const res = L.applyRewards(p, chars, r);
@@ -517,7 +549,7 @@ export class Game {
     const allies = [];
     for (const p of players) {
       const chars = L.coopCharacters(p);
-      allies.push(...buildPartyUnits(chars, { ownerId: p.id, ownerName: p.name, positionOffset: offset, extraBonuses: bonuses }));
+      allies.push(...buildPartyUnits(chars, { ownerId: p.id, ownerName: p.name, positionOffset: offset, extraBonuses: bonuses, buffs: elixirBonuses(p) }));
       offset += chars.length;
     }
     const groupLevel = Math.round(players.reduce((sum, p) => sum + L.hero(p).level, 0) / players.length);
@@ -552,7 +584,7 @@ export class Game {
       if (!p) continue;
       const summary = { result: b.state, kind: 'coop', encounterId: enc.id };
       if (b.state === 'victory') {
-        const rewards = computeRewards(b.kills, createRng(randomSeed()), { rewardMult: enc.rewardMult, lootBoost: 0.5 });
+        const rewards = this.applyElixirRewards(p, computeRewards(b.kills, createRng(randomSeed()), { rewardMult: enc.rewardMult, lootBoost: 0.5 }));
         rewards.kills = b.kills.length;
         p.stats.coopWins++;
         p.stats.bossKills += b.kills.filter(k => k.boss).length;
