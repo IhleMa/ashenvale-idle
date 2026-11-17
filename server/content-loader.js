@@ -24,6 +24,7 @@ export const SETTINGS_FILES = {
   legendaries: 'legendaries/_settings.json', skilltree: 'skilltree/_settings.json', town: 'town/_settings.json',
   expeditions: 'expeditions/_settings.json', quests: 'quests/_settings.json', rifts: 'rifts/_settings.json',
   gems: 'gems/_settings.json', bestiary: 'bestiary.json', lootfilter: 'lootfilter/_settings.json', bots: 'bots/_settings.json',
+  tutorial: 'tutorial.json',
 };
 // [system, key] ← folder with one file per entry
 export const COLLECTIONS = [

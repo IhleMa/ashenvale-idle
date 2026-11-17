@@ -14,6 +14,7 @@ import { adminActions } from './admin.js';
 import { Announcements } from './announcements.js';
 import * as TL from './townLogic.js';
 import * as XL from './expeditionLogic.js';
+import * as TU from './tutorialLogic.js';
 import { EXPEDITIONS } from '../shared/data/expeditions.js';
 import { elixirBonuses } from '../shared/town.js';
 import { speedUpCost } from '../shared/premium.js';
@@ -166,7 +167,16 @@ export class Game {
   flushState(s) {
     if (!s.stateDirty) return;
     s.stateDirty = false;
+    if (s.player.tutorial && !s.player.tutorial.done) this.tutorialToasts(s, TU.checkTutorial(s.player));
     this.sendTo(s.player.id, { t: 'state', player: L.publicPlayer(s.player) });
+  }
+
+  tutorialToasts(s, done) {
+    for (const d of done) {
+      this.toast(s.player.id, `✔ ${d.step.title}${d.reward.length ? ` — ${d.reward.join(', ')}` : ''}`, 'success');
+      this.store.savePlayerSoon(s.player);
+    }
+    if (done.length) this.sendTo(s.player.id, { t: 'tutorial', done: done.map(d => ({ id: d.step.id, reward: d.reward })), next: done[done.length - 1].next?.id || null });
   }
 
   markDirty(s) { s.stateDirty = true; this.store.savePlayerSoon(s.player); }
@@ -208,7 +218,8 @@ export class Game {
   actions = {
     create_hero(s, d) {
       const ch = L.createHero(s.player, d, this.assets.get());
-      this.toast(s.player.id, `Welcome to Ashenvale, ${ch.name}! Your first companion is free — visit Recruitment.`, 'success');
+      TU.startTutorial(s.player);
+      if (s.player.tutorial.done) this.toast(s.player.id, `Welcome to Ashenvale, ${ch.name}! Your first companion is free — visit Recruitment.`, 'success');
       this.onlineDirty = true;
     },
     allocate_nodes(s, d) {
@@ -241,6 +252,7 @@ export class Game {
     expedition_start(s, d) {
       this.ensureNotInCoop(s.player.id);
       const ex = XL.startExpedition(s.player, { destId: String(d.destId), charIds: d.charIds, hours: Number(d.hours) });
+      s.player.stats.expeditionsSent = (s.player.stats.expeditionsSent || 0) + 1;
       for (const id of ex.charIds) this.abortSoloIfUsing(s, id);
       return ex;
     },
@@ -262,11 +274,16 @@ export class Game {
       if (cost > 0) L.spendPremium(p, cost, d.maxCost);
       ex.endsAt = Date.now();
       ex.announced = true;
+      p.stats.expeditionSpeedups = (p.stats.expeditionSpeedups || 0) + 1;
       return { cost };
     },
+    // ---- tutorial
+    tutorial_ack(s, d) { this.tutorialToasts(s, TU.ackTutorial(s.player, { stepId: d.stepId ? String(d.stepId) : null })); },
+    tutorial_skip(s) { TU.skipTutorial(s.player); },
     expedition_cancel(s, d) { XL.cancelExpedition(s.player, { id: String(d.id) }); },
     expedition_claim(s, d) {
       const r = d.id ? XL.claimExpedition(s.player, { id: String(d.id) }) : XL.claimAll(s.player);
+      s.player.stats.expeditionsClaimed = (s.player.stats.expeditionsClaimed || 0) + (r.count || 1);
       this.profToast(s, r.messages);
       this.questDone(s.player, Q.track(s.player, 'expedition', r.count || 1));
       L.checkAchievements(s.player);

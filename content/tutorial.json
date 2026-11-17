@@ -1,0 +1,102 @@
+{
+  "_about": "The new-player tutorial: steps in order. Each step names the page it happens on (view), what to highlight there, the goal that completes it and an optional reward. Pages are only shown in the menu once a step unlocks them; the last step unlocks everything. Goals: { \"type\": \"ack\" } (a Continue button) or { \"metric\": …, \"count\": n } counted from the start of the step (\"absolute\": true counts the total instead), or { \"any\": [goal, …] }. Metrics: kills, fights, recruited, heroNodes, buildingUpgrades, expeditionsSent, expeditionSpeedups, expeditionsReady, expeditionsClaimed, partySize, heroLevel. Rewards: gold, premium, xp (hero), materials { id: n }, coverUpgrade (a building id: gives whatever is missing to upgrade it).",
+  "enabled": true,
+  "alwaysVisible": ["progression", "admin"],
+  "steps": [
+    {
+      "id": "welcome",
+      "title": "Welcome to Ashenvale",
+      "text": "Your hero has arrived in the Whispering Woods. This short tutorial shows you the most important things — every step unlocks a new part of the game. Fights run on their own, even while you're offline.",
+      "view": "combat",
+      "unlocks": ["combat"],
+      "goal": { "type": "ack" },
+      "button": "Let's go"
+    },
+    {
+      "id": "first_fight",
+      "title": "Your first fights",
+      "text": "Your hero fights automatically. Watch the battle and defeat **{count} enemies**. Every victory brings experience, gold and sometimes equipment.",
+      "view": "combat",
+      "goal": { "metric": "kills", "count": 5 },
+      "reward": { "gold": 100 }
+    },
+    {
+      "id": "recruit",
+      "title": "Recruit a companion",
+      "text": "Nobody should fight alone. Visit **Recruitment** and hire a companion — the first one is free. They join your party right away. Pick a class that fills a different role than your hero.",
+      "view": "recruitment",
+      "unlocks": ["recruitment", "party", "inventory"],
+      "highlight": ["[data-recruit]"],
+      "goal": { "metric": "recruited", "count": 1 }
+    },
+    {
+      "id": "skill_tree",
+      "title": "Spend a skill point",
+      "text": "Every level gives your hero a skill point. Open the **Skill Tree** and click one of the glowing nodes next to your start to allocate it. Nodes give stats, new abilities and powerful bonuses.",
+      "view": "skilltree",
+      "unlocks": ["character", "skilltree", "abilities"],
+      "highlight": [".node.s-avail"],
+      "goal": { "metric": "heroNodes", "count": 1 },
+      "reward": { "coverUpgrade": "town_hall" },
+      "rewardText": "Building materials and gold for your town"
+    },
+    {
+      "id": "town",
+      "title": "Build up your town",
+      "text": "Your town makes the whole party stronger. You received exactly what you need — upgrade the **Town Hall**: it decides how far every other building can grow. Construction finishes on its own after a few minutes.",
+      "view": "town",
+      "unlocks": ["town"],
+      "highlight": ["[data-upgrade=\"town_hall\"]"],
+      "goal": { "metric": "buildingUpgrades", "count": 1 },
+      "reward": { "premium": 5 },
+      "rewardText": "5 Ashen Crystals 💠"
+    },
+    {
+      "id": "expedition",
+      "title": "Send an expedition",
+      "text": "Companions can gather materials while you fight. Open **Expeditions**, choose the **Whispering Glade**, pick your companion, set **15 min** and send them off.",
+      "view": "expeditions",
+      "unlocks": ["expeditions"],
+      "highlight": ["[data-dest=\"whispering_glade\"]", "[data-pick]", "[data-hours=\"0.25\"]", "[data-send]"],
+      "goal": { "metric": "expeditionsSent", "count": 1 }
+    },
+    {
+      "id": "speed_up",
+      "title": "Bring them back now",
+      "text": "Waiting is optional: **Ashen Crystals 💠** finish expeditions and constructions instantly — with full rewards. Use the crystals you just got: click **⚡ Return now**.",
+      "view": "expeditions",
+      "highlight": ["[data-speed]", "[data-claim]"],
+      "goal": { "any": [
+        { "metric": "expeditionSpeedups", "count": 1 },
+        { "metric": "expeditionsReady", "count": 1, "absolute": true },
+        { "metric": "expeditionsClaimed", "count": 1 }
+      ] }
+    },
+    {
+      "id": "claim",
+      "title": "Claim the rewards",
+      "text": "Your companion is back. Click **Claim** to collect what they gathered — materials go to your town storage.",
+      "view": "expeditions",
+      "highlight": ["[data-claim]"],
+      "goal": { "metric": "expeditionsClaimed", "count": 1 }
+    },
+    {
+      "id": "party",
+      "title": "Back into the party",
+      "text": "Companions on an expedition leave your party. Open **Party** and **add** your companion again so they fight at your side.",
+      "view": "party",
+      "highlight": ["[data-add]"],
+      "goal": { "metric": "partySize", "count": 2, "absolute": true },
+      "reward": { "gold": 250 }
+    },
+    {
+      "id": "done",
+      "title": "You're ready!",
+      "text": "That's the basics. Everything else is unlocked now: **quests**, **rifts**, the **bestiary**, **gems**, the **auction house**, co-op with friends and more. Good luck out there!",
+      "view": "combat",
+      "unlocks": ["*"],
+      "goal": { "type": "ack" },
+      "button": "Start playing"
+    }
+  ]
+}

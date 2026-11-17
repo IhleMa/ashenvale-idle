@@ -3,6 +3,7 @@
 // typo …), wrong value types and impossible settings. The server refuses to start with errors and
 // prints exactly where the problem is. Run "npm run content:check" or type "content" in the console.
 import { CONDITIONS, TARGET_CONDITIONS, SELECTORS } from '../shared/rules.js';
+import { VIEW_IDS as TUTORIAL_VIEWS, METRIC_NAMES as TUTORIAL_METRICS } from '../shared/tutorialDefs.js';
 
 const EFFECT_KINDS = ['damage', 'heal', 'status', 'shield', 'taunt', 'cleanse', 'resource', 'summon'];
 const PROC_EFFECT_KINDS = [...EFFECT_KINDS, 'reflect', 'healPct', 'shieldPct', 'cooldowns'];
@@ -262,6 +263,38 @@ export function validateContent(C) {
   }
   for (const [id, a] of Object.entries(C.bots?.archetypes || {})) for (const k of ['skill', 'activity', 'trader', 'crafter', 'rifter', 'social']) num(`bots.archetypes.${id}.${k}`, a[k], { min: 0, max: 1 });
   if (!(C.bots?.names || []).length) err('bots.names', 'needs at least one name');
+
+  // ---- tutorial
+  if (C.tutorial) {
+    const T = C.tutorial, ids = new Set();
+    const views = new Set([...TUTORIAL_VIEWS, '*']);
+    for (const v of T.alwaysVisible || []) if (!views.has(v)) err('tutorial.alwaysVisible', `unknown page "${v}" (pages: ${TUTORIAL_VIEWS.join(', ')})`);
+    if (!Array.isArray(T.steps)) err('tutorial.steps', 'must be a list');
+    (T.steps || []).forEach((s, i) => {
+      const w = `tutorial.steps[${i}]${s?.id ? ` (${s.id})` : ''}`;
+      if (!s?.id || ids.has(s.id)) err(w, s?.id ? `id "${s.id}" is used twice` : 'needs an id');
+      ids.add(s?.id);
+      str(`${w}.title`, s?.title); str(`${w}.text`, s?.text);
+      if (s?.view && !views.has(s.view)) err(`${w}.view`, `unknown page "${s.view}"`);
+      for (const v of s?.unlocks || []) if (!views.has(v)) err(`${w}.unlocks`, `unknown page "${v}" (pages: ${TUTORIAL_VIEWS.join(', ')})`);
+      const g = s?.goal;
+      const cond = (c, cw) => {
+        if (!TUTORIAL_METRICS.includes(c?.metric)) err(`${cw}.metric`, `unknown metric "${c?.metric}" (metrics: ${TUTORIAL_METRICS.join(', ')})`);
+        num(`${cw}.count`, c?.count, { min: 1 });
+      };
+      if (!g || typeof g !== 'object') err(`${w}.goal`, 'needs a goal');
+      else if (g.type === 'ack') { /* Continue button */ }
+      else if (g.any) { if (!Array.isArray(g.any) || !g.any.length) err(`${w}.goal.any`, 'must be a non-empty list'); else g.any.forEach((c, j) => cond(c, `${w}.goal.any[${j}]`)); }
+      else cond(g, `${w}.goal`);
+      const r = s?.reward;
+      if (r) {
+        for (const k of ['gold', 'premium', 'xp']) num(`${w}.reward.${k}`, r[k], { min: 0, optional: true });
+        for (const [m, n] of Object.entries(r.materials || {})) { ref(`${w}.reward.materials`, m, materials, 'material'); num(`${w}.reward.materials.${m}`, n, { min: 0 }); }
+        if (r.coverUpgrade !== undefined) ref(`${w}.reward.coverUpgrade`, r.coverUpgrade, town.buildings, 'building');
+      }
+    });
+    if (T.enabled && (T.steps || []).length && !(T.steps || []).some(s => (s.unlocks || []).includes('*'))) warn('tutorial.steps', 'no step unlocks "*" — pages hidden during the tutorial only appear once it is finished or skipped');
+  }
 
   // point messages at the file that contains the problem, e.g. "content/abilities/cleric/heal.json → effects[0].power: …"
   const files = C._meta?.files || {};

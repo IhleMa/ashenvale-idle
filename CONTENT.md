@@ -161,6 +161,14 @@ The validator tells you if a piece is missing.
 | `onEnemyHit` | `status`, `duration`, `basicAttacksOnly` | enemy hits apply a status |
 | `periodic` | `every` (s), `target` (randomHero/allHeroes), `status`+`duration`+`pctMaxHp` and/or `damagePctMaxHp`+`school`, `message` | timed effects |
 
+### Change the tutorial
+
+`content/tutorial.json` lists the steps in order. Each step has a `title`, a `text` (`**bold**` works, `{count}` is the goal count), the page it happens on (`view`), the pages it makes visible (`unlocks`; `"*"` = everything — used by the last step), CSS selectors of what to make glow (`highlight`), a `goal` and an optional `reward`.
+
+- Goals: `{ "type": "ack" }` shows a button (`"button"` sets its label). `{ "metric": "kills", "count": 5 }` counts from the start of the step; add `"absolute": true` to count the total instead. `{ "any": [ … ] }` completes when one of several goals is met. Metrics: `kills`, `fights`, `recruited`, `heroLevel`, `heroNodes`, `buildingUpgrades`, `expeditionsSent`, `expeditionSpeedups`, `expeditionsReady`, `expeditionsClaimed`, `partySize`.
+- Rewards: `gold`, `premium`, `xp` (hero), `materials` `{ "ore": 5 }`, and `coverUpgrade: "<building>"`, which gives exactly what is still missing to upgrade that building. `rewardText` overrides how the reward is described.
+- `"enabled": false` turns the tutorial off for new players; `alwaysVisible` lists pages that are never hidden.
+
 ### Change building texts
 `content/town/buildings/<id>.json → effects` is a list of templates such as `"Roster: {innRoster} companions"` or `{ "minLevel": 3, "text": "…" }`. The available values are listed in CONTENT_REFERENCE.md.
 

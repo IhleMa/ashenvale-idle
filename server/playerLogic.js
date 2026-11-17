@@ -42,6 +42,7 @@ export function newPlayer(account) {
     rift: { best: 0, bestTimes: {}, runs: 0, timed: 0, history: [], auto: 'off' },
     lootFilter: { enabled: false, protectUpgrades: true, rules: [] },
     lootLog: [],        // recent items handled by the loot filter
+    tutorial: null,     // new-player tutorial (tutorialLogic): { step, done, base }
   };
 }
 
@@ -54,6 +55,8 @@ export function migratePlayer(p) {
   p.rift = { ...base.rift, ...p.rift };
   if (!p.lootFilter) { p.lootFilter = filterFromLegacy(p.settings); p.settings.autoSellBelow = null; }
   p.lootLog ||= [];
+  // players from before the tutorial existed don't get it
+  if (!p.tutorial && p.heroId) p.tutorial = { done: true, step: 0, legacy: true };
   migrateTown(p);
   while (p.parties.length < CONFIG.party.presets) p.parties.push({ name: `Party ${p.parties.length + 1}`, members: p.heroId ? [p.heroId] : [] });
   for (const ch of Object.values(p.characters)) {
@@ -542,6 +545,7 @@ export function publicPlayer(p) {
     stats: p.stats, achievements: p.achievements, settings: p.settings, coopChars: p.coopChars,
     town: p.town, expeditions: p.expeditions || [], mailbox: p.mailbox || [], serverTime: Date.now(),
     bestiary: p.bestiary || {}, quests: p.quests, rift: p.rift, lootFilter: p.lootFilter, lootLog: p.lootLog || [],
+    tutorial: p.tutorial || null,
   };
 }
 

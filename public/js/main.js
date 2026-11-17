@@ -5,6 +5,7 @@ import { loadAssets, portrait } from './assets.js';
 import { esc, fmt, toast, modal, initTooltips, duration, bar } from './ui.js';
 import { xpToNext } from '/shared/config.js';
 import { initPwa } from './pwa.js';
+import { initTutorial, renderTutorial, isViewVisible, visibleKey } from './tutorial.js';
 import { CLASSES } from '/shared/data/classes.js';
 import { replaceContent } from '/shared/content.js';
 import { hasAbilityAction } from '/shared/character.js';
@@ -75,17 +76,28 @@ function startGame() {
   connect();
 }
 
+// pages appear one by one during the tutorial; freshly unlocked ones get a NEW mark until visited
+const newViews = new Set();
+let navKey = null;
 function renderNav() {
   const nav = document.getElementById('sidebar');
-  nav.innerHTML = VIEWS.filter(v => !v.adminOnly || state.isAdmin).map(v => `<a href="#/${v.id}" data-view="${v.id}"><span class="nav-icon">${v.icon}</span><span class="nav-label">${v.label}</span><span class="nav-badge" data-badge="${v.id}"></span></a>`).join('');
+  const key = visibleKey();
+  if (navKey && key !== navKey) {
+    const before = new Set(navKey === '*' ? VIEWS.map(v => v.id) : navKey.split(','));
+    for (const v of VIEWS) if (!before.has(v.id) && isViewVisible(v.id)) newViews.add(v.id);
+  }
+  navKey = key;
+  nav.innerHTML = VIEWS.filter(v => (!v.adminOnly || state.isAdmin) && isViewVisible(v.id)).map(v => `<a href="#/${v.id}" data-view="${v.id}" class="${newViews.has(v.id) ? 'nav-new' : ''} ${current?.id === v.id ? 'active' : ''}"><span class="nav-icon">${v.icon}</span><span class="nav-label">${v.label}</span><span class="nav-badge" data-badge="${v.id}"></span></a>`).join('');
 }
 
 function route() {
   if (!state.player) return;
   if (!state.player.heroId) { mount(createView); return; }
   const id = (location.hash.match(/^#\/(\w+)/) || [])[1] || 'combat';
-  const v = VIEWS.find(x => x.id === id && (!x.adminOnly || state.isAdmin)) || combatView;
+  const v = VIEWS.find(x => x.id === id && (!x.adminOnly || state.isAdmin) && isViewVisible(x.id)) || combatView;
+  if (newViews.delete(v.id)) document.querySelector(`#sidebar a[data-view="${v.id}"]`)?.classList.remove('nav-new');
   mount(v);
+  renderTutorial();
 }
 
 function mount(v) {
@@ -264,8 +276,10 @@ bus.on('msg:state', m => {
   const hadHero = !!state.player?.heroId;
   state.player = m.player;
   if (m.player.serverTime) state.timeOffset = m.player.serverTime - Date.now();
+  if (visibleKey() !== navKey) { renderNav(); if (!isViewVisible(current?.id)) route(); }
   renderTopbar();
   if (first || hadHero !== !!m.player.heroId) route(); else requestRender();
+  renderTutorial();
 });
 bus.on('msg:toast', m => toast(m.text, m.kind));
 bus.on('msg:group', m => { state.group = m.group; if (current?.id === 'multiplayer') requestRender(); renderTopbar(); });
@@ -297,6 +311,7 @@ window.addEventListener('hashchange', route);
 // ------------------------------------------------------------------ boot
 initTooltips();
 initPwa();
+initTutorial({ currentView: () => current?.id || null, viewLabel: id => VIEWS.find(v => v.id === id)?.label || id });
 loadAssets().then(() => {
   // views that were rendered before artwork loaded get refreshed
   if (current) requestRender();

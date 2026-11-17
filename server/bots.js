@@ -220,6 +220,7 @@ export class BotManager {
     const classId = pick(Object.keys(CLASSES));
     const name = b.name.replace(/[^A-Za-z]/g, '').slice(0, 16) || pick(NAMES);
     this.act(b, 'create_hero', { name: name.length >= 2 ? name : pick(NAMES), classId });
+    this.act(b, 'tutorial_skip');
     this.act(b, 'set_settings', { autoDevelopRecruits: true, autoDevelopHero: chance(0.7), autoLootAction: chance(0.8) ? 'salvage' : 'sell' });
     b.doing = 'creating a hero';
   }
