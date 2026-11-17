@@ -1,19 +1,13 @@
-// Persistent server announcements: stored on disk so players who were offline see them when they come back.
-import fs from 'node:fs';
-import path from 'node:path';
+// Persistent server announcements: stored in the database so players who were offline see them when they come back.
 import crypto from 'node:crypto';
 
 export class Announcements {
-  constructor(dataDir) {
-    this.file = path.join(dataDir, 'announcements.json');
-    try { this.list = JSON.parse(fs.readFileSync(this.file, 'utf8')); } catch { this.list = []; }
+  constructor(store) {
+    this.store = store;
+    this.list = store.getDoc('announcements', []);
   }
 
-  save() {
-    const tmp = this.file + '.tmp';
-    fs.writeFileSync(tmp, JSON.stringify(this.list));
-    fs.renameSync(tmp, this.file);
-  }
+  save() { this.store.putDoc('announcements', this.list); this.store.flush(); }
 
   // hours: how long it stays visible to returning players (0 = until deleted)
   add({ text, from, hours = 168 }) {

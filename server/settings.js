@@ -1,6 +1,4 @@
-// Runtime server settings (editable on the admin page, persisted in data/settings.json).
-import fs from 'node:fs';
-import path from 'node:path';
+// Runtime server settings (editable on the admin page, stored in the database).
 
 export const SETTING_DEFS = {
   xpRate:            { label: 'XP rate', type: 'number', min: 0.1, max: 10, step: 0.1, default: 1 },
@@ -16,11 +14,11 @@ export const SETTING_DEFS = {
 };
 
 export class Settings {
-  constructor(dataDir, envDefaults = {}) {
-    this.file = path.join(dataDir, 'settings.json');
+  constructor(store, envDefaults = {}) {
+    this.store = store;
     this.values = Object.fromEntries(Object.entries(SETTING_DEFS).map(([k, d]) => [k, d.default]));
     Object.assign(this.values, envDefaults);
-    try { Object.assign(this.values, JSON.parse(fs.readFileSync(this.file, 'utf8'))); } catch { /* first start */ }
+    Object.assign(this.values, store.getDoc('settings', {}));
   }
   get(k) { return this.values[k]; }
   set(changes) {
@@ -33,9 +31,5 @@ export class Settings {
     }
     this.save();
   }
-  save() {
-    const tmp = this.file + '.tmp';
-    fs.writeFileSync(tmp, JSON.stringify(this.values, null, 2));
-    fs.renameSync(tmp, this.file);
-  }
+  save() { this.store.putDoc('settings', this.values); this.store.flush(); }
 }

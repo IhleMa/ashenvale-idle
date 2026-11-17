@@ -1,5 +1,6 @@
 // End-to-end smoke test: starts a server on a temp data dir and plays through the main flows.
 // Usage: npm test
+import Database from 'better-sqlite3';
 import { spawn } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -239,22 +240,16 @@ try {
   res = await a.act('expedition_speedup', { id: res.result?.id, maxCost: 48 });
   check(!res.ok && /need/.test(res.error), 'not enough crystals is rejected: ' + res.error);
 
-  // offline progression
+  // offline progression: stop the server, pretend alice was away for 2 hours (edit the database), start again
   a.ws.close();
   await sleep(500);
-  const pfile = path.join(DATA, 'players', a.state.id + '.json');
-  srv.stdin.write('noop\n');
-  await sleep(5500); // wait for save loop
-  const pdata = JSON.parse(fs.readFileSync(pfile, 'utf8'));
-  pdata.lastActive -= 2 * 3600 * 1000;
-  fs.writeFileSync(pfile, JSON.stringify(pdata));
-  // force reload from disk: server caches players, so restart server-side cache via new process is overkill —
-  // instead we verify the offline simulation through a fresh server run below.
   srv.kill('SIGINT');
-  await sleep(1500);
-  const p2 = JSON.parse(fs.readFileSync(pfile, 'utf8'));
-  p2.lastActive = Date.now() - 2 * 3600 * 1000;
-  fs.writeFileSync(pfile, JSON.stringify(p2));
+  await new Promise(r => srv.once('exit', r));
+  const db = new Database(path.join(DATA, 'ashenvale.db'));
+  check(db.prepare('SELECT COUNT(*) n FROM accounts').get().n === 2, 'accounts stored in SQLite');
+  db.prepare("UPDATE players SET data = json_set(data, '$.lastActive', ?) WHERE id = ?").run(Date.now() - 2 * 3600 * 1000, a.state.id);
+  check(JSON.parse(db.prepare("SELECT data FROM docs WHERE key = 'auction'").get().data).history.length === 1, 'auction house saved in the database');
+  db.close();
   const srv2 = spawn(process.execPath, ['server/index.js'], { env: { ...process.env, PORT, DATA_DIR: DATA }, stdio: ['pipe', 'pipe', 'inherit'] });
   await new Promise(res2 => srv2.stdout.on('data', d => { if (String(d).includes('listening')) res2(); }));
   const login = await api('/api/login', { username: 'alice', password: 'secret123' });

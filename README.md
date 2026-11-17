@@ -33,7 +33,8 @@ Create an account in the browser and choose a class. Your first companion is fre
 |---|---|---|
 | `PORT` / `SERVER_PORT` | `8080` | HTTP/WebSocket port (`SERVER_PORT` is set automatically by Pterodactyl) |
 | `HOST` | `0.0.0.0` | Bind address |
-| `DATA_DIR` | `./data` | Where accounts and player saves are stored (JSON files) |
+| `DATA_DIR` | `./data` | Folder of the SQLite database `ashenvale.db` (accounts, saves, auction house, settings) and its backups |
+| `BACKUP_HOURS` | `24` | Automatic database backup interval into `data/backups/` (newest 7 kept); `0` turns it off |
 | `ALLOW_REGISTRATION` | `true` | Initial value for registrations (can be toggled later on the Admin page) |
 | `ADMIN_USERS` | | Comma-separated usernames with admin rights |
 | `TRUST_PROXY` | `false` | Set to `true` behind nginx or Cloudflare so rate limiting sees real IPs |
@@ -142,10 +143,14 @@ pterodactyl/       Pterodactyl egg
 
    With *Auto Update = 1*, every restart also runs `git pull`. Player data in `data/` is never touched.
 
-   Other console commands: `players` (who is online), `say <message>` (announcement from "Server", e.g. `say Restarting in 2 minutes!`; players who are offline still see it on their next login within 24 h), `reload-clients` (refresh every open page), `admin add|remove|list <username>`, `help`.
+   Other console commands: `players` (who is online), `say <message>` (announcement from "Server", e.g. `say Restarting in 2 minutes!`; players who are offline still see it on their next login within 24 h), `reload-clients` (refresh every open page), `admin add|remove|list <username>`, `backup` (database snapshot now), `db` (database size and counts), `help`.
 7. **Admins:** set the server variable **Admin Users** (e.g. `alice,bob`) or type `admin add alice` in the console. Admins get an extra **🛡 Admin** page in the sidebar after refreshing.
 5. **Images on the server:** commit them to `public/assets/` in the repo (recommended, so they arrive with updates), or upload them with the panel's File Manager into `public/assets/<folder>/`. Uploaded files sit outside git and survive updates. Don't upload a file with the same name as one that's also committed to the repo, or `git pull` will refuse to update.
-6. **Backups:** back up the `data/` folder, which holds all accounts and saves. The panel's Backups feature works for this.
+6. **Saves & backups:** everything is stored in one SQLite database, `data/ashenvale.db`. The server keeps the game in memory and writes all changes every 5 seconds in a single transaction. Trades, mail, crystal speed-ups and admin actions are written immediately, so an item or gold can never be duplicated or lost half-way through a trade, even on a crash.
+   - The server makes a consistent backup every 24 h into `data/backups/` (the newest 7 are kept); type `backup` in the console for one right now. The panel's Backups feature also works. Prefer the files in `data/backups/` if you restore by hand, because they are safe to copy while the server runs.
+   - **Restore:** stop the server, replace `data/ashenvale.db` with a backup file (and delete `ashenvale.db-wal` / `ashenvale.db-shm` if present), start again.
+   - **Upgrading from the old JSON saves:** nothing to do. On the first start the server imports `accounts.json`, `players/` and the other JSON files and moves them into `data/json-backup-<date>/`.
+   - To look inside the database, download it and open it with [DB Browser for SQLite](https://sqlitebrowser.org/) (players are stored as JSON in the `players` table). Only edit a copy while the server is stopped.
 
 ### Own subdomain + HTTPS
 

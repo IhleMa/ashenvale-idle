@@ -1,6 +1,4 @@
 // Auction house: player-to-player trading of items and materials for gold (server-authoritative).
-import fs from 'node:fs';
-import path from 'node:path';
 import crypto from 'node:crypto';
 import { CONFIG, rarityIndex } from '../shared/config.js';
 import { MATERIALS } from '../shared/data/town.js';
@@ -23,17 +21,14 @@ export function priceKey(l) {
 export class AuctionHouse {
   constructor(game) {
     this.game = game;
-    this.file = path.join(game.store.dataDir, 'auction.json');
-    this.data = { listings: [], history: [] };
-    try { this.data = { ...this.data, ...JSON.parse(fs.readFileSync(this.file, 'utf8')) }; } catch { /* first start */ }
+    this.data = { listings: [], history: [], ...game.store.getDoc('auction', {}) };
     this.dirty = false;
   }
 
+  // queues the auction house for the next database flush (written together with the players involved)
   save() {
     if (!this.dirty) return;
-    const tmp = this.file + '.tmp';
-    fs.writeFileSync(tmp, JSON.stringify(this.data));
-    fs.renameSync(tmp, this.file);
+    this.game.store.putDoc('auction', this.data);
     this.dirty = false;
   }
 

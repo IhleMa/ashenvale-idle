@@ -9,7 +9,7 @@
     "dev": "node --watch server/index.js",
     "simulate": "node tools/simulate.js",
     "assets": "node tools/asset-checklist.js",
-    "test": "node tools/smoke-test.js && node tools/town-test.js"
+    "test": "node tools/migrate-test.js && node tools/smoke-test.js && node tools/town-test.js"
   },
   "engines": {
     "node": ">=20"
@@ -17,5 +17,8 @@
   "license": "UNLICENSED",
   "dependencies": {
     "ws": "^8.23.0"
+  },
+  "optionalDependencies": {
+    "better-sqlite3": "^13.2.0"
   }
 }

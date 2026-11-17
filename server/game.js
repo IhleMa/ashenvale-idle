@@ -1,7 +1,5 @@
 // Game server: sessions, action dispatch, server-authoritative battle loop, offline progression, groups.
 import crypto from 'node:crypto';
-import fs from 'node:fs';
-import path from 'node:path';
 import { CONFIG } from '../shared/config.js';
 import { ZONES, COOP_ENCOUNTERS } from '../shared/data/zones.js';
 import { generateItem, itemSellValue } from '../shared/data/items.js';
@@ -23,6 +21,7 @@ import { BUILDINGS } from '../shared/data/town.js';
 import * as L from './playerLogic.js';
 
 const { GameError } = L;
+const SAVE_NOW = new Set(['ah_list', 'ah_buy', 'ah_cancel', 'collect_mail', 'town_speedup', 'expedition_speedup']);
 const READ_ONLY = new Set(['get_rankings', 'inspect_player', 'ah_search', 'ah_mine']);
 const fail = m => { throw new GameError(m); };
 
@@ -44,7 +43,7 @@ export class Game {
     this.onlineDirty = true;
     this.rankings = new Rankings(this);
     this.auction = new AuctionHouse(this);
-    this.announcements = new Announcements(store.dataDir);
+    this.announcements = new Announcements(store);
     this.adminActions = adminActions(this);
   }
 
@@ -58,20 +57,19 @@ export class Game {
     clearInterval(this.saveHandle);
     const now = Date.now();
     for (const s of this.sessions.values()) { s.player.lastActive = now; this.store.savePlayerSoon(s.player); }
-    this.store.flush();
     this.auction.save();
     this.saveGroups();
+    this.store.flush();
   }
 
   // Groups survive restarts (battles and pending invites do not)
-  get groupsFile() { return path.join(this.store.dataDir, 'groups.json'); }
   saveGroups() {
     const data = [...this.groups.values()].map(g => ({ id: g.id, leaderId: g.leaderId, members: g.members, chat: g.chat.slice(-30) }));
-    try { fs.writeFileSync(this.groupsFile, JSON.stringify(data)); } catch (e) { this.log('Could not save groups', e.message); }
+    this.store.putDoc('groups', data);
   }
   loadGroups() {
-    let data = [];
-    try { data = JSON.parse(fs.readFileSync(this.groupsFile, 'utf8')); } catch { return; }
+    const data = this.store.getDoc('groups', []);
+    if (!Array.isArray(data)) return;
     for (const g of data) {
       if (!Array.isArray(g.members) || !g.members.length) continue;
       const group = { id: g.id, leaderId: g.members.includes(g.leaderId) ? g.leaderId : g.members[0], members: g.members, invites: new Map(), battle: null, chat: g.chat || [] };
@@ -96,8 +94,8 @@ export class Game {
   save() {
     const now = Date.now();
     for (const s of this.sessions.values()) { s.player.lastActive = now; this.store.savePlayerSoon(s.player); }
-    this.store.flush();
     this.auction.save();
+    this.store.flush(); // one transaction: players, accounts, auction house, logs
   }
 
   // ------------------------------------------------------------------ connections
@@ -193,6 +191,8 @@ export class Game {
       if (!p.heroId && msg.type !== 'create_hero' && !isAdminAction) fail('Create your hero first');
       const result = handler.call(this, s, payload);
       if (!READ_ONLY.has(msg.type) && !isAdminAction) this.markDirty(s);
+      // value moving between players (trades, mail, admin gifts) is written to disk right away, in one transaction
+      if (isAdminAction || SAVE_NOW.has(msg.type)) this.save();
       this.send(ws, { t: 'result', id: msg.id, ok: true, result: result ?? null });
       this.flushState(s);
     } catch (e) {

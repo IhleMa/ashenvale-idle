@@ -24,10 +24,11 @@ const ALLOW_REGISTRATION = process.env.ALLOW_REGISTRATION !== 'false';
 const TRUST_PROXY = process.env.TRUST_PROXY === 'true';
 
 const log = (...a) => console.log(new Date().toISOString(), ...a);
-const store = new Store(DATA_DIR);
+let store;
+try { store = new Store(DATA_DIR, { log }); } catch (e) { log('Could not open the database:', e.message); process.exit(1); }
 const assets = new AssetIndex(ASSETS_DIR);
-const settings = new Settings(DATA_DIR, { registrationOpen: ALLOW_REGISTRATION });
-const admins = new AdminManager(DATA_DIR, process.env.ADMIN_USERS || '');
+const settings = new Settings(store, { registrationOpen: ALLOW_REGISTRATION });
+const admins = new AdminManager(store, process.env.ADMIN_USERS || '');
 const game = new Game({ store, assets, log, settings, admins, buildId: computeBuildId(ROOT) });
 game.loadGroups();
 const authLimiter = new RateLimiter(20, 60_000);
@@ -146,8 +147,12 @@ setInterval(() => {
 }, 30_000);
 
 game.start();
+// automatic daily database backup (data/backups, newest 7 kept)
+const BACKUP_HOURS = Number(process.env.BACKUP_HOURS ?? 24);
+if (BACKUP_HOURS > 0) setInterval(() => { try { log(`Automatic backup: ${path.basename(store.backup())}`); } catch (e) { log('Automatic backup failed:', e.message); } }, BACKUP_HOURS * 3600_000).unref();
 server.listen(PORT, HOST, () => {
-  log(`Ashenvale Idle server listening on http://${HOST}:${PORT} (data: ${DATA_DIR}, build ${game.buildId})`);
+  const st = store.stats();
+  log(`Ashenvale Idle server listening on http://${HOST}:${PORT} (database: ${store.file}, ${st.accounts} accounts, ${st.sizeMb} MB, ${st.driver}; build ${game.buildId})`);
   log('Type "help" for console commands (e.g. "update" to pull a new version).');
 });
 
@@ -158,6 +163,7 @@ function shutdown(sig) {
   log(`${sig} received, saving and shutting down...`);
   try { game.broadcast({ t: 'server_restart' }); } catch { /* ignore */ }
   try { game.stop(); } catch (e) { log('Error while saving', e); }
+  try { store.close(); } catch (e) { log('Error while closing the database', e); }
   for (const ws of wss.clients) ws.close(1012, 'Server restarting');
   server.close(() => process.exit(0));
   setTimeout(() => process.exit(0), 2000).unref();
@@ -197,7 +203,9 @@ async function runUpdate() {
 }
 
 const COMMANDS = {
-  help: () => log('Commands: update | reload-clients | players | say <message> | admin add|remove|list <name> | stop'),
+  help: () => log('Commands: update | reload-clients | players | say <message> | admin add|remove|list <name> | backup | db | stop'),
+  backup: () => { try { log(`Backup written: ${store.backup()}`); } catch (e) { log('Backup failed:', e.message); } },
+  db: () => { const st = store.stats(); log(`Database ${store.file}: ${st.accounts} accounts, ${st.players} players, ${st.sizeMb} MB (driver: ${st.driver})`); },
   admin: args => {
     const [sub, name] = args.split(/\s+/);
     if (sub === 'list') return log('Admins:', admins.list().join(', ') || '(none)');

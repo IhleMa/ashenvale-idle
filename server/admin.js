@@ -1,8 +1,6 @@
 // Admin tools: roles, player management, bans, gifts, settings, audit log.
 // Admins come from the ADMIN_USERS environment variable (comma separated usernames)
 // plus data/admins.json (managed with the console command "admin add <name>").
-import fs from 'node:fs';
-import path from 'node:path';
 import crypto from 'node:crypto';
 import { MATERIALS } from '../shared/data/town.js';
 import { generateItem, ITEM_BASES } from '../shared/data/items.js';
@@ -16,22 +14,21 @@ import { setPassword } from './auth.js';
 const fail = m => { throw new GameError(m); };
 
 export class AdminManager {
-  constructor(dataDir, envList = '') {
-    this.file = path.join(dataDir, 'admins.json');
-    this.logFile = path.join(dataDir, 'admin-log.json');
+  constructor(store, envList = '') {
+    this.store = store;
     this.env = new Set(String(envList || '').split(',').map(s => s.trim().toLowerCase()).filter(Boolean));
-    try { this.extra = new Set(JSON.parse(fs.readFileSync(this.file, 'utf8')).map(s => s.toLowerCase())); } catch { this.extra = new Set(); }
-    try { this.log = JSON.parse(fs.readFileSync(this.logFile, 'utf8')); } catch { this.log = []; }
+    this.extra = new Set(store.getDoc('admins', []).map(s => String(s).toLowerCase()));
+    this.log = store.getDoc('admin-log', []);
   }
   has(name) { const n = String(name || '').toLowerCase(); return this.env.has(n) || this.extra.has(n); }
   list() { return [...new Set([...this.env, ...this.extra])]; }
   add(name) { this.extra.add(name.toLowerCase()); this.persist(); }
   remove(name) { this.extra.delete(name.toLowerCase()); this.persist(); return !this.env.has(name.toLowerCase()); }
-  persist() { fs.writeFileSync(this.file, JSON.stringify([...this.extra])); }
+  persist() { this.store.putDoc('admins', [...this.extra]); this.store.flush(); }
   audit(admin, action, target, details = '') {
     this.log.push({ at: Date.now(), admin, action, target, details: String(details).slice(0, 300) });
     if (this.log.length > 500) this.log.splice(0, this.log.length - 500);
-    try { fs.writeFileSync(this.logFile, JSON.stringify(this.log)); } catch { /* ignore */ }
+    this.store.putDoc('admin-log', this.log); // saved together with the action's other changes
   }
 }
 
