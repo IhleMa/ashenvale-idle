@@ -1,0 +1,25 @@
+{
+  "name": "Soul Link",
+  "classId": "summoner",
+  "unlockLevel": 22,
+  "type": "buff",
+  "description": "Bind your minions' souls: heal them for 100% Magic Power, they take 25% less damage for 10 seconds and stay 10 seconds longer.",
+  "cost": 30,
+  "cooldown": 25,
+  "target": "ally",
+  "area": true,
+  "effects": [
+    { "kind": "extend", "seconds": 10 },
+    { "kind": "heal", "stat": "magPower", "power": 1 },
+    { "kind": "status", "status": "soul_link", "duration": 10 }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [{ "type": "own_minions", "cmp": ">=", "value": 2 }],
+    "target": { "selector": "own_minions" },
+    "targetConditions": []
+  },
+  "priority": 55,
+  "order": 70
+}

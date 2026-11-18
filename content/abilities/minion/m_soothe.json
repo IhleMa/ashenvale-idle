@@ -1,0 +1,12 @@
+{
+  "name": "Soothe",
+  "classId": "minion",
+  "type": "heal",
+  "description": "Heals the most wounded party member.",
+  "cost": 0,
+  "cooldown": 3,
+  "target": "ally",
+  "effects": [{ "kind": "heal", "stat": "magPower", "power": 1.6 }],
+  "defaultRule": { "enabled": true, "mode": "all", "conditions": [{ "type": "ally_hp_below", "value": 85 }], "target": { "selector": "ally_lowest_hp_pct" }, "targetConditions": [] },
+  "order": 520
+}

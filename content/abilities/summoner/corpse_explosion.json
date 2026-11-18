@@ -1,0 +1,20 @@
+{
+  "name": "Corpse Explosion",
+  "classId": "summoner",
+  "unlockLevel": 15,
+  "type": "damage",
+  "description": "Detonate your minion with the least time left: it deals magic damage equal to 120% of its maximum health to all enemies.",
+  "cost": 20,
+  "cooldown": 12,
+  "target": "self",
+  "effects": [{ "kind": "sacrifice", "count": 1, "power": 1.2, "school": "magical" }],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [{ "type": "own_minions", "cmp": ">=", "value": 3 }, { "type": "enemies_alive", "cmp": ">=", "value": 2 }],
+    "target": { "selector": "self" },
+    "targetConditions": []
+  },
+  "priority": 50,
+  "order": 60
+}

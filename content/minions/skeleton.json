@@ -1,0 +1,17 @@
+{
+  "name": "Skeleton Warrior",
+  "glyph": "☠",
+  "color": "#d8d0bf",
+  "role": "damage",
+  "description": "A sturdy melee fighter raised from old bones.",
+  "hp": 0.45,
+  "power": 0.52,
+  "defense": 0.6,
+  "attackSpeed": 1,
+  "attack": { "name": "Rusty Blade", "power": 1, "school": "physical" },
+  "abilities": [],
+  "duration": 30,
+  "threat": 20,
+  "tags": ["undead"],
+  "order": 10
+}

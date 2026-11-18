@@ -1,0 +1,7 @@
+{
+  "name": "Empowered",
+  "type": "buff",
+  "mods": { "damagePct": 0.4, "attackSpeedPct": 0.3 },
+  "description": "Deals 40% more damage and attacks 30% faster.",
+  "order": 260
+}

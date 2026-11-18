@@ -1,0 +1,23 @@
+{
+  "name": "Raise Skeleton",
+  "classId": "summoner",
+  "unlockLevel": 1,
+  "type": "summon",
+  "description": "Raise a Skeleton Warrior (up to 3) that fights for 30 seconds. Its health and damage grow with your Magic Power. At the limit, the oldest skeleton is renewed instead.",
+  "cost": 20,
+  "cooldown": 5,
+  "target": "self",
+  "effects": [{ "kind": "summon", "minion": "skeleton", "count": 1, "max": 3 }],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      { "type": "enemies_alive", "cmp": ">=", "value": 1 },
+      { "type": "own_minions", "minion": "skeleton", "cmp": "<=", "value": 2 }
+    ],
+    "target": { "selector": "self" },
+    "targetConditions": []
+  },
+  "priority": 30,
+  "order": 10
+}

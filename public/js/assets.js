@@ -7,6 +7,7 @@ import { GEM_KINDS, gemName } from '/shared/gems.js';
 import { ABILITIES } from '/shared/data/abilities.js';
 import { STATUSES } from '/shared/data/statuses.js';
 import { ENEMIES } from '/shared/data/enemies.js';
+import { MINIONS } from '/shared/data/minions.js';
 import { ITEM_BASES, SLOTS } from '/shared/data/items.js';
 import { rarityById } from '/shared/config.js';
 import { specialItemImageKeys } from '/shared/data/legendaries.js';
@@ -66,7 +67,7 @@ export function portrait(ch, cls = '') {
   return render(url, { cls: `portrait ${cls}`, color: c.color, glyph: c.glyph || initials(ch.name), title: ch.name });
 }
 
-const TYPE_GLYPH = { damage: '⚔', heal: '✚', buff: '▲', debuff: '▼', control: '✱', utility: '◆' };
+const TYPE_GLYPH = { damage: '⚔', heal: '✚', buff: '▲', debuff: '▼', control: '✱', utility: '◆', summon: '☥' };
 export function abilityIcon(abilityId, cls = '') {
   const a = ABILITIES[abilityId] || {};
   const color = CLASSES[a.classId]?.color || '#8a3b3b';
@@ -88,6 +89,12 @@ export function enemyArt(enemyId, cls = '') {
   const e = ENEMIES[enemyId] || { name: enemyId, tags: [] };
   const color = e.boss ? '#a8322d' : e.tags?.includes('elite') ? '#a86b2d' : e.tags?.includes('caster') ? '#5a3fa8' : '#4d5a4a';
   return render(assetUrl(`enemies/${enemyId}`), { cls: `portrait enemy ${cls}`, color, glyph: initials(e.name), title: e.name });
+}
+
+// summoned minions: public/assets/minions/<id>.png if present, otherwise the glyph from content/minions/<id>.json
+export function minionArt(minionId, cls = '') {
+  const m = MINIONS[minionId] || { name: minionId };
+  return render(assetUrl(`minions/${minionId}`), { cls: `portrait minion-art ${cls}`, color: m.color || '#555', glyph: m.glyph || initials(m.name), title: m.name });
 }
 
 export function statusIcon(statusId, cls = '') {

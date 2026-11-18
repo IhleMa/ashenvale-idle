@@ -1,7 +1,7 @@
 {
   "name": "Tome",
   "slot": "offhand",
-  "classes": ["mage", "cleric"],
+  "classes": ["mage", "cleric", "summoner"],
   "stats": { "int": [2, 0.6], "magPower": [1, 0.5] },
   "material": "cloth",
   "order": 100

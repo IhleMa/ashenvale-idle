@@ -73,6 +73,11 @@ export function computeStats(ch) {
     damagePct: bonus.damagePct || 0,
     healingPct: bonus.healingPct || 0,
     damageTakenPct: bonus.damageTakenPct || 0,
+    // minion bonuses (summoner skill tree)
+    minionDamagePct: bonus.minionDamagePct || 0,
+    minionHpPct: bonus.minionHpPct || 0,
+    minionDurationPct: bonus.minionDurationPct || 0,
+    minionMax: bonus.minionMax || 0,
   };
   return s;
 }

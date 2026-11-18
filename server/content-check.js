@@ -5,7 +5,7 @@
 import { CONDITIONS, TARGET_CONDITIONS, SELECTORS } from '../shared/rules.js';
 import { VIEW_IDS as TUTORIAL_VIEWS, METRIC_NAMES as TUTORIAL_METRICS } from '../shared/tutorialDefs.js';
 
-const EFFECT_KINDS = ['damage', 'heal', 'status', 'shield', 'taunt', 'cleanse', 'resource', 'summon'];
+const EFFECT_KINDS = ['damage', 'heal', 'status', 'shield', 'taunt', 'cleanse', 'resource', 'summon', 'sacrifice', 'extend'];
 const PROC_EFFECT_KINDS = [...EFFECT_KINDS, 'reflect', 'healPct', 'shieldPct', 'cooldowns'];
 const PROC_TRIGGERS = ['hit', 'crit', 'struck', 'heal', 'kill', 'cast', 'lowHp'];
 const PROC_TARGETS = ['self', 'target', 'source', 'randomEnemy', 'lowestAlly', 'allAllies'];
@@ -32,7 +32,7 @@ export function validateContent(C) {
   const obj = (where, v) => { if (!v || typeof v !== 'object' || Array.isArray(v)) { err(where, 'must be an object { … }'); return false; } return true; };
 
   const cfg = C.config, classes = C.classes?.classes || {}, abilities = C.abilities?.abilities || {}, statuses = C.statuses?.statuses || {};
-  const items = C.items || {}, enemies = C.enemies?.enemies || {}, zones = C.zones?.zones || {}, town = C.town || {};
+  const items = C.items || {}, enemies = C.enemies?.enemies || {}, zones = C.zones?.zones || {}, town = C.town || {}, minions = C.minions?.minions || {};
   const materials = { ...(town.materials || {}) };
   for (const s of town.shardStats || []) materials[`shard_${s.stat}`] = true;
   const rarities = new Set((cfg?.rarities || []).map(r => r.id));
@@ -81,7 +81,13 @@ export function validateContent(C) {
     if (['damage', 'heal', 'shield'].includes(e.kind)) { num(`${w}.power`, e.power, { min: 0 }); if (e.stat && !POWER_STATS.includes(e.stat)) err(`${w}.stat`, `must be one of ${POWER_STATS.join(', ')}`); }
     if (e.kind === 'damage' && e.school && !['physical', 'magical'].includes(e.school)) err(`${w}.school`, 'must be "physical" or "magical"');
     if (e.kind === 'status') { ref(`${w}.status`, e.status, statuses, 'status'); num(`${w}.duration`, e.duration, { min: 0 }); }
-    if (e.kind === 'summon') ref(`${w}.enemyId`, e.enemyId, enemies, 'enemy');
+    if (e.kind === 'summon') {
+      if (e.minion !== undefined) { ref(`${w}.minion`, e.minion, minions, 'minion'); num(`${w}.max`, e.max, { min: 1, max: 10, optional: true }); }
+      else ref(`${w}.enemyId`, e.enemyId, enemies, 'enemy');
+      num(`${w}.count`, e.count, { min: 1, max: 10, optional: true });
+    }
+    if (e.kind === 'sacrifice') { num(`${w}.power`, e.power, { min: 0 }); num(`${w}.count`, e.count, { min: 1, max: 10, optional: true }); if (e.school && !['physical', 'magical'].includes(e.school)) err(`${w}.school`, 'must be "physical" or "magical"'); }
+    if (e.kind === 'extend') num(`${w}.seconds`, e.seconds, { min: 0 });
   };
   const checkRule = (w, r) => {
     if (!r) return;
@@ -92,15 +98,30 @@ export function validateContent(C) {
   for (const [id, a] of Object.entries(abilities)) {
     const w = `abilities.abilities.${id}`;
     str(`${w}.name`, a.name);
-    if (a.classId !== 'enemy') ref(`${w}.classId`, a.classId, classes, 'class');
+    const npc = a.classId === 'enemy' || a.classId === 'minion';
+    if (!npc) ref(`${w}.classId`, a.classId, classes, 'class');
     if (!['enemy', 'ally', 'self'].includes(a.target)) err(`${w}.target`, 'must be "enemy", "ally" or "self"');
     num(`${w}.cooldown`, a.cooldown, { min: 0 });
     num(`${w}.cost`, a.cost, { min: 0, optional: true });
     num(`${w}.priority`, a.priority, { optional: true });
-    if (a.classId !== 'enemy') num(`${w}.unlockLevel`, a.unlockLevel, { min: 1 });
+    if (!npc) num(`${w}.unlockLevel`, a.unlockLevel, { min: 1 });
     if (!Array.isArray(a.effects) || !a.effects.length) err(`${w}.effects`, 'needs at least one effect');
     (a.effects || []).forEach((e, i) => checkEffect(`${w}.effects[${i}]`, e));
     checkRule(`${w}.defaultRule`, a.defaultRule);
+  }
+
+  // ---- minions (summoned by players)
+  for (const [id, m] of Object.entries(minions)) {
+    const w = `minions.minions.${id}`;
+    str(`${w}.name`, m.name);
+    for (const k of ['hp', 'power', 'defense']) num(`${w}.${k}`, m[k], { min: 0, max: 10 });
+    num(`${w}.attackSpeed`, m.attackSpeed, { min: 0.1, max: 5, optional: true });
+    num(`${w}.duration`, m.duration, { min: 0, optional: true });
+    num(`${w}.threat`, m.threat, { min: 0, optional: true });
+    if (m.role && !['tank', 'healer', 'damage', 'support'].includes(m.role)) err(`${w}.role`, 'must be tank, healer, damage or support');
+    if (!m.attack || !isNum(m.attack.power)) err(`${w}.attack`, 'needs { name, power, school }');
+    else if (m.attack.school && !['physical', 'magical'].includes(m.attack.school)) err(`${w}.attack.school`, 'must be "physical" or "magical"');
+    for (const a of m.abilities || []) { ref(`${w}.abilities`, a, abilities, 'ability'); if (abilities[a] && abilities[a].classId !== 'minion') warn(`${w}.abilities`, `"${a}" is not a minion ability (classId ${abilities[a].classId})`); }
   }
 
   // ---- classes

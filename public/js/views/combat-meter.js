@@ -1,6 +1,6 @@
 // Damage meter panel (rankings + detailed per-unit breakdown).
 import { esc, fmt, duration } from '../ui.js';
-import { classIcon, enemyArt, abilityIcon } from '../assets.js';
+import { classIcon, enemyArt, abilityIcon, minionArt } from '../assets.js';
 import { CLASSES } from '/shared/data/classes.js';
 import { ABILITIES } from '/shared/data/abilities.js';
 
@@ -17,7 +17,7 @@ const pctTxt = (a, b) => (b > 0 ? `${((a / b) * 100).toFixed(1)}%` : '—');
 const per = (v, sec) => fmt(v / Math.max(1, sec));
 const color = u => (u.side === 'A' ? CLASSES[u.classId]?.color || '#8fd3ff' : u.boss ? '#d9452b' : '#a86b4a');
 
-function icon(u) { return u.side === 'A' ? classIcon(u.classId, 'xxs') : enemyArt(u.defId, 'xxs'); }
+function icon(u) { return u.minions ? minionArt(u.defId, 'xxs') : u.side === 'A' ? classIcon(u.classId, 'xxs') : enemyArt(u.defId, 'xxs'); }
 
 function labels(units) {
   // number duplicate names ("Grey Wolf", "Grey Wolf #2")

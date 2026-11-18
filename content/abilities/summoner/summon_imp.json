@@ -1,0 +1,23 @@
+{
+  "name": "Summon Imps",
+  "classId": "summoner",
+  "unlockLevel": 1,
+  "type": "summon",
+  "description": "Call 2 Ember Imps (up to 2) for 25 seconds. They spit fire that burns enemies.",
+  "cost": 25,
+  "cooldown": 10,
+  "target": "self",
+  "effects": [{ "kind": "summon", "minion": "ember_imp", "count": 2, "max": 2 }],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      { "type": "enemies_alive", "cmp": ">=", "value": 1 },
+      { "type": "own_minions", "minion": "ember_imp", "cmp": "<=", "value": 0 }
+    ],
+    "target": { "selector": "self" },
+    "targetConditions": []
+  },
+  "priority": 35,
+  "order": 20
+}

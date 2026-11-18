@@ -15,7 +15,8 @@ content/
   bestiary.json                       mastery, targeting wording, "How to prepare" tip rules
   classes/warrior.json …              one file per class
   traits/brute.json …                 recruit traits
-  abilities/<class>/<id>.json         abilities, sorted into a folder per class ("enemy" = enemy abilities)
+  abilities/<class>/<id>.json         abilities, sorted into a folder per class ("enemy" = enemy abilities, "minion" = minion abilities)
+  minions/<id>.json                   minions that players summon (Summoner)
   statuses/burn.json …                buffs and debuffs
   items/_settings.json                slots, affix stats, naming, sell value, socket rules
   items/<slot>/<id>.json              item bases, sorted into a folder per slot
@@ -148,6 +149,19 @@ The bestiary picks the new enemy up automatically, including its tips.
 3. A skill tree `content/skilltree/<class>.json` with exactly 4 branches (`npm run content:new -- skilltree paladin warrior`). The `start` ability is learned at level 1.
 
 The validator tells you if a piece is missing.
+
+### Add or change a minion (Summoner)
+`content/minions/<id>.json` — minions are temporary allies built from their summoner's stats:
+
+| field | meaning |
+| --- | --- |
+| `hp`, `power`, `defense` | fractions of the summoner's max health, Magic Power and defense (`0.45` = 45 %) |
+| `attack` | basic attack `{ "name", "power", "school" }` |
+| `abilities` | extra abilities from `content/abilities/minion/` (`"classId": "minion"`), used with their `defaultRule` |
+| `duration` | seconds until it fades (`0` = until the fight ends) · `threat` — how strongly enemies go for it at first · `role` — `tank` minions stand in front |
+| `glyph`, `color`, `description` | how it looks; an image `public/assets/minions/<id>.png` replaces the glyph |
+
+Ability effects for summoners: `{ "kind": "summon", "minion": "skeleton", "count": 1, "max": 3 }` (at the limit the oldest one is renewed instead), `{ "kind": "sacrifice", "count": 1, "power": 1.2, "school": "magical" }` (the minion closest to fading explodes for `power` × its max health to every enemy), `{ "kind": "extend", "seconds": 10 }` (on minion targets). Targets `own_minions` / `own_minion_lowest_hp` and the condition `own_minions` (optionally of one kind) work in every rule. Skill-tree stats: `minionDamagePct`, `minionHpPct`, `minionDurationPct`, `minionMax` (+N of each kind). Minions fade when their summoner falls, and a party with only minions left loses.
 
 ### Add a rift affix
 `content/rifts/affixes/<id>.json` with `name`, `icon`, `description` and a list of `mechanics`:

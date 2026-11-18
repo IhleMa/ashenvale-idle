@@ -1,0 +1,17 @@
+{
+  "name": "Ember Imp",
+  "glyph": "🜂",
+  "color": "#ff7a3d",
+  "role": "damage",
+  "description": "A fragile little demon that spits fire from the back line.",
+  "hp": 0.25,
+  "power": 0.6,
+  "defense": 0.3,
+  "attackSpeed": 1.1,
+  "attack": { "name": "Ember", "power": 0.8, "school": "magical" },
+  "abilities": ["m_fire_spit"],
+  "duration": 25,
+  "threat": 5,
+  "tags": ["demon"],
+  "order": 20
+}

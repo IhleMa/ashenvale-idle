@@ -1,0 +1,17 @@
+{
+  "name": "Bone Golem",
+  "glyph": "⛫",
+  "color": "#bfb6a3",
+  "role": "tank",
+  "description": "A hulking guardian that draws enemies to itself.",
+  "hp": 1.3,
+  "power": 0.36,
+  "defense": 1.6,
+  "attackSpeed": 0.8,
+  "attack": { "name": "Bone Fist", "power": 1, "school": "physical" },
+  "abilities": ["m_bone_roar"],
+  "duration": 45,
+  "threat": 200,
+  "tags": ["undead", "construct"],
+  "order": 30
+}

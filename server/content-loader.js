@@ -51,6 +51,7 @@ export const COLLECTIONS = [
   ['gems', 'kinds', 'gems'],
   ['lootfilter', 'presets', 'lootfilter'],
   ['bots', 'archetypes', 'bots'],
+  ['minions', 'minions', 'minions'],
 ];
 export const SYSTEMS = [...new Set([...Object.keys(SETTINGS_FILES), ...COLLECTIONS.map(c => c[0])])];
 // kept for tools that list the systems

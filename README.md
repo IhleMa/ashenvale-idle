@@ -58,6 +58,7 @@ public/assets/
 ├── classes/        warrior.png, mage.png, rogue.png, cleric.png, ranger.png
 ├── portraits/      warrior_1.png, mage_female.png, …   (extra appearance choices per class)
 ├── abilities/      fireball.png, heal.png, execute.png, …
+├── minions/        skeleton.png, ember_imp.png, bone_golem.png, spirit_wisp.png
 ├── items/          sword.png, staff.png, plate_chest.png, … (+ optional sword_legendary.png)
 ├── gems/           ruby… one per stat: str.png, critChance.png, … (optional per tier: str_1.png … str_5.png)
 ├── enemies/        wolf.png, goblin_chieftain.png, …  (also shown in the Bestiary)
@@ -83,7 +84,7 @@ public/assets/
 | System | Summary |
 |---|---|
 | **Hero** | Permanent main character: +8% attributes, an extra ability slot, a bonus skill tree point every 5 levels, +10% XP, a Leadership aura at level 10 and a hero-only class title at level 40. The hero can't be dismissed and is always in the party. |
-| **Classes** | Warrior (tank), Mage, Rogue, Ranger (damage) and Cleric (healer). Each has its own attributes, attribute scaling, resource (Rage/Mana/Energy/Focus), 7 abilities and class titles. |
+| **Classes** | Warrior (tank), Mage, Rogue, Ranger (damage), Cleric (healer) and Summoner. Each has its own attributes, attribute scaling, resource (Rage/Mana/Energy/Focus/Soul Energy), 7 abilities and class titles. The **Summoner** raises minions that fight beside the party — Skeleton Warriors, Ember Imps, a taunting Bone Golem and a healing Spirit Wisp — and has spells that work with them: Dark Pact empowers them, Soul Link heals, shields and extends them, Corpse Explosion detonates one for area damage. Its skill tree improves minion health, damage, duration and count. Minions appear as small cards under their summoner with a countdown, and share one row in the damage meter. |
 | **Passive skill tree** | A Path of Exile-style web for each class. You start at the Origin in the middle, which grants your first ability, and spend 1 point per level on any node connected to your tree. Four themed branches are linked by rings and bridges, so there are many routes. The tree holds every ability (7 per class), "Empowered" nodes that raise ability ranks, attribute nodes, branch masteries, notables and an outer keystone per branch. About 109 nodes per class, roughly 70 points at max level, so you have to choose. Hover a node to preview the path and click to allocate the whole path. Refund single nodes or reset the tree for gold. Companions can auto-allocate. |
 | **Recruitment** | A rotating tavern of recruits with random classes and traits. The roster holds up to 12 companions. |
 | **Party** | 3 saved presets with up to 4 members each. Position affects who enemies target first, and each member has a role (Tank, Healer, Damage, Support). A balanced party and class variety give synergy bonuses. |

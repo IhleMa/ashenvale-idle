@@ -1,0 +1,42 @@
+{
+  "start": "raise_skeleton",
+  "branches": [
+    {
+      "name": "Bone",
+      "attrs": ["int", "vit"],
+      "abilities": { "2": "bone_golem", "6": "corpse_explosion" },
+      "notables": {
+        "4": { "name": "Thick Bones", "stats": { "minionHpPct": 0.25 } },
+        "8": { "name": "Ossuary", "stats": { "minionMax": 1, "minionHpPct": 0.15 } }
+      }
+    },
+    {
+      "name": "Hellfire",
+      "attrs": ["int", "dex"],
+      "abilities": { "1": "summon_imp", "5": "dark_pact" },
+      "notables": {
+        "4": { "name": "Kindled Servants", "stats": { "minionDamagePct": 0.2 } },
+        "8": { "name": "Infernal Covenant", "stats": { "minionDamagePct": 0.3, "magPowerPct": 0.08 } }
+      }
+    },
+    {
+      "name": "Spirit",
+      "attrs": ["int", "vit"],
+      "abilities": { "3": "spirit_wisp", "7": "soul_link" },
+      "notables": {
+        "4": { "name": "Lingering Souls", "stats": { "minionDurationPct": 0.3 } },
+        "8": { "name": "Eternal Servants", "stats": { "minionDurationPct": 0.5, "healingPct": 0.1 } }
+      }
+    },
+    {
+      "name": "Grave Ward",
+      "attrs": ["vit", "int"],
+      "abilities": {},
+      "notables": {
+        "4": { "name": "Deathless", "stats": { "hpPct": 0.12 } },
+        "8": { "name": "Shroud of Bones", "stats": { "damageTakenPct": -0.1, "defensePct": 0.2 } }
+      }
+    }
+  ],
+  "order": 60
+}

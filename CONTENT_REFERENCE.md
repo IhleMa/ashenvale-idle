@@ -12,6 +12,7 @@ See [CONTENT.md](CONTENT.md) for how the files work.
 | [`rogue`](content/classes/rogue.json) | Rogue | damage | Energy |
 | [`cleric`](content/classes/cleric.json) | Cleric | healer | Mana |
 | [`ranger`](content/classes/ranger.json) | Ranger | damage | Focus |
+| [`summoner`](content/classes/summoner.json) | Summoner | damage | Soul Energy |
 
 Roles (config.json → roles): `tank`, `healer`, `damage`, `support`
 
@@ -20,11 +21,18 @@ Roles (config.json → roles): `tank`, `healer`, `damage`, `support`
 | id | name | class | type | cooldown | target |
 | --- | --- | --- | --- | --- | --- |
 | [`heroic_strike`](content/abilities/warrior/heroic_strike.json) | Heroic Strike | warrior | damage | 3 | enemy |
+| [`raise_skeleton`](content/abilities/summoner/raise_skeleton.json) | Raise Skeleton | summoner | summon | 5 | self |
+| [`summon_imp`](content/abilities/summoner/summon_imp.json) | Summon Imps | summoner | summon | 10 | self |
 | [`taunt`](content/abilities/warrior/taunt.json) | Taunt | warrior | control | 10 | self |
+| [`bone_golem`](content/abilities/summoner/bone_golem.json) | Bone Golem | summoner | summon | 40 | self |
 | [`shield_wall`](content/abilities/warrior/shield_wall.json) | Shield Wall | warrior | buff | 25 | self |
 | [`cleave`](content/abilities/warrior/cleave.json) | Cleave | warrior | damage | 6 | enemy |
+| [`spirit_wisp`](content/abilities/summoner/spirit_wisp.json) | Spirit Wisp | summoner | summon | 25 | self |
+| [`dark_pact`](content/abilities/summoner/dark_pact.json) | Dark Pact | summoner | buff | 20 | ally |
 | [`shield_bash`](content/abilities/warrior/shield_bash.json) | Shield Bash | warrior | control | 14 | enemy |
 | [`battle_cry`](content/abilities/warrior/battle_cry.json) | Battle Cry | warrior | buff | 30 | ally |
+| [`corpse_explosion`](content/abilities/summoner/corpse_explosion.json) | Corpse Explosion | summoner | damage | 12 | self |
+| [`soul_link`](content/abilities/summoner/soul_link.json) | Soul Link | summoner | buff | 25 | ally |
 | [`sunder_armor`](content/abilities/warrior/sunder_armor.json) | Sunder Armor | warrior | debuff | 8 | enemy |
 | [`fireball`](content/abilities/mage/fireball.json) | Fireball | mage | damage | 3 | enemy |
 | [`frost_bolt`](content/abilities/mage/frost_bolt.json) | Frost Bolt | mage | debuff | 4 | enemy |
@@ -69,8 +77,11 @@ Roles (config.json → roles): `tank`, `healer`, `damage`, `support`
 | [`e_frenzy`](content/abilities/enemy/e_frenzy.json) | Frenzy | enemy | buff | 25 | self |
 | [`e_cleave`](content/abilities/enemy/e_cleave.json) | Brutal Cleave | enemy | damage | 8 | enemy |
 | [`e_void_bolt`](content/abilities/enemy/e_void_bolt.json) | Void Bolt | enemy | damage | 4 | enemy |
+| [`m_fire_spit`](content/abilities/minion/m_fire_spit.json) | Fire Spit | minion | damage | 5 | enemy |
 | [`b_war_stomp`](content/abilities/enemy/b_war_stomp.json) | War Stomp | enemy | control | 18 | enemy |
+| [`m_bone_roar`](content/abilities/minion/m_bone_roar.json) | Bone Roar | minion | control | 8 | self |
 | [`b_crushing_blow`](content/abilities/enemy/b_crushing_blow.json) | Crushing Blow | enemy | damage | 12 | enemy |
+| [`m_soothe`](content/abilities/minion/m_soothe.json) | Soothe | minion | heal | 3 | ally |
 | [`b_inferno`](content/abilities/enemy/b_inferno.json) | Inferno | enemy | damage | 15 | enemy |
 | [`b_blizzard`](content/abilities/enemy/b_blizzard.json) | Blizzard | enemy | damage | 16 | enemy |
 | [`b_void_rift`](content/abilities/enemy/b_void_rift.json) | Void Rift | enemy | damage | 14 | enemy |
@@ -113,6 +124,7 @@ Conditions (`conditions[].type`):
 | `resource_below` | Resource below |
 | `boss_present` | A boss is present |
 | `combat_time_above` | Fight has lasted longer than |
+| `own_minions` | Number of my minions |
 
 Target conditions (`targetConditions[].type`):
 
@@ -126,6 +138,7 @@ Target conditions (`targetConditions[].type`):
 | `target_hp_above` | Target health above |
 | `target_role` | Target has role |
 | `target_is_type` | Target is enemy type |
+| `target_is_minion` | Target is a minion |
 
 Target selectors (`target.selector`):
 
@@ -138,6 +151,8 @@ Target selectors (`target.selector`):
 | `ally_random` | Random living ally |
 | `ally_tank` | Ally tank (fallback: lowest health %) |
 | `all_allies` | All allies |
+| `own_minions` | All my minions |
+| `own_minion_lowest_hp` | My minion with lowest health % |
 | `enemy_current` | Current target (front-most enemy) |
 | `enemy_lowest_hp_pct` | Enemy with lowest health % |
 | `enemy_lowest_hp` | Enemy with lowest health |
@@ -176,12 +191,14 @@ Target selectors (`target.selector`):
 | [`stone_skin`](content/statuses/stone_skin.json) | Stone Skin | buff | Takes 70% less damage. |
 | [`bolstered`](content/statuses/bolstered.json) | Bolstered | buff | Empowered by a fallen ally: +8% damage per stack. |
 | [`regeneration`](content/statuses/regeneration.json) | Regeneration | buff | Regenerating health. |
+| [`empowered`](content/statuses/empowered.json) | Empowered | buff | Deals 40% more damage and attacks 30% faster. |
+| [`soul_link`](content/statuses/soul_link.json) | Soul Link | buff | Takes 25% less damage. |
 
 ## Stats
 
 Item / affix / gem stats: `str`, `int`, `dex`, `vit`, `hp`, `defense`, `physPower`, `magPower`, `healPower`, `critChance`, `critDamage`, `attackSpeed`
 
-Skill tree & set bonus stats: `str`, `int`, `dex`, `vit`, `strPct`, `intPct`, `dexPct`, `vitPct`, `allPct`, `physPowerPct`, `magPowerPct`, `healPowerPct`, `defensePct`, `hpPct`, `critChance`, `critDamage`, `attackSpeed`, `damagePct`, `healingPct`, `damageTakenPct`, `rank` ({ abilityId: +ranks })
+Skill tree & set bonus stats: `str`, `int`, `dex`, `vit`, `strPct`, `intPct`, `dexPct`, `vitPct`, `allPct`, `physPowerPct`, `magPowerPct`, `healPowerPct`, `defensePct`, `hpPct`, `critChance`, `critDamage`, `attackSpeed`, `damagePct`, `healingPct`, `damageTakenPct`, `minionDamagePct`, `minionHpPct`, `minionDurationPct`, `minionMax`, `rank` ({ abilityId: +ranks })
 
 ## Item slots and bases
 
@@ -193,12 +210,12 @@ Slots: `weapon`, `offhand`, `head`, `chest`, `hands`, `feet`, `ring`, `amulet`
 | [`axe`](content/items/weapon/axe.json) | Battleaxe | weapon | metal | warrior |
 | [`mace`](content/items/weapon/mace.json) | Mace | weapon | metal | warrior, cleric |
 | [`dagger`](content/items/weapon/dagger.json) | Dagger | weapon | metal | rogue |
-| [`staff`](content/items/weapon/staff.json) | Staff | weapon | cloth | mage, cleric |
-| [`wand`](content/items/weapon/wand.json) | Wand | weapon | cloth | mage, cleric |
+| [`staff`](content/items/weapon/staff.json) | Staff | weapon | cloth | mage, cleric, summoner |
+| [`wand`](content/items/weapon/wand.json) | Wand | weapon | cloth | mage, cleric, summoner |
 | [`bow`](content/items/weapon/bow.json) | Longbow | weapon | leather | ranger |
 | [`crossbow`](content/items/weapon/crossbow.json) | Crossbow | weapon | metal | ranger |
 | [`shield`](content/items/offhand/shield.json) | Shield | offhand | metal | warrior, cleric |
-| [`tome`](content/items/offhand/tome.json) | Tome | offhand | cloth | mage, cleric |
+| [`tome`](content/items/offhand/tome.json) | Tome | offhand | cloth | mage, cleric, summoner |
 | [`quiver`](content/items/offhand/quiver.json) | Quiver | offhand | leather | ranger |
 | [`parrying_dagger`](content/items/offhand/parrying_dagger.json) | Parrying Dagger | offhand | leather | rogue |
 | [`plate_helm`](content/items/head/plate_helm.json) | Plate Helm | head | metal | warrior, cleric |

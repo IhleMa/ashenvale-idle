@@ -9,6 +9,7 @@ export function createMeter(title = '') {
 
 // Stable key so the same character is merged across fights (session totals)
 export function unitKey(u) {
+  if (u.kind === 'minion') return `A:${u.ownerId || ''}:${u.charId || u.summonerName}:minions`; // all minions of a summoner share one row
   return u.side === 'A' ? `A:${u.ownerId || ''}:${u.charId || u.name}` : `B:${u.defId}#${u.uid}`;
 }
 
@@ -16,7 +17,7 @@ function entry(m, u) {
   const k = unitKey(u);
   if (!m.units[k]) {
     m.units[k] = {
-      key: k, name: u.name, side: u.side, classId: u.classId || null, defId: u.defId, isMain: !!u.isMain,
+      key: k, name: u.kind === 'minion' ? `${u.summonerName}'s minions` : u.name, side: u.side, minions: u.kind === 'minion', classId: u.classId || null, defId: u.defId, isMain: !!u.isMain,
       ownerName: u.ownerName || null, ownerId: u.ownerId || null, boss: !!u.boss, count: 0,
       dmg: { total: 0, byAbility: {}, byTarget: {} },
       heal: { total: 0, over: 0, byAbility: {}, byTarget: {} },

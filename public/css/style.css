@@ -1092,3 +1092,17 @@ html.standalone body { padding-bottom: env(safe-area-inset-bottom); padding-left
 .xc-legend i.dash { background: repeating-linear-gradient(90deg, #8a7a6c 0 5px, transparent 5px 9px); }
 .xc-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; }
 .xc-simbox .xc-svg { background: #120d0c; border: 1px solid var(--line); border-radius: var(--radius); }
+
+/* ---------------------------------------------------------------- summoned minions (battle) */
+.unit:has(> .unit-minions) { flex-wrap: wrap; }
+.unit-minions { flex-basis: 100%; display: flex; flex-wrap: wrap; gap: 6px; padding-left: 4px; }
+.unit.minion { flex: 1 1 128px; max-width: 170px; gap: 6px; padding: 4px 6px; border-radius: 9px; background: rgba(40, 28, 52, .75); border-color: #4a3a66; }
+.unit.minion .unit-info { gap: 2px; }
+.unit.minion .bar.hp { height: 7px; }
+.unit.minion .bar-label { display: none; }
+.unit.minion .unit-statuses { min-height: 0; }
+.unit.minion .unit-statuses:empty { display: none; }
+.minion-name { font-size: 11px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #d8c8f0; }
+.minion-exp { font-weight: 400; color: var(--faint); font-size: 10px; margin-left: 2px; }
+.minion-art.xs, .unit.minion .art { width: 26px; height: 26px; font-size: 15px; }
+.unit.minion .floaters .floater { font-size: 11px; }

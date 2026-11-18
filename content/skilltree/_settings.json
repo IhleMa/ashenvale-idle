@@ -29,6 +29,10 @@
     "attackSpeed": ["Attack Speed", "pct"],
     "damagePct": ["damage dealt", "pct"],
     "healingPct": ["healing done", "pct"],
-    "damageTakenPct": ["damage taken", "pct"]
+    "damageTakenPct": ["damage taken", "pct"],
+    "minionDamagePct": ["minion damage", "pct"],
+    "minionHpPct": ["minion health", "pct"],
+    "minionDurationPct": ["minion duration", "pct"],
+    "minionMax": ["maximum minions of each kind", "flat"]
   }
 }

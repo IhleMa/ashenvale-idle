@@ -1,0 +1,21 @@
+{
+  "name": "Dark Pact",
+  "classId": "summoner",
+  "unlockLevel": 10,
+  "type": "buff",
+  "description": "Empower all your minions for 8 seconds: +40% damage and +30% attack speed.",
+  "cost": 25,
+  "cooldown": 20,
+  "target": "ally",
+  "area": true,
+  "effects": [{ "kind": "status", "status": "empowered", "duration": 8 }],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [{ "type": "own_minions", "cmp": ">=", "value": 3 }],
+    "target": { "selector": "own_minions" },
+    "targetConditions": []
+  },
+  "priority": 60,
+  "order": 50
+}

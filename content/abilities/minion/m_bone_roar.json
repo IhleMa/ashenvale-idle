@@ -1,0 +1,12 @@
+{
+  "name": "Bone Roar",
+  "classId": "minion",
+  "type": "control",
+  "description": "Roars to force every enemy to attack the golem.",
+  "cost": 0,
+  "cooldown": 8,
+  "target": "self",
+  "effects": [{ "kind": "taunt", "duration": 4 }],
+  "defaultRule": { "enabled": true, "mode": "all", "conditions": [{ "type": "enemies_alive", "cmp": ">=", "value": 1 }], "target": { "selector": "self" }, "targetConditions": [{ "type": "target_missing_status", "status": "taunting" }] },
+  "order": 510
+}

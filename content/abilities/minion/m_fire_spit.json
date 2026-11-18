@@ -1,0 +1,15 @@
+{
+  "name": "Fire Spit",
+  "classId": "minion",
+  "type": "damage",
+  "description": "Spits a glob of fire that burns the target.",
+  "cost": 0,
+  "cooldown": 5,
+  "target": "enemy",
+  "effects": [
+    { "kind": "damage", "stat": "magPower", "power": 1.4, "school": "magical" },
+    { "kind": "status", "status": "burn", "duration": 4, "stat": "magPower", "power": 0.15 }
+  ],
+  "defaultRule": { "enabled": true, "mode": "all", "conditions": [{ "type": "always" }], "target": { "selector": "enemy_current" }, "targetConditions": [] },
+  "order": 500
+}

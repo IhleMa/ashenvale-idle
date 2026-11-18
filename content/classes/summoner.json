@@ -1,0 +1,33 @@
+{
+  "name": "Summoner",
+  "role": "damage",
+  "color": "#8a5cf6",
+  "glyph": "☥",
+  "description": "Commands an army of the dead and the damned. Summons minions that fight beside the party, then empowers, sustains or detonates them.",
+  "strengths": [
+    "Minions that tank, heal and deal damage", "Grows stronger the longer a fight lasts",
+    "Area damage with Corpse Explosion"
+  ],
+  "weaknesses": ["Fragile on its own", "Slow start in every fight", "Minions vanish after a while"],
+  "resource": { "id": "soul", "name": "Soul Energy", "color": "#9b6bff", "max": 100, "start": 60, "regen": 5 },
+  "baseAttributes": { "str": 4, "int": 14, "dex": 6, "vit": 10 },
+  "growth": { "str": 0.4, "int": 2.8, "dex": 0.9, "vit": 2 },
+  "scaling": {
+    "hp": { "vit": 10 },
+    "physPower": { "str": 1, "dex": 0.3 },
+    "magPower": { "int": 2.2 },
+    "healPower": { "int": 0.6 },
+    "defense": { "str": 0.2, "vit": 0.4 },
+    "critChance": { "dex": 0.0008, "int": 0.0002 },
+    "attackSpeed": { "dex": 0.0012 }
+  },
+  "basicAttack": { "name": "Soul Bolt", "stat": "magPower", "power": 0.8, "school": "magical" },
+  "threatMult": 0.9,
+  "tiers": [
+    { "level": 1, "title": "Bonecaller" },
+    { "level": 10, "title": "Necromancer", "bonus": { "intPct": 0.05 } },
+    { "level": 25, "title": "Lich", "bonus": { "intPct": 0.05, "vitPct": 0.04 } },
+    { "level": 40, "title": "Lord of the Ashen Dead", "mainOnly": true, "bonus": { "allPct": 0.06 } }
+  ],
+  "order": 60
+}

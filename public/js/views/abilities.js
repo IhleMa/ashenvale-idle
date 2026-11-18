@@ -9,6 +9,7 @@ import { CLASSES } from '/shared/data/classes.js';
 import { ABILITIES, classAbilities } from '/shared/data/abilities.js';
 import { STATUSES } from '/shared/data/statuses.js';
 import { ENEMIES } from '/shared/data/enemies.js';
+import { MINIONS } from '/shared/data/minions.js';
 import { CONDITIONS, TARGET_CONDITIONS, SELECTORS, selectorsForAbility, describeCondition } from '/shared/rules.js';
 import { abilitySlots, abilityNodeId } from '/shared/character.js';
 import { pathTo, availablePoints } from '/shared/skilltree.js';
@@ -41,6 +42,7 @@ function paramInput(p, value, path) {
     return `<select ${attrs}><optgroup label="Buffs">${opt('buff')}</optgroup><optgroup label="Debuffs">${opt('debuff')}</optgroup></select>`;
   }
   if (p.type === 'enemyTag') return enemyTagSelect(value, attrs);
+  if (p.type === 'minion') return `<select ${attrs}><option value="">any minion</option>${Object.values(MINIONS).map(m => `<option value="${m.id}" ${m.id === value ? 'selected' : ''}>${esc(m.name)}</option>`).join('')}</select>`;
   return `<input value="${esc(value)}" ${attrs}>`;
 }
 

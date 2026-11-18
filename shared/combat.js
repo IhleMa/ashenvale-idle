@@ -5,10 +5,11 @@ import { CLASSES } from './data/classes.js';
 import { ABILITIES } from './data/abilities.js';
 import { STATUSES } from './data/statuses.js';
 import { ENEMIES, enemyStatsAt } from './data/enemies.js';
+import { MINIONS } from './data/minions.js';
 import { computeStats } from './stats.js';
 import { equipmentEffects } from './data/legendaries.js';
 import { createRng } from './rng.js';
-import { resolveRule, hpPct, hasStatus, enemiesOf, alliesOf } from './rules.js';
+import { resolveRule, hpPct, hasStatus, enemiesOf, alliesOf, ownMinions } from './rules.js';
 
 const C = CONFIG.combat;
 const DT = C.tickMs / 1000;
@@ -40,6 +41,40 @@ export function makeCharacterUnit(ch, { ownerId, ownerName, position, bonuses = 
     actionTimer: 0.3 + position * 0.25,
     danger: 0,
     vsEnemy, // bestiary mastery: { enemyId: damage bonus }
+    minionBonus: { damagePct: s.minionDamagePct || 0, hpPct: s.minionHpPct || 0, durationPct: s.minionDurationPct || 0, extraMax: s.minionMax || 0 },
+  };
+}
+
+// A player's summoned minion: stats come from its summoner (content/minions/)
+export function makeMinionUnit(minionId, owner, battleTime) {
+  const def = MINIONS[minionId];
+  if (!def) throw new Error('Unknown minion ' + minionId);
+  const mb = owner.minionBonus || {};
+  const power = Math.max(owner.stats.magPower || 0, owner.stats.physPower || 0);
+  const maxHp = Math.max(1, Math.round(owner.maxHp * def.hp * (1 + (mb.hpPct || 0))));
+  const stats = {
+    maxHp, physPower: Math.round(power * def.power), magPower: Math.round(power * def.power), healPower: Math.round(power * def.power),
+    defense: Math.round((owner.stats.defense || 0) * (def.defense ?? 0.5)),
+    critChance: (owner.stats.critChance || 0.05) * 0.5, critDamage: 1.5, attackSpeed: def.attackSpeed || 1, dodge: 0,
+  };
+  const rules = {}, ranks = {};
+  for (const a of def.abilities || []) { rules[a] = JSON.parse(JSON.stringify(ABILITIES[a].defaultRule)); ranks[a] = 1; }
+  const duration = (def.duration || 0) * (1 + (mb.durationPct || 0));
+  return {
+    uid: 0, side: owner.side, kind: 'minion', name: def.name, defId: minionId, level: owner.level, tags: ['minion', ...(def.tags || [])],
+    ownerUid: owner.uid, ownerId: owner.ownerId, ownerName: owner.ownerName, charId: owner.charId, summonerName: owner.name,
+    role: def.role || 'damage', position: 10 + (def.role === 'tank' ? -20 : 0),
+    stats, maxHp, hp: maxHp, resource: 0, resourceMax: 0, resourceDef: null,
+    cooldowns: Object.fromEntries((def.abilities || []).map(a => [a, ABILITIES[a].cooldown * 0.3])),
+    statuses: [], alive: true,
+    loadout: [...(def.abilities || [])], ranks, rules,
+    basicAttack: { name: def.attack?.name || 'Attack', stat: def.attack?.school === 'magical' ? 'magPower' : 'physPower', power: def.attack?.power ?? 1, school: def.attack?.school || 'physical' },
+    threatMult: def.role === 'tank' ? 2 : 1,
+    bonuses: { damagePct: (mb.damagePct || 0) + (owner.bonuses?.damagePct || 0) * 0.5, healingPct: owner.bonuses?.healingPct || 0, damageTakenPct: 0, buffDurationPct: 0, allStatsPct: 0 },
+    actionTimer: 0.4,
+    danger: 0,
+    expiresAt: duration > 0 ? battleTime + duration : null,
+    duration,
   };
 }
 
@@ -128,6 +163,15 @@ const rankMult = (u, abilityId) => 1 + CONFIG.abilityRankBonus * ((u.ranks?.[abi
 export function stepBattle(b) {
   if (b.state !== 'running') return;
   b.time += DT; b.ticks++; b.phaseTime += DT;
+  // minions: fade when their time is up or their summoner falls; dead ones leave the field
+  if (b.units.some(u => u.kind === 'minion')) {
+    for (const u of b.units) {
+      if (u.kind !== 'minion' || !u.alive) continue;
+      const owner = b.units.find(x => x.uid === u.ownerUid);
+      if ((u.expiresAt != null && b.time >= u.expiresAt) || !owner?.alive) expireMinion(b, u);
+    }
+    b.units = b.units.filter(u => u.alive || u.kind !== 'minion');
+  }
   const living = b.units.filter(u => u.alive);
 
   for (const u of living) {
@@ -155,7 +199,7 @@ export function stepBattle(b) {
 
 function checkEnd(b) {
   if (b.state !== 'running') return true;
-  const alliesAlive = b.units.some(u => u.side === 'A' && u.alive);
+  const alliesAlive = b.units.some(u => u.side === 'A' && u.alive && u.kind !== 'minion'); // minions alone can't win
   const enemiesAlive = b.units.some(u => u.side === 'B' && u.alive);
   if (!alliesAlive) { finish(b, 'defeat'); return true; }
   if (!enemiesAlive) {
@@ -276,7 +320,13 @@ function applyEffect(b, src, tgt, eff, abilityId) {
       if (tgt.resourceDef) tgt.resource = Math.min(tgt.resourceMax, tgt.resource + eff.amount);
       break;
     }
+    case 'sacrifice': sacrificeMinions(b, src, eff, abilityId); break;
+    case 'extend': {
+      if (tgt.alive && tgt.expiresAt != null) tgt.expiresAt = Math.min(tgt.expiresAt + (eff.seconds || 0), b.time + tgt.duration * 2);
+      break;
+    }
     case 'summon': {
+      if (eff.minion) { summonMinions(b, src, eff); break; }
       const current = b.units.filter(u => u.side === src.side && u.alive).length;
       const n = Math.min(eff.count || 1, Math.max(0, (eff.max || 4) - current + 1));
       for (let i = 0; i < n; i++) {
@@ -289,6 +339,42 @@ function applyEffect(b, src, tgt, eff, abilityId) {
       }
       break;
     }
+  }
+}
+
+// ---------------------------------------------------------------- minions
+function summonMinions(b, src, eff) {
+  if (!MINIONS[eff.minion]) return;
+  const max = (eff.max || 1) + (src.minionBonus?.extraMax || 0);
+  for (let i = 0; i < (eff.count || 1); i++) {
+    const mine = ownMinions(b, src, eff.minion);
+    if (mine.length >= max) {
+      // at the limit: renew the one closest to fading instead
+      const oldest = mine.filter(m => m.expiresAt != null).sort((a, c) => a.expiresAt - c.expiresAt)[0];
+      if (oldest) { oldest.expiresAt = b.time + oldest.duration; oldest.hp = oldest.maxHp; emit(b, { type: 'renew', src: src.uid, tgt: oldest.uid }); }
+      continue;
+    }
+    const nu = addUnit(b, makeMinionUnit(eff.minion, src, b.time));
+    // enemies notice the newcomer (tanky minions loudly)
+    for (const e of enemiesOf(b, nu)) if (e.threatTable) e.threatTable[nu.uid] = MINIONS[eff.minion].threat ?? 10;
+    emit(b, { type: 'spawn', src: src.uid, unit: publicUnit(nu) });
+  }
+}
+
+function expireMinion(b, u, reason = 'expire') {
+  u.alive = false;
+  u.hp = 0;
+  u.statuses = [];
+  emit(b, { type: 'expire', src: u.ownerUid, tgt: u.uid, reason });
+}
+
+function sacrificeMinions(b, src, eff, abilityId) {
+  // the minions closest to fading go first
+  const victims = ownMinions(b, src).sort((a, c) => (a.expiresAt ?? 1e9) - (c.expiresAt ?? 1e9)).slice(0, eff.count || 1);
+  for (const m of victims) {
+    const amount = m.maxHp * (eff.power || 1) * rankMult(src, abilityId);
+    expireMinion(b, m, 'sacrifice');
+    for (const e of enemiesOf(b, src)) dealDamage(b, src, e, amount, { school: eff.school || 'magical', ability: abilityId });
   }
 }
 
@@ -481,6 +567,7 @@ export function publicUnit(u) {
     uid: u.uid, side: u.side, kind: u.kind, name: u.name, defId: u.defId, classId: u.classId || null,
     level: u.level, isMain: !!u.isMain, ownerName: u.ownerName || null, ownerId: u.ownerId || null, portrait: u.portrait || null,
     role: u.role || null, tags: u.tags, boss: !!u.boss, position: u.position,
+    ...(u.kind === 'minion' ? { ownerUid: u.ownerUid, charId: u.charId, summonerName: u.summonerName, duration: u.duration } : {}),
     maxHp: u.maxHp, resourceMax: u.resourceMax, resourceColor: u.resourceDef?.color || null, resourceName: u.resourceDef?.name || null,
     loadout: u.loadout,
     ...dynamicUnit(u),
@@ -495,6 +582,7 @@ export function dynamicUnit(u) {
     resource: Math.round(u.resource || 0),
     cd: cds,
     st: u.statuses.map(s => [s.id, Math.round(s.remaining * 10) / 10, s.stacks]),
+    ...(u.expiresAt != null ? { exp: Math.round(u.expiresAt * 10) / 10 } : {}), // battle time when a minion fades
   };
 }
 
@@ -513,4 +601,6 @@ export function runToEnd(b, maxTicks = 100000) {
 }
 
 export { DT as TICK_SECONDS };
+// internals for tests
+export const __test = { applyEffect };
 export { alliesOf, enemiesOf };

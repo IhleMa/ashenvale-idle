@@ -1,0 +1,23 @@
+{
+  "name": "Bone Golem",
+  "classId": "summoner",
+  "unlockLevel": 6,
+  "type": "summon",
+  "description": "Raise a Bone Golem for 45 seconds: a heavily armored minion that taunts enemies and protects the party.",
+  "cost": 40,
+  "cooldown": 40,
+  "target": "self",
+  "effects": [{ "kind": "summon", "minion": "bone_golem", "count": 1, "max": 1 }],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      { "type": "enemies_alive", "cmp": ">=", "value": 1 },
+      { "type": "own_minions", "minion": "bone_golem", "cmp": "<=", "value": 0 }
+    ],
+    "target": { "selector": "self" },
+    "targetConditions": []
+  },
+  "priority": 80,
+  "order": 30
+}

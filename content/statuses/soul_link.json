@@ -1,0 +1,7 @@
+{
+  "name": "Soul Link",
+  "type": "buff",
+  "mods": { "damageTakenPct": -0.25 },
+  "description": "Takes 25% less damage.",
+  "order": 270
+}

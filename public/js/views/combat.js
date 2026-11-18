@@ -2,12 +2,13 @@
 import { bus, state } from '../state.js';
 import { act } from '../net.js';
 import { esc, fmt, run, tipAttr } from '../ui.js';
-import { portrait, enemyArt, abilityIcon, statusIcon, backgroundStyle } from '../assets.js';
+import { portrait, enemyArt, minionArt, abilityIcon, statusIcon, backgroundStyle } from '../assets.js';
 import { ABILITIES } from '/shared/data/abilities.js';
 import { STATUSES } from '/shared/data/statuses.js';
 import { ZONES, COOP_ENCOUNTERS } from '/shared/data/zones.js';
 import { ENEMIES } from '/shared/data/enemies.js';
 import { CLASSES } from '/shared/data/classes.js';
+import { MINIONS } from '/shared/data/minions.js';
 import { rarityById } from '/shared/config.js';
 import { createMeter, recordEvent, seedUnits, mergeMeter } from '../meter.js';
 import { LOG_CATEGORIES, PRESETS, loadFilter, saveFilter, makeEntry, passes } from '../combatlog.js';
@@ -52,7 +53,10 @@ bus.on('msg:bt', m => {
   let structural = false;
   for (const d of m.u) { const u = b.units.get(d.uid); if (u) Object.assign(u, d); }
   const visible = root && shown() === m.k;
+  const gone = [];
   for (const ev of m.e) {
+    // minions that faded, exploded or died leave the field
+    if (ev.type === 'expire' || (ev.type === 'death' && b.units.get(ev.tgt)?.kind === 'minion')) { const u = b.units.get(ev.tgt); if (u) { u.alive = false; gone.push(ev.tgt); } }
     if (ev.type === 'spawn') { b.units.set(ev.unit.uid, ev.unit); structural = true; }
     if (ev.type === 'wave') {
       for (const [uid, u] of b.units) if (u.side === 'B' && !u.alive) b.units.delete(uid);
@@ -65,6 +69,7 @@ bus.on('msg:bt', m => {
     if (entry) addLog(b, entry);
     if (visible && !structural) floatEvent(ev);
   }
+  if (gone.length) { for (const uid of gone) b.units.delete(uid); structural = true; }
   meterDirty = true;
   if (visible) { if (structural) { buildField(); refreshSources(); } update(); }
 });
@@ -182,7 +187,7 @@ function logPanelHtml(b) {
     <div class="log-lines"></div>
   </div>`;
 }
-function unitKeyOf(u) { return u.side === 'A' ? `A:${u.ownerId || ''}:${u.charId || u.name}` : `B:${u.defId}#${u.uid}`; }
+function unitKeyOf(u) { return u.kind === 'minion' ? `A:${u.ownerId || ''}:${u.charId || u.summonerName}:minions` : u.side === 'A' ? `A:${u.ownerId || ''}:${u.charId || u.name}` : `B:${u.defId}#${u.uid}`; }
 
 function currentMeter() {
   const k = shown();
@@ -203,7 +208,17 @@ function renderMeter() {
 }
 
 // ------------------------------------------------------------------ rendering
-function unitCard(u, k) {
+// summoned minions: small cards under their summoner (health, statuses, time left)
+function minionCard(m) {
+  return `<div class="unit minion ally" data-uid="${m.uid}" ${tipAttr(`<b>${esc(m.name)}</b> · ${esc(m.summonerName || '')}'s minion<br>${esc(MINIONS[m.defId]?.description || '')}`)}>
+    <div class="unit-art">${minionArt(m.defId, 'xs')}<div class="floaters"></div></div>
+    <div class="unit-info"><div class="minion-name">${esc(m.name)} <span class="minion-exp"></span></div>
+      <div class="bar hp"><div class="fill"></div><span class="bar-label"></span></div>
+      <div class="unit-statuses"></div></div>
+  </div>`;
+}
+
+function unitCard(u, k, minions = []) {
   const art = u.kind === 'enemy' ? enemyArt(u.defId, 'md') : portrait({ name: u.name, classId: u.classId, portrait: u.portrait }, 'md');
   const owner = k === 'coop' && u.ownerName ? `<small class="owner">${esc(u.ownerName)}</small>` : '';
   const tags = u.boss ? '<span class="tag boss">BOSS</span>' : u.tags?.includes('elite') ? '<span class="tag elite">ELITE</span>' : '';
@@ -219,6 +234,7 @@ function unitCard(u, k) {
       <div class="unit-statuses"></div>
       ${abilities}
     </div>
+    ${minions.length ? `<div class="unit-minions">${minions.map(minionCard).join('')}</div>` : ''}
   </div>`;
 }
 
@@ -275,7 +291,8 @@ function buildField() {
   const b = battles[k];
   const zoneId = b?.meta?.zoneId || state.player?.zone;
   const bg = k === 'coop' ? backgroundStyle(`encounters/${b?.meta?.encounterId}`, 'zones/coop') : backgroundStyle(`zones/${zoneId}`);
-  const allies = b ? [...b.units.values()].filter(u => u.side === 'A').sort((x, y) => x.position - y.position) : [];
+  const allies = b ? [...b.units.values()].filter(u => u.side === 'A' && u.kind !== 'minion').sort((x, y) => x.position - y.position) : [];
+  const minionsOf = u => (b ? [...b.units.values()].filter(m => m.kind === 'minion' && m.alive !== false && m.ownerUid === u.uid).sort((x, y) => x.uid - y.uid) : []);
   const foes = b ? [...b.units.values()].filter(u => u.side === 'B' && (u.alive || !u.summoned)).sort((x, y) => x.position - y.position) : [];
   const header = root.querySelector('.combat-header');
   if (document.activeElement?.closest?.('.combat-header') == null) header.innerHTML = headerHtml(k, b);
@@ -283,7 +300,7 @@ function buildField() {
   field.setAttribute('style', bg);
   field.innerHTML = `
     <div class="bf-status"><span class="bf-wave"></span><span class="bf-time"></span></div>
-    <div class="side allies">${allies.map(u => unitCard(u, k)).join('') || '<div class="muted center pad">Your party is resting…</div>'}</div>
+    <div class="side allies">${allies.map(u => unitCard(u, k, minionsOf(u))).join('') || '<div class="muted center pad">Your party is resting…</div>'}</div>
     <div class="side enemies">${foes.map(u => unitCard(u, k)).join('')}</div>
     <div class="result-banner" hidden></div>`;
 }
@@ -325,6 +342,7 @@ function update() {
       const i = stEl.querySelector(`[data-st="${id}"] i`);
       if (i) i.textContent = rem > 99 ? '' : Math.ceil(rem);
     }
+    if (u.exp != null) { const x = el.querySelector('.minion-exp'); if (x) x.textContent = `${Math.max(0, Math.ceil(u.exp - b.time))}s`; }
     if (u.side === 'A' && u.cd) {
       for (const [ab, rem] of Object.entries(u.cd)) {
         const w = el.querySelector(`.cd-wrap[data-ab="${ab}"]`);

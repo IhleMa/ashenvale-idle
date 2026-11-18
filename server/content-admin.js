@@ -21,6 +21,7 @@ export const TYPE_INFO = {
   traits: { label: 'Traits', icon: '✨', group: 'Characters' },
   abilities: { label: 'Abilities', icon: '⚔', group: 'Characters' },
   skilltree: { label: 'Skill tree specs', icon: '🌳', group: 'Characters' },
+  minions: { label: 'Minions', icon: '☠', group: 'Characters' },
   statuses: { label: 'Statuses', icon: '💫', group: 'Characters' },
   items: { label: 'Item bases', icon: '🗡', group: 'Items' },
   'legendaries/uniques': { label: 'Uniques', icon: '🟧', group: 'Items' },

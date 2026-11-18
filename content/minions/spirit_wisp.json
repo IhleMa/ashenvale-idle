@@ -1,0 +1,17 @@
+{
+  "name": "Spirit Wisp",
+  "glyph": "✧",
+  "color": "#8fe3d0",
+  "role": "healer",
+  "description": "A gentle spirit that mends the wounds of the party.",
+  "hp": 0.3,
+  "power": 0.45,
+  "defense": 0.4,
+  "attackSpeed": 1,
+  "attack": { "name": "Spark", "power": 0.4, "school": "magical" },
+  "abilities": ["m_soothe"],
+  "duration": 30,
+  "threat": 5,
+  "tags": ["spirit"],
+  "order": 40
+}
