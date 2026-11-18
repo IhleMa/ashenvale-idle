@@ -1,14 +1,16 @@
 {
-  "_about": "Rift scaling, time limit, wave composition, weekly rotation and rewards. Affixes: rifts/affixes/. rewards.repeatXpGold: share of XP and gold paid when a player clears a tier again (0 = XP and gold only on the first clear of each tier; loot and chests always drop).",
+  "_about": "Rift scaling, time limit, wave composition, weekly rotation and rewards. Enemies do not depend on the player: tier N has enemies of level startLevel + (N-1) × levelsPerTier (also past the level cap), with health × baseHp × hpGrowth^(N-1) and damage × baseDamage × damageGrowth^(N-1) — so tiers start easy and keep getting harder without end. minLevel: hero level needed to enter. Affixes: rifts/affixes/. rewards.repeatXpGold: share of XP and gold paid when a player clears a tier again (0 = XP and gold only on the first clear of each tier; loot and chests always drop).",
   "config": {
     "minLevel": 8,
-    "maxTier": 150,
+    "maxTier": 100000,
     "trashWaves": 3,
     "timeLimit": 210,
-    "baseHp": 0.55,
-    "baseDamage": 0.6,
-    "hpGrowth": 1.12,
-    "damageGrowth": 1.075,
+    "startLevel": 5,
+    "levelsPerTier": 1,
+    "baseHp": 0.8,
+    "baseDamage": 0.85,
+    "hpGrowth": 1.03,
+    "damageGrowth": 1.02,
     "affixTiers": [2, 5, 10],
     "untimedRewardMult": 0.5
   },

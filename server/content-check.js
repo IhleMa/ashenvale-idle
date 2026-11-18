@@ -275,6 +275,9 @@ export function validateContent(C) {
   for (const pair of C.rifts?.rotation?.mutuallyExclusive || []) for (const a of pair) ref('rifts.rotation.mutuallyExclusive', a, affixes, 'affix');
   for (const [, r] of C.rifts?.rewards?.chest?.rarityByTier || []) if (!rarities.has(r)) err('rifts.rewards.chest.rarityByTier', `unknown rarity "${r}"`);
   num('rifts.rewards.repeatXpGold', C.rifts?.rewards?.repeatXpGold, { min: 0, max: 1, optional: true });
+  num('rifts.config.startLevel', C.rifts?.config?.startLevel, { min: 1, optional: true });
+  num('rifts.config.levelsPerTier', C.rifts?.config?.levelsPerTier, { min: 0, max: 100, optional: true });
+  for (const k of ['hpGrowth', 'damageGrowth']) num(`rifts.config.${k}`, C.rifts?.config?.[k], { min: 1, max: 3 });
 
   // ---- gems
   for (const s of Object.keys(affixStats)) if (!C.gems?.kinds?.[s]) err('gems.kinds', `no gem for the stat "${s}"`);

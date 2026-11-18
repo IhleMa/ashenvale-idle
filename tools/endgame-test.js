@@ -112,7 +112,7 @@ try {
 
   // ---------------------------------------------------------------- affixes don't break combat
   for (const id of Object.keys(AFFIXES)) {
-    const b = createBattle({ seed: 5, allies: buildPartyUnits(team, { ownerId: 'p', ownerName: 'p' }), waves: riftWaves('ashen_barrows', 14, createRng(2), 4), scale: riftScale(3), hooks: riftHooks([id]) });
+    const b = createBattle({ seed: 5, allies: buildPartyUnits(team, { ownerId: 'p', ownerName: 'p' }), waves: riftWaves('ashen_barrows', 3, createRng(2), 4), scale: riftScale(3), hooks: riftHooks([id]) });
     runToEnd(b);
     ok(b.state !== 'running', `affix ${id}: ${b.state} in ${Math.round(b.time)}s`);
   }

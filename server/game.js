@@ -22,7 +22,7 @@ import { BUILDINGS } from '../shared/data/town.js';
 import * as L from './playerLogic.js';
 import * as Q from './questLogic.js';
 import { masteryMap } from '../shared/bestiary.js';
-import { RIFT, riftWaves, riftScale, riftHooks, affixesFor, maxStartTier, riftThemes, riftRewardOptions, riftChest, firstClearCrystals, riftCleared, repeatXpGold } from '../shared/rifts.js';
+import { RIFT, riftWaves, riftScale, riftHooks, affixesFor, maxStartTier, riftThemes, riftRewardOptions, riftChest, firstClearCrystals, riftCleared, repeatXpGold, riftLevel } from '../shared/rifts.js';
 
 const { GameError } = L;
 const SAVE_NOW = new Set(['ah_list', 'ah_buy', 'ah_cancel', 'collect_mail', 'town_speedup', 'expedition_speedup']);
@@ -489,8 +489,8 @@ export class Game {
       zone = ZONES[next.theme] || ZONES[p.zone];
       const affixes = affixesFor(next.tier);
       battle = createBattle({
-        seed: randomSeed(), allies, waves: riftWaves(zone.id, h.level, rng, chars.length), scale: riftScale(next.tier), hooks: riftHooks(affixes),
-        meta: { kind: 'rift', zoneId: zone.id, tier: next.tier, affixes, timeLimit: RIFT.timeLimit, title: `Rift Tier ${next.tier} · ${zone.name}`, level: h.level },
+        seed: randomSeed(), allies, waves: riftWaves(zone.id, next.tier, rng, chars.length), scale: riftScale(next.tier), hooks: riftHooks(affixes),
+        meta: { kind: 'rift', zoneId: zone.id, tier: next.tier, affixes, timeLimit: RIFT.timeLimit, title: `Rift Tier ${next.tier} · ${zone.name}`, level: riftLevel(next.tier) },
       });
     } else {
       zone = ZONES[next.zoneId] || ZONES.whispering_woods;
@@ -561,7 +561,9 @@ export class Game {
       const rng = createRng(randomSeed());
       // XP & gold: in full (as if timed) on the first clear of a tier, then only repeatXpGold of it; loot always
       const firstClear = !riftCleared(p, tier);
-      const rewards = this.applyElixirRewards(p, computeRewards(b.kills, rng, { ...riftRewardOptions(tier, timed), lootMult: this.settings.get('lootRate') }));
+      // enemies above the level cap still drop items (and give XP) of the level cap
+      const rewardKills = b.kills.map(k => (k.level > CONFIG.levelCap ? { ...k, level: CONFIG.levelCap } : k));
+      const rewards = this.applyElixirRewards(p, computeRewards(rewardKills, rng, { ...riftRewardOptions(tier, timed), lootMult: this.settings.get('lootRate') }));
       if (firstClear) {
         if (!timed && RIFT.untimedRewardMult > 0) { rewards.xp = Math.round(rewards.xp / RIFT.untimedRewardMult); rewards.gold = Math.round(rewards.gold / RIFT.untimedRewardMult); }
         r.cleared = [...(r.cleared || []), tier].sort((a, c) => a - c);

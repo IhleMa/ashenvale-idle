@@ -135,15 +135,17 @@ export function riftHooks(affixIds) {
 
 // ---------------------------------------------------------------- run composition
 export function maxStartTier(p) { return Math.min(RIFT.maxTier, (p.rift?.best || 0) + 1); }
+// Rifts don't scale with the player: every tier has a fixed enemy level (rising without end, past the level cap)
+// and health/damage multipliers that grow a little every tier — easy at first, then an endless climb.
 export function riftScale(tier) {
   return { hp: RIFT.baseHp * Math.pow(RIFT.hpGrowth, tier - 1), damage: RIFT.baseDamage * Math.pow(RIFT.damageGrowth, tier - 1) };
 }
-export function riftLevel(heroLevel) { return Math.max(RIFT.minLevel, heroLevel); }
+export function riftLevel(tier) { return Math.max(1, Math.round((RIFT.startLevel ?? 5) + (tier - 1) * (RIFT.levelsPerTier ?? 1))); }
 
-// Picks a theme zone among the unlocked ones and builds the waves
-export function riftWaves(themeZoneId, heroLevel, rng, partySize = 4) {
+// Builds the waves of a tier, themed after one of the player's unlocked zones
+export function riftWaves(themeZoneId, tier, rng, partySize = 4) {
   const zone = ZONES[themeZoneId];
-  const lvl = riftLevel(heroLevel);
+  const lvl = riftLevel(tier);
   const C = RF.composition;
   const size = Math.max(C.minWaveSize, Math.min(C.maxWaveSize, partySize));
   const waves = [];
