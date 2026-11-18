@@ -22,7 +22,7 @@ import { BUILDINGS } from '../shared/data/town.js';
 import * as L from './playerLogic.js';
 import * as Q from './questLogic.js';
 import { masteryMap } from '../shared/bestiary.js';
-import { RIFT, riftWaves, riftScale, riftHooks, affixesFor, maxStartTier, riftThemes, riftRewardOptions, riftChest, firstClearCrystals } from '../shared/rifts.js';
+import { RIFT, riftWaves, riftScale, riftHooks, affixesFor, maxStartTier, riftThemes, riftRewardOptions, riftChest, firstClearCrystals, riftCleared, repeatXpGold } from '../shared/rifts.js';
 
 const { GameError } = L;
 const SAVE_NOW = new Set(['ah_list', 'ah_buy', 'ah_cancel', 'collect_mail', 'town_speedup', 'expedition_speedup']);
@@ -559,7 +559,19 @@ export class Game {
     r.runs = (r.runs || 0) + 1;
     if (won) {
       const rng = createRng(randomSeed());
+      // XP & gold: in full (as if timed) on the first clear of a tier, then only repeatXpGold of it; loot always
+      const firstClear = !riftCleared(p, tier);
       const rewards = this.applyElixirRewards(p, computeRewards(b.kills, rng, { ...riftRewardOptions(tier, timed), lootMult: this.settings.get('lootRate') }));
+      if (firstClear) {
+        if (!timed && RIFT.untimedRewardMult > 0) { rewards.xp = Math.round(rewards.xp / RIFT.untimedRewardMult); rewards.gold = Math.round(rewards.gold / RIFT.untimedRewardMult); }
+        r.cleared = [...(r.cleared || []), tier].sort((a, c) => a - c);
+        summary.firstClear = true;
+      } else {
+        const m = repeatXpGold();
+        rewards.xp = Math.round(rewards.xp * m);
+        rewards.gold = Math.round(rewards.gold * m);
+        summary.repeat = true;
+      }
       rewards.kills = b.kills.length;
       const h = L.hero(p);
       if (timed) {

@@ -1,5 +1,5 @@
 {
-  "_about": "Rift scaling, time limit, wave composition, weekly rotation and rewards. Affixes: rifts/affixes/.",
+  "_about": "Rift scaling, time limit, wave composition, weekly rotation and rewards. Affixes: rifts/affixes/. rewards.repeatXpGold: share of XP and gold paid when a player clears a tier again (0 = XP and gold only on the first clear of each tier; loot and chests always drop).",
   "config": {
     "minLevel": 8,
     "maxTier": 150,
@@ -29,6 +29,7 @@
       "maxItemLevelBonus": 10,
       "qualityBoostPerTier": 0.05
     },
-    "firstClearCrystals": { "base": 2, "perTiers": 5 }
+    "firstClearCrystals": { "base": 2, "perTiers": 5 },
+    "repeatXpGold": 0
   }
 }

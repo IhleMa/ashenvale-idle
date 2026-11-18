@@ -392,7 +392,7 @@ function showBanner(s) {
   el.className = `result-banner ${s.result}`;
   const riftLine = s.kind === 'rift' ? `<span>Rift tier ${s.tier}: ${Math.floor(s.time / 60)}:${String(s.time % 60).padStart(2, '0')} — ${s.timed ? '⏱ in time!' : s.result === 'victory' ? 'over time' : 'defeated'}${s.crystals ? ` · +${s.crystals} 💠` : ''}</span>` : '';
   el.innerHTML = s.result === 'victory'
-    ? `<b>${s.kind === 'rift' ? (s.timed ? 'Rift timed!' : 'Rift cleared') : 'Victory'}</b>${riftLine}<span>+${fmt(s.xp)} XP · +${fmt(s.gold)} gold${s.items?.length ? ` · ${s.items.length} loot` : ''}</span>`
+    ? `<b>${s.kind === 'rift' ? (s.timed ? 'Rift timed!' : 'Rift cleared') : 'Victory'}</b>${riftLine}<span>${s.repeat && !s.xp ? 'Tier already cleared — no XP or gold' : `+${fmt(s.xp)} XP · +${fmt(s.gold)} gold${s.firstClear ? ' (first clear)' : ''}`}${s.items?.length ? ` · ${s.items.length} loot` : ''}</span>`
     : `<b>Defeat</b>${riftLine}<span>Tip: click an enemy to see its abilities in the Bestiary, then adjust behaviour, gear or party.</span>`;
   setTimeout(() => { if (el.isConnected) el.hidden = true; }, s.kind === 'rift' ? 5000 : 2200);
 }

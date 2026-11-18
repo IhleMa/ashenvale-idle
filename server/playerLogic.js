@@ -39,7 +39,7 @@ export function newPlayer(account) {
     coopChars: [], mailbox: [],
     bestiary: {},       // enemyId -> { kills, seen }
     quests: null,       // daily/weekly quests (questLogic)
-    rift: { best: 0, bestTimes: {}, runs: 0, timed: 0, history: [], auto: 'off' },
+    rift: { best: 0, bestTimes: {}, runs: 0, timed: 0, history: [], auto: 'off', cleared: [] },
     lootFilter: { enabled: false, protectUpgrades: true, rules: [] },
     lootLog: [],        // recent items handled by the loot filter
     tutorial: null,     // new-player tutorial (tutorialLogic): { step, done, base }
@@ -52,7 +52,10 @@ export function migratePlayer(p) {
   for (const k of Object.keys(base)) if (p[k] === undefined) p[k] = base[k];
   p.stats = { ...base.stats, ...p.stats };
   p.settings = { ...base.settings, ...p.settings };
+  // tiers whose XP & gold were already paid out; players from before this rule count every tier up to their best
+  const hadCleared = Array.isArray(p.rift?.cleared);
   p.rift = { ...base.rift, ...p.rift };
+  if (!hadCleared) p.rift.cleared = Array.from({ length: p.rift.best || 0 }, (_, i) => i + 1);
   if (!p.lootFilter) { p.lootFilter = filterFromLegacy(p.settings); p.settings.autoSellBelow = null; }
   p.lootLog ||= [];
   // players from before the tutorial existed don't get it

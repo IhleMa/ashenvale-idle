@@ -6,7 +6,7 @@ import { enemyArt } from '../assets.js';
 import { openInspect } from '../inspect.js';
 import { ZONES } from '/shared/data/zones.js';
 import { ENEMIES } from '/shared/data/enemies.js';
-import { RIFT, AFFIXES, weeklyAffixes, weekEndsAt, affixesFor, maxStartTier, riftThemes, riftScale, riftChest, firstClearCrystals, riftRewardOptions } from '/shared/rifts.js';
+import { RIFT, AFFIXES, weeklyAffixes, weekEndsAt, affixesFor, maxStartTier, riftThemes, riftScale, riftChest, firstClearCrystals, riftRewardOptions, riftCleared, repeatXpGold } from '/shared/rifts.js';
 import { openBestiary } from './bestiary.js';
 
 const ui = { tier: null, theme: '' };
@@ -64,21 +64,23 @@ function html() {
       <p class="muted small">Fight through ${RIFT.trashWaves} waves and a Rift Guardian before the clock runs out (<b>${mmss(RIFT.timeLimit)}</b>). Health carries over between waves. Finish in time to unlock the next tier. Rifts use your active party at your hero's level.</p>
       ${locked ? `<p class="warn-text">🔒 Rifts open at hero level ${RIFT.minLevel}.</p>` : `
       <div class="rift-form">
-        <label>Tier <select data-rift-tier>${Array.from({ length: max }, (_, i) => max - i).map(t => `<option value="${t}" ${t === ui.tier ? 'selected' : ''}>Tier ${t}${r.bestTimes?.[t] ? ` · best ${mmss(r.bestTimes[t])}` : t > (r.best || 0) ? ' · new!' : ''}</option>`).join('')}</select></label>
+        <label>Tier <select data-rift-tier>${Array.from({ length: max }, (_, i) => max - i).map(t => `<option value="${t}" ${t === ui.tier ? 'selected' : ''}>Tier ${t}${r.bestTimes?.[t] ? ` · best ${mmss(r.bestTimes[t])}` : t > (r.best || 0) ? ' · new!' : ''}${riftCleared(state.player, t) ? '' : ' · XP & gold'}</option>`).join('')}</select></label>
         <label>Theme <select data-rift-theme><option value="">🎲 Random</option>${themes.map(z => `<option value="${z}" ${ui.theme === z ? 'selected' : ''}>${esc(ZONES[z].name)} — ${esc(ENEMIES[ZONES[z].boss].name)}</option>`).join('')}</select></label>
-        <label>After a run <select data-rift-auto>${[['off', 'Return to idle farming'], ['repeat', 'Repeat the same tier'], ['push', 'Push: next tier if timed']].map(([v, l]) => `<option value="${v}" ${r.auto === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
+        <label>After a run <select data-rift-auto>${[['off', 'Return to idle farming'], ['repeat', 'Repeat the same tier (loot only)'], ['push', 'Push: next tier if timed']].map(([v, l]) => `<option value="${v}" ${r.auto === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
       </div>
       <div class="rift-preview">
         <div class="stat-row"><span>Enemy health</span><b>×${sc.hp.toFixed(2)}</b></div>
         <div class="stat-row"><span>Enemy damage</span><b>×${sc.damage.toFixed(2)}</b></div>
-        <div class="stat-row"><span>XP & gold</span><b>×${opts.rewardMult.toFixed(2)}</b></div>
+        ${riftCleared(state.player, ui.tier)
+          ? `<div class="stat-row"><span>XP & gold</span><b class="muted" ${tipAttr('XP and gold are paid only the first time you clear a tier. Loot, the chest and crystals still work as usual.')}>${repeatXpGold() > 0 ? `×${(opts.rewardMult * repeatXpGold()).toFixed(2)} (already cleared)` : 'none — already cleared'}</b></div>`
+          : `<div class="stat-row"><span>XP & gold <span class="tag">first clear</span></span><b>×${opts.rewardMult.toFixed(2)}</b></div>`}
         <div class="stat-row"><span>Timed chest</span><b><span class="rarity-text rarity-${chest.minRarity}">${chest.count}× ${chest.minRarity}+</span></b></div>
         ${firstClear ? `<div class="stat-row"><span>First timed clear</span><b class="premium-text">+${firstClearCrystals(ui.tier)} 💠</b></div>` : ''}
         <div class="stat-row"><span>Affixes</span><b>${active.length ? active.map(a => `<span ${tipAttr(`<b>${esc(AFFIXES[a].name)}</b><br>${esc(AFFIXES[a].description)}`)}>${AFFIXES[a].icon} ${esc(AFFIXES[a].name)}</span>`).join(', ') : 'none'}</b></div>
       </div>
       <div class="row end gap">${running ? '<button class="btn danger" data-rift-stop>Abandon run</button>' : `<button class="btn primary" data-rift-start>Enter Rift (Tier ${ui.tier})</button>`}</div>`}
       <div data-rift-live>${liveHtml()}</div>
-      <p class="faint small">Not timed? You still get half the rewards, but no chest and no tier unlock. A wipe ends the run with no rewards.</p>
+      <p class="faint small">XP and gold are paid <b>once per tier</b>, the first time you clear it (in full, even over time); repeating a tier only gives loot. Not timed? No chest and no tier unlock. A wipe ends the run with no rewards.</p>
     </section>
 
     <section class="panel">

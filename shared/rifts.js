@@ -172,5 +172,8 @@ export function riftChest(tier) {
   const minRarity = C.rarityByTier.filter(([t]) => tier >= t).pop()?.[1] || C.rarityByTier[0][1];
   return { count, minRarity, itemLevelBonus: Math.min(C.maxItemLevelBonus, Math.floor(tier / C.itemLevelEveryTiers)), boost: 1 + tier * C.qualityBoostPerTier };
 }
+// XP and gold are paid in full the first time a player clears a tier; repeats pay rewards.repeatXpGold of it (default 0)
+export const riftCleared = (p, tier) => (p.rift?.cleared || []).includes(tier);
+export const repeatXpGold = () => Math.max(0, Number(RF.rewards.repeatXpGold) || 0);
 // crystals for the first timed clear of a tier
 export function firstClearCrystals(tier) { const F = RF.rewards.firstClearCrystals; return F.base + Math.floor(tier / F.perTiers); }
