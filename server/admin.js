@@ -9,7 +9,7 @@ import { generateUnique, generateSetItem, UNIQUES, SETS } from '../shared/data/l
 import { CONFIG } from '../shared/config.js';
 import { createRng, randomSeed } from '../shared/rng.js';
 import { SETTING_DEFS } from './settings.js';
-import { GameError, hero, sendMail } from './playerLogic.js';
+import { GameError, hero, sendMail, adminGrantXp, checkAchievements } from './playerLogic.js';
 import { setPassword } from './auth.js';
 import { ContentError } from './content-admin.js';
 
@@ -225,6 +225,23 @@ export function adminActions(game) {
       if (ses) { ses.stateDirty = true; game.toast(acc.id, `🎁 You received a gift: ${note} Check your mailbox in the Auction House.`, 'success'); }
       admins.audit(s.player.name, 'give', acc.username, [gold && `${gold} gold`, premium && `${premium} crystals`, ...Object.entries(materials).map(([k, v]) => `${v} ${k}`), item && item.name].filter(Boolean).join(', '));
       return { item };
+    },
+    admin_give_xp(s, d) {
+      const { acc, p } = loadById(d.id);
+      if (!p) fail('This account has no game data yet');
+      const res = adminGrantXp(p, { target: String(d.target || 'hero'), mode: String(d.mode || 'xp'), amount: d.amount });
+      const ses = game.sessions.get(acc.id);
+      const changed = res.filter(r => r.from !== r.to);
+      for (const a of checkAchievements(p)) if (ses) game.toast(acc.id, `Achievement unlocked: ${a.name} (+${a.reward.gold} gold)`, 'achievement');
+      store.savePlayerSoon(p);
+      if (ses) {
+        ses.stateDirty = true;
+        const what = d.mode === 'xp' ? `${Number(d.amount).toLocaleString('en')} XP` : changed.length ? changed.map(r => `${r.name} is now level ${r.to}`).join(', ') : 'experience';
+        game.toast(acc.id, `✨ The server admins gave you ${d.mode === 'xp' ? what : `levels: ${what}`}.`, 'success');
+      }
+      const detail = res.map(r => `${r.name} ${r.from}→${r.to}`).join(', ');
+      admins.audit(s.player.name, 'give_xp', acc.username, `${d.mode} ${d.amount} (${d.target}): ${detail}`);
+      return { results: res };
     },
     admin_reset_password(s, d) {
       const { acc } = loadById(d.id);

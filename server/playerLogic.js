@@ -1,6 +1,6 @@
 // Player state model and all validated player actions (pure game logic, no networking).
 import crypto from 'node:crypto';
-import { CONFIG, rarityIndex } from '../shared/config.js';
+import { CONFIG, rarityIndex, xpToNext } from '../shared/config.js';
 import { CLASSES, CLASS_IDS, TRAITS } from '../shared/data/classes.js';
 import { ABILITIES, abilityPriority } from '../shared/data/abilities.js';
 import { ZONES } from '../shared/data/zones.js';
@@ -546,6 +546,43 @@ export function ascendHero(p, { subclassId }) {
   p.stats.ascensions = (p.stats.ascensions || 0) + 1;
   p.stats.heroLevel = 1;
   return { subclass: sub.id, name: sub.name, mailed, switched: !!from };
+}
+
+// Admin: give experience to characters. mode "xp" adds raw XP (no hero/trait bonus, no ascension cap),
+// "levels" adds whole levels (keeping progress into the current level), "set" sets an exact level (also lower).
+// Level-ups behave like normal ones (skill points, auto-develop) but don't count for the balance statistics.
+export function adminGrantXp(p, { target = 'hero', mode = 'xp', amount = 0 } = {}) {
+  const chars = target === 'hero' ? [hero(p)]
+    : target === 'party' ? (p.parties[p.activeParty]?.members || []).map(id => p.characters[id])
+    : target === 'all' ? Object.values(p.characters)
+    : [p.characters[target]];
+  const list = chars.filter(Boolean);
+  if (!list.length) fail('No matching character');
+  amount = Math.floor(Number(amount) || 0);
+  if (mode === 'xp' && (amount < 1 || amount > 1e12)) fail('XP must be between 1 and 1,000,000,000,000');
+  if (mode === 'levels' && (amount < 1 || amount > CONFIG.levelCap)) fail(`Levels must be between 1 and ${CONFIG.levelCap}`);
+  if (mode === 'set' && (amount < 1 || amount > CONFIG.levelCap)) fail(`Level must be between 1 and ${CONFIG.levelCap}`);
+  if (!['xp', 'levels', 'set'].includes(mode)) fail('Unknown mode');
+  const now = Date.now();
+  const out = [];
+  for (const ch of list) {
+    const from = ch.level;
+    if (mode === 'xp') addXp(ch, amount);
+    else if (mode === 'levels') {
+      const frac = ch.level < CONFIG.levelCap ? ch.xp / xpToNext(ch.level) : 0;
+      for (let i = 0; i < amount && ch.level < CONFIG.levelCap; i++) ch.level++;
+      ch.xp = ch.level < CONFIG.levelCap ? Math.floor(frac * xpToNext(ch.level)) : 0;
+    } else { ch.level = amount; ch.xp = 0; }
+    if (ch.level !== from) {
+      ch.levelAt = now; // don't let the jump distort "time per level" statistics
+      if (ch.level > from && ((ch.isMain && p.settings.autoDevelopHero) || (!ch.isMain && p.settings.autoDevelopRecruits))) autoDevelop(ch);
+      else syncTree(ch); // a lower level drops skill points that are no longer covered
+    }
+    out.push({ name: ch.name, from, to: ch.level, isMain: !!ch.isMain });
+  }
+  const h = hero(p);
+  if (h) p.stats.heroLevel = h.level;
+  return out;
 }
 
 export function applyRewards(p, chars, rewards) {

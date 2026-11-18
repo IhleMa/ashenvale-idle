@@ -146,6 +146,18 @@ async function openPlayer(id, root) {
       <button class="btn primary small" data-give>Send gift by mail</button>
     </div>
 
+    ${pl ? `<h3>Experience</h3>
+    <div class="admin-give">
+      <label class="inline">For <select data-x-target>
+        <option value="hero">Hero</option><option value="party">Active party</option><option value="all">All characters</option>
+        ${pl.characters.map(c => `<option value="${esc(c.id)}">${c.isMain ? '★ ' : ''}${esc(c.name)} (Lv ${c.level})</option>`).join('')}
+      </select></label>
+      <label class="inline"><select data-x-mode><option value="xp">Add XP</option><option value="levels">Add levels</option><option value="set">Set level to</option></select></label>
+      <input type="number" data-x-amount min="1" value="1000" style="width:130px">
+      <button class="btn primary small" data-give-xp>Give</button>
+      <span class="muted small" data-x-hint>Raw XP, no hero/trait bonus. Applied immediately.</span>
+    </div>` : ''}
+
     <h3>Moderation</h3>
     <div class="row gap wrap">
       ${d.online ? '<button class="btn small" data-kick>Kick</button>' : ''}
@@ -153,6 +165,12 @@ async function openPlayer(id, root) {
       <button class="btn small" data-reset-pw>Reset password</button>
       <button class="btn small ghost danger" data-delete>Delete account…</button>
     </div>`, { wide: true });
+  m.el.querySelector('[data-x-mode]')?.addEventListener('change', e => {
+    const mode = e.target.value, inp = m.el.querySelector('[data-x-amount]');
+    m.el.querySelector('[data-x-hint]').textContent = { xp: 'Raw XP, no hero/trait bonus. Applied immediately.', levels: `Whole levels (max ${CONFIG.levelCap}); progress into the current level is kept.`, set: 'Exact level — can also lower it. Skill points over the new budget are refunded.' }[mode];
+    inp.max = mode === 'xp' ? '' : CONFIG.levelCap;
+    inp.value = mode === 'xp' ? 1000 : mode === 'levels' ? 1 : CONFIG.levelCap;
+  });
   m.el.addEventListener('click', async e => {
     const t = e.target.closest('button');
     if (!t) return;
@@ -168,6 +186,16 @@ async function openPlayer(id, root) {
         note: q('[data-g-note]').value || undefined,
       }), 'Gift sent.');
       if (r !== undefined) done();
+    }
+    if ('giveXp' in t.dataset) {
+      const mode = q('[data-x-mode]').value, amount = Number(q('[data-x-amount]').value) || 0;
+      if (mode === 'set' && !await confirmBox(`Set the level of ${q('[data-x-target]').selectedOptions[0].textContent} to ${amount}? Lowering a level removes skill points that are no longer covered.`, 'Set level')) return;
+      const r = await run(act('admin_give_xp', { id, target: q('[data-x-target]').value, mode, amount }));
+      if (r) {
+        toast(r.results.map(x => `${x.name}: Lv ${x.from} → ${x.to}`).join(' · ') || 'Done.', 'success', 5000);
+        m.close(); openPlayer(id, root); loadPlayers(root);
+      }
+      return;
     }
     if ('kick' in t.dataset) { await run(act('admin_kick', { id }), 'Player kicked.'); done(); }
     if ('unban' in t.dataset) { await run(act('admin_unban', { id }), 'Player unbanned.'); done(); }
