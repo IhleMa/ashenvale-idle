@@ -38,6 +38,8 @@ export function makeCharacterUnit(ch, { ownerId, ownerName, position, bonuses = 
       damageTakenPct: (role.damageTakenPct || 0) + (bonuses.damageTakenPct || 0) + s.damageTakenPct,
       buffDurationPct: role.buffDurationPct || 0,
       allStatsPct: bonuses.allStatsPct || 0,
+      dotDamagePct: s.dotDamagePct || 0,
+      dotDurationPct: s.dotDurationPct || 0,
     },
     actionTimer: 0.3 + position * 0.25,
     danger: 0,
@@ -158,6 +160,11 @@ function mod(u, key) {
     if (m) v += m * (STATUSES[s.id].maxStacks ? s.stacks : 1);
   }
   return v;
+}
+const srcMod = (b, uid, key) => { const u = b.units.find(x => x.uid === uid); return u ? mod(u, key) : 0; };
+// how many different debuffs this caster has on a unit (Drain Life, the warlock's AI conditions)
+export function ownDebuffKinds(src, tgt) {
+  return new Set(tgt.statuses.filter(s => s.src === src.uid && STATUSES[s.id]?.type === 'debuff').map(s => s.id)).size;
 }
 const effAttackSpeed = u => Math.max(0.2, u.stats.attackSpeed * (1 + mod(u, 'attackSpeedPct')));
 const effDefense = u => Math.max(0, u.stats.defense * (1 + mod(u, 'defensePct') + u.bonuses.allStatsPct));
@@ -280,7 +287,10 @@ function applyEffect(b, src, tgt, eff, abilityId) {
       for (let i = 0; i < hits && tgt.alive; i++) {
         let amount = effPower(src, eff.stat) * eff.power * rm;
         if (eff.executeBelow && hpPct(tgt) < eff.executeBelow * 100) amount *= eff.executeMult || 2;
-        dealDamage(b, src, tgt, amount, { school: eff.school, ability: abilityId, bonusCrit: eff.bonusCrit, proc: eff.proc });
+        const ownDebuffs = eff.lifestealPerDebuff ? ownDebuffKinds(src, tgt) : 0; // count before the hit can kill
+        const dealt = dealDamage(b, src, tgt, amount, { school: eff.school, ability: abilityId, bonusCrit: eff.bonusCrit, proc: eff.proc });
+        // life drain: heal the caster for part of the damage (more for each of its own different debuffs on the target)
+        if (dealt > 0 && (eff.lifesteal || eff.lifestealPerDebuff) && src.alive) healUnit(b, src, src, dealt * ((eff.lifesteal || 0) + (eff.lifestealPerDebuff || 0) * ownDebuffs), abilityId);
       }
       break;
     }
@@ -296,8 +306,10 @@ function applyEffect(b, src, tgt, eff, abilityId) {
       if (eff.chance && b.rng() > eff.chance) return;
       const value = eff.stat ? effPower(src, eff.stat) * (eff.power || 0) * rm : 0;
       let dur = eff.duration;
+      let v = value;
       if (STATUSES[eff.status]?.type === 'buff') dur *= 1 + (src.bonuses.buffDurationPct || 0);
-      applyStatus(b, src, target, eff.status, dur, value, eff.stacks || 1);
+      if (STATUSES[eff.status]?.tick === 'damage') { dur *= 1 + (src.bonuses.dotDurationPct || 0); v *= 1 + (src.bonuses.dotDamagePct || 0); }
+      for (let i = 0; i < (STATUSES[eff.status]?.stacking === 'independent' ? eff.stacks || 1 : 1); i++) applyStatus(b, src, target, eff.status, dur, v, eff.stacks || 1);
       break;
     }
     case 'shield': {
@@ -330,6 +342,23 @@ function applyEffect(b, src, tgt, eff, abilityId) {
       break;
     }
     case 'sacrifice': sacrificeMinions(b, src, eff, abilityId); break;
+    case 'consume_dots': consumeDots(b, src, tgt, eff, abilityId, rm); break;
+    case 'spread_dots': {
+      // copy the caster's own damage-over-time effects from the target onto every other enemy
+      if (!tgt.alive) return;
+      const mine = tgt.statuses.filter(s => s.src === src.uid && STATUSES[s.id]?.tick === 'damage');
+      for (const e of enemiesOf(b, src)) {
+        if (e === tgt) continue;
+        for (const s of mine) applyStatus(b, src, e, s.id, s.remaining, s.value, s.stacks || 1);
+      }
+      break;
+    }
+    case 'self_damage': {
+      // pay with health (never lethal)
+      const cost = Math.min(src.hp - 1, src.hp * (eff.pct || 0.1));
+      if (cost > 0) { src.hp -= cost; emit(b, { type: 'damage', src: src.uid, tgt: src.uid, amount: Math.round(cost), absorbed: 0, crit: false, ability: abilityId, school: 'magical' }); }
+      break;
+    }
     case 'extend': {
       if (tgt.alive && tgt.expiresAt != null) tgt.expiresAt = Math.min(tgt.expiresAt + (eff.seconds || 0), b.time + tgt.duration * 2);
       break;
@@ -349,6 +378,29 @@ function applyEffect(b, src, tgt, eff, abilityId) {
       break;
     }
   }
+}
+
+// ---------------------------------------------------------------- consuming damage over time (Reap)
+// Removes damage-over-time effects from the target and deals damage per second of duration they had left.
+//   own: only the caster's (default: every source) · refundPerStack: resource back per instance
+//   mark: a status that boosts the hit (markMult) and kills non-bosses below markExecute · splash: share to other enemies
+function consumeDots(b, src, tgt, eff, abilityId, rm) {
+  if (!tgt.alive) return;
+  const dots = tgt.statuses.filter(s => STATUSES[s.id]?.tick === 'damage' && (!eff.own || s.src === src.uid));
+  const seconds = dots.reduce((sum, s) => sum + Math.max(0, s.remaining) * (STATUSES[s.id].maxStacks ? s.stacks : 1), 0);
+  if (!dots.length) return;
+  tgt.statuses = tgt.statuses.filter(s => !dots.includes(s));
+  emit(b, { type: 'cleanse', src: src.uid, tgt: tgt.uid, status: dots[0].id });
+  let amount = effPower(src, eff.stat || 'magPower') * (eff.power || 0.15) * seconds * rm * (1 + (src.bonuses.dotDamagePct || 0));
+  const mark = eff.mark && tgt.statuses.find(s => s.id === eff.mark);
+  if (mark) {
+    amount *= eff.markMult || 2;
+    tgt.statuses = tgt.statuses.filter(s => s !== mark);
+    if (eff.markExecute && !tgt.boss && hpPct(tgt) < eff.markExecute * 100) amount = Math.max(amount, tgt.hp * 10);
+  }
+  const dealt = dealDamage(b, src, tgt, amount, { school: eff.school || 'magical', ability: abilityId, bonusCrit: eff.bonusCrit });
+  if (eff.splash) for (const e of enemiesOf(b, src)) if (e !== tgt) dealDamage(b, src, e, dealt * eff.splash, { school: eff.school || 'magical', ability: abilityId, noCrit: true });
+  if (eff.refundPerStack && src.resourceDef) src.resource = Math.min(src.resourceMax, src.resource + eff.refundPerStack * dots.length);
 }
 
 // ---------------------------------------------------------------- minions
@@ -390,7 +442,8 @@ function sacrificeMinions(b, src, eff, abilityId) {
 function applyStatus(b, src, tgt, id, duration, value, stacks) {
   const def = STATUSES[id];
   if (!def) return;
-  const existing = tgt.statuses.find(s => s.id === id);
+  // "independent" stacks: every application is its own instance with its own timer (no cap)
+  const existing = def.stacking === 'independent' ? null : tgt.statuses.find(s => s.id === id);
   if (existing) {
     existing.remaining = Math.max(existing.remaining, duration);
     existing.duration = Math.max(existing.duration, duration);
@@ -398,7 +451,7 @@ function applyStatus(b, src, tgt, id, duration, value, stacks) {
     if (def.absorb) existing.value = Math.max(existing.value, value); else existing.value = Math.max(existing.value, value);
     existing.src = src.uid;
   } else {
-    tgt.statuses.push({ id, remaining: duration, duration, value, stacks: def.maxStacks ? Math.min(def.maxStacks, stacks) : 1, src: src.uid, tickTimer: C.statusTickInterval });
+    tgt.statuses.push({ id, remaining: duration, duration, value, stacks: def.maxStacks ? Math.min(def.maxStacks, stacks) : 1, src: src.uid, tickTimer: def.tickOnApply ? 0.001 : C.statusTickInterval }); // tickOnApply: first tick right away
   }
   emit(b, { type: 'status', src: src.uid, tgt: tgt.uid, status: id });
 }
@@ -408,12 +461,14 @@ function tickStatuses(b, u) {
     s.remaining -= DT;
     const def = STATUSES[s.id];
     if (def.tick) {
-      s.tickTimer -= DT;
+      // the source's own "dotSpeedPct" buff (Dark Pact) makes its damage over time tick faster
+      const speed = def.tick === 'damage' ? 1 + Math.max(0, srcMod(b, s.src, 'dotSpeedPct')) : 1;
+      s.tickTimer -= DT * speed;
       if (s.tickTimer <= 0) {
         s.tickTimer += C.statusTickInterval;
         const src = b.units.find(x => x.uid === s.src) || u;
         const amount = s.value * (def.maxStacks ? s.stacks : 1);
-        if (def.tick === 'damage') dealDamage(b, src, u, amount, { school: def.school, ability: null, dot: s.id, ignoreArmor: def.ignoreArmor, noCrit: true });
+        if (def.tick === 'damage') dealDamage(b, src, u, amount, { school: def.school, ability: null, dot: s.id, ignoreArmor: def.ignoreArmor, noCrit: !def.canCrit });
         else if (def.tick === 'heal') healUnit(b, src, u, amount, null, s.id);
         if (!u.alive) return;
       }
@@ -444,7 +499,7 @@ function dealDamage(b, src, tgt, raw, { school, ability, bonusCrit = 0, dot = nu
     const red = Math.min(C.armorCap, def / (def + C.armorK + 12 * src.level));
     amount *= 1 - red;
   }
-  amount *= Math.max(0.1, 1 + mod(tgt, 'damageTakenPct') + tgt.bonuses.damageTakenPct);
+  amount *= Math.max(0.1, 1 + mod(tgt, 'damageTakenPct') + tgt.bonuses.damageTakenPct + (dot ? mod(tgt, 'dotTakenPct') : 0));
   amount *= 0.92 + b.rng() * 0.16;
   amount = Math.max(1, Math.round(amount));
 
@@ -548,6 +603,16 @@ function healUnit(b, src, tgt, raw, ability, hot = null, proc = null) {
 function kill(b, src, tgt) {
   tgt.alive = false;
   tgt.hp = 0;
+  // statuses that jump to another enemy when their carrier dies (Plague Swarm)
+  const jumpers = tgt.statuses.filter(s => STATUSES[s.id]?.jumpOnDeath && s.remaining > 0);
+  if (jumpers.length) {
+    const others = b.units.filter(x => x.side === tgt.side && x.alive && x !== tgt);
+    if (others.length) {
+      const to = others[Math.floor(b.rng() * others.length)];
+      const from = b.units.find(x => x.uid === jumpers[0].src) || src;
+      for (const s of jumpers) applyStatus(b, b.units.find(x => x.uid === s.src) || from, to, s.id, s.remaining, s.value, s.stacks || 1);
+    }
+  }
   tgt.statuses = [];
   emit(b, { type: 'death', src: src.uid, tgt: tgt.uid });
   if (tgt.stat && tgt.kind === 'character') tgt.stat.deaths++;
@@ -588,6 +653,19 @@ export function publicUnit(u) {
   };
 }
 
+// statuses as the client shows them: independent stacks (one entry per application) are merged into one
+// icon with a stack count and the longest time left
+function statusView(u) {
+  const out = [], seen = new Map();
+  for (const s of u.statuses) {
+    if (STATUSES[s.id]?.stacking !== 'independent') { out.push([s.id, Math.round(s.remaining * 10) / 10, s.stacks]); continue; }
+    const row = seen.get(s.id);
+    if (row) { row[1] = Math.max(row[1], Math.round(s.remaining * 10) / 10); row[2]++; }
+    else { const r = [s.id, Math.round(s.remaining * 10) / 10, 1]; seen.set(s.id, r); out.push(r); }
+  }
+  return out;
+}
+
 export function dynamicUnit(u) {
   const cds = {};
   for (const k of u.loadout) cds[k] = Math.round((u.cooldowns[k] || 0) * 10) / 10;
@@ -595,7 +673,7 @@ export function dynamicUnit(u) {
     uid: u.uid, hp: Math.round(u.hp), maxHp: u.maxHp, alive: u.alive,
     resource: Math.round(u.resource || 0),
     cd: cds,
-    st: u.statuses.map(s => [s.id, Math.round(s.remaining * 10) / 10, s.stacks]),
+    st: statusView(u),
     ...(u.expiresAt != null ? { exp: Math.round(u.expiresAt * 10) / 10 } : {}), // battle time when a minion fades
   };
 }

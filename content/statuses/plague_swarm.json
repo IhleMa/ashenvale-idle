@@ -1,0 +1,13 @@
+{
+  "name": "Plague Swarm",
+  "type": "debuff",
+  "tick": "damage",
+  "school": "magical",
+  "ignoreArmor": true,
+  "stacking": "independent",
+  "jumpOnDeath": true,
+  "description": "Takes damage every second; when the carrier dies, the swarm jumps to another enemy.",
+  "order": 405,
+  "canCrit": true,
+  "tickOnApply": true
+}

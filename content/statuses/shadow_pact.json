@@ -1,0 +1,9 @@
+{
+  "name": "Dark Pact",
+  "type": "buff",
+  "mods": {
+    "dotSpeedPct": 1.0
+  },
+  "description": "This Warlock's damage over time ticks twice as fast.",
+  "order": 404
+}

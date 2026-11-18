@@ -1,0 +1,46 @@
+{
+  "name": "Pact of Flesh",
+  "classId": "warlock",
+  "subclass": "hexblood",
+  "unlockLevel": 1,
+  "type": "heal",
+  "description": "Sacrifices 15% of the Warlock's current health to shield every ally for 150% magic power for 8 seconds.",
+  "cost": 20,
+  "cooldown": 25,
+  "target": "ally",
+  "area": true,
+  "effects": [
+    {
+      "kind": "self_damage",
+      "pct": 0.15,
+      "once": true
+    },
+    {
+      "kind": "shield",
+      "stat": "magPower",
+      "power": 1.5,
+      "duration": 8
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "allies_below_hp",
+        "value": 70,
+        "count": 2
+      },
+      {
+        "type": "self_hp_above",
+        "value": 40
+      }
+    ],
+    "target": {
+      "selector": "all_allies"
+    },
+    "targetConditions": []
+  },
+  "priority": 66,
+  "order": 945
+}

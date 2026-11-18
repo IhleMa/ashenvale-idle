@@ -1,0 +1,43 @@
+{
+  "name": "Death's Door",
+  "classId": "warlock",
+  "subclass": "soulreaper",
+  "unlockLevel": 1,
+  "type": "debuff",
+  "description": "Marks the target for 10 seconds: the next Reap or Soul Harvest on it deals double damage, and kills a non-boss below 25% health.",
+  "cost": 25,
+  "cooldown": 30,
+  "target": "enemy",
+  "effects": [
+    {
+      "kind": "status",
+      "status": "deaths_door",
+      "duration": 10
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "always"
+      }
+    ],
+    "target": {
+      "selector": "enemy_current"
+    },
+    "targetConditions": [
+      {
+        "type": "target_own_debuffs",
+        "cmp": ">=",
+        "value": 2
+      },
+      {
+        "type": "target_missing_status",
+        "status": "deaths_door"
+      }
+    ]
+  },
+  "priority": 68,
+  "order": 943
+}

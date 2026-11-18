@@ -1,0 +1,34 @@
+{
+  "name": "Agony",
+  "classId": "warlock",
+  "unlockLevel": 6,
+  "type": "debuff",
+  "description": "A stacking curse: each stack deals 15% magic power per second for 12 seconds and makes the target take 5% more damage from all damage over time.",
+  "cost": 14,
+  "cooldown": 4,
+  "target": "enemy",
+  "effects": [
+    {
+      "kind": "status",
+      "status": "agony",
+      "duration": 12,
+      "stat": "magPower",
+      "power": 0.15
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "always"
+      }
+    ],
+    "target": {
+      "selector": "enemy_current"
+    },
+    "targetConditions": []
+  },
+  "priority": 72,
+  "order": 30
+}

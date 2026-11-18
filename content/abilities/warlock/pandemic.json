@@ -1,0 +1,39 @@
+{
+  "name": "Pandemic",
+  "classId": "warlock",
+  "subclass": "plaguelord",
+  "unlockLevel": 1,
+  "type": "debuff",
+  "description": "Copies all of the Warlock's damage over time from its target onto every other enemy.",
+  "cost": 35,
+  "cooldown": 25,
+  "target": "enemy",
+  "effects": [
+    {
+      "kind": "spread_dots"
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "enemies_alive",
+        "cmp": ">=",
+        "value": 3
+      }
+    ],
+    "target": {
+      "selector": "enemy_current"
+    },
+    "targetConditions": [
+      {
+        "type": "target_own_debuffs",
+        "cmp": ">=",
+        "value": 2
+      }
+    ]
+  },
+  "priority": 60,
+  "order": 940
+}

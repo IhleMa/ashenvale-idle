@@ -1,0 +1,100 @@
+{
+  "name": "Warlock",
+  "role": "damage",
+  "color": "#4e0b5e",
+  "glyph": "☾",
+  "description": "Weaves curses and damage-over-time that stack on its enemies, then consumes them all in one devastating Reap.",
+  "strengths": [
+    "Damage keeps growing the longer a fight lasts",
+    "Shuts down enemy healing",
+    "Pressure on many enemies with curses"
+  ],
+  "weaknesses": [
+    "Slow start",
+    "Fragile",
+    "Weak in short fights against many small enemies"
+  ],
+  "resource": {
+    "id": "malice",
+    "name": "Malice",
+    "color": "#9c3bd6",
+    "max": 100,
+    "start": 70,
+    "regen": 6
+  },
+  "baseAttributes": {
+    "str": 4,
+    "int": 15,
+    "dex": 7,
+    "vit": 9
+  },
+  "growth": {
+    "str": 0.4,
+    "int": 3.0,
+    "dex": 1.0,
+    "vit": 1.8
+  },
+  "scaling": {
+    "hp": {
+      "vit": 10
+    },
+    "physPower": {
+      "str": 1,
+      "dex": 0.3
+    },
+    "magPower": {
+      "int": 2.4
+    },
+    "healPower": {
+      "int": 0.6
+    },
+    "defense": {
+      "str": 0.2,
+      "vit": 0.35
+    },
+    "critChance": {
+      "dex": 0.0008,
+      "int": 0.0002
+    },
+    "attackSpeed": {
+      "dex": 0.0012
+    }
+  },
+  "basicAttack": {
+    "name": "Shadow Bolt",
+    "stat": "magPower",
+    "power": 0.8,
+    "school": "magical"
+  },
+  "threatMult": 0.7,
+  "tiers": [
+    {
+      "level": 1,
+      "title": "Hexer"
+    },
+    {
+      "level": 10,
+      "title": "Warlock",
+      "bonus": {
+        "intPct": 0.05
+      }
+    },
+    {
+      "level": 25,
+      "title": "Shadowcaller",
+      "bonus": {
+        "intPct": 0.05,
+        "vitPct": 0.04
+      }
+    },
+    {
+      "level": 40,
+      "title": "Lord of Ruin",
+      "mainOnly": true,
+      "bonus": {
+        "allPct": 0.06
+      }
+    }
+  ],
+  "order": 70
+}

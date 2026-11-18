@@ -13,6 +13,7 @@ See [CONTENT.md](CONTENT.md) for how the files work.
 | [`cleric`](content/classes/cleric.json) | Cleric | healer | Mana |
 | [`ranger`](content/classes/ranger.json) | Ranger | damage | Focus |
 | [`summoner`](content/classes/summoner.json) | Summoner | damage | Soul Energy |
+| [`warlock`](content/classes/warlock.json) | Warlock | damage | Malice |
 
 Roles (config.json → roles): `tank`, `healer`, `damage`, `support`
 
@@ -20,18 +21,25 @@ Roles (config.json → roles): `tank`, `healer`, `damage`, `support`
 
 | id | name | class | type | cooldown | target |
 | --- | --- | --- | --- | --- | --- |
+| [`corruption`](content/abilities/warlock/corruption.json) | Corruption | warlock | debuff | 1.5 | enemy |
 | [`heroic_strike`](content/abilities/warrior/heroic_strike.json) | Heroic Strike | warrior | damage | 3 | enemy |
 | [`raise_skeleton`](content/abilities/summoner/raise_skeleton.json) | Raise Skeleton | summoner | summon | 5 | self |
+| [`blight`](content/abilities/warlock/blight.json) | Blight | warlock | debuff | 8 | enemy |
 | [`summon_imp`](content/abilities/summoner/summon_imp.json) | Summon Imps | summoner | summon | 10 | self |
 | [`taunt`](content/abilities/warrior/taunt.json) | Taunt | warrior | control | 10 | self |
+| [`agony`](content/abilities/warlock/agony.json) | Agony | warlock | debuff | 4 | enemy |
 | [`bone_golem`](content/abilities/summoner/bone_golem.json) | Bone Golem | summoner | summon | 40 | self |
 | [`shield_wall`](content/abilities/warrior/shield_wall.json) | Shield Wall | warrior | buff | 25 | self |
 | [`cleave`](content/abilities/warrior/cleave.json) | Cleave | warrior | damage | 6 | enemy |
+| [`reap`](content/abilities/warlock/reap.json) | Reap | warlock | damage | 12 | enemy |
 | [`spirit_wisp`](content/abilities/summoner/spirit_wisp.json) | Spirit Wisp | summoner | summon | 25 | self |
+| [`curse_of_ruin`](content/abilities/warlock/curse_of_ruin.json) | Curse of Ruin | warlock | debuff | 10 | enemy |
 | [`dark_pact`](content/abilities/summoner/dark_pact.json) | Dark Pact | summoner | buff | 20 | ally |
 | [`shield_bash`](content/abilities/warrior/shield_bash.json) | Shield Bash | warrior | control | 14 | enemy |
 | [`battle_cry`](content/abilities/warrior/battle_cry.json) | Battle Cry | warrior | buff | 30 | ally |
 | [`corpse_explosion`](content/abilities/summoner/corpse_explosion.json) | Corpse Explosion | summoner | damage | 12 | self |
+| [`drain_life`](content/abilities/warlock/drain_life.json) | Drain Life | warlock | damage | 4 | enemy |
+| [`pact_of_shadows`](content/abilities/warlock/pact_of_shadows.json) | Dark Pact | warlock | buff | 40 | self |
 | [`soul_link`](content/abilities/summoner/soul_link.json) | Soul Link | summoner | buff | 25 | ally |
 | [`sunder_armor`](content/abilities/warrior/sunder_armor.json) | Sunder Armor | warrior | debuff | 8 | enemy |
 | [`fireball`](content/abilities/mage/fireball.json) | Fireball | mage | damage | 3 | enemy |
@@ -122,6 +130,12 @@ Roles (config.json → roles): `tank`, `healer`, `damage`, `support`
 | [`demonic_empowerment`](content/abilities/summoner/demonic_empowerment.json) | Demonic Empowerment | summoner | buff | 22 | ally |
 | [`ancestral_spirits`](content/abilities/summoner/ancestral_spirits.json) | Ancestral Spirits | summoner | summon | 24 | self |
 | [`spirit_ward`](content/abilities/summoner/spirit_ward.json) | Spirit Ward | summoner | buff | 25 | ally |
+| [`pandemic`](content/abilities/warlock/pandemic.json) | Pandemic | warlock | debuff | 25 | enemy |
+| [`plague_swarm`](content/abilities/warlock/plague_swarm.json) | Plague Swarm | warlock | debuff | 12 | enemy |
+| [`soul_harvest`](content/abilities/warlock/soul_harvest.json) | Soul Harvest | warlock | damage | 15 | enemy |
+| [`deaths_door`](content/abilities/warlock/deaths_door.json) | Death's Door | warlock | debuff | 30 | enemy |
+| [`blood_leech`](content/abilities/warlock/blood_leech.json) | Blood Leech | warlock | damage | 10 | enemy |
+| [`pact_of_flesh`](content/abilities/warlock/pact_of_flesh.json) | Pact of Flesh | warlock | heal | 25 | ally |
 
 ### Effect kinds (abilities, boss phases)
 
@@ -174,6 +188,7 @@ Target conditions (`targetConditions[].type`):
 | `target_hp_above` | Target health above |
 | `target_role` | Target has role |
 | `target_is_type` | Target is enemy type |
+| `target_own_debuffs` | Number of my different debuffs on the target |
 | `target_is_minion` | Target is a minion |
 
 Target selectors (`target.selector`):
@@ -237,12 +252,19 @@ Target selectors (`target.selector`):
 | [`judged`](content/statuses/judged.json) | Judged | debuff | Takes 20% more damage and deals 10% less. |
 | [`chilled`](content/statuses/chilled.json) | Chilled | debuff | Attacks 35% slower. |
 | [`nature_blessing`](content/statuses/nature_blessing.json) | Nature's Blessing | buff | Heals every second. |
+| [`corruption`](content/statuses/corruption.json) | Corruption | debuff | Takes shadow damage every second. Every application is its own stack with its own timer. |
+| [`blight`](content/statuses/blight.json) | Blight | debuff | Takes shadow damage every second and receives 40% less healing. |
+| [`agony`](content/statuses/agony.json) | Agony | debuff | Takes shadow damage every second; each stack makes all damage over time hurt 5% more. |
+| [`ruin`](content/statuses/ruin.json) | Ruin | debuff | Cursed: takes shadow damage every second. |
+| [`shadow_pact`](content/statuses/shadow_pact.json) | Dark Pact | buff | This Warlock's damage over time ticks twice as fast. |
+| [`plague_swarm`](content/statuses/plague_swarm.json) | Plague Swarm | debuff | Takes damage every second; when the carrier dies, the swarm jumps to another enemy. |
+| [`deaths_door`](content/statuses/deaths_door.json) | Death's Door | debuff | Marked: the next Reap deals double damage, and kills a non-boss below 25% health. |
 
 ## Stats
 
 Item / affix / gem stats: `str`, `int`, `dex`, `vit`, `hp`, `defense`, `physPower`, `magPower`, `healPower`, `critChance`, `critDamage`, `attackSpeed`
 
-Skill tree & set bonus stats: `str`, `int`, `dex`, `vit`, `strPct`, `intPct`, `dexPct`, `vitPct`, `allPct`, `physPowerPct`, `magPowerPct`, `healPowerPct`, `defensePct`, `hpPct`, `critChance`, `critDamage`, `attackSpeed`, `damagePct`, `healingPct`, `damageTakenPct`, `minionDamagePct`, `minionHpPct`, `minionDurationPct`, `minionMax`, `rank` ({ abilityId: +ranks })
+Skill tree & set bonus stats: `str`, `int`, `dex`, `vit`, `strPct`, `intPct`, `dexPct`, `vitPct`, `allPct`, `physPowerPct`, `magPowerPct`, `healPowerPct`, `defensePct`, `hpPct`, `critChance`, `critDamage`, `attackSpeed`, `damagePct`, `healingPct`, `damageTakenPct`, `minionDamagePct`, `minionHpPct`, `minionDurationPct`, `minionMax`, `dotDamagePct`, `dotDurationPct`, `rank` ({ abilityId: +ranks })
 
 ## Item slots and bases
 

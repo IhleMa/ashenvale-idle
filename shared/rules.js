@@ -63,6 +63,7 @@ export const TARGET_CONDITIONS = {
   target_hp_above:       { label: 'Target health above', params: [P.pct('value', 50)], test: (c, t) => hpPct(t) > c.value },
   target_role:           { label: 'Target has role', params: [P.role()], test: (c, t) => t.role === c.role },
   target_is_type:        { label: 'Target is enemy type', params: [P.tag()], test: (c, t) => t.tags?.includes(c.param) || t.defId === c.param },
+  target_own_debuffs:    { label: 'Number of my different debuffs on the target', params: [P.cmp(), P.count('value', 3)], test: (c, t, b, u) => cmp(new Set(t.statuses.filter(s => s.src === u?.uid && STATUSES[s.id]?.type === 'debuff').map(s => s.id)).size, c.cmp, c.value), format: c => `my different debuffs on target: ${c.cmp === '<=' ? 'at most' : c.cmp === '==' ? 'exactly' : 'at least'} ${c.value}` },
   target_is_minion:      { label: 'Target is a minion', params: [P.minion()], test: (c, t) => t.kind === 'minion' && (!c.minion || t.defId === c.minion) },
 };
 

@@ -1,0 +1,15 @@
+{
+  "name": "Agony",
+  "type": "debuff",
+  "tick": "damage",
+  "school": "magical",
+  "ignoreArmor": true,
+  "stacking": "independent",
+  "mods": {
+    "dotTakenPct": 0.05
+  },
+  "description": "Takes shadow damage every second; each stack makes all damage over time hurt 5% more.",
+  "order": 402,
+  "canCrit": true,
+  "tickOnApply": true
+}

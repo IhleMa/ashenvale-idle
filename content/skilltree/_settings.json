@@ -33,6 +33,8 @@
     "minionDamagePct": ["minion damage", "pct"],
     "minionHpPct": ["minion health", "pct"],
     "minionDurationPct": ["minion duration", "pct"],
-    "minionMax": ["maximum minions of each kind", "flat"]
+    "minionMax": ["maximum minions of each kind", "flat"],
+    "dotDamagePct": ["damage over time dealt", "pct"],
+    "dotDurationPct": ["damage-over-time duration", "pct"]
   }
 }

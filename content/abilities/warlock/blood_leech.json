@@ -1,0 +1,38 @@
+{
+  "name": "Blood Leech",
+  "classId": "warlock",
+  "subclass": "hexblood",
+  "unlockLevel": 1,
+  "type": "damage",
+  "description": "90% magic damage to every enemy; heals the Warlock for 30% of the damage dealt.",
+  "cost": 30,
+  "cooldown": 10,
+  "target": "enemy",
+  "area": true,
+  "effects": [
+    {
+      "kind": "damage",
+      "stat": "magPower",
+      "power": 0.9,
+      "school": "magical",
+      "lifesteal": 0.3
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "enemies_alive",
+        "cmp": ">=",
+        "value": 2
+      }
+    ],
+    "target": {
+      "selector": "all_enemies"
+    },
+    "targetConditions": []
+  },
+  "priority": 52,
+  "order": 944
+}

@@ -1,0 +1,14 @@
+{
+  "name": "Blight",
+  "type": "debuff",
+  "tick": "damage",
+  "school": "magical",
+  "ignoreArmor": true,
+  "mods": {
+    "healingTakenPct": -0.4
+  },
+  "description": "Takes shadow damage every second and receives 40% less healing.",
+  "order": 401,
+  "canCrit": true,
+  "tickOnApply": true
+}

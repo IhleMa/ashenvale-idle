@@ -6,7 +6,7 @@ import { MUTATOR_CHANGES } from '../shared/mutators.js';
 import { CONDITIONS, TARGET_CONDITIONS, SELECTORS } from '../shared/rules.js';
 import { VIEW_IDS as TUTORIAL_VIEWS, METRIC_NAMES as TUTORIAL_METRICS } from '../shared/tutorialDefs.js';
 
-const EFFECT_KINDS = ['damage', 'heal', 'status', 'shield', 'taunt', 'cleanse', 'resource', 'summon', 'sacrifice', 'extend'];
+const EFFECT_KINDS = ['damage', 'heal', 'status', 'shield', 'taunt', 'cleanse', 'resource', 'summon', 'sacrifice', 'extend', 'consume_dots', 'spread_dots', 'self_damage'];
 const PROC_EFFECT_KINDS = [...EFFECT_KINDS, 'reflect', 'healPct', 'shieldPct', 'cooldowns'];
 const PROC_TRIGGERS = ['hit', 'crit', 'struck', 'heal', 'kill', 'cast', 'lowHp'];
 const PROC_TARGETS = ['self', 'target', 'source', 'randomEnemy', 'lowestAlly', 'allAllies'];
@@ -74,6 +74,8 @@ export function validateContent(C) {
     str(`${w}.name`, s.name);
     if (!['buff', 'debuff'].includes(s.type)) err(`${w}.type`, 'must be "buff" or "debuff"');
     if (s.tick && !['damage', 'heal'].includes(s.tick)) err(`${w}.tick`, 'must be "damage" or "heal"');
+    if (s.stacking && s.stacking !== 'independent') err(`${w}.stacking`, 'must be "independent" (each application its own instance and timer) or left out');
+    if (s.stacking && s.maxStacks) err(`${w}.maxStacks`, 'independent stacks have no cap — leave maxStacks out');
     if (s.tick === 'damage' && !['physical', 'magical'].includes(s.school)) err(`${w}.school`, 'damage-over-time needs "physical" or "magical"');
   }
 
@@ -91,6 +93,14 @@ export function validateContent(C) {
     }
     if (e.kind === 'sacrifice') { num(`${w}.power`, e.power, { min: 0 }); num(`${w}.count`, e.count, { min: 1, max: 10, optional: true }); if (e.school && !['physical', 'magical'].includes(e.school)) err(`${w}.school`, 'must be "physical" or "magical"'); }
     if (e.kind === 'extend') num(`${w}.seconds`, e.seconds, { min: 0 });
+    if (e.kind === 'damage') { num(`${w}.lifesteal`, e.lifesteal, { min: 0, max: 5, optional: true }); num(`${w}.lifestealPerDebuff`, e.lifestealPerDebuff, { min: 0, max: 2, optional: true }); }
+    if (e.kind === 'consume_dots') {
+      num(`${w}.power`, e.power, { min: 0 });
+      if (e.stat && !POWER_STATS.includes(e.stat)) err(`${w}.stat`, `must be one of ${POWER_STATS.join(', ')}`);
+      if (e.mark) ref(`${w}.mark`, e.mark, statuses, 'status');
+      for (const k of ['markMult', 'markExecute', 'splash', 'refundPerStack']) num(`${w}.${k}`, e[k], { min: 0, optional: true });
+    }
+    if (e.kind === 'self_damage') num(`${w}.pct`, e.pct, { min: 0, max: 0.9 });
   };
   const checkRule = (w, r) => {
     if (!r) return;
@@ -253,6 +263,7 @@ export function validateContent(C) {
         if (!m.changes || typeof m.changes !== 'object' || !Object.keys(m.changes).length) err(`${mw}.changes`, 'needs at least one change');
         for (const [k, v] of Object.entries(m.changes || {})) {
           if (!MUTATOR_CHANGES.includes(k)) { err(`${mw}.changes.${k}`, `unknown change (use ${MUTATOR_CHANGES.join(', ')})`); continue; }
+          if (k === 'set') { if (!v || typeof v !== 'object' || Array.isArray(v)) err(`${mw}.changes.set`, 'must be { "<effect kind>": { field: value } }'); else for (const kind of Object.keys(v)) if (!EFFECT_KINDS.includes(kind)) err(`${mw}.changes.set.${kind}`, 'unknown effect kind'); continue; }
           if (k === 'effects') { if (!Array.isArray(v)) err(`${mw}.changes.effects`, 'must be a list of effects'); else v.forEach((e, j) => checkEffect(`${mw}.changes.effects[${j}]`, e)); }
           else num(`${mw}.changes.${k}`, v);
         }

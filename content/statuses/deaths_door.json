@@ -1,0 +1,6 @@
+{
+  "name": "Death's Door",
+  "type": "debuff",
+  "description": "Marked: the next Reap deals double damage, and kills a non-boss below 25% health.",
+  "order": 406
+}

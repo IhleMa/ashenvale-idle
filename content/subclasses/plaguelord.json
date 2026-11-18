@@ -1,0 +1,77 @@
+{
+  "name": "Plaguelord",
+  "glyph": "☣",
+  "color": "#6fae3a",
+  "description": "Spreads its curses across every enemy at once until whole packs rot together.",
+  "title": "Plague Incarnate",
+  "bonus": {
+    "dotDamagePct": 0.1
+  },
+  "branches": [
+    {
+      "name": "Plaguelord",
+      "attrs": [
+        "int",
+        "dex"
+      ],
+      "abilities": {
+        "2": "plague_swarm",
+        "5": "pandemic"
+      },
+      "notables": {
+        "4": {
+          "name": "Virulence",
+          "stats": {
+            "dotDurationPct": 0.12
+          }
+        },
+        "8": {
+          "name": "Epidemic",
+          "stats": {
+            "damagePct": 0.08
+          }
+        }
+      },
+      "mutators": {
+        "3": {
+          "name": "Spreading Ruin",
+          "ability": "curse_of_ruin",
+          "description": "Curse of Ruin also adds a Corruption stack to every enemy.",
+          "changes": {
+            "effects": [
+              {
+                "kind": "status",
+                "status": "corruption",
+                "duration": 8,
+                "stat": "magPower",
+                "power": 0.12
+              }
+            ]
+          }
+        },
+        "6": {
+          "name": "Lasting Corruption",
+          "ability": "corruption",
+          "description": "Corruption stacks last 3 seconds longer.",
+          "changes": {
+            "duration": 3
+          }
+        },
+        "7": {
+          "name": "Plague Reaping",
+          "ability": "reap",
+          "description": "Reap also hits every other enemy for 8% of its damage.",
+          "changes": {
+            "set": {
+              "consume_dots": {
+                "splash": 0.08
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "order": 1,
+  "classId": "warlock"
+}

@@ -1,0 +1,37 @@
+{
+  "name": "Curse of Ruin",
+  "classId": "warlock",
+  "unlockLevel": 12,
+  "type": "debuff",
+  "description": "Curses every enemy: 30% magic power per second for 10 seconds.",
+  "cost": 30,
+  "cooldown": 10,
+  "target": "enemy",
+  "area": true,
+  "effects": [
+    {
+      "kind": "status",
+      "status": "ruin",
+      "duration": 10,
+      "stat": "magPower",
+      "power": 0.3
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "enemies_alive",
+        "cmp": ">=",
+        "value": 3
+      }
+    ],
+    "target": {
+      "selector": "all_enemies"
+    },
+    "targetConditions": []
+  },
+  "priority": 50,
+  "order": 50
+}

@@ -1,0 +1,41 @@
+{
+  "name": "Dark Pact",
+  "classId": "warlock",
+  "unlockLevel": 18,
+  "type": "buff",
+  "description": "Costs 10% of current health: for 8 seconds all the Warlock's damage over time ticks twice as fast.",
+  "cost": 20,
+  "cooldown": 40,
+  "target": "self",
+  "effects": [
+    {
+      "kind": "self_damage",
+      "pct": 0.1
+    },
+    {
+      "kind": "status",
+      "status": "shadow_pact",
+      "duration": 8
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "self_hp_above",
+        "value": 50
+      },
+      {
+        "type": "combat_time_above",
+        "value": 6
+      }
+    ],
+    "target": {
+      "selector": "self"
+    },
+    "targetConditions": []
+  },
+  "priority": 40,
+  "order": 70
+}

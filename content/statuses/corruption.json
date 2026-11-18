@@ -1,0 +1,12 @@
+{
+  "name": "Corruption",
+  "type": "debuff",
+  "tick": "damage",
+  "school": "magical",
+  "ignoreArmor": true,
+  "stacking": "independent",
+  "description": "Takes shadow damage every second. Every application is its own stack with its own timer.",
+  "order": 400,
+  "canCrit": true,
+  "tickOnApply": true
+}

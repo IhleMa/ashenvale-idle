@@ -1,0 +1,117 @@
+{
+  "start": "corruption",
+  "branches": [
+    {
+      "name": "Affliction",
+      "attrs": [
+        "int",
+        "dex"
+      ],
+      "abilities": {
+        "2": "agony",
+        "5": "blight"
+      },
+      "notables": {
+        "4": {
+          "name": "Festering",
+          "stats": {
+            "dotDamagePct": 0.12
+          }
+        },
+        "7": {
+          "name": "Lingering Torment",
+          "stats": {
+            "dotDurationPct": 0.15
+          }
+        },
+        "8": {
+          "name": "Slow Rot",
+          "stats": {
+            "dotDurationPct": 0.4,
+            "dotDamagePct": -0.2
+          }
+        }
+      }
+    },
+    {
+      "name": "Ruin",
+      "attrs": [
+        "int",
+        "vit"
+      ],
+      "abilities": {
+        "3": "curse_of_ruin",
+        "6": "reap"
+      },
+      "notables": {
+        "4": {
+          "name": "Ruinous",
+          "stats": {
+            "magPowerPct": 0.08
+          }
+        },
+        "5": {
+          "name": "Harvester",
+          "stats": {
+            "critChance": 0.06
+          }
+        },
+        "8": {
+          "name": "Glass Hex",
+          "stats": {
+            "dotDamagePct": 0.2,
+            "hpPct": -0.15
+          }
+        }
+      }
+    },
+    {
+      "name": "Shadow",
+      "attrs": [
+        "vit",
+        "int"
+      ],
+      "abilities": {
+        "1": "drain_life",
+        "7": "pact_of_shadows"
+      },
+      "notables": {
+        "4": {
+          "name": "Dark Vitality",
+          "stats": {
+            "hpPct": 0.1
+          }
+        },
+        "8": {
+          "name": "Siphon",
+          "stats": {
+            "healingPct": 0.15
+          }
+        }
+      }
+    },
+    {
+      "name": "Malice",
+      "attrs": [
+        "int",
+        "dex"
+      ],
+      "abilities": {},
+      "notables": {
+        "4": {
+          "name": "Quickened Hexes",
+          "stats": {
+            "attackSpeed": 0.06
+          }
+        },
+        "8": {
+          "name": "Warded Soul",
+          "stats": {
+            "defensePct": 0.12
+          }
+        }
+      }
+    }
+  ],
+  "order": 70
+}

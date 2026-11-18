@@ -1,0 +1,11 @@
+{
+  "name": "Ruin",
+  "type": "debuff",
+  "tick": "damage",
+  "school": "magical",
+  "ignoreArmor": true,
+  "description": "Cursed: takes shadow damage every second.",
+  "order": 403,
+  "canCrit": true,
+  "tickOnApply": true
+}

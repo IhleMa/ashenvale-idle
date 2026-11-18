@@ -80,6 +80,9 @@ export function computeStats(ch) {
     minionHpPct: bonus.minionHpPct || 0,
     minionDurationPct: bonus.minionDurationPct || 0,
     minionMax: bonus.minionMax || 0,
+    // damage-over-time bonuses (warlock skill tree)
+    dotDamagePct: bonus.dotDamagePct || 0,
+    dotDurationPct: bonus.dotDurationPct || 0,
   };
   return s;
 }

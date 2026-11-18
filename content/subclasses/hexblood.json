@@ -1,0 +1,81 @@
+{
+  "name": "Hexblood",
+  "glyph": "❦",
+  "color": "#a3202f",
+  "description": "Lives off its curses: drains life from every enemy and shields the party with its own blood.",
+  "title": "Blood Sovereign",
+  "bonus": {
+    "hpPct": 0.1,
+    "healingPct": 0.1
+  },
+  "branches": [
+    {
+      "name": "Hexblood",
+      "attrs": [
+        "vit",
+        "int"
+      ],
+      "abilities": {
+        "2": "blood_leech",
+        "5": "pact_of_flesh"
+      },
+      "notables": {
+        "4": {
+          "name": "Sanguine Ward",
+          "stats": {
+            "defensePct": 0.12
+          }
+        },
+        "8": {
+          "name": "Crimson Thirst",
+          "stats": {
+            "healingPct": 0.12
+          }
+        }
+      },
+      "mutators": {
+        "3": {
+          "name": "Deep Drain",
+          "ability": "drain_life",
+          "description": "Drain Life hits and heals 40% harder.",
+          "changes": {
+            "power": 0.4
+          }
+        },
+        "6": {
+          "name": "Blood Pact",
+          "ability": "pact_of_shadows",
+          "description": "Dark Pact lasts 4 seconds longer and also gives Regeneration.",
+          "changes": {
+            "duration": 4,
+            "effects": [
+              {
+                "kind": "status",
+                "status": "regeneration",
+                "duration": 12,
+                "stat": "magPower",
+                "power": 0.2
+              }
+            ]
+          }
+        },
+        "7": {
+          "name": "Withering Curse",
+          "ability": "curse_of_ruin",
+          "description": "Curse of Ruin also Weakens every enemy for 5 seconds.",
+          "changes": {
+            "effects": [
+              {
+                "kind": "status",
+                "status": "weakened",
+                "duration": 5
+              }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "order": 3,
+  "classId": "warlock"
+}

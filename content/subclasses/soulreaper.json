@@ -1,0 +1,65 @@
+{
+  "name": "Soulreaper",
+  "glyph": "☠",
+  "color": "#d8d0c0",
+  "description": "Builds its curses only to tear them out in enormous finishing blows.",
+  "title": "Reaper of Souls",
+  "bonus": {
+    "critDamage": 0.2
+  },
+  "branches": [
+    {
+      "name": "Soulreaper",
+      "attrs": [
+        "int",
+        "dex"
+      ],
+      "abilities": {
+        "2": "soul_harvest",
+        "5": "deaths_door"
+      },
+      "notables": {
+        "4": {
+          "name": "Grim Focus",
+          "stats": {
+            "critChance": 0.08
+          }
+        },
+        "8": {
+          "name": "Soul Hunger",
+          "stats": {
+            "magPowerPct": 0.1
+          }
+        }
+      },
+      "mutators": {
+        "3": {
+          "name": "Swift Reaping",
+          "ability": "reap",
+          "description": "Reap comes back 4 seconds sooner.",
+          "changes": {
+            "cooldown": -4
+          }
+        },
+        "6": {
+          "name": "Drawn-out Agony",
+          "ability": "agony",
+          "description": "Agony stacks last 4 seconds longer.",
+          "changes": {
+            "duration": 4
+          }
+        },
+        "7": {
+          "name": "Soul Drain",
+          "ability": "drain_life",
+          "description": "Drain Life crits far more often.",
+          "changes": {
+            "bonusCrit": 0.25
+          }
+        }
+      }
+    }
+  ],
+  "order": 2,
+  "classId": "warlock"
+}

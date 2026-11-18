@@ -1,0 +1,44 @@
+{
+  "name": "Soul Harvest",
+  "classId": "warlock",
+  "subclass": "soulreaper",
+  "unlockLevel": 1,
+  "type": "damage",
+  "description": "A second Reap: consumes every damage over time on the target for 25% magic power per second left, and refunds 5 Malice for each effect consumed.",
+  "cost": 20,
+  "cooldown": 15,
+  "target": "enemy",
+  "effects": [
+    {
+      "kind": "consume_dots",
+      "stat": "magPower",
+      "power": 0.25,
+      "school": "magical",
+      "refundPerStack": 5,
+      "mark": "deaths_door",
+      "markMult": 2,
+      "markExecute": 0.25
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "always"
+      }
+    ],
+    "target": {
+      "selector": "enemy_current"
+    },
+    "targetConditions": [
+      {
+        "type": "target_own_debuffs",
+        "cmp": ">=",
+        "value": 2
+      }
+    ]
+  },
+  "priority": 62,
+  "order": 942
+}

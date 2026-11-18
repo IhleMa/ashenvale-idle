@@ -96,7 +96,7 @@ The console command `content` checks the files on disk; `content reload` also ap
 | `config.json` | Level cap, XP curve, party size, combat timing, armor formula, offline progress, recruitment, co-op scaling, **rarities** (weights, multipliers, affix counts), premium currency name |
 | `classes/`, `traits/` | Classes (role, resource, attributes, growth, how attributes become combat stats, basic attack, tiers) and recruit traits |
 | `abilities/` | All player and enemy abilities: cost, cooldown, target, `effects`, default behaviour rule, loadout priority |
-| `statuses/` | Buffs and debuffs: stat modifiers (`mods`), damage or heal per second (`tick`), stacking |
+| `statuses/` | Buffs and debuffs: stat modifiers (`mods`), damage or heal per second (`tick`), stacking (`maxStacks`, or `"stacking": "independent"` = every application is its own stack with its own timer, no cap), `tickOnApply` (first tick right away), `canCrit` (ticks can crit), `jumpOnDeath` (moves to another enemy when the carrier dies). Mods for damage over time: `dotTakenPct` (target takes more DoT damage), `healingTakenPct`, `dotSpeedPct` (on the caster: its DoTs tick faster) |
 | `items/` | Slots, item bases (`stats: [base, perLevel]`, `classes`, `material`), affixes, naming (level prefixes, suffixes), sell value, socket chances |
 | `enemies/` | Enemies and bosses: level-1 stats, growth, tags, abilities, boss `phases`, `enrageAfter` |
 | `zones/`, `coop/` | Zones (level range, enemies, boss, which zone unlocks it) and co-op encounters (waves) |
@@ -164,7 +164,9 @@ At the level cap a hero can **ascend** into a subclass of its class (optional): 
 | `branches` | 1–2 extra branches: `{ "name", "attrs": [a, b], "abilities": { "2": id, "5": id }, "notables": { "4": { "name", "stats" }, "8": { … } } }` — keys are ring numbers, like the class trees |
 | `branches[].mutators` | **Ability mutators** (✦ nodes) that change a *base* class ability while allocated: `{ "3": { "name", "ability", "description", "changes": { … } } }` (key = ring) |
 
-Mutator `changes` (any combination): `power` (+0.3 = every damage/heal/shield/over-time effect of the ability 30 % stronger), `cost` and `cooldown` (added, e.g. `-5`), `hits` (extra hits on damage), `duration` (seconds added to its statuses, shields and taunts), `bonusCrit`, `executeBelow` (sets the execute threshold, e.g. `0.45`), and `effects` — extra effects in the normal ability-effect format. In extra effects, `"self": true` puts a status/heal/shield/resource on the caster and `"once": true` applies it only once even if the ability hits several targets. Example:
+Warlock effect kinds (usable by any ability): `consume_dots` (`power` per second of DoT left on the target, `own`: only the caster's, `refundPerStack`, `mark` + `markMult` + `markExecute`, `splash`), `spread_dots` (copies the caster's DoTs from the target onto every other enemy), `self_damage` (`pct` of current health), and on `damage`: `lifesteal` + `lifestealPerDebuff` (more for each of the caster's own different debuffs on the target). AI target condition `target_own_debuffs` counts those debuffs. Tree stats `dotDamagePct` and `dotDurationPct` boost DoTs.
+
+Mutator `changes` (any combination): `power` (+0.3 = every damage/heal/shield/over-time effect of the ability 30 % stronger), `cost` and `cooldown` (added, e.g. `-5`), `hits` (extra hits on damage), `duration` (seconds added to its statuses, shields and taunts), `bonusCrit`, `executeBelow` (sets the execute threshold, e.g. `0.45`), `set` — `{ "<effect kind>": { field: value } }` merged into the ability's effects of that kind (e.g. `{ "consume_dots": { "splash": 0.08 } }`), and `effects` — extra effects in the normal ability-effect format. In extra effects, `"self": true` puts a status/heal/shield/resource on the caster and `"once": true` applies it only once even if the ability hits several targets. Example:
 
 ```json
 "mutators": {

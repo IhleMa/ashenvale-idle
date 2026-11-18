@@ -1,0 +1,39 @@
+{
+  "name": "Blight",
+  "classId": "warlock",
+  "unlockLevel": 4,
+  "type": "debuff",
+  "description": "Deals 50% magic power per second for 12 seconds; the target receives 40% less healing.",
+  "cost": 18,
+  "cooldown": 8,
+  "target": "enemy",
+  "effects": [
+    {
+      "kind": "status",
+      "status": "blight",
+      "duration": 12,
+      "stat": "magPower",
+      "power": 0.5
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "always"
+      }
+    ],
+    "target": {
+      "selector": "enemy_current"
+    },
+    "targetConditions": [
+      {
+        "type": "target_missing_status",
+        "status": "blight"
+      }
+    ]
+  },
+  "priority": 70,
+  "order": 20
+}

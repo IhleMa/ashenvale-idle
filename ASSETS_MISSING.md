@@ -1,17 +1,17 @@
 # Missing assets
 
-**396 of 396** images still missing (315 recommended, 81 optional).
+**418 of 418** images still missing (336 recommended, 82 optional).
 Only the missing files are listed; see [ASSETS.md](ASSETS.md) for everything, sizes and naming rules. Drop files into `public/assets/<folder>/`
 (any of .png, .webp, .jpg, .jpeg, .gif, .svg, .avif).
 
 | Section | Missing |
 |---|---|
-| [Class icons](#class-icons) | 6 |
-| [Abilities](#abilities) | 78 |
+| [Class icons](#class-icons) | 7 |
+| [Abilities](#abilities) | 91 |
 | [Minions (Summoner)](#minions-summoner) | 6 |
 | [Item bases](#item-bases) | 26 |
 | [Enemies & bosses](#enemies--bosses) | 53 |
-| [Status effects](#status-effects) | 35 |
+| [Status effects](#status-effects) | 42 |
 | [Zone backgrounds](#zone-backgrounds) | 13 |
 | [Co-op encounter art](#co-op-encounter-art) | 4 |
 | [Achievements](#achievements) | 16 |
@@ -22,7 +22,7 @@ Only the missing files are listed; see [ASSETS.md](ASSETS.md) for everything, si
 | [Elixirs](#elixirs) | 5 |
 | [Expedition destinations](#expedition-destinations) | 7 |
 | [Interface](#interface) | 2 |
-| [Default portraits (optional)](#default-portraits-optional) | 6 |
+| [Default portraits (optional)](#default-portraits-optional) | 7 |
 | [Minion abilities (optional)](#minion-abilities-optional) | 3 |
 | [Enemy abilities (optional)](#enemy-abilities-optional) | 21 |
 | [Unique items (optional)](#unique-items-optional) | 19 |
@@ -38,21 +38,29 @@ Only the missing files are listed; see [ASSETS.md](ASSETS.md) for everything, si
 - [ ] `classes/cleric.png` — Cleric class icon (also the fallback portrait)
 - [ ] `classes/ranger.png` — Ranger class icon (also the fallback portrait)
 - [ ] `classes/summoner.png` — Summoner class icon (also the fallback portrait)
+- [ ] `classes/warlock.png` — Warlock class icon (also the fallback portrait)
 
 ## Abilities
 
+- [ ] `abilities/corruption.png` — Corruption (Warlock)
 - [ ] `abilities/heroic_strike.png` — Heroic Strike (Warrior)
 - [ ] `abilities/raise_skeleton.png` — Raise Skeleton (Summoner)
+- [ ] `abilities/blight.png` — Blight (Warlock)
 - [ ] `abilities/summon_imp.png` — Summon Imps (Summoner)
 - [ ] `abilities/taunt.png` — Taunt (Warrior)
+- [ ] `abilities/agony.png` — Agony (Warlock)
 - [ ] `abilities/bone_golem.png` — Bone Golem (Summoner)
 - [ ] `abilities/shield_wall.png` — Shield Wall (Warrior)
 - [ ] `abilities/cleave.png` — Cleave (Warrior)
+- [ ] `abilities/reap.png` — Reap (Warlock)
 - [ ] `abilities/spirit_wisp.png` — Spirit Wisp (Summoner)
+- [ ] `abilities/curse_of_ruin.png` — Curse of Ruin (Warlock)
 - [ ] `abilities/dark_pact.png` — Dark Pact (Summoner)
 - [ ] `abilities/shield_bash.png` — Shield Bash (Warrior)
 - [ ] `abilities/battle_cry.png` — Battle Cry (Warrior)
 - [ ] `abilities/corpse_explosion.png` — Corpse Explosion (Summoner)
+- [ ] `abilities/drain_life.png` — Drain Life (Warlock)
+- [ ] `abilities/pact_of_shadows.png` — Dark Pact (Warlock)
 - [ ] `abilities/soul_link.png` — Soul Link (Summoner)
 - [ ] `abilities/sunder_armor.png` — Sunder Armor (Warrior)
 - [ ] `abilities/fireball.png` — Fireball (Mage)
@@ -119,6 +127,12 @@ Only the missing files are listed; see [ASSETS.md](ASSETS.md) for everything, si
 - [ ] `abilities/demonic_empowerment.png` — Demonic Empowerment (Demonologist — Summoner subclass)
 - [ ] `abilities/ancestral_spirits.png` — Ancestral Spirits (Spiritcaller — Summoner subclass)
 - [ ] `abilities/spirit_ward.png` — Spirit Ward (Spiritcaller — Summoner subclass)
+- [ ] `abilities/pandemic.png` — Pandemic (Plaguelord — Warlock subclass)
+- [ ] `abilities/plague_swarm.png` — Plague Swarm (Plaguelord — Warlock subclass)
+- [ ] `abilities/soul_harvest.png` — Soul Harvest (Soulreaper — Warlock subclass)
+- [ ] `abilities/deaths_door.png` — Death's Door (Soulreaper — Warlock subclass)
+- [ ] `abilities/blood_leech.png` — Blood Leech (Hexblood — Warlock subclass)
+- [ ] `abilities/pact_of_flesh.png` — Pact of Flesh (Hexblood — Warlock subclass)
 
 ## Minions (Summoner)
 
@@ -251,6 +265,13 @@ Only the missing files are listed; see [ASSETS.md](ASSETS.md) for everything, si
 - [ ] `statuses/judged.png` — Judged (debuff)
 - [ ] `statuses/chilled.png` — Chilled (debuff)
 - [ ] `statuses/nature_blessing.png` — Nature's Blessing (buff)
+- [ ] `statuses/corruption.png` — Corruption (debuff)
+- [ ] `statuses/blight.png` — Blight (debuff)
+- [ ] `statuses/agony.png` — Agony (debuff)
+- [ ] `statuses/ruin.png` — Ruin (debuff)
+- [ ] `statuses/shadow_pact.png` — Dark Pact (buff)
+- [ ] `statuses/plague_swarm.png` — Plague Swarm (debuff)
+- [ ] `statuses/deaths_door.png` — Death's Door (debuff)
 
 ## Zone backgrounds
 
@@ -401,6 +422,7 @@ Only the missing files are listed; see [ASSETS.md](ASSETS.md) for everything, si
 - [ ] `portraits/cleric.png` — Default Cleric portrait
 - [ ] `portraits/ranger.png` — Default Ranger portrait
 - [ ] `portraits/summoner.png` — Default Summoner portrait
+- [ ] `portraits/warlock.png` — Default Warlock portrait
 
 ## Minion abilities (optional)
 

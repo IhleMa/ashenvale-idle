@@ -9,7 +9,7 @@
 import { ABILITIES } from './data/abilities.js';
 import { STATUSES } from './data/statuses.js';
 
-export const MUTATOR_CHANGES = ['power', 'cost', 'cooldown', 'hits', 'duration', 'bonusCrit', 'executeBelow', 'effects'];
+export const MUTATOR_CHANGES = ['power', 'cost', 'cooldown', 'hits', 'duration', 'bonusCrit', 'executeBelow', 'effects', 'set'];
 
 const POWER_KINDS = new Set(['damage', 'heal', 'shield', 'status', 'sacrifice']);
 
@@ -28,6 +28,8 @@ export function applyMutators(ability, changeSets) {
       }
       if (ch.duration && (e.kind === 'status' || e.kind === 'shield' || e.kind === 'taunt') && e.duration) e.duration += ch.duration;
     }
+    // set: { "<effect kind>": { field: value } } → merged into the ability's effects of that kind (e.g. Reap's splash)
+    for (const [kind, fields] of Object.entries(ch.set || {})) for (const e of ab.effects) if (e.kind === kind) Object.assign(e, fields);
     if (ch.effects?.length) ab.effects.push(...JSON.parse(JSON.stringify(ch.effects)));
   }
   return ab;
@@ -60,6 +62,11 @@ export function describeChanges(ch) {
   if (ch.duration) out.push(`${sgn(ch.duration)}s duration`);
   if (ch.cooldown) out.push(`${sgn(ch.cooldown)}s cooldown`);
   if (ch.cost) out.push(`${sgn(ch.cost)} cost`);
+  for (const fields of Object.values(ch.set || {})) {
+    if (fields.splash) out.push(`also hits every other enemy for ${Math.round(fields.splash * 100)}% of the damage`);
+    if (fields.refundPerStack) out.push(`refunds ${fields.refundPerStack} resource per effect consumed`);
+    if (fields.lifesteal) out.push(`heals for ${Math.round(fields.lifesteal * 100)}% of the damage`);
+  }
   for (const e of ch.effects || []) out.push(describeEffect(e));
   return out;
 }
