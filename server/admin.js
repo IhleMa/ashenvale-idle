@@ -127,7 +127,8 @@ export function adminActions(game) {
         if (curve.length < 2) fail('The curve needs at least 2 points');
       }
       try {
-        const r = sim.start({ curve, hours, schedule: d.schedule === 'natural' ? 'natural' : 'online', label: String(d.label || '').slice(0, 40) }, s.player.name);
+        const bots = d.bots === 'all' || ARCHETYPES[d.bots] ? d.bots : 'social';
+        const r = sim.start({ curve, hours, schedule: d.schedule === 'natural' ? 'natural' : 'online', bots, label: String(d.label || '').slice(0, 40) }, s.player.name);
         admins.audit(s.player.name, 'levelsim_start', `${hours}h`, curve ? 'custom curve' : 'saved curve');
         return r;
       } catch (e) { fail(e.message); }

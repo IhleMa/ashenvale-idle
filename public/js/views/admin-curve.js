@@ -171,7 +171,7 @@ function draw(part = 'all') {
 }
 
 // ---------------------------------------------------------------- test with bots (server/levelSim.js)
-const SIM = { status: null, hours: 24, schedule: 'online', which: 'edited', timer: null };
+const SIM = { status: null, hours: 24, schedule: 'online', which: 'edited', bots: 'social', timer: null };
 const SIM_HOURS = [[3, '3 hours'], [6, '6 hours'], [12, '12 hours'], [24, '1 day'], [48, '2 days'], [72, '3 days'], [168, '1 week']];
 const COLORS = ['#7fb8ff', '#c78bff', '#6fd08c', '#f2c14e', '#ff9f5a', '#ff6b6b', '#5fd3d3', '#e0e0e0'];
 const fmtH = h => {
@@ -233,16 +233,20 @@ function simTable(run) {
 function simHtml() {
   const st = SIM.status, run = st?.current, running = !!st?.running;
   const others = (st?.history || []).filter(r => r.id !== run?.id).slice(0, 2);
-  const estMin = Math.max(1, Math.round((SIM.hours * 5.5) / 60));
+  // measured: ≈ 0.4 s per simulated hour for one bot, ≈ 2 s with all play styles
+  const estSec = SIM.hours * (SIM.bots === 'all' ? 2 : 0.4) + 5;
+  const est = estSec < 90 ? `≈ ${Math.max(5, Math.round(estSec / 5) * 5)} s` : `≈ ${Math.round(estSec / 60)} min`;
+  const types = Object.entries(CONTENT.bots?.archetypes || {}).sort((a, b) => (a[1].skill ?? 0) - (b[1].skill ?? 0));
   const pct = run ? Math.min(100, Math.round((run.simHours / run.hours) * 100)) : 0;
   return `<section class="panel xc">
     <div class="panel-head"><h3>⏱ Test with bots</h3></div>
-    <p class="muted small">One bot of every play style (Casual → Tryhard) plays a fresh character with the chosen curve on a fast-forwarded clock — on a throw-away copy of the game with your current content and server rates, so real players aren't touched and the game keeps running normally. The chart shows how much play time each bot needed to reach each level.</p>
+    <p class="muted small">A bot (or one of every play style, Casual → Tryhard) plays a fresh character with the chosen curve on a fast-forwarded clock — on a throw-away copy of the game with your current content and server rates, so real players aren't touched and the game keeps running normally. The chart shows how much play time each bot needed to reach each level.</p>
     <div class="row gap wrap xc-simctl">
       <label class="small">Curve <select data-sim="which"><option value="edited" ${SIM.which === 'edited' ? 'selected' : ''}>the curve above${dirty() ? ' (unsaved)' : ''}</option><option value="saved" ${SIM.which === 'saved' ? 'selected' : ''}>what the game uses now</option></select></label>
       <label class="small">Play time <select data-sim="hours">${SIM_HOURS.map(([v, l]) => `<option value="${v}" ${SIM.hours === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
+      <label class="small">Bots <select data-sim="bots">${types.map(([id, a]) => `<option value="${id}" ${SIM.bots === id ? 'selected' : ''}>1 bot · ${esc(a.label)}${id === 'social' ? ' (average player)' : ''}</option>`).join('')}<option value="all" ${SIM.bots === 'all' ? 'selected' : ''}>all ${types.length} play styles (slower)</option></select></label>
       <label class="small">Bots are <select data-sim="schedule"><option value="online" ${SIM.schedule === 'online' ? 'selected' : ''}>online the whole time</option><option value="natural" ${SIM.schedule === 'natural' ? 'selected' : ''}>online like real players (with offline progress)</option></select></label>
-      ${running ? '<button class="btn small ghost danger" data-sim-cancel>Cancel</button>' : `<button class="btn small primary" data-sim-run>▶ Run simulation</button><span class="faint small">takes ≈ ${estMin} min</span>`}
+      ${running ? '<button class="btn small ghost danger" data-sim-cancel>Cancel</button>' : `<button class="btn small primary" data-sim-run>▶ Run simulation</button><span class="faint small">takes ${est}</span>`}
     </div>
     ${run ? `
       <div class="xc-simhead"><b>#${run.id} · ${esc(run.label)}</b> · ${run.hours >= 24 ? fmtH(run.hours) : `${run.hours}h`} · ${run.schedule === 'natural' ? 'real online times' : 'always online'}
@@ -346,7 +350,7 @@ function bind(el) {
     if ('simRun' in t.dataset) {
       const curve = SIM.which === 'edited' ? sorted(S.pts) : savedCurve();
       const label = SIM.which === 'edited' ? (dirty() ? 'edited curve' : 'saved curve') : (savedCurve() ? 'saved curve' : 'formula');
-      try { SIM.status = await act('admin_levelsim_start', { curve, hours: SIM.hours, schedule: SIM.schedule, label }); } catch (err) { toast(err.message, 'error'); }
+      try { SIM.status = await act('admin_levelsim_start', { curve, hours: SIM.hours, schedule: SIM.schedule, bots: SIM.bots, label }); } catch (err) { toast(err.message, 'error'); }
       return pollSim();
     }
     if ('xcJump' in t.dataset) { host.querySelector('.xc-simbox')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }

@@ -210,7 +210,11 @@ export class BotManager {
     if (chance(P.trader * 0.6)) this.trade(b, p);
     const g = this.game.groupOf(p.id);
     if (g) return this.groupPlay(b, p, g);
-    if (this.inRift(b)) { b.doing = 'running a rift'; return; }
+    if (this.inRift(b)) {
+      // like a player, a rift session ends after a while (rifts only give XP for new tiers, so endless repeats go nowhere)
+      if (Date.now() - (b.riftSince || Date.now()) > b.riftFor) { this.act(b, 'rift_stop'); b.riftSince = 0; b.doing = 'back from the rift'; }
+      else { b.doing = 'running a rift'; return; }
+    }
     if (chance(P.social * 0.12) && this.formGroup(b, p)) return;
     if (L.hero(p).level >= RIFT.minLevel && chance(P.rifter * 0.25)) return this.startRift(b, p);
     this.manageZone(b, p);
@@ -332,7 +336,11 @@ export class BotManager {
     const max = maxStartTier(p);
     // careful bots repeat their best tier, ambitious ones push
     const tier = b.persona.rifter > 0.6 || chance(b.persona.skill) ? max : Math.max(1, max - 1);
-    if (this.act(b, 'rift_settings', { auto: b.persona.rifter > 0.75 ? 'push' : chance(0.5) ? 'repeat' : 'off' }) !== null && this.act(b, 'rift_start', { tier })) b.doing = `running rift tier ${tier}`;
+    if (this.act(b, 'rift_settings', { auto: b.persona.rifter > 0.75 ? 'push' : chance(0.5) ? 'repeat' : 'off' }) !== null && this.act(b, 'rift_start', { tier })) {
+      b.doing = `running rift tier ${tier}`;
+      b.riftSince = Date.now();
+      b.riftFor = (10 + Math.random() * 30 * (0.5 + b.persona.rifter)) * MIN; // 10–55 minutes, longer for rift lovers
+    }
   }
 
   // ------------------------------------------------------------------ town, expeditions, crafting

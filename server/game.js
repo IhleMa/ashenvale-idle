@@ -162,6 +162,8 @@ export class Game {
 
   send(ws, msg) { if (ws.readyState === 1) ws.send(JSON.stringify(msg)); }
   sendTo(playerId, msg) {
+    // headless (levelling simulation): only bots listen, and they only read action results and fight endings
+    if (this.headless && msg.t !== 'result' && msg.t !== 'battle_end') return;
     const s = this.sessions.get(playerId);
     if (!s) return;
     const data = JSON.stringify(msg);
@@ -173,6 +175,7 @@ export class Game {
     if (!s.stateDirty) return;
     s.stateDirty = false;
     if (s.player.tutorial && !s.player.tutorial.done) this.tutorialToasts(s, TU.checkTutorial(s.player));
+    if (this.headless) return; // nobody to show the state to
     this.sendTo(s.player.id, { t: 'state', player: L.publicPlayer(s.player) });
   }
 
@@ -667,7 +670,7 @@ export class Game {
         const b = s.solo.battle;
         stepBattle(b);
         const events = drainEvents(b);
-        this.sendTo(p.id, { t: 'bt', k: 'solo', time: Math.round(b.time * 10) / 10, wave: b.waveIndex + 1, u: b.units.map(dynamicUnit), e: events });
+        if (!this.headless) this.sendTo(p.id, { t: 'bt', k: 'solo', time: Math.round(b.time * 10) / 10, wave: b.waveIndex + 1, u: b.units.map(dynamicUnit), e: events });
         if (b.state !== 'running') this.finishSoloBattle(s);
       }
       this.flushState(s);

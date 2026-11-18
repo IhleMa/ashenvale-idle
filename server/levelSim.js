@@ -3,7 +3,7 @@
 // a throw-away database, the server's current content and settings, one bot per play style, and a
 // fast-forwarded clock. Reports, as JSON lines on stdout, when each bot's hero reached each level.
 //
-//   input (stdin, JSON): { hours, curve: [[level, xp], …] | null, schedule: "online" | "natural", settings: {…} }
+//   input (stdin, JSON): { hours, curve: [[level, xp], …] | null, schedule: "online" | "natural", bots: "all" | <archetype>, settings: {…} }
 //   output: { t: "progress", simHours, bots: [...] } … { t: "done", … } | { t: "error", message }
 import fs from 'node:fs';
 import os from 'node:os';
@@ -36,10 +36,12 @@ async function runSimulation(input) {
   try {
     const store = new Store(DATA, { log: () => {} });
     const game = new Game({ store, assets: { get: () => ({}) }, log: () => {}, settings: new Settings(store, input.settings || {}), admins: new AdminManager(store), buildId: 'sim' });
+    game.headless = true; // no browsers here: skip building live fight frames and state updates
     const bots = new BotManager(game, { log: () => {} });
     game.bots = bots;
-    // one bot per play style, ordered from relaxed to hardcore
-    const types = Object.entries(ARCHETYPES).sort((a, b) => (a[1].skill ?? 0) - (b[1].skill ?? 0)).map(([id]) => id);
+    // one bot of the chosen play style (default: an average "social" player), or one per play style
+    const types = input.bots === 'all' ? Object.entries(ARCHETYPES).sort((a, b) => (a[1].skill ?? 0) - (b[1].skill ?? 0)).map(([id]) => id)
+      : [ARCHETYPES[input.bots] ? input.bots : ARCHETYPES.social ? 'social' : Object.keys(ARCHETYPES)[0]];
     for (const t of types) bots.add(1, t);
     const always = input.schedule !== 'natural';
     for (const b of bots.bots.values()) b.nextSwitch = fake;
@@ -106,9 +108,9 @@ export class LevelSimRunner {
     this.child = null;
     this.seq = 0;
   }
-  start({ curve = null, hours = 24, schedule = 'online', label = '' } = {}, by = '') {
+  start({ curve = null, hours = 24, schedule = 'online', bots = 'social', label = '' } = {}, by = '') {
     if (this.child) throw new Error('A simulation is already running — wait for it or cancel it');
-    const run = { id: ++this.seq, label: label || (curve ? 'edited curve' : 'saved curve'), curve, hours, schedule, by, startedAt: Date.now(), simHours: 0, bots: [], status: 'running', error: null };
+    const run = { id: ++this.seq, label: label || (curve ? 'edited curve' : 'saved curve'), curve, hours, schedule, botsMode: bots, by, startedAt: Date.now(), simHours: 0, bots: [], status: 'running', error: null };
     const child = spawn(process.execPath, [SELF, '--child'], { env: { ...process.env, DATA_DIR: this.dataDir }, stdio: ['pipe', 'pipe', 'pipe'] });
     try { os.setPriority(child.pid, 19); } catch { /* not allowed here — fine */ }
     this.child = child; this.current = run;
@@ -132,7 +134,7 @@ export class LevelSimRunner {
       if (run.bots.length) { this.history.unshift(run); this.history = this.history.slice(0, 4); }
       this.log(`XP curve simulation #${run.id} ${run.status} after ${run.simHours} simulated hours (${Math.round((run.finishedAt - run.startedAt) / 1000)}s).`);
     });
-    child.stdin.end(JSON.stringify({ hours, curve, schedule, settings: this.settings?.values || {} }));
+    child.stdin.end(JSON.stringify({ hours, curve, schedule, bots, settings: this.settings?.values || {} }));
     return this.status();
   }
   cancel() {
@@ -143,7 +145,7 @@ export class LevelSimRunner {
   }
   stop() { this.child?.kill('SIGKILL'); }
   status() {
-    const brief = r => r && { id: r.id, label: r.label, curve: r.curve, hours: r.hours, schedule: r.schedule, by: r.by, startedAt: r.startedAt, finishedAt: r.finishedAt || null, simHours: r.simHours, status: r.status, error: r.error, bots: r.bots };
+    const brief = r => r && { id: r.id, label: r.label, curve: r.curve, hours: r.hours, schedule: r.schedule, botsMode: r.botsMode, by: r.by, startedAt: r.startedAt, finishedAt: r.finishedAt || null, simHours: r.simHours, status: r.status, error: r.error, bots: r.bots };
     return { running: !!this.child, current: brief(this.current), history: this.history.map(brief) };
   }
 }
