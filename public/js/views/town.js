@@ -7,7 +7,7 @@ import { esc, fmt, run, toast, tipAttr, itemTooltipHtml, duration, bar, confirmB
 import { speedUpCost } from '/shared/premium.js';
 import { buildingArt, materialIcon, professionIcon, elixirIcon, itemIcon, portrait } from '../assets.js';
 import { CONFIG, rarityIndex } from '/shared/config.js';
-import { BUILDINGS, BUILDING_IDS, MATERIALS, MATERIAL_IDS, PROFESSIONS, ELIXIRS, QUALITIES, ITEM_MATERIAL, ENCHANT_STATS_BY_LEVEL, professionXpToNext, CRAFT_LEVEL_CAP, buildingEffects } from '/shared/data/town.js';
+import { BUILDINGS, BUILDING_IDS, MATERIALS, MATERIAL_IDS, PROFESSIONS, ELIXIRS, QUALITIES, ITEM_MATERIAL, CRAFT_BUILDING_OF_TYPE, ENCHANT_STATS_BY_LEVEL, professionXpToNext, CRAFT_LEVEL_CAP, buildingEffects } from '/shared/data/town.js';
 import { ITEM_BASES, SLOTS, STAT_LABELS } from '/shared/data/items.js';
 import { CLASSES } from '/shared/data/classes.js';
 import * as T from '/shared/town.js';
@@ -113,6 +113,40 @@ function itemsOfType(p, type) {
   return list;
 }
 
+// Reforge: pick a character (or the inventory), then see its gear slot by slot
+const typeOf = it => ITEM_MATERIAL[it.baseId] || 'metal';
+function reforgeHtml(p, id, def, cap, w) {
+  const canHere = it => typeOf(it) === def.type && it.level < cap;
+  const chars = Object.values(p.characters).sort((a, c) => (c.isMain ? 1 : 0) - (a.isMain ? 1 : 0) || c.level - a.level);
+  const countFor = ch => Object.values(ch.equipment).filter(it => it && canHere(it)).length;
+  const invItems = p.inventory.filter(canHere).sort((a, c) => a.level - c.level);
+  if (!ui.reforgeChar || (ui.reforgeChar !== 'inv' && !p.characters[ui.reforgeChar])) ui.reforgeChar = (chars.find(c => countFor(c)) || chars[0])?.id || 'inv';
+  const chip = (key, art, name, n) => `<button class="reforge-chip ${ui.reforgeChar === key ? 'active' : ''}" data-reforge-pick="${key}">${art}<span>${name}</span>${n ? `<b class="count">${n}</b>` : ''}</button>`;
+  const picker = `<div class="reforge-picker">${chars.map(c => chip(c.id, portrait(c, 'xs'), `${c.isMain ? '★ ' : ''}${esc(c.name)} <small class="muted">Lv ${c.level}</small>`, countFor(c))).join('')}
+    ${chip('inv', '🎒', 'Inventory', invItems.length)}</div>`;
+  const row = (it, charId, slotLabel) => {
+    const base = `<span class="reforge-slot">${esc(slotLabel)}</span>`;
+    if (!it) return `<div class="reforge-row empty">${base}<span class="muted small grow">Empty</span></div>`;
+    const name = `<span class="grow" ${tipAttr(itemTooltipHtml(it))}>${itemIcon(it, 'xs')} <span class="rarity-text rarity-${it.rarity}">${esc(it.name)}</span> <span class="muted small">ilvl ${it.level}</span></span>`;
+    if (typeOf(it) !== def.type) {
+      const other = BUILDINGS[CRAFT_BUILDING_OF_TYPE[typeOf(it)]];
+      return `<div class="reforge-row other">${base}${name}<span class="muted small">${other ? `at the ${esc(other.name)}` : 'not here'}</span></div>`;
+    }
+    if (it.level >= cap) return `<div class="reforge-row done">${base}${name}<span class="muted small">✓ up to date (max ${cap})</span></div>`;
+    return `<div class="reforge-row">${base}${name}<span class="small up">→ ${cap}</span>${costHtml(p, T.reforgeCost(it, cap))}<button class="btn tiny primary" data-reforge="${it.uid}" data-char="${charId}" ${w ? '' : 'disabled'}>Reforge</button></div>`;
+  };
+  let body;
+  if (ui.reforgeChar === 'inv') {
+    body = invItems.length ? invItems.map(it => row(it, '', SLOTS[it.slot]?.label || '')).join('') : `<p class="muted small">No ${def.type} items below item level ${cap} in your inventory.</p>`;
+  } else {
+    const ch = p.characters[ui.reforgeChar];
+    body = Object.keys(SLOTS).map(slot => row(ch.equipment[slot], ch.id, SLOTS[slot].label)).join('');
+  }
+  return `<h4>Reforge</h4>
+    <p class="muted small">Raise ${def.type} gear to item level ${cap} (your hero's level and this building's limit), keeping rarity, stats, enchantment and gems.${w ? '' : ' <b>Assign a worker first.</b>'}</p>
+    ${picker}<div class="reforge-list">${body}</div>`;
+}
+
 function specificHtml(p, id) {
   const def = BUILDINGS[id];
   const b = p.town.buildings[id];
@@ -155,7 +189,6 @@ function specificHtml(p, id) {
     if (!QUALITIES[ui.craftQuality] || QUALITIES[ui.craftQuality].building > b.level) ui.craftQuality = 'standard';
     const cost = T.craftCost(ui.craftBase, lvl, ui.craftQuality);
     const base = ITEM_BASES[ui.craftBase];
-    const reforgeable = itemsOfType(p, def.type).filter(x => x.item.level < cap).sort((a, c) => (c.charId ? 1 : 0) - (a.charId ? 1 : 0) || a.item.level - c.item.level);
     return `<h4>Craft</h4>
       ${w ? '' : '<div class="notice small">Assign a worker to start crafting.</div>'}
       <div class="recipe-grid">${bases.map(bs => `<button class="recipe ${bs.id === ui.craftBase ? 'active' : ''}" data-recipe="${bs.id}">${itemIcon({ baseId: bs.id, slot: bs.slot, rarity: 'common', name: bs.name }, 'sm')}<span>${esc(bs.name)}<small>${esc(SLOTS[bs.slot].label)}</small></span></button>`).join('')}</div>
@@ -165,10 +198,7 @@ function specificHtml(p, id) {
         <div class="small muted">${esc(base.name)} · ${base.classes ? base.classes.map(c => CLASSES[c].name).join(', ') : 'all classes'} · rarity is rolled — a skilled worker (${w ? w.profession.level : 0}) and a better building raise the odds</div>
         <div class="row between wrap gap">${costHtml(p, cost)}<button class="btn primary" data-craft="${id}" ${w ? '' : 'disabled'}>Craft</button></div>
       </div>
-      <h4>Reforge</h4>
-      <p class="muted small">Raise an old ${def.type} item to item level ${cap}, keeping its rarity, stats and enchantment.</p>
-      <div class="reforge-list">${reforgeable.slice(0, 30).map(x => `<div class="reforge-row">${itemIcon(x.item, 'xs')}<span class="grow" ${tipAttr(itemTooltipHtml(x.item))}><span class="rarity-text rarity-${x.item.rarity}">${esc(x.item.name)}</span> <span class="muted small">ilvl ${x.item.level} → ${cap}${x.owner ? ` · worn by ${esc(x.owner)}` : ''}</span></span>
-        ${costHtml(p, T.reforgeCost(x.item, cap))}<button class="btn tiny" data-reforge="${x.item.uid}" data-char="${x.charId}" ${w ? '' : 'disabled'}>Reforge</button></div>`).join('') || '<p class="muted small">No items below item level ' + cap + '.</p>'}</div>`;
+      ${reforgeHtml(p, id, def, cap, w)}`;
   }
   if (id === 'enchanter') {
     const w = T.worker(p, id);
@@ -274,6 +304,7 @@ export const townView = {
         return;
       }
       if (d.recipe) { ui.craftBase = d.recipe; rerender(); return; }
+      if (d.reforgePick) { ui.reforgeChar = d.reforgePick; rerender(); return; }
       if (d.craft) {
         const r = await run(act('craft_item', { buildingId: d.craft, baseId: ui.craftBase, level: Number(root.querySelector('[data-craft-level]').value), quality: ui.craftQuality }));
         if (r) toast(`Crafted ${r.item.name} (${CONFIG.rarities.find(x => x.id === r.item.rarity).label})!`, 'success');

@@ -82,6 +82,7 @@ function startGame() {
 // pages appear one by one during the tutorial; freshly unlocked ones get a NEW mark until visited
 const newViews = new Set();
 let navKey = null;
+let navReady = false;
 // pages locked by hero level (the Auction House page stays open: its mailbox always works, only trading is locked)
 const pageLock = id => (id === 'auction' ? 0 : featureLock(state.player, id));
 // menu state: visible pages (tutorial) + pages still locked by hero level (config.featureUnlocks)
@@ -107,7 +108,8 @@ function lockedView(v) {
 function renderNav() {
   const nav = document.getElementById('sidebar');
   const key = navStateKey();
-  if (navKey && key !== navKey) {
+  const ready = !!state.player?.characters?.[state.player?.heroId];
+  if (navKey && navReady && key !== navKey) {
     const [vis, locks] = navKey.split('|');
     const before = new Set(vis === '*' ? VIEWS.map(v => v.id) : vis.split(','));
     const lockedBefore = new Set((locks || '').split(',').filter(Boolean));
@@ -120,6 +122,7 @@ function renderNav() {
     }
   }
   navKey = key;
+  navReady = ready; // "new"/unlock messages only compare two states that both had the player's data
   nav.innerHTML = VIEWS.filter(v => (!v.adminOnly || state.isAdmin) && isViewVisible(v.id)).map(v => {
     const lock = pageLock(v.id);
     return `<a href="#/${v.id}" data-view="${v.id}" class="${newViews.has(v.id) ? 'nav-new' : ''} ${current?.id === v.id ? 'active' : ''} ${lock ? 'nav-locked' : ''}" ${lock ? `title="Unlocks at hero level ${lock}"` : ''}><span class="nav-icon">${v.icon}</span><span class="nav-label">${v.label}</span>${lock ? `<span class="nav-lock">🔒 ${lock}</span>` : `<span class="nav-badge" data-badge="${v.id}"></span>`}</a>`;

@@ -24,6 +24,7 @@ export function unlockHeroLevel(p) {
 
 // 0 when open, otherwise the hero level needed
 export function featureLock(p, feature) {
+  if (!p?.characters?.[p.heroId]) return 0; // no player data yet: don't report locks
   const need = unlockLevelOf(feature);
   return need && unlockHeroLevel(p) < need ? need : 0;
 }
