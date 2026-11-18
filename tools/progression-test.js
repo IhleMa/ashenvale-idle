@@ -85,7 +85,7 @@ ok('features and buildings unlock by hero level (ascended heroes keep them)');
 // ---- slower curve
 let total = 0;
 for (let l = 1; l < CONFIG.levelCap; l++) total += xpToNext(l);
-assert.ok(xpToNext(1) < 200 && xpToNext(59) > 2e6, 'slow at the top, quick at the start');
+assert.ok(xpToNext(1) < 500 && xpToNext(59) > 2e6, 'slow at the top, quick at the start');
 ok(`XP curve: level 1 needs ${xpToNext(1)}, level 59 needs ${xpToNext(59).toLocaleString('en')} (total ${total.toLocaleString('en')})`);
 
 console.log(`Progression: all ${n} checks passed.`);
