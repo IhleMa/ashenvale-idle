@@ -1174,3 +1174,16 @@ html.standalone body { padding-bottom: env(safe-area-inset-bottom); padding-left
 .reforge-slot { width: 64px; color: var(--faint); font-size: 11px; text-transform: uppercase; letter-spacing: .03em; }
 .reforge-row.empty, .reforge-row.other, .reforge-row.done { opacity: .6; }
 .reforge-row .up { color: var(--good, #6fe08a); font-weight: 600; }
+/* Admin → Assets */
+.assets-head { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+.assets-head .bar { height: 8px; background: #1a1210; border-radius: 4px; overflow: hidden; }
+.assets-head .bar .fill { height: 100%; background: linear-gradient(90deg, #6fbf5a, #c9a24a); }
+.assets-sec { border: 1px solid var(--line2); border-radius: 8px; padding: 6px 10px; margin-bottom: 6px; background: #120d0c; }
+.assets-sec summary { cursor: pointer; }
+.assets-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 6px; margin: 6px 0; }
+.asset-cell { display: flex; gap: 8px; align-items: center; padding: 4px; border-radius: 6px; background: #1a1311; }
+.asset-cell img, .asset-missing { width: 40px; height: 40px; object-fit: cover; border-radius: 6px; flex: none; }
+.asset-missing { display: grid; place-items: center; border: 1px dashed var(--line2); color: var(--faint); }
+.asset-text { display: flex; flex-direction: column; min-width: 0; }
+.asset-text .link { background: none; border: 0; padding: 0; color: var(--text); text-align: left; cursor: copy; font: 12px ui-monospace, monospace; overflow-wrap: anywhere; }
+.asset-text .link:hover { color: var(--gold); }

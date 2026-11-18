@@ -1,4 +1,5 @@
 // Admin panel (only visible to admins; every action is re-checked on the server).
+import { mountAssets } from './admin-assets.js';
 import { state } from '../state.js';
 import { act } from '../net.js';
 import { esc, fmt, run, toast, modal, duration, confirmBox, itemTooltipHtml, tipAttr } from '../ui.js';
@@ -219,13 +220,14 @@ export const adminView = {
   id: 'admin', label: 'Admin', icon: '🛡', adminOnly: true,
   mount(root) {
     root.innerHTML = `<section class="panel"><div class="panel-head"><h3>🛡 Admin</h3><span class="muted small">Only visible to admins. All actions are logged.</span></div>
-      <div class="tabs">${[['dashboard', 'Dashboard'], ['players', 'Players'], ['bots', '🤖 Bots'], ['balance', '⚖ Balance'], ['content', '📦 Content'], ['curve', '📈 XP curve']].map(([id, l]) => `<button class="tab ${ui.tab === id ? 'active' : ''}" data-tab="${id}">${l}</button>`).join('')}</div>
+      <div class="tabs">${[['dashboard', 'Dashboard'], ['players', 'Players'], ['bots', '🤖 Bots'], ['balance', '⚖ Balance'], ['content', '📦 Content'], ['curve', '📈 XP curve'], ['assets', '🖼 Assets']].map(([id, l]) => `<button class="tab ${ui.tab === id ? 'active' : ''}" data-tab="${id}">${l}</button>`).join('')}</div>
       <div class="admin-body"></div></section>`;
     const reload = () => {
       root.querySelector('.admin-body').classList.toggle('wide', ui.tab === 'content');
       if (ui.tab === 'content') return mountContentEditor(root.querySelector('.admin-body'));
       if (ui.tab === 'curve') return mountCurveEditor(root.querySelector('.admin-body'));
       if (ui.tab === 'balance') return mountBalance(root.querySelector('.admin-body'));
+      if (ui.tab === 'assets') return mountAssets(root.querySelector('.admin-body'));
       return ui.tab === 'dashboard' ? loadOverview(root) : ui.tab === 'bots' ? loadBots(root) : loadPlayers(root);
     };
     clearInterval(botTimer);

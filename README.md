@@ -75,7 +75,7 @@ public/assets/
 └── ui/             logo.png, background.png, app-icon-192.png + app-icon-512.png (installed-app icon)
 ```
 
-**[ASSETS.md](ASSETS.md)** lists every file name, each with a ✅ or ⬜ to show whether it's present; **[ASSETS_MISSING.md](ASSETS_MISSING.md)** lists only the missing files as a to-do list, recommended art first and optional art last. To use a different file name, map it in `public/assets/manifest.json`.
+**[ASSETS.md](ASSETS.md)** lists every file name, each with a ✅ or ⬜ to show whether it's present; **[ASSETS_MISSING.md](ASSETS_MISSING.md)** lists only the missing files as a to-do list, recommended art first and optional art last. On a hosted server without a shell, use **Admin → 🖼 Assets** (filter, thumbnails of what's there, click to copy a file name, download the missing list) or the console command `assets` — both check the files actually on the server. To use a different file name, map it in `public/assets/manifest.json`.
 
 ---
 
@@ -170,7 +170,7 @@ The game is **data-driven**: items, classes, abilities, enemies, zones, uniques,
 
    If `update` ever says *"Your local changes … would be overwritten"*, a file from the repository was edited on the server. Use **Settings → Reinstall Server** in the panel: it resets the game files to the newest version and keeps `data/` (saves, content overrides, certificates) and uploaded images. (`package-lock.json`, which `npm install` used to rewrite, is now handled automatically.)
 
-   Other console commands: `players` (who is online), `say <message>` (announcement from "Server", e.g. `say Restarting in 2 minutes!`; players who are offline still see it on their next login within 24 h), `reload-clients` (refresh every open page), `content [reload]` (check the content files / apply them live), `tls [renew]` (HTTPS status / new certificate now), `admin add|remove|list <username>`, `bots [add <n> [type] | remove <name|all> | on | off]`, `backup` (database snapshot now), `db` (database size and counts), `help`.
+   Other console commands: `players` (who is online), `say <message>` (announcement from "Server", e.g. `say Restarting in 2 minutes!`; players who are offline still see it on their next login within 24 h), `reload-clients` (refresh every open page), `content [reload]` (check the content files / apply them live), `tls [renew]` (HTTPS status / new certificate now), `admin add|remove|list <username>`, `bots [add <n> [type] | remove <name|all> | on | off]`, `assets [list|<section>]` (which artwork files are still missing on the server, e.g. `assets enemies`), `backup` (database snapshot now), `db` (database size and counts), `help`.
 7. **Admins:** set the server variable **Admin Users** (e.g. `alice,bob`) or type `admin add alice` in the console. Admins get an extra **🛡 Admin** page in the sidebar after refreshing.
 5. **Images on the server:** commit them to `public/assets/` in the repo (recommended, so they arrive with updates), or upload them with the panel's File Manager into `public/assets/<folder>/`. Uploaded files sit outside git and survive updates. Don't upload a file with the same name as one that's also committed to the repo, or `git pull` will refuse to update.
 6. **Saves & backups:** everything is stored in one SQLite database, `data/ashenvale.db`. The server keeps the game in memory and writes all changes every 5 seconds in a single transaction. Trades, mail, crystal speed-ups and admin actions are written immediately, so an item or gold can never be duplicated or lost half-way through a trade, even on a crash.

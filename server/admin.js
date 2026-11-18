@@ -1,6 +1,7 @@
 // Admin tools: roles, player management, bans, gifts, settings, audit log.
 // Admins come from the ADMIN_USERS environment variable (comma separated usernames)
 // plus data/admins.json (managed with the console command "admin add <name>").
+import { assetReport, missingMarkdown } from './asset-report.js';
 import crypto from 'node:crypto';
 import { ARCHETYPES } from './bots.js';
 import { MATERIALS } from '../shared/data/town.js';
@@ -100,6 +101,13 @@ export function adminActions(game) {
       const r = contentCall(() => content().reset(str(d.type, 'type'), str(d.id, 'id')));
       admins.audit(s.player.name, 'content_reset', `${d.type}/${d.id}`, '');
       return r;
+    },
+    // ---- artwork checklist: which images exist on this server (server/asset-report.js)
+    admin_assets() {
+      const index = game.assets.get();
+      const r = assetReport(index);
+      for (const sec of r.sections) for (const e of sec.entries) if (e.ok) e.url = index[e.key.toLowerCase()];
+      return { ...r, missingMarkdown: missingMarkdown(r) };
     },
     // ---- live balance statistics (server/balance.js)
     admin_balance(s, d) {

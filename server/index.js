@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { WebSocketServer } from 'ws';
 import { Store } from './store.js';
 import { AssetIndex } from './assets.js';
+import { assetReport } from './asset-report.js';
 import { Game } from './game.js';
 import { CONTENT, replaceContent } from '../shared/content.js';
 import { validateContent } from './content-check.js';
@@ -323,7 +324,7 @@ async function runUpdate() {
 }
 
 const COMMANDS = {
-  help: () => log('Commands: update | reload-clients | players | say <message> | admin add|remove|list <name> | bots [add <n> [type] | remove <name|all> | on | off] | content [reload] | tls [renew] | backup | db | stop'),
+  help: () => log('Commands: update | reload-clients | players | say <message> | assets [list|<section>] | admin add|remove|list <name> | bots [add <n> [type] | remove <name|all> | on | off] | content [reload] | tls [renew] | backup | db | stop'),
   content: async args => {
     // "content" checks the files on disk; "content reload" also switches the running server to them
     try {
@@ -350,6 +351,20 @@ const COMMANDS = {
     const list = bots.list();
     log(`${list.length} bot(s), ${list.filter(x => x.online).length} online${bots.enabled ? '' : ' — PAUSED (bots on)'}. Add: bots add <n> [${Object.keys(ARCHETYPES).join('|')}]`);
     for (const x of list) log(`  ${x.online ? '●' : '○'} ${x.name.padEnd(16)} ${String(x.label).padEnd(8)} ${x.hero ? `Lv ${String(x.hero.level).padStart(2)} ${x.hero.classId.padEnd(7)}` : 'no hero    '} ${x.doing}`);
+  },
+  // "assets" = missing images per section, "assets list" = every missing file, "assets <word>" = only matching sections
+  assets: args => {
+    const r = assetReport(assets.get());
+    const arg = args.trim().toLowerCase();
+    log(`Artwork: ${r.found} of ${r.total} images present, ${r.missing} missing (${r.missingRecommended} recommended, ${r.missing - r.missingRecommended} optional). Folder: public/assets/<folder>/<name>.png|webp|jpg…`);
+    const secs = r.sections.map(x => ({ ...x, miss: x.entries.filter(e => !e.ok) })).filter(x => x.miss.length).sort((a, b) => a.optional - b.optional);
+    if (!arg) {
+      for (const x of secs) log(`  ${String(x.miss.length).padStart(3)} missing  ${x.title}`);
+      return log('Type "assets list" for every missing file name, "assets <section>" (e.g. "assets enemies") for one section, or see Admin → 🖼 Assets.');
+    }
+    const pick = arg === 'list' || arg === 'all' ? secs : secs.filter(x => x.title.toLowerCase().includes(arg) || x.folder.includes(arg));
+    if (!pick.length) return log(`No section with missing images matches "${arg}".`);
+    for (const x of pick) { log(`${x.title} (${x.miss.length} missing):`); for (const e of x.miss) log(`  ${e.file.padEnd(40)} ${e.name}`); }
   },
   backup: () => { try { log(`Backup written: ${store.backup()}`); } catch (e) { log('Backup failed:', e.message); } },
   db: () => { const st = store.stats(); log(`Database ${store.file}: ${st.accounts} accounts, ${st.players} players, ${st.sizeMb} MB (driver: ${st.driver})`); },
