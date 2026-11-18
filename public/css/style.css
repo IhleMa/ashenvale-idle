@@ -1155,3 +1155,5 @@ html.standalone body { padding-bottom: env(safe-area-inset-bottom); padding-left
 .mut-chip.on { border-style: solid; border-color: #c9a24a; color: var(--text); }
 .mut-tag { display: inline-block; font-size: 11px; padding: 0 6px; margin: 2px 4px 0 0; border-radius: 9px; background: #2a1830; color: #f0c6ff; border: 1px solid #6a3a7a; }
 .notable-chip.mutator { background: #2a1830; color: #f0c6ff; }
+.sync-tag { margin-left: 4px; font-size: 11px; color: #7fd6ff; }
+.sync-note { margin: 6px 0; padding: 8px 10px; border-radius: 8px; background: #10222b; border: 1px solid #2c5566; color: #bfe9fb; font-size: 13px; }

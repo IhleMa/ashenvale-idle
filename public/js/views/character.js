@@ -141,7 +141,7 @@ function ascensionPanel(ch) {
   let head;
   if (cur) head = `<p><b>${esc(ch.name)}</b> has ascended as a <b style="color:${esc(cur.color || 'inherit')}">${esc(cur.glyph || '')} ${esc(cur.name)}</b>${ch.ascensions > 1 ? ` (${ch.ascensions} ascensions: ${hist.map(esc).join(' → ')})` : ''}.</p>`
     + (atCap ? `<div class="row gap"><button class="btn primary glow" data-act="ascend">🌟 Switch subclass</button><span class="small muted">Starts again at level 1 as another ${esc(CLASSES[ch.classId].name)} subclass.</span></div>`
-      : `<p class="small muted">Reach level ${CONFIG.levelCap} again to switch to another subclass.</p>`);
+      : `<p class="small muted">Reach level ${CONFIG.levelCap} again to switch to another subclass.${CONFIG.ascension.levelSync?.enabled ? ` Until then, your party is <b>level-synced</b> to level ${Math.min(CONFIG.levelCap, ch.level + CONFIG.ascension.levelSync.levelGap)}.` : ''}</p>`);
   else head = atCap
     ? `<p>Your hero has reached the level cap. Ascending is optional, but unlocks a subclass with new skill-tree branches and abilities.</p><div class="row gap"><button class="btn primary glow" data-act="ascend">🌟 Ascend</button></div>`
     : `<p class="small muted">At level ${CONFIG.levelCap} your hero can <b>ascend</b> into one of these subclasses (optional): back to level 1, but with a new skill-tree branch, new abilities, a passive bonus and +${cfg.bonusSkillPoints} skill points.</p>`;
@@ -170,7 +170,7 @@ function openAscend(ch) {
         <li>${esc(ch.name)} goes back to <b>level 1</b> and the skill tree is reset (now with the ${esc(sub.name)} branch).</li>
         <li>All ${gear} equipped item${gear === 1 ? '' : 's'} will be <b>sent to your mailbox</b> (Auction House → Mailbox).</li>
         <li>+${cfg.bonusSkillPoints} bonus skill points and the ${esc(sub.name)} passive: ${describeNodeStats(sub.bonus).map(esc).join(', ')}.</li>
-        <li>While levelling again, XP from kills is capped at enemies ${cfg.xpLevelGap} levels above the hero.</li>
+        ${cfg.levelSync?.enabled ? `<li><b>Level sync:</b> until ${esc(ch.name)} reaches level ${CONFIG.levelCap} again, everyone in the hero's party fights at the hero's level + ${cfg.levelSync.levelGap} (stats, skill points and gear scaled down). Your party starts again in the first zone.</li>` : ''}
         <li>Gold, items, recruits, town and everything else are kept.</li>
       </ul>`, `Ascend as ${sub.name}`, { html: true });
     if (!ok) return;

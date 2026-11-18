@@ -229,7 +229,7 @@ function unitCard(u, k, minions = []) {
   return `<div class="unit ${u.side === 'A' ? 'ally' : 'foe'} ${u.boss ? 'boss' : ''} ${u.isMain ? 'main' : ''}" data-uid="${u.uid}">
     <div class="unit-art">${art}<div class="floaters"></div></div>
     <div class="unit-info">
-      <div class="unit-name">${u.isMain ? '<span class="hero-star">★</span>' : ''}${esc(u.name)} <span class="muted">Lv ${u.level}${cls ? ' ' + esc(classLabel(u.classId, u.subclass)) : ''}</span> ${tags}${owner}</div>
+      <div class="unit-name">${u.isMain ? '<span class="hero-star">★</span>' : ''}${esc(u.name)} <span class="muted">Lv ${u.level}${u.syncedFrom ? `<span class="sync-tag" ${tipAttr(`Level sync: fights at level ${u.level} (really ${u.syncedFrom}) while the ascended hero levels up again`)}>⇩${u.syncedFrom}</span>` : ''}${cls ? ' ' + esc(classLabel(u.classId, u.subclass)) : ''}</span> ${tags}${owner}</div>
       <div class="bar hp"><div class="fill"></div><span class="bar-label"></span></div>
       ${res}
       <div class="unit-statuses"></div>

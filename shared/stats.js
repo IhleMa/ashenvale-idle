@@ -4,6 +4,7 @@ import { CLASSES, TRAITS, classTier } from './data/classes.js';
 import { treeStats } from './skilltree.js';
 import { setStatBonuses } from './data/legendaries.js';
 import { socketStats } from './gems.js';
+import { gearSyncFactor } from './levelsync.js';
 
 export const ATTRIBUTES = {
   str: { label: 'Strength', short: 'STR' },
@@ -28,9 +29,10 @@ export function equipmentStats(ch) {
   const out = {};
   for (const item of Object.values(ch.equipment || {})) {
     if (!item) continue;
-    for (const [k, v] of Object.entries(item.stats)) out[k] = (out[k] || 0) + v;
-    if (item.enchant) out[item.enchant.stat] = (out[item.enchant.stat] || 0) + item.enchant.value; // Enchanter's Study
-    if (item.sockets) for (const [k, v] of Object.entries(socketStats(item))) out[k] = (out[k] || 0) + v; // socketed gems
+    const f = ch.gearSync ? gearSyncFactor(ch.gearSync, item.level) : 1; // level sync (ascension) scales gear down
+    for (const [k, v] of Object.entries(item.stats)) out[k] = (out[k] || 0) + v * f;
+    if (item.enchant) out[item.enchant.stat] = (out[item.enchant.stat] || 0) + item.enchant.value * f; // Enchanter's Study
+    if (item.sockets) for (const [k, v] of Object.entries(socketStats(item))) out[k] = (out[k] || 0) + v * f; // socketed gems
   }
   return out;
 }

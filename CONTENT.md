@@ -173,7 +173,7 @@ Mutator `changes` (any combination): `power` (+0.3 = every damage/heal/shield/ov
 }
 ```
 
-Subclass abilities live in `content/abilities/<class>/` with `"classId": "<class>"` **and** `"subclass": "<id>"`; only heroes of that subclass see them. Settings in `config.json` → `ascension`: `enabled`, `bonusSkillPoints` (extra points for ascended heroes, default 10) and `xpLevelGap` (while re-levelling, kill XP counts enemies as at most this many levels above the hero, so a strong party can't carry an ascended level-1 hero to the cap in minutes).
+Subclass abilities live in `content/abilities/<class>/` with `"classId": "<class>"` **and** `"subclass": "<id>"`; only heroes of that subclass see them. Settings in `config.json` → `ascension`: `enabled`, `bonusSkillPoints` (extra points for ascended heroes, default 10) `xpLevelGap` (while re-levelling, kill XP counts enemies as at most this many levels above the hero) and `levelSync` — while the ascended hero is below the cap, every character in its party fights at hero level + `levelGap` (default 3): stats of that level, only the skill points of that level (the earliest allocated nodes are kept) and gear scaled by `(gearCurve + level) / (gearCurve + item level)` (default `gearCurve` 4 ≈ how item stats grow). Set `enabled: false` to turn it off.
 
 ### Add or change a minion (Summoner)
 `content/minions/<id>.json` — minions are temporary allies built from their summoner's stats:

@@ -1,6 +1,7 @@
 // Party composition bonuses & building combat units from characters.
 import { CONFIG } from './config.js';
 import { makeCharacterUnit } from './combat.js';
+import { syncParty } from './levelsync.js';
 
 // characters: array of character objects in position order
 export function partyBonuses(characters) {
@@ -28,6 +29,7 @@ export function partyBonuses(characters) {
 // buffs: extra temporary bonuses (e.g. elixirs) { damagePct, damageTakenPct, allStatsPct }
 export function buildPartyUnits(characters, { ownerId, ownerName, positionOffset = 0, extraBonuses = null, buffs = null, vsEnemy = null } = {}) {
   const pb = extraBonuses || partyBonuses(characters);
+  characters = syncParty(characters).characters; // ascension level sync
   return characters.map((ch, i) => makeCharacterUnit(ch, {
     ownerId, ownerName, position: positionOffset + i, vsEnemy,
     bonuses: {

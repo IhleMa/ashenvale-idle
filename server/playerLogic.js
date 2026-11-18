@@ -545,6 +545,9 @@ export function ascendHero(p, { subclassId }) {
   if (p.settings?.autoDevelopHero) autoDevelop(h);
   p.stats.ascensions = (p.stats.ascensions || 0) + 1;
   p.stats.heroLevel = 1;
+  // the party now fights at the hero's level (level sync): start again in the lowest unlocked zone
+  const start = Object.values(ZONES).filter(z => (p.unlockedZones || []).includes(z.id)).sort((a, b) => a.levelRange[0] - b.levelRange[0])[0];
+  if (start) p.zone = start.id;
   return { subclass: sub.id, name: sub.name, mailed, switched: !!from };
 }
 

@@ -1,4 +1,5 @@
 // Party management: presets, member order (position), roles and combined statistics.
+import { partySyncLevel, syncedCharacter } from '/shared/levelsync.js';
 import { classLabel } from '/shared/data/subclasses.js';
 import { state, chars } from '../state.js';
 import { act } from '../net.js';
@@ -60,7 +61,9 @@ export const partyView = {
     const party = p.parties[idx];
     const members = party.members.map(id => p.characters[id]).filter(Boolean);
     const bonus = partyBonuses(members);
-    const stats = members.map(c => computeStats(c));
+    const syncL = partySyncLevel(members);
+    const fighting = syncL ? members.map(c => syncedCharacter(c, syncL)) : members; // level sync: show what actually fights
+    const stats = fighting.map(c => computeStats(c));
     const roles = new Set(members.map(m => m.role));
     const bench = chars().filter(c => !party.members.includes(c.id));
     root.innerHTML = `
@@ -69,14 +72,15 @@ export const partyView = {
         <section class="panel">
           <div class="panel-head"><h3>${esc(party.name)} <button class="icon-btn small" data-rename title="Rename">✎</button></h3>
             ${idx === p.activeParty ? '<span class="tag live">Active — fighting now</span>' : `<button class="btn primary small" data-activate>Make active</button>`}</div>
+          ${(() => { const sl = syncL; return sl ? `<div class="sync-note">⇩ <b>Level sync:</b> your hero is ascending, so everyone in this party fights at <b>level ${sl}</b> (hero level + ${CONFIG.ascension.levelSync.levelGap}). Higher characters use the stats, skill-tree points and scaled-down gear of that level until the hero reaches level ${CONFIG.levelCap} again.</div>` : ''; })()}
           <p class="muted small">Position matters: characters at the front draw more attention from enemies at the start of each fight. Put your tank first. Changes apply from the next fight.</p>
           <div class="party-slots">
             ${members.map((c, i) => `<div class="party-member">
               <span class="pos">${i + 1}</span>
               ${portrait(c, 'md')}
               <div class="grow">
-                <b>${c.isMain ? '<span class="hero-star">★</span> ' : ''}${esc(c.name)}</b> <span class="muted small">Lv ${c.level} · ${esc(charTitle(c))}</span>
-                <div class="row gap small">${classBadge(c.classId)}
+                <b>${c.isMain ? '<span class="hero-star">★</span> ' : ''}${esc(c.name)}</b> <span class="muted small">Lv ${c.level}${fighting[i] !== c ? ` <span class="sync-tag">⇩ fights at ${fighting[i].level}</span>` : ''} · ${esc(charTitle(c))}</span>
+                <div class="row gap small">${classBadge(c.classId, c.subclass)}
                   <select data-role-for="${c.id}" class="small-select">${Object.entries(CONFIG.roles).map(([id, r]) => `<option value="${id}" ${c.role === id ? 'selected' : ''}>${esc(r.label)}</option>`).join('')}</select>
                   <span class="muted">HP ${fmt(stats[i].maxHp)} · Power ${fmt(powerRating(stats[i]))}</span>
                 </div>
@@ -95,7 +99,7 @@ export const partyView = {
           <div class="stat-grid">
             <div class="stat-row"><span>Total health</span><b>${fmt(stats.reduce((s, x) => s + x.maxHp, 0))}</b></div>
             <div class="stat-row"><span>Party power</span><b>${fmt(stats.reduce((s, x) => s + powerRating(x), 0))}</b></div>
-            <div class="stat-row"><span>Average level</span><b>${members.length ? Math.round(members.reduce((s, c) => s + c.level, 0) / members.length) : 0}</b></div>
+            <div class="stat-row"><span>Average level</span><b>${members.length ? Math.round(fighting.reduce((s, c) => s + c.level, 0) / members.length) : 0}${syncL ? ' ⇩' : ''}</b></div>
           </div>
           <h4>Roles</h4>
           <div class="role-coverage">${Object.keys(CONFIG.roles).map(r => `<span class="role-check ${roles.has(r) ? 'ok' : ''}">${roles.has(r) ? '✓' : '○'} ${roleBadge(r)}</span>`).join('')}</div>

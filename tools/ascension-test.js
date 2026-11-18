@@ -13,7 +13,7 @@ const { SUBCLASSES, subclassesOf } = await import('../shared/data/subclasses.js'
 const { CLASSES } = await import('../shared/data/classes.js');
 const { getTree } = await import('../shared/data/skilltree.js');
 const { classAbilities } = await import('../shared/data/abilities.js');
-const { totalSkillPoints, treeStats, allocateNode, pathTo } = await import('../shared/skilltree.js');
+const { totalSkillPoints, treeStats, allocateNode, pathTo, spentPoints: spentOf } = await import('../shared/skilltree.js');
 const { abilityNodeId, syncTree } = await import('../shared/character.js');
 const { makeCharacterUnit, publicUnit } = await import('../shared/combat.js');
 
@@ -69,6 +69,7 @@ assert.equal(Object.values(h.equipment).filter(Boolean).length, 0);
 assert.equal(p.mailbox.length - mailBefore, equipped);
 assert.ok(p.mailbox.slice(-equipped).every(m => m.item && m.from === 'Ascension'));
 assert.equal(p.stats.ascensions, 1);
+assert.equal(p.zone, 'whispering_woods', 'party moved to the first zone');
 ok(`ascended as ${first.name}: level 1, ${equipped} items mailed, subclass set`);
 
 // tree: base branches kept, subclass branch added, subclass ability reachable
@@ -118,6 +119,35 @@ assert.notDeepEqual(mutated, ABILITIES[mutNode.mutator.ability]);
 const unit = makeCharacterUnit(h, { ownerId: p.id, ownerName: p.name, position: 0 });
 assert.deepEqual(unit.abilityDefs[mutNode.mutator.ability], mutated);
 ok(`every subclass has ability mutators; ${mutNode.name} changes ${ABILITIES[mutNode.mutator.ability].name} in combat`);
+
+// level sync: recruits in the ascending hero's party fight at hero level + gap
+{
+  const { partySyncLevel, syncedCharacter, gearSyncFactor } = await import('../shared/levelsync.js');
+  const { buildPartyUnits } = await import('../shared/party.js');
+  const { computeStats } = await import('../shared/stats.js');
+  const { createCharacter } = await import('../shared/character.js');
+  const { autoAllocate } = await import('../shared/skilltree.js');
+  const gap = CONFIG.ascension.levelSync.levelGap;
+  const rec = createCharacter({ id: 'rec', name: 'Rec', classId: 'mage', level: CONFIG.levelCap, autoTree: false });
+  autoAllocate(rec); syncTree(rec);
+  rec.equipment.weapon = { id: 'w', name: 'Staff', slot: 'weapon', level: CONFIG.levelCap, rarity: 'rare', stats: { magPower: 300 } };
+  const savedLevel = h.level;
+  h.level = 4;
+  assert.equal(partySyncLevel([h, rec]), 4 + gap);
+  const sc = syncedCharacter(rec, 4 + gap);
+  assert.equal(sc.level, 4 + gap); assert.equal(rec.level, CONFIG.levelCap, 'original untouched');
+  assert.ok(spentOf(sc) <= totalSkillPoints(sc) && sc.tree.allocated.length < rec.tree.allocated.length, 'tree trimmed to the lower budget');
+  assert.ok(Object.keys(sc.abilities).length < Object.keys(rec.abilities).length);
+  assert.ok(gearSyncFactor(4 + gap, CONFIG.levelCap) < 0.3);
+  assert.ok(computeStats(sc).magPower < computeStats(rec).magPower * 0.25);
+  const units = buildPartyUnits([h, rec], { ownerId: 'x', ownerName: 'X' });
+  assert.equal(units[1].level, 4 + gap); assert.equal(units[1].syncedFrom, CONFIG.levelCap); assert.equal(units[0].level, 4);
+  h.level = CONFIG.levelCap;
+  assert.equal(partySyncLevel([h, rec]), null, 'no sync once the hero is back at the cap');
+  assert.equal(partySyncLevel([{ ...h, subclass: null, level: 4 }, rec]), null, 'no sync for heroes that never ascended');
+  h.level = savedLevel;
+  ok(`level sync: level-${CONFIG.levelCap} recruit fights at hero level + ${gap}, tree, abilities and gear scaled down`);
+}
 
 // same subclass rejected, switch only at the cap again
 h.level = CONFIG.levelCap;

@@ -43,7 +43,7 @@
   "offline": { "maxHours": 8, "minSeconds": 60, "maxSimulatedFights": 250, "efficiency": 1 },
   "recruitment": { "offers": 4, "refreshSeconds": 600, "refreshCostPerLevel": 15, "costBase": 100, "costPerLevel": 40 },
   "inventory": { "limit": 80 },
-  "ascension": { "enabled": true, "bonusSkillPoints": 10, "xpLevelGap": 5 },
+  "ascension": { "enabled": true, "bonusSkillPoints": 10, "xpLevelGap": 5, "levelSync": { "enabled": true, "levelGap": 3, "gearCurve": 4 } },
   "coop": {
     "maxPlayers": 4,
     "charactersPerPlayer": 2,
