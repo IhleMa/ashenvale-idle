@@ -4,7 +4,7 @@ A multiplayer idle RPG that runs in the browser. Create a hero, recruit companio
 
 - **Server-authoritative:** all combat, loot, XP and offline progress is calculated on the server, so client clocks and modified browsers can't cheat.
 - **No build step:** plain ES modules. Run `npm install` and `npm start`, then open the game in a browser.
-- **Bring your own art:** drop images into `public/assets/`. Anything missing shows a generated placeholder. See **[ASSETS.md](ASSETS.md)**.
+- **Bring your own art:** drop images into `public/assets/`. Anything missing shows a generated placeholder. See **[ASSETS.md](ASSETS.md)** (everything) and **[ASSETS_MISSING.md](ASSETS_MISSING.md)** (only what's still missing).
 
 ---
 
@@ -26,7 +26,7 @@ Create an account in the browser and choose a class. Your first companion is fre
 | `npm test` | Quick tests (content, editor, tutorial, saves, smoke test, HTTPS) — about a minute |
 | `npm run test:full` | Everything, including the slow town/endgame simulations and 4 h of bot play |
 | `npm run simulate -- 14 ashen_barrows 100 warrior,cleric,mage,rogue` | Balance simulator using the real combat engine |
-| `npm run assets` | Regenerate `ASSETS.md`, the checklist of all image names |
+| `npm run assets` | Regenerate `ASSETS.md` (all image names) and `ASSETS_MISSING.md` (only the missing ones, recommended first); add `-- --missing` to also print the missing files |
 
 ### Environment variables
 
@@ -75,7 +75,7 @@ public/assets/
 └── ui/             logo.png, background.png, app-icon-192.png + app-icon-512.png (installed-app icon)
 ```
 
-**[ASSETS.md](ASSETS.md)** lists every file name, each with a ✅ or ⬜ to show whether it's present. To use a different file name, map it in `public/assets/manifest.json`.
+**[ASSETS.md](ASSETS.md)** lists every file name, each with a ✅ or ⬜ to show whether it's present; **[ASSETS_MISSING.md](ASSETS_MISSING.md)** lists only the missing files as a to-do list, recommended art first and optional art last. To use a different file name, map it in `public/assets/manifest.json`.
 
 ---
 

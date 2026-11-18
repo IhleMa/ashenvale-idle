@@ -21,7 +21,7 @@ Square images. Shown on class selection, badges and as the default portrait for 
 | ⬜ | `classes/ranger.png` | Ranger class icon (also the fallback portrait) |
 | ⬜ | `classes/summoner.png` | Summoner class icon (also the fallback portrait) |
 
-## Default portraits
+## Default portraits (optional)
 Optional. Add **extra appearance options** by naming files `portraits/<class>_<anything>.png`, e.g. `portraits/warrior_1.png`, `portraits/mage_female.png`.
 They automatically appear as appearance choices during hero creation and are randomly assigned to recruits of that class.
 
@@ -196,7 +196,7 @@ Square icons. You can also add a rarity-specific version: `items/<base>_<rarity>
 | ⬜ | `items/ring.png` | Ring (Ring) |
 | ⬜ | `items/amulet.png` | Amulet (Amulet) |
 
-## Unique items
+## Unique items (optional)
 Optional special art for each unique item.
 
 | | File | Used for |
@@ -221,7 +221,7 @@ Optional special art for each unique item.
 | ⬜ | `items/unique_heart_of_the_void.png` | Heart of the Void (falls back to items/ring) |
 | ⬜ | `items/unique_titans_cleaver.png` | Titan's Cleaver (falls back to items/axe) |
 
-## Set pieces
+## Set pieces (optional)
 Optional art per set piece. Fallback order: items/set_<set>_<base> → items/set_<set> → items/<base>.
 
 | | File | Used for |
