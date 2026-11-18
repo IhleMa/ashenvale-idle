@@ -1,0 +1,43 @@
+{
+  "name": "Templar",
+  "classId": "cleric",
+  "glyph": "⚜",
+  "color": "#f0d27a",
+  "description": "A holy warrior who fights on the front line and heals while dealing damage.",
+  "title": "Templar",
+  "bonus": {
+    "magPowerPct": 0.08,
+    "hpPct": 0.05
+  },
+  "branches": [
+    {
+      "name": "Templar",
+      "attrs": [
+        "str",
+        "int"
+      ],
+      "abilities": {
+        "2": "holy_strike",
+        "5": "consecration"
+      },
+      "notables": {
+        "4": {
+          "name": "Righteous Fury",
+          "stats": {
+            "damagePct": 0.1,
+            "hpPct": 0.05
+          }
+        },
+        "8": {
+          "name": "Crusader",
+          "stats": {
+            "magPowerPct": 0.12,
+            "defensePct": 0.15,
+            "damagePct": 0.08
+          }
+        }
+      }
+    }
+  ],
+  "order": 90
+}

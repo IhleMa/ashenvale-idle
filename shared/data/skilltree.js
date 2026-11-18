@@ -13,6 +13,7 @@
 //   physPowerPct, magPowerPct, healPowerPct, defensePct, hpPct  ·  critChance, critDamage, attackSpeed
 //   damagePct, healingPct, damageTakenPct (combat)  ·  rank: { abilityId: +ranks }
 import { ABILITIES } from './abilities.js';
+import { SUBCLASSES } from './subclasses.js';
 
 import { CONTENT, onContentReload } from '../content.js';
 
@@ -24,12 +25,17 @@ const ATTR_NAMES = CONTENT.skilltree.attributeNames;
 const cache = new Map();
 onContentReload(() => cache.clear());
 
-export function getTree(classId) {
-  if (cache.has(classId)) return cache.get(classId);
+// An ascended hero's tree is the class tree plus the branches of its subclass (node ids of the class
+// branches stay the same; the extra branches get the next branch numbers).
+export function getTree(classId, subclassId = null) {
+  const sub = subclassId && SUBCLASSES[subclassId]?.classId === classId ? SUBCLASSES[subclassId] : null;
+  const key = sub ? `${classId}:${sub.id}` : classId;
+  if (cache.has(key)) return cache.get(key);
   const spec = TREE_SPECS[classId];
   if (!spec) return null;
-  const tree = buildTree(spec);
-  cache.set(classId, tree);
+  const tree = buildTree(sub ? { ...spec, branches: [...spec.branches, ...sub.branches.map(b => ({ ...b, subclass: sub.id }))] } : spec);
+  if (sub) tree.subclassBranches = spec.branches.length; // branches from this index on belong to the subclass
+  cache.set(key, tree);
   return tree;
 }
 
@@ -138,7 +144,7 @@ function buildTree(spec) {
     else n.stats = { [k === 1 ? s : p]: smallNodeValue };
     n.name = Object.keys(n.stats).map(a => ATTR_NAMES[a]).join(' & ');
   }
-  for (const n of Object.values(nodes)) n.links.sort();
+  for (const n of Object.values(nodes)) { n.links.sort(); if (spec.branches[n.branch]?.subclass) n.subclass = spec.branches[n.branch].subclass; }
   return { nodes, start: 'start', branches: spec.branches.map(b => b.name), radius: rings.length * ringSpacing };
 }
 

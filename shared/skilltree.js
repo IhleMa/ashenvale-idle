@@ -3,12 +3,14 @@
 import { CONFIG } from './config.js';
 import { CLASSES } from './data/classes.js';
 import { getTree, TREE_CONFIG } from './data/skilltree.js';
+import { SUBCLASSES } from './data/subclasses.js';
 
 export { getTree };
 
 export function totalSkillPoints(ch) {
   const every = CONFIG.mainCharacter.bonusSkillPointEvery;
-  return ch.level * CONFIG.skillPointsPerLevel + (ch.isMain && every ? Math.floor(ch.level / every) : 0);
+  const ascended = ch.subclass ? CONFIG.ascension?.bonusSkillPoints || 0 : 0; // ascended heroes get extra points
+  return ch.level * CONFIG.skillPointsPerLevel + (ch.isMain && every ? Math.floor(ch.level / every) : 0) + ascended;
 }
 
 export function allocatedSet(ch) { return new Set(ch.tree?.allocated || ['start']); }
@@ -16,7 +18,7 @@ export function spentPoints(ch) { return Math.max(0, allocatedSet(ch).size - 1);
 export function availablePoints(ch) { return totalSkillPoints(ch) - spentPoints(ch); }
 
 export function canAllocate(ch, nodeId) {
-  const tree = getTree(ch.classId);
+  const tree = getTree(ch.classId, ch.subclass);
   const node = tree.nodes[nodeId];
   if (!node) return 'Unknown node';
   const set = allocatedSet(ch);
@@ -28,7 +30,7 @@ export function canAllocate(ch, nodeId) {
 
 // Shortest path (list of unallocated node ids, in order) from the current tree to nodeId.
 export function pathTo(ch, nodeId) {
-  const tree = getTree(ch.classId);
+  const tree = getTree(ch.classId, ch.subclass);
   const set = allocatedSet(ch);
   if (!tree.nodes[nodeId] || set.has(nodeId)) return [];
   const prev = new Map();
@@ -64,7 +66,7 @@ export function canRefund(ch, nodeId) {
   const set = allocatedSet(ch);
   if (!set.has(nodeId)) return 'Node is not allocated';
   set.delete(nodeId);
-  if (!stillConnected(getTree(ch.classId), set)) return 'Refunding this node would disconnect other nodes';
+  if (!stillConnected(getTree(ch.classId, ch.subclass), set)) return 'Refunding this node would disconnect other nodes';
   return null;
 }
 
@@ -83,7 +85,7 @@ export function resetTree(ch) { ch.tree = { allocated: ['start'] }; }
 
 // Drops unknown / disconnected nodes and over-spent points (e.g. after a tree layout change).
 export function sanitizeTree(ch) {
-  const tree = getTree(ch.classId);
+  const tree = getTree(ch.classId, ch.subclass);
   if (!ch.tree || !Array.isArray(ch.tree.allocated)) ch.tree = { allocated: ['start'] };
   let list = ['start', ...ch.tree.allocated.filter(n => n !== 'start' && tree.nodes[n])];
   list = [...new Set(list)];
@@ -103,7 +105,7 @@ export function sanitizeTree(ch) {
 
 // Abilities (id -> rank) granted by the allocated nodes
 export function treeAbilities(ch) {
-  const tree = getTree(ch.classId);
+  const tree = getTree(ch.classId, ch.subclass);
   const out = {};
   for (const id of allocatedSet(ch)) {
     const n = tree.nodes[id];
@@ -116,10 +118,11 @@ export function treeAbilities(ch) {
   return out;
 }
 
-// Summed passive stats of the allocated nodes (excluding ranks)
+// Summed passive stats of the allocated nodes (excluding ranks), plus the subclass's permanent bonus
 export function treeStats(ch) {
-  const tree = getTree(ch.classId);
+  const tree = getTree(ch.classId, ch.subclass);
   const out = {};
+  for (const [k, v] of Object.entries((ch.subclass && SUBCLASSES[ch.subclass]?.bonus) || {})) out[k] = (out[k] || 0) + v;
   for (const id of allocatedSet(ch)) {
     for (const [k, v] of Object.entries(tree.nodes[id]?.stats || {})) {
       if (k === 'rank') continue;
@@ -144,7 +147,7 @@ function nodeValue(ch, node, owned) {
 
 // Spends all available points greedily on the best value-per-point target.
 export function autoAllocate(ch) {
-  const tree = getTree(ch.classId);
+  const tree = getTree(ch.classId, ch.subclass);
   let guard = 200;
   while (availablePoints(ch) > 0 && guard-- > 0) {
     const set = allocatedSet(ch);

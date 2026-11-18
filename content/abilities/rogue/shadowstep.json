@@ -1,0 +1,41 @@
+{
+  "name": "Shadowstep",
+  "classId": "rogue",
+  "subclass": "assassin",
+  "unlockLevel": 20,
+  "type": "buff",
+  "description": "Vanish into the shadows: 50% dodge and 30% more damage for 6 seconds.",
+  "cost": 30,
+  "cooldown": 20,
+  "target": "self",
+  "effects": [
+    {
+      "kind": "status",
+      "status": "evasion",
+      "duration": 6,
+      "self": true
+    },
+    {
+      "kind": "status",
+      "status": "deadeye",
+      "duration": 6,
+      "self": true
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "self_hp_below",
+        "value": 70
+      }
+    ],
+    "target": {
+      "selector": "self"
+    },
+    "targetConditions": []
+  },
+  "priority": 82,
+  "order": 913
+}

@@ -1,0 +1,41 @@
+{
+  "name": "Venomancer",
+  "classId": "rogue",
+  "glyph": "☣",
+  "color": "#7ac943",
+  "description": "Poisons everything it touches and lets toxins do the work.",
+  "title": "Venomancer",
+  "bonus": {
+    "damagePct": 0.07
+  },
+  "branches": [
+    {
+      "name": "Venomancer",
+      "attrs": [
+        "dex",
+        "int"
+      ],
+      "abilities": {
+        "2": "plague_strike",
+        "5": "toxic_cloud"
+      },
+      "notables": {
+        "4": {
+          "name": "Virulence",
+          "stats": {
+            "damagePct": 0.08,
+            "physPowerPct": 0.05
+          }
+        },
+        "8": {
+          "name": "Pandemic",
+          "stats": {
+            "damagePct": 0.15,
+            "physPowerPct": 0.1
+          }
+        }
+      }
+    }
+  ],
+  "order": 80
+}

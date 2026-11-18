@@ -1,0 +1,43 @@
+{
+  "name": "Cryomancer",
+  "classId": "mage",
+  "glyph": "❄",
+  "color": "#7fd0ff",
+  "description": "Freezes enemies in place and protects allies behind walls of ice.",
+  "title": "Cryomancer",
+  "bonus": {
+    "magPowerPct": 0.05,
+    "defensePct": 0.1
+  },
+  "branches": [
+    {
+      "name": "Cryomancer",
+      "attrs": [
+        "int",
+        "vit"
+      ],
+      "abilities": {
+        "2": "blizzard",
+        "5": "ice_barrier"
+      },
+      "notables": {
+        "4": {
+          "name": "Frozen Heart",
+          "stats": {
+            "hpPct": 0.08,
+            "damageTakenPct": -0.05
+          }
+        },
+        "8": {
+          "name": "Absolute Zero",
+          "stats": {
+            "magPowerPct": 0.1,
+            "defensePct": 0.2,
+            "hpPct": 0.08
+          }
+        }
+      }
+    }
+  ],
+  "order": 40
+}

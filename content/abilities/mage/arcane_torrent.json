@@ -1,0 +1,35 @@
+{
+  "name": "Arcane Torrent",
+  "classId": "mage",
+  "subclass": "arcanist",
+  "unlockLevel": 5,
+  "type": "damage",
+  "description": "Five arcane bolts of 60% magic damage each.",
+  "cost": 40,
+  "cooldown": 8,
+  "target": "enemy",
+  "effects": [
+    {
+      "kind": "damage",
+      "stat": "magPower",
+      "power": 0.6,
+      "school": "magical",
+      "hits": 5
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "always"
+      }
+    ],
+    "target": {
+      "selector": "enemy_current"
+    },
+    "targetConditions": []
+  },
+  "priority": 70,
+  "order": 910
+}

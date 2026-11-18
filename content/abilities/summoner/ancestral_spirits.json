@@ -1,0 +1,41 @@
+{
+  "name": "Ancestral Spirits",
+  "classId": "summoner",
+  "subclass": "spiritcaller",
+  "unlockLevel": 5,
+  "type": "summon",
+  "description": "Call 2 Spirit Wisps (up to 2) that heal the party.",
+  "cost": 40,
+  "cooldown": 24,
+  "target": "self",
+  "effects": [
+    {
+      "kind": "summon",
+      "minion": "spirit_wisp",
+      "count": 2,
+      "max": 2
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "ally_hp_below",
+        "value": 85
+      },
+      {
+        "type": "own_minions",
+        "minion": "spirit_wisp",
+        "cmp": "<=",
+        "value": 0
+      }
+    ],
+    "target": {
+      "selector": "self"
+    },
+    "targetConditions": []
+  },
+  "priority": 80,
+  "order": 934
+}

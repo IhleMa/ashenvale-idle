@@ -12,6 +12,9 @@ import { abilitySlots } from '/shared/character.js';
 import { activeSetBonuses, equippedSetCounts, SETS, UNIQUES } from '/shared/data/legendaries.js';
 import { availablePoints, treeStats } from '/shared/skilltree.js';
 import { PROFESSIONS, BUILDINGS, professionXpToNext } from '/shared/data/town.js';
+import { SUBCLASSES, subclassesOf } from '/shared/data/subclasses.js';
+import { ABILITIES } from '/shared/data/abilities.js';
+import { describeNodeStats } from '/shared/data/skilltree.js';
 import { professionIcon } from '../assets.js';
 
 export const characterView = {
@@ -24,6 +27,7 @@ export const characterView = {
       if (!t || !ch) return;
       const a = t.dataset.act;
       if (a === 'slot') openSlot(ch, t.dataset.slot);
+      if (a === 'ascend') openAscend(ch, t.dataset.sub || null);
       if (a === 'rename') {
         const name = prompt('New name', ch.name);
         if (name) await run(act('rename_character', { charId: ch.id, name }));
@@ -51,7 +55,7 @@ export const characterView = {
           <div class="char-portrait">${portrait(ch, 'xl')}</div>
           <div class="char-ident">
             <h2>${ch.isMain ? '<span class="hero-star">★</span> ' : ''}${esc(ch.name)} <button class="icon-btn small" data-act="rename" title="Rename">✎</button></h2>
-            <div class="muted">${esc(charTitle(ch))} · ${classBadge(ch.classId)} ${ch.isMain ? '<span class="tag hero">HERO</span>' : ''}</div>
+            <div class="muted">${esc(charTitle(ch))} · ${classBadge(ch.classId, ch.subclass)} ${ch.isMain ? '<span class="tag hero">HERO</span>' : ''}</div>
             <div class="lvl-line"><b>Level ${ch.level}</b>${ch.level < CONFIG.levelCap ? bar(ch.xp, xpToNext(ch.level), 'xp', `${fmt(ch.xp)} / ${fmt(xpToNext(ch.level))} XP`) : '<span class="muted"> (max level)</span>'}</div>
             <div class="row gap wrap">
               <label class="inline">Role <select data-role>${Object.entries(CONFIG.roles).map(([id, r]) => `<option value="${id}" ${ch.role === id ? 'selected' : ''}>${esc(r.label)}</option>`).join('')}</select></label>
@@ -105,9 +109,72 @@ export const characterView = {
           ${specialEffectsHtml(ch)}
           <div class="muted small">${p.inventory.filter(i => canEquip(i, ch)).length} usable item(s) in inventory.</div>
         </section>
+        ${ch.isMain ? ascensionPanel(ch) : ''}
       </div>`;
   },
 };
+
+// ---------- Ascension (hero only) ----------
+function subclassCard(sub, { pick = false, current = false } = {}) {
+  const abil = sub.branches.flatMap(b => Object.values(b.abilities || {})).map(id => ABILITIES[id]).filter(Boolean);
+  const keys = sub.branches.flatMap(b => Object.values(b.notables || {}));
+  return `<div class="subclass-card ${current ? 'current' : ''}" style="--sub-color:${esc(sub.color || '#c9a24a')}">
+    <div class="subclass-head"><span class="subclass-glyph">${esc(sub.glyph || '🌟')}</span><div><b>${esc(sub.name)}</b>${current ? ' <span class="tag hero">CURRENT</span>' : ''}<div class="small muted">${esc(sub.description || '')}</div></div></div>
+    <div class="small"><b>Passive:</b> ${describeNodeStats(sub.bonus).map(esc).join(' · ') || '—'}</div>
+    <div class="subclass-abil">${abil.map(a => `<div class="small"><b>${esc(a.name)}</b> <span class="muted">— ${esc(a.description)}</span></div>`).join('')}</div>
+    ${keys.length ? `<div class="small muted">Notables: ${keys.map(k => `<span ${tipAttr(esc(describeNodeStats(k.stats).join(', ')))}>${esc(k.name)}</span>`).join(' · ')}</div>` : ''}
+    ${pick ? `<div class="row end"><button class="btn primary small" data-pick="${esc(sub.id)}">Ascend as ${esc(sub.name)}</button></div>` : ''}
+  </div>`;
+}
+
+function ascensionPanel(ch) {
+  const cfg = CONFIG.ascension;
+  if (!cfg?.enabled) return '';
+  const subs = subclassesOf(ch.classId);
+  if (!subs.length) return '';
+  const atCap = ch.level >= CONFIG.levelCap;
+  const cur = ch.subclass && SUBCLASSES[ch.subclass];
+  const hist = (ch.ascensionHistory || []).map(h => SUBCLASSES[h.subclass]?.name || h.subclass);
+  let head;
+  if (cur) head = `<p><b>${esc(ch.name)}</b> has ascended as a <b style="color:${esc(cur.color || 'inherit')}">${esc(cur.glyph || '')} ${esc(cur.name)}</b>${ch.ascensions > 1 ? ` (${ch.ascensions} ascensions: ${hist.map(esc).join(' → ')})` : ''}.</p>`
+    + (atCap ? `<div class="row gap"><button class="btn primary glow" data-act="ascend">🌟 Switch subclass</button><span class="small muted">Starts again at level 1 as another ${esc(CLASSES[ch.classId].name)} subclass.</span></div>`
+      : `<p class="small muted">Reach level ${CONFIG.levelCap} again to switch to another subclass.</p>`);
+  else head = atCap
+    ? `<p>Your hero has reached the level cap. Ascending is optional, but unlocks a subclass with new skill-tree branches and abilities.</p><div class="row gap"><button class="btn primary glow" data-act="ascend">🌟 Ascend</button></div>`
+    : `<p class="small muted">At level ${CONFIG.levelCap} your hero can <b>ascend</b> into one of these subclasses (optional): back to level 1, but with a new skill-tree branch, new abilities, a passive bonus and +${cfg.bonusSkillPoints} skill points.</p>`;
+  return `<section class="panel ascension-panel">
+    <div class="panel-head"><h3>🌟 Ascension</h3></div>
+    ${head}
+    <details ${cur ? '' : 'open'}><summary class="small">Subclasses of the ${esc(CLASSES[ch.classId].name)}</summary>
+      <div class="subclass-grid">${subs.map(s => subclassCard(s, { current: s.id === ch.subclass })).join('')}</div>
+    </details>
+  </section>`;
+}
+
+function openAscend(ch) {
+  const subs = subclassesOf(ch.classId).filter(s => s.id !== ch.subclass);
+  const m = modal(`<h3>🌟 ${ch.subclass ? 'Switch subclass' : 'Ascend'} — ${esc(ch.name)}</h3>
+    <p class="small muted">Choose a ${esc(CLASSES[ch.classId].name)} subclass. You keep the whole ${esc(CLASSES[ch.classId].name)} tree and abilities; the subclass adds a new branch on top.</p>
+    <div class="subclass-grid">${subs.map(s => subclassCard(s, { pick: true })).join('')}</div>`, { wide: true });
+  m.el.addEventListener('click', async e => {
+    const b = e.target.closest('[data-pick]');
+    if (!b) return;
+    const sub = SUBCLASSES[b.dataset.pick];
+    const gear = SLOT_IDS.filter(sl => ch.equipment[sl]).length;
+    const cfg = CONFIG.ascension;
+    const ok = await confirmBox(`<b>Ascend ${esc(ch.name)} as ${esc(sub.name)}?</b>
+      <ul class="small">
+        <li>${esc(ch.name)} goes back to <b>level 1</b> and the skill tree is reset (now with the ${esc(sub.name)} branch).</li>
+        <li>All ${gear} equipped item${gear === 1 ? '' : 's'} will be <b>sent to your mailbox</b> (Auction House → Mailbox).</li>
+        <li>+${cfg.bonusSkillPoints} bonus skill points and the ${esc(sub.name)} passive: ${describeNodeStats(sub.bonus).map(esc).join(', ')}.</li>
+        <li>While levelling again, XP from kills is capped at enemies ${cfg.xpLevelGap} levels above the hero.</li>
+        <li>Gold, items, recruits, town and everything else are kept.</li>
+      </ul>`, `Ascend as ${sub.name}`, { html: true });
+    if (!ok) return;
+    const r = await run(act('ascend', { subclassId: sub.id }));
+    if (r !== undefined) m.close();
+  });
+}
 
 function specialEffectsHtml(ch) {
   const uniques = Object.values(ch.equipment).filter(i => i?.unique && UNIQUES[i.unique]);

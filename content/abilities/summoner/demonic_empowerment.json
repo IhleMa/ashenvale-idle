@@ -1,0 +1,41 @@
+{
+  "name": "Demonic Empowerment",
+  "classId": "summoner",
+  "subclass": "demonologist",
+  "unlockLevel": 20,
+  "type": "buff",
+  "description": "All your minions deal 40% more damage, attack 30% faster and take 25% less damage for 10 seconds.",
+  "cost": 35,
+  "cooldown": 22,
+  "target": "ally",
+  "area": true,
+  "effects": [
+    {
+      "kind": "status",
+      "status": "empowered",
+      "duration": 10
+    },
+    {
+      "kind": "status",
+      "status": "soul_link",
+      "duration": 10
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "own_minions",
+        "cmp": ">=",
+        "value": 2
+      }
+    ],
+    "target": {
+      "selector": "own_minions"
+    },
+    "targetConditions": []
+  },
+  "priority": 76,
+  "order": 933
+}

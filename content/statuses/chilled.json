@@ -1,0 +1,9 @@
+{
+  "name": "Chilled",
+  "type": "debuff",
+  "mods": {
+    "attackSpeedPct": -0.35
+  },
+  "description": "Attacks 35% slower.",
+  "order": 340
+}

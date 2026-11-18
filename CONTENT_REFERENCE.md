@@ -86,6 +86,42 @@ Roles (config.json → roles): `tank`, `healer`, `damage`, `support`
 | [`b_blizzard`](content/abilities/enemy/b_blizzard.json) | Blizzard | enemy | damage | 16 | enemy |
 | [`b_void_rift`](content/abilities/enemy/b_void_rift.json) | Void Rift | enemy | damage | 14 | enemy |
 | [`b_annihilate`](content/abilities/enemy/b_annihilate.json) | Annihilate | enemy | damage | 20 | enemy |
+| [`iron_bulwark`](content/abilities/warrior/iron_bulwark.json) | Iron Bulwark | warrior | buff | 20 | self |
+| [`seismic_slam`](content/abilities/warrior/seismic_slam.json) | Seismic Slam | warrior | damage | 14 | enemy |
+| [`rampage`](content/abilities/warrior/rampage.json) | Rampage | warrior | damage | 7 | enemy |
+| [`bloodlust`](content/abilities/warrior/bloodlust.json) | Bloodlust | warrior | buff | 22 | self |
+| [`rallying_banner`](content/abilities/warrior/rallying_banner.json) | Rallying Banner | warrior | buff | 25 | ally |
+| [`commanding_shout`](content/abilities/warrior/commanding_shout.json) | Commanding Shout | warrior | buff | 18 | ally |
+| [`inferno`](content/abilities/mage/inferno.json) | Inferno | mage | damage | 12 | enemy |
+| [`combustion`](content/abilities/mage/combustion.json) | Combustion | mage | damage | 16 | enemy |
+| [`blizzard`](content/abilities/mage/blizzard.json) | Blizzard | mage | damage | 12 | enemy |
+| [`ice_barrier`](content/abilities/mage/ice_barrier.json) | Ice Barrier | mage | buff | 14 | ally |
+| [`arcane_torrent`](content/abilities/mage/arcane_torrent.json) | Arcane Torrent | mage | damage | 8 | enemy |
+| [`time_warp`](content/abilities/mage/time_warp.json) | Time Warp | mage | buff | 30 | ally |
+| [`assassinate`](content/abilities/rogue/assassinate.json) | Assassinate | rogue | damage | 14 | enemy |
+| [`shadowstep`](content/abilities/rogue/shadowstep.json) | Shadowstep | rogue | buff | 20 | self |
+| [`smoke_bomb`](content/abilities/rogue/smoke_bomb.json) | Smoke Bomb | rogue | control | 20 | enemy |
+| [`fan_of_knives`](content/abilities/rogue/fan_of_knives.json) | Fan of Knives | rogue | damage | 9 | enemy |
+| [`plague_strike`](content/abilities/rogue/plague_strike.json) | Plague Strike | rogue | damage | 6 | enemy |
+| [`toxic_cloud`](content/abilities/rogue/toxic_cloud.json) | Toxic Cloud | rogue | debuff | 16 | enemy |
+| [`holy_strike`](content/abilities/cleric/holy_strike.json) | Holy Strike | cleric | damage | 6 | enemy |
+| [`consecration`](content/abilities/cleric/consecration.json) | Consecration | cleric | damage | 14 | enemy |
+| [`prophecy`](content/abilities/cleric/prophecy.json) | Prophecy | cleric | heal | 14 | ally |
+| [`divine_aegis`](content/abilities/cleric/divine_aegis.json) | Divine Aegis | cleric | buff | 22 | ally |
+| [`judgement`](content/abilities/cleric/judgement.json) | Judgement | cleric | damage | 10 | enemy |
+| [`purge`](content/abilities/cleric/purge.json) | Purge | cleric | damage | 12 | enemy |
+| [`deadeye_shot`](content/abilities/ranger/deadeye_shot.json) | Deadeye Shot | ranger | damage | 12 | enemy |
+| [`steady_aim`](content/abilities/ranger/steady_aim.json) | Steady Aim | ranger | buff | 24 | self |
+| [`call_wolf`](content/abilities/ranger/call_wolf.json) | Call Wolf | ranger | summon | 20 | self |
+| [`pack_tactics`](content/abilities/ranger/pack_tactics.json) | Pack Tactics | ranger | buff | 22 | self |
+| [`thorn_trap`](content/abilities/ranger/thorn_trap.json) | Thorn Trap | ranger | damage | 12 | enemy |
+| [`natures_blessing`](content/abilities/ranger/natures_blessing.json) | Nature's Blessing | ranger | heal | 20 | ally |
+| [`army_of_the_dead`](content/abilities/summoner/army_of_the_dead.json) | Army of the Dead | summoner | summon | 18 | self |
+| [`death_coil`](content/abilities/summoner/death_coil.json) | Death Coil | summoner | damage | 8 | enemy |
+| [`summon_felguard`](content/abilities/summoner/summon_felguard.json) | Summon Felguard | summoner | summon | 40 | self |
+| [`demonic_empowerment`](content/abilities/summoner/demonic_empowerment.json) | Demonic Empowerment | summoner | buff | 22 | ally |
+| [`ancestral_spirits`](content/abilities/summoner/ancestral_spirits.json) | Ancestral Spirits | summoner | summon | 24 | self |
+| [`spirit_ward`](content/abilities/summoner/spirit_ward.json) | Spirit Ward | summoner | buff | 25 | ally |
 
 ### Effect kinds (abilities, boss phases)
 
@@ -193,6 +229,14 @@ Target selectors (`target.selector`):
 | [`regeneration`](content/statuses/regeneration.json) | Regeneration | buff | Regenerating health. |
 | [`empowered`](content/statuses/empowered.json) | Empowered | buff | Deals 40% more damage and attacks 30% faster. |
 | [`soul_link`](content/statuses/soul_link.json) | Soul Link | buff | Takes 25% less damage. |
+| [`bloodlust`](content/statuses/bloodlust.json) | Bloodlust | buff | Attacks 35% faster and deals 10% more damage. |
+| [`rallied`](content/statuses/rallied.json) | Rallied | buff | Deals 15% more damage and has 10% more defense. |
+| [`unbreakable`](content/statuses/unbreakable.json) | Unbreakable | buff | Takes 35% less damage. |
+| [`hastened`](content/statuses/hastened.json) | Hastened | buff | Attacks and casts 25% faster. |
+| [`deadeye`](content/statuses/deadeye.json) | Deadeye | buff | Deals 30% more damage. |
+| [`judged`](content/statuses/judged.json) | Judged | debuff | Takes 20% more damage and deals 10% less. |
+| [`chilled`](content/statuses/chilled.json) | Chilled | debuff | Attacks 35% slower. |
+| [`nature_blessing`](content/statuses/nature_blessing.json) | Nature's Blessing | buff | Heals every second. |
 
 ## Stats
 

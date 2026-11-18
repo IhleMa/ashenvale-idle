@@ -1,0 +1,41 @@
+{
+  "name": "Inquisitor",
+  "classId": "cleric",
+  "glyph": "⚖",
+  "color": "#e86a4a",
+  "description": "Judges the wicked: weakens the strongest enemies and burns the rest.",
+  "title": "Inquisitor",
+  "bonus": {
+    "damagePct": 0.08
+  },
+  "branches": [
+    {
+      "name": "Inquisitor",
+      "attrs": [
+        "int",
+        "str"
+      ],
+      "abilities": {
+        "2": "judgement",
+        "5": "purge"
+      },
+      "notables": {
+        "4": {
+          "name": "Zeal",
+          "stats": {
+            "damagePct": 0.08,
+            "critChance": 0.03
+          }
+        },
+        "8": {
+          "name": "Holy Wrath",
+          "stats": {
+            "magPowerPct": 0.15,
+            "damagePct": 0.08
+          }
+        }
+      }
+    }
+  ],
+  "order": 110
+}

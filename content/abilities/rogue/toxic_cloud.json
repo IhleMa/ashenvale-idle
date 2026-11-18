@@ -1,0 +1,43 @@
+{
+  "name": "Toxic Cloud",
+  "classId": "rogue",
+  "subclass": "venomancer",
+  "unlockLevel": 20,
+  "type": "debuff",
+  "description": "Poison all enemies and expose them (15% more damage taken) for 8 seconds.",
+  "cost": 40,
+  "cooldown": 16,
+  "target": "enemy",
+  "area": true,
+  "effects": [
+    {
+      "kind": "status",
+      "status": "poison",
+      "duration": 8,
+      "stat": "physPower",
+      "power": 0.3
+    },
+    {
+      "kind": "status",
+      "status": "exposed",
+      "duration": 8
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "enemies_alive",
+        "cmp": ">=",
+        "value": 2
+      }
+    ],
+    "target": {
+      "selector": "all_enemies"
+    },
+    "targetConditions": []
+  },
+  "priority": 72,
+  "order": 917
+}

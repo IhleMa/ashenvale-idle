@@ -1,0 +1,10 @@
+{
+  "name": "Judged",
+  "type": "debuff",
+  "mods": {
+    "damageTakenPct": 0.2,
+    "damagePct": -0.1
+  },
+  "description": "Takes 20% more damage and deals 10% less.",
+  "order": 330
+}

@@ -1,0 +1,39 @@
+{
+  "name": "Iron Bulwark",
+  "classId": "warrior",
+  "subclass": "juggernaut",
+  "unlockLevel": 5,
+  "type": "buff",
+  "description": "Become Unbreakable for 6 seconds (35% less damage taken) and taunt all enemies.",
+  "cost": 30,
+  "cooldown": 20,
+  "target": "self",
+  "effects": [
+    {
+      "kind": "status",
+      "status": "unbreakable",
+      "duration": 6,
+      "self": true
+    },
+    {
+      "kind": "taunt",
+      "duration": 4
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "self_hp_below",
+        "value": 60
+      }
+    ],
+    "target": {
+      "selector": "self"
+    },
+    "targetConditions": []
+  },
+  "priority": 85,
+  "order": 900
+}

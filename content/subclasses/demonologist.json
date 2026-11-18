@@ -1,0 +1,41 @@
+{
+  "name": "Demonologist",
+  "classId": "summoner",
+  "glyph": "♆",
+  "color": "#e0533d",
+  "description": "Binds demons. A Felguard holds the line while empowered minions tear enemies apart.",
+  "title": "Demonologist",
+  "bonus": {
+    "minionDamagePct": 0.15
+  },
+  "branches": [
+    {
+      "name": "Demonologist",
+      "attrs": [
+        "int",
+        "str"
+      ],
+      "abilities": {
+        "2": "summon_felguard",
+        "5": "demonic_empowerment"
+      },
+      "notables": {
+        "4": {
+          "name": "Infernal Pact",
+          "stats": {
+            "minionDamagePct": 0.15,
+            "damagePct": 0.05
+          }
+        },
+        "8": {
+          "name": "Master of Demons",
+          "stats": {
+            "minionDamagePct": 0.25,
+            "minionDurationPct": 0.3
+          }
+        }
+      }
+    }
+  ],
+  "order": 160
+}

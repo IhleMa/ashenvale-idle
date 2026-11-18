@@ -1,0 +1,43 @@
+{
+  "name": "Berserker",
+  "classId": "warrior",
+  "glyph": "⚔",
+  "color": "#d14b3b",
+  "description": "Trades safety for fury. Strikes fast and hard, and grows deadlier in long fights.",
+  "title": "Berserker",
+  "bonus": {
+    "damagePct": 0.08,
+    "attackSpeed": 0.05
+  },
+  "branches": [
+    {
+      "name": "Berserker",
+      "attrs": [
+        "str",
+        "dex"
+      ],
+      "abilities": {
+        "2": "rampage",
+        "5": "bloodlust"
+      },
+      "notables": {
+        "4": {
+          "name": "Blood Frenzy",
+          "stats": {
+            "damagePct": 0.1,
+            "critChance": 0.03
+          }
+        },
+        "8": {
+          "name": "Undying Rage",
+          "stats": {
+            "damagePct": 0.15,
+            "attackSpeed": 0.08,
+            "critDamage": 0.2
+          }
+        }
+      }
+    }
+  ],
+  "order": 10
+}

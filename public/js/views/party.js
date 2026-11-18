@@ -1,4 +1,5 @@
 // Party management: presets, member order (position), roles and combined statistics.
+import { classLabel } from '/shared/data/subclasses.js';
 import { state, chars } from '../state.js';
 import { act } from '../net.js';
 import { esc, fmt, run, tipAttr } from '../ui.js';
@@ -105,7 +106,7 @@ export const partyView = {
         </section>
         <section class="panel">
           <h3>Roster</h3>
-          <div class="bench">${bench.length ? bench.map(c => `<div class="bench-row">${portrait(c, 'sm')}<div class="grow"><b>${esc(c.name)}</b><div class="muted small">Lv ${c.level} ${esc(CLASSES[c.classId].name)} · ${esc(CONFIG.roles[c.role].label)}</div></div>
+          <div class="bench">${bench.length ? bench.map(c => `<div class="bench-row">${portrait(c, 'sm')}<div class="grow"><b>${esc(c.name)}</b><div class="muted small">Lv ${c.level} ${esc(classLabel(c.classId, c.subclass))} · ${esc(CONFIG.roles[c.role].label)}</div></div>
             ${busyLabel(p, c) ? `<span class="small warn-text">${esc(busyLabel(p, c))}</span>` : `<button class="btn tiny" data-add="${c.id}" ${members.length >= CONFIG.party.size ? 'disabled' : ''}>Add</button>`}</div>`).join('') : '<p class="muted small">Everyone is already in this party. <a href="#/recruitment">Recruit more companions.</a></p>'}</div>
         </section>
       </div>`;

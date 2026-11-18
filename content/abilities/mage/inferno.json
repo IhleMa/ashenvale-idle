@@ -1,0 +1,44 @@
+{
+  "name": "Inferno",
+  "classId": "mage",
+  "subclass": "pyromancer",
+  "unlockLevel": 5,
+  "type": "damage",
+  "description": "Engulf all enemies: 120% magic damage and a strong burn.",
+  "cost": 45,
+  "cooldown": 12,
+  "target": "enemy",
+  "area": true,
+  "effects": [
+    {
+      "kind": "damage",
+      "stat": "magPower",
+      "power": 1.2,
+      "school": "magical"
+    },
+    {
+      "kind": "status",
+      "status": "burn",
+      "duration": 6,
+      "stat": "magPower",
+      "power": 0.3
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "enemies_alive",
+        "cmp": ">=",
+        "value": 2
+      }
+    ],
+    "target": {
+      "selector": "all_enemies"
+    },
+    "targetConditions": []
+  },
+  "priority": 70,
+  "order": 906
+}

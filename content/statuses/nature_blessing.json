@@ -1,0 +1,7 @@
+{
+  "name": "Nature's Blessing",
+  "type": "buff",
+  "tick": "heal",
+  "description": "Heals every second.",
+  "order": 350
+}

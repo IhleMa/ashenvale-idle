@@ -1,0 +1,43 @@
+{
+  "name": "Warden",
+  "classId": "ranger",
+  "glyph": "🌿",
+  "color": "#5fbf8a",
+  "description": "Guardian of the wild. Traps enemies and keeps the party healthy with nature magic.",
+  "title": "Warden",
+  "bonus": {
+    "hpPct": 0.06,
+    "healingPct": 0.08
+  },
+  "branches": [
+    {
+      "name": "Warden",
+      "attrs": [
+        "dex",
+        "vit"
+      ],
+      "abilities": {
+        "2": "thorn_trap",
+        "5": "natures_blessing"
+      },
+      "notables": {
+        "4": {
+          "name": "Barkskin",
+          "stats": {
+            "hpPct": 0.08,
+            "damageTakenPct": -0.05
+          }
+        },
+        "8": {
+          "name": "Heart of the Wild",
+          "stats": {
+            "healingPct": 0.15,
+            "damagePct": 0.08,
+            "hpPct": 0.06
+          }
+        }
+      }
+    }
+  ],
+  "order": 140
+}

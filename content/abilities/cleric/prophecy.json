@@ -1,0 +1,37 @@
+{
+  "name": "Prophecy",
+  "classId": "cleric",
+  "subclass": "oracle",
+  "unlockLevel": 5,
+  "type": "heal",
+  "description": "Heal all allies for 160% healing power.",
+  "cost": 55,
+  "cooldown": 14,
+  "target": "ally",
+  "area": true,
+  "effects": [
+    {
+      "kind": "heal",
+      "stat": "healPower",
+      "power": 1.6
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "allies_below_hp",
+        "value": 70,
+        "cmp": ">=",
+        "count": 2
+      }
+    ],
+    "target": {
+      "selector": "all_allies"
+    },
+    "targetConditions": []
+  },
+  "priority": 85,
+  "order": 920
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Hastened",
+  "type": "buff",
+  "mods": {
+    "attackSpeedPct": 0.25
+  },
+  "description": "Attacks and casts 25% faster.",
+  "order": 310
+}

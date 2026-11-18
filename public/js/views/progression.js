@@ -1,4 +1,5 @@
 // Progression: levels, class titles, zones, achievements, statistics and settings.
+import { classLabel } from '/shared/data/subclasses.js';
 import { state, chars } from '../state.js';
 import { act } from '../net.js';
 import { openInstallHelp } from '../pwa.js';
@@ -35,7 +36,7 @@ export const progressionView = {
           <div class="prog-chars">${chars().map(c => {
             const tiers = CLASSES[c.classId].tiers.filter(t => !t.mainOnly || c.isMain);
             return `<div class="prog-char">${portrait(c, 'sm')}
-              <div class="grow"><b>${c.isMain ? '★ ' : ''}${esc(c.name)}</b> <span class="muted small">Lv ${c.level} ${esc(CLASSES[c.classId].name)}</span>
+              <div class="grow"><b>${c.isMain ? '★ ' : ''}${esc(c.name)}</b> <span class="muted small">Lv ${c.level} ${esc(classLabel(c.classId, c.subclass))}</span>
                 ${c.level < CONFIG.levelCap ? bar(c.xp, xpToNext(c.level), 'xp thin', '') : ''}
                 <div class="tier-track">${tiers.map(t => `<span class="tier ${c.level >= t.level ? 'done' : ''} ${t.mainOnly ? 'hero-only' : ''}" ${tipAttr(`<b>${esc(t.title)}</b> (Lv ${t.level})${t.bonus ? '<br>' + esc(bonusText(t.bonus)) : ''}${t.mainOnly ? '<br><i>Hero only</i>' : ''}`)}>${esc(t.title)}<small>Lv ${t.level}</small></span>`).join('')}</div>
               </div></div>`;

@@ -72,5 +72,6 @@ export function computeRewards(kills, rng, { rewardMult = 1, lootBoost = 0, loot
       if (rng() < DROP_CHANCE.set[tier] * mult) { const si = generateSetItem(rng, k.level); if (si) items.push(si); }
     }
   }
-  return { xp: Math.round(xp * rewardMult), gold: Math.round(gold * rewardMult), items };
+  // killList: lets XP be adjusted per character (ascended heroes, see applyRewards)
+  return { xp: Math.round(xp * rewardMult), gold: Math.round(gold * rewardMult), items, killList: kills };
 }

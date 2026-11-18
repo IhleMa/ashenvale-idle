@@ -1,0 +1,43 @@
+{
+  "name": "Lich",
+  "classId": "summoner",
+  "glyph": "☠",
+  "color": "#9be3c8",
+  "description": "Has cheated death itself. Commands a great army of skeletons and drains life.",
+  "title": "Lich",
+  "bonus": {
+    "minionHpPct": 0.15,
+    "magPowerPct": 0.05
+  },
+  "branches": [
+    {
+      "name": "Lich",
+      "attrs": [
+        "int",
+        "vit"
+      ],
+      "abilities": {
+        "2": "army_of_the_dead",
+        "5": "death_coil"
+      },
+      "notables": {
+        "4": {
+          "name": "Phylactery",
+          "stats": {
+            "hpPct": 0.1,
+            "minionHpPct": 0.15
+          }
+        },
+        "8": {
+          "name": "Lord of Bones",
+          "stats": {
+            "minionMax": 1,
+            "minionDamagePct": 0.2,
+            "magPowerPct": 0.08
+          }
+        }
+      }
+    }
+  ],
+  "order": 150
+}

@@ -1,0 +1,36 @@
+{
+  "name": "Commanding Shout",
+  "classId": "warrior",
+  "subclass": "warlord",
+  "unlockLevel": 20,
+  "type": "buff",
+  "description": "Shield every ally for 80% physical power.",
+  "cost": 30,
+  "cooldown": 18,
+  "target": "ally",
+  "area": true,
+  "effects": [
+    {
+      "kind": "shield",
+      "stat": "physPower",
+      "power": 0.8,
+      "duration": 8
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "ally_hp_below",
+        "value": 70
+      }
+    ],
+    "target": {
+      "selector": "all_allies"
+    },
+    "targetConditions": []
+  },
+  "priority": 75,
+  "order": 905
+}

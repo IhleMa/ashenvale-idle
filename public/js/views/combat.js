@@ -1,4 +1,5 @@
 // Combat view: live, server-driven battle display (presentation only — all math happens on the server).
+import { classLabel } from '/shared/data/subclasses.js';
 import { bus, state } from '../state.js';
 import { act } from '../net.js';
 import { esc, fmt, run, tipAttr } from '../ui.js';
@@ -228,7 +229,7 @@ function unitCard(u, k, minions = []) {
   return `<div class="unit ${u.side === 'A' ? 'ally' : 'foe'} ${u.boss ? 'boss' : ''} ${u.isMain ? 'main' : ''}" data-uid="${u.uid}">
     <div class="unit-art">${art}<div class="floaters"></div></div>
     <div class="unit-info">
-      <div class="unit-name">${u.isMain ? '<span class="hero-star">★</span>' : ''}${esc(u.name)} <span class="muted">Lv ${u.level}${cls ? ' ' + esc(cls.name) : ''}</span> ${tags}${owner}</div>
+      <div class="unit-name">${u.isMain ? '<span class="hero-star">★</span>' : ''}${esc(u.name)} <span class="muted">Lv ${u.level}${cls ? ' ' + esc(classLabel(u.classId, u.subclass)) : ''}</span> ${tags}${owner}</div>
       <div class="bar hp"><div class="fill"></div><span class="bar-label"></span></div>
       ${res}
       <div class="unit-statuses"></div>

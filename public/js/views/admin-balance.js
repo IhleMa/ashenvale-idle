@@ -93,7 +93,7 @@ function levelsHtml(d) {
 function abilitiesHtml(d) {
   if (S.activity !== 'all') return '<p class="muted small">Ability usage is shown for "All fights".</p>';
   return `<div class="bl-abil">${classIds().map(c => {
-    const list = classAbilities(c).map(a => ({ a, n: d.casts[`${c}|${a.id}`] || 0 }));
+    const list = classAbilities(c, '*').map(a => ({ a, n: d.casts[`${c}|${a.id}`] || 0 }));
     const total = list.reduce((s, x) => s + x.n, 0);
     if (!total) return '';
     list.sort((x, y) => y.n - x.n);

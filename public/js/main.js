@@ -1,9 +1,10 @@
 // App entry: authentication, layout, routing and global message handling.
+import { classLabel, subclassesOf } from '/shared/data/subclasses.js';
 import { bus, state, hero } from './state.js';
 import { connect, disconnect, apiPost, getToken, setToken, act } from './net.js';
 import { loadAssets, portrait } from './assets.js';
 import { esc, fmt, toast, modal, initTooltips, duration, bar } from './ui.js';
-import { xpToNext } from '/shared/config.js';
+import { xpToNext, CONFIG } from '/shared/config.js';
 import { initPwa } from './pwa.js';
 import { initTutorial, renderTutorial, isViewVisible, visibleKey } from './tutorial.js';
 import { CLASSES } from '/shared/data/classes.js';
@@ -141,7 +142,7 @@ function renderTopbar() {
   const el = document.getElementById('topbar-hero');
   if (!h) { el.innerHTML = ''; return; }
   const cls = CLASSES[h.classId];
-  el.innerHTML = `${portrait(h, 'xs')}<div><div class="name">${esc(h.name)} <span class="muted">Lv ${h.level} ${esc(cls.name)}</span></div>${bar(h.xp, xpToNext(h.level), 'xp thin', '')}</div>`;
+  el.innerHTML = `${portrait(h, 'xs')}<div><div class="name">${esc(h.name)} <span class="muted">Lv ${h.level} ${esc(classLabel(h.classId, h.subclass))}${h.ascensions ? ' 🌟' : ''}</span></div>${bar(h.xp, xpToNext(h.level), 'xp thin', '')}</div>`;
   // badges for unspent points
   const treePts = Object.values(p.characters).filter(hasAbilityAction).length;
   setBadge('skilltree', treePts ? '!' : '');
@@ -155,7 +156,16 @@ function renderTopbar() {
   setBadge('auction', (p.mailbox || []).length ? String(p.mailbox.length) : '');
   const qr = questsReady(p);
   setBadge('quests', qr ? String(qr) : '');
+  // ascension available: badge on Character + a one-time toast when the hero hits the cap
+  const canAsc = !!(CONFIG.ascension?.enabled && h.level >= CONFIG.levelCap && subclassesOf(h.classId).length > (h.subclass ? 1 : 0));
+  setBadge('character', canAsc ? '🌟' : '');
+  const ascKey = `asc-notice:${h.id}:${h.ascensions || 0}`;
+  if (canAsc && lastHeroLevel !== null && lastHeroLevel < CONFIG.levelCap) {
+    try { if (!localStorage.getItem(ascKey)) { localStorage.setItem(ascKey, '1'); toast(`🌟 ${h.name} reached level ${CONFIG.levelCap} and can now ascend! Open the Character page.`, 'success', 9000); } } catch {}
+  }
+  lastHeroLevel = h.level;
 }
+let lastHeroLevel = null;
 function setBadge(id, text) {
   const b = document.querySelector(`[data-badge="${id}"]`);
   if (b) { b.textContent = text; b.hidden = !text; }

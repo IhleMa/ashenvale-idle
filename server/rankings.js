@@ -8,7 +8,7 @@ import { getTree } from '../shared/data/skilltree.js';
 import * as L from './playerLogic.js';
 
 export const RANKING_CATEGORIES = {
-  level:        { label: 'Hero level', value: s => s.heroLevel * 1e9 + s.heroXp, display: s => `Lv ${s.heroLevel}` },
+  level:        { label: 'Hero level', value: s => (s.heroAscensions || 0) * 1e12 + s.heroLevel * 1e9 + s.heroXp, display: s => `${s.heroAscensions ? `🌟${s.heroAscensions > 1 ? s.heroAscensions : ''} ` : ''}Lv ${s.heroLevel}` },
   power:        { label: 'Party power', value: s => s.partyPower, display: s => s.partyPower },
   heroPower:    { label: 'Hero power', value: s => s.heroPower, display: s => s.heroPower },
   kills:        { label: 'Enemies slain', value: s => s.kills, display: s => s.kills },
@@ -43,8 +43,8 @@ export class Rankings {
     const heroPower = powerRating(computeStats(h));
     return {
       id: p.id, name: p.name, online: this.game.sessions.has(p.id),
-      hero: { name: h.name, classId: h.classId, level: h.level, portrait: h.portrait, title: classTier(h.classId, h.level, true)?.title },
-      heroLevel: h.level, heroXp: h.xp, heroPower,
+      hero: { name: h.name, classId: h.classId, subclass: h.subclass || null, ascensions: h.ascensions || 0, level: h.level, portrait: h.portrait, title: classTier(h.classId, h.level, true)?.title },
+      heroLevel: h.level, heroXp: h.xp, heroAscensions: h.ascensions || 0, heroPower,
       partyPower: party.reduce((s, c) => s + powerRating(computeStats(c)), 0),
       partyClasses: party.map(c => c.classId),
       kills: p.stats.kills || 0, bossKills: p.stats.bossKills || 0, coopWins: p.stats.coopWins || 0,
@@ -98,12 +98,12 @@ export class Rankings {
     const charView = (ch, full) => {
       const s = computeStats(ch);
       const base = {
-        id: ch.id, name: ch.name, classId: ch.classId, level: ch.level, isMain: !!ch.isMain, portrait: ch.portrait, role: ch.role,
+        id: ch.id, name: ch.name, classId: ch.classId, subclass: ch.subclass || null, ascensions: ch.ascensions || 0, level: ch.level, isMain: !!ch.isMain, portrait: ch.portrait, role: ch.role,
         trait: ch.trait || null, title: classTier(ch.classId, ch.level, ch.isMain)?.title, power: powerRating(s),
         loadout: ch.loadout, ranks: ch.abilities,
       };
       if (!full) return base;
-      const tree = getTree(ch.classId);
+      const tree = getTree(ch.classId, ch.subclass);
       const allocated = ch.tree?.allocated || ['start'];
       return {
         ...base,
@@ -131,7 +131,7 @@ export class Rankings {
         members: g.members.map(id => {
           const mp = this.game.sessions.get(id)?.player || this.game.store.loadPlayer(id);
           const mh = mp && L.hero(mp);
-          return { name: this.game.nameOf(id), online: this.game.sessions.has(id), bot: this.game.showBot?.(id), leader: id === g.leaderId, hero: mh ? { name: mh.name, classId: mh.classId, level: mh.level, portrait: mh.portrait } : null };
+          return { name: this.game.nameOf(id), online: this.game.sessions.has(id), bot: this.game.showBot?.(id), leader: id === g.leaderId, hero: mh ? { name: mh.name, classId: mh.classId, subclass: mh.subclass || null, level: mh.level, portrait: mh.portrait } : null };
         }),
       } : null,
       hero: charView(L.hero(p), !hidden),

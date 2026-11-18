@@ -1,0 +1,45 @@
+{
+  "name": "Fan of Knives",
+  "classId": "rogue",
+  "subclass": "trickster",
+  "unlockLevel": 20,
+  "type": "damage",
+  "description": "Throw knives at all enemies: 2 × 60% physical damage, causing bleeding.",
+  "cost": 35,
+  "cooldown": 9,
+  "target": "enemy",
+  "area": true,
+  "effects": [
+    {
+      "kind": "damage",
+      "stat": "physPower",
+      "power": 0.6,
+      "school": "physical",
+      "hits": 2
+    },
+    {
+      "kind": "status",
+      "status": "bleed",
+      "duration": 5,
+      "stat": "physPower",
+      "power": 0.15
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "enemies_alive",
+        "cmp": ">=",
+        "value": 2
+      }
+    ],
+    "target": {
+      "selector": "all_enemies"
+    },
+    "targetConditions": []
+  },
+  "priority": 70,
+  "order": 915
+}

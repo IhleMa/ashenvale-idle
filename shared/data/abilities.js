@@ -11,6 +11,7 @@ export const DEFAULT_PRIORITY = priorities();
 onContentReload(() => { withIds(ABILITIES); refillObject(DEFAULT_PRIORITY, priorities()); });
 export const abilityPriority = id => DEFAULT_PRIORITY[id] ?? 50;
 
-export function classAbilities(classId) {
-  return Object.values(ABILITIES).filter(a => a.classId === classId).sort((a, b) => a.unlockLevel - b.unlockLevel);
+// abilities of a class; subclass abilities only for that subclass (subclassId '*' = all of them)
+export function classAbilities(classId, subclassId = null) {
+  return Object.values(ABILITIES).filter(a => a.classId === classId && (!a.subclass || subclassId === '*' || a.subclass === subclassId)).sort((a, b) => (a.subclass ? 1 : 0) - (b.subclass ? 1 : 0) || a.unlockLevel - b.unlockLevel);
 }

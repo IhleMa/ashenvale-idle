@@ -102,6 +102,7 @@ The console command `content` checks the files on disk; `content reload` also ap
 | `zones/`, `coop/` | Zones (level range, enemies, boss, which zone unlocks it) and co-op encounters (waves) |
 | `legendaries/` | Unique items (fixed stats + procs/passives), item sets (piece names, bonuses at 2/4 pieces), drop chances |
 | `skilltree/` | Passive tree generator settings and one tree per class (4 branches: attributes, ability nodes, notables) |
+| `subclasses/` | Ascension subclasses (2–3 per class): extra skill-tree branch(es) with subclass abilities and notables, a permanent passive `bonus`, glyph/color/title |
 | `town/` | Materials, professions, buildings (costs, effects text), crafting qualities, enchanting, elixirs, salvage yields |
 | `expeditions/` | Destinations (yields per hour, rare finds, profession bonus), durations, camp limits |
 | `achievements/` | Goals on player counters (`kills`, `bossKills`, `heroLevel`, …) with gold rewards |
@@ -149,6 +150,20 @@ The bestiary picks the new enemy up automatically, including its tips.
 3. A skill tree `content/skilltree/<class>.json` with exactly 4 branches (`npm run content:new -- skilltree paladin warrior`). The `start` ability is learned at level 1.
 
 The validator tells you if a piece is missing.
+
+### Add or change a subclass (ascension)
+At the level cap a hero can **ascend** into a subclass of its class (optional): back to level 1, the old gear goes to the mailbox, and the skill tree gets the subclass branch on top of the 4 class branches. Later, at the cap again, the hero may switch to another subclass of the same class (again from level 1). Only the hero ascends, not recruits.
+
+`content/subclasses/<id>.json`:
+
+| field | meaning |
+| --- | --- |
+| `classId` | the class it belongs to |
+| `name`, `glyph`, `color`, `description`, `title`, `order` | how it's shown (the name replaces the class name in the top bar, combat and rankings; `title` is the hero title at the cap) |
+| `bonus` | permanent passive with skill-tree stat keys, e.g. `{ "hpPct": 0.08, "defensePct": 0.1 }` |
+| `branches` | 1–2 extra branches: `{ "name", "attrs": [a, b], "abilities": { "2": id, "5": id }, "notables": { "4": { "name", "stats" }, "8": { … } } }` — keys are ring numbers, like the class trees |
+
+Subclass abilities live in `content/abilities/<class>/` with `"classId": "<class>"` **and** `"subclass": "<id>"`; only heroes of that subclass see them. Settings in `config.json` → `ascension`: `enabled`, `bonusSkillPoints` (extra points for ascended heroes, default 10) and `xpLevelGap` (while re-levelling, kill XP counts enemies as at most this many levels above the hero, so a strong party can't carry an ascended level-1 hero to the cap in minutes).
 
 ### Add or change a minion (Summoner)
 `content/minions/<id>.json` — minions are temporary allies built from their summoner's stats:

@@ -1,0 +1,10 @@
+{
+  "name": "Rallied",
+  "type": "buff",
+  "mods": {
+    "damagePct": 0.15,
+    "defensePct": 0.1
+  },
+  "description": "Deals 15% more damage and has 10% more defense.",
+  "order": 290
+}

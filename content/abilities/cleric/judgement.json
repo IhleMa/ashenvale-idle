@@ -1,0 +1,39 @@
+{
+  "name": "Judgement",
+  "classId": "cleric",
+  "subclass": "inquisitor",
+  "unlockLevel": 5,
+  "type": "damage",
+  "description": "260% magic damage; the target is Judged for 8 seconds (takes 20% more, deals 10% less damage).",
+  "cost": 35,
+  "cooldown": 10,
+  "target": "enemy",
+  "effects": [
+    {
+      "kind": "damage",
+      "stat": "magPower",
+      "power": 2.6,
+      "school": "magical"
+    },
+    {
+      "kind": "status",
+      "status": "judged",
+      "duration": 8
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "always"
+      }
+    ],
+    "target": {
+      "selector": "enemy_highest_hp"
+    },
+    "targetConditions": []
+  },
+  "priority": 74,
+  "order": 922
+}

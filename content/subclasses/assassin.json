@@ -1,0 +1,42 @@
+{
+  "name": "Assassin",
+  "classId": "rogue",
+  "glyph": "🗡",
+  "color": "#c94a6a",
+  "description": "A silent killer who picks off the weakest enemy with devastating critical strikes.",
+  "title": "Assassin",
+  "bonus": {
+    "critChance": 0.04,
+    "critDamage": 0.15
+  },
+  "branches": [
+    {
+      "name": "Assassin",
+      "attrs": [
+        "dex",
+        "str"
+      ],
+      "abilities": {
+        "2": "assassinate",
+        "5": "shadowstep"
+      },
+      "notables": {
+        "4": {
+          "name": "Killer Instinct",
+          "stats": {
+            "critChance": 0.04,
+            "critDamage": 0.2
+          }
+        },
+        "8": {
+          "name": "Death Mark",
+          "stats": {
+            "critDamage": 0.4,
+            "damagePct": 0.1
+          }
+        }
+      }
+    }
+  ],
+  "order": 60
+}

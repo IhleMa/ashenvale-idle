@@ -1,0 +1,40 @@
+{
+  "name": "Death Coil",
+  "classId": "summoner",
+  "subclass": "lich",
+  "unlockLevel": 20,
+  "type": "damage",
+  "description": "260% magic damage to the target and heal yourself for 80% magic power.",
+  "cost": 30,
+  "cooldown": 8,
+  "target": "enemy",
+  "effects": [
+    {
+      "kind": "damage",
+      "stat": "magPower",
+      "power": 2.6,
+      "school": "magical"
+    },
+    {
+      "kind": "heal",
+      "stat": "magPower",
+      "power": 0.8,
+      "self": true
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "always"
+      }
+    ],
+    "target": {
+      "selector": "enemy_current"
+    },
+    "targetConditions": []
+  },
+  "priority": 66,
+  "order": 931
+}

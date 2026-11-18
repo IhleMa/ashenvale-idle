@@ -1,0 +1,10 @@
+{
+  "name": "Bloodlust",
+  "type": "buff",
+  "mods": {
+    "attackSpeedPct": 0.35,
+    "damagePct": 0.1
+  },
+  "description": "Attacks 35% faster and deals 10% more damage.",
+  "order": 280
+}

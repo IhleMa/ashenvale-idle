@@ -16,6 +16,8 @@ const TIP_CONDITIONS = ['anyOf', 'healsAllies', 'hasAbility', 'phaseStatus', 'ap
 const QUEST_REQUIRES = ['rift', 'expedition', 'town', 'workers'];
 const PASSIVES = ['damageVsBossPct', 'damageVsHighHpPct', 'costPct'];
 
+const CFG_ASC_ON = C => C.config?.ascension?.enabled !== false;
+
 export function validateContent(C) {
   const errors = [];
   const warnings = [];
@@ -218,6 +220,33 @@ export function validateContent(C) {
       }
     });
   }
+
+  // ---- subclasses (ascension)
+  const subclasses = C.subclasses?.subclasses || {};
+  for (const [id, sc] of Object.entries(subclasses)) {
+    const w = `subclasses.subclasses.${id}`;
+    str(`${w}.name`, sc.name);
+    ref(`${w}.classId`, sc.classId, classes, 'class');
+    for (const k of Object.keys(sc.bonus || {})) if (!(k in treeStats)) err(`${w}.bonus.${k}`, 'unknown stat (same keys as skill-tree nodes, see skilltree/_settings.json → statLabels)');
+    if (!Array.isArray(sc.branches) || !sc.branches.length || sc.branches.length > 2) err(`${w}.branches`, 'needs 1 or 2 skill-tree branches');
+    (sc.branches || []).forEach((br, i) => {
+      str(`${w}.branches[${i}].name`, br.name);
+      for (const a of br.attrs || []) if (!ATTRS.includes(a)) err(`${w}.branches[${i}].attrs`, `"${a}" is not an attribute`);
+      if ((br.attrs || []).length !== 2) err(`${w}.branches[${i}].attrs`, 'needs [primary, secondary] attributes');
+      for (const a of Object.values(br.abilities || {})) {
+        ref(`${w}.branches[${i}].abilities`, a, abilities, 'ability');
+        if (abilities[a] && (abilities[a].classId !== sc.classId || abilities[a].subclass !== id)) err(`${w}.branches[${i}].abilities`, `"${a}" must have "classId": "${sc.classId}" and "subclass": "${id}"`);
+      }
+      for (const [r, n] of Object.entries(br.notables || {})) for (const k of Object.keys(n.stats || {})) if (k !== 'rank' && !(k in treeStats)) err(`${w}.branches[${i}].notables.${r}.stats.${k}`, 'unknown tree stat');
+    });
+  }
+  for (const [id, a] of Object.entries(abilities)) {
+    if (a.subclass === undefined) continue;
+    const sc = subclasses[a.subclass];
+    if (!sc) err(`abilities.abilities.${id}.subclass`, `unknown subclass "${a.subclass}"`);
+    else if (sc.classId !== a.classId) err(`abilities.abilities.${id}.subclass`, `"${a.subclass}" is a ${sc.classId} subclass, but the ability belongs to ${a.classId}`);
+  }
+  for (const cls of Object.keys(classes)) if (CFG_ASC_ON(C) && !Object.values(subclasses).some(sc => sc.classId === cls)) warn(`classes.classes.${cls}`, 'has no subclasses — heroes of this class cannot ascend');
 
   // ---- town
   for (const [id, b] of Object.entries(town.buildings || {})) {

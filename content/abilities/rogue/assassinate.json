@@ -1,0 +1,37 @@
+{
+  "name": "Assassinate",
+  "classId": "rogue",
+  "subclass": "assassin",
+  "unlockLevel": 5,
+  "type": "damage",
+  "description": "A lethal strike: 320% physical damage with +30% crit chance, tripled below 25% health.",
+  "cost": 45,
+  "cooldown": 14,
+  "target": "enemy",
+  "effects": [
+    {
+      "kind": "damage",
+      "stat": "physPower",
+      "power": 3.2,
+      "school": "physical",
+      "bonusCrit": 0.3,
+      "executeBelow": 0.25,
+      "executeMult": 3
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "always"
+      }
+    ],
+    "target": {
+      "selector": "enemy_lowest_hp_pct"
+    },
+    "targetConditions": []
+  },
+  "priority": 78,
+  "order": 912
+}

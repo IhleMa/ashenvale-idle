@@ -1,0 +1,42 @@
+{
+  "name": "Blizzard",
+  "classId": "mage",
+  "subclass": "cryomancer",
+  "unlockLevel": 5,
+  "type": "damage",
+  "description": "Ice storm: 100% magic damage to all enemies and chill them (35% slower) for 5 seconds.",
+  "cost": 45,
+  "cooldown": 12,
+  "target": "enemy",
+  "area": true,
+  "effects": [
+    {
+      "kind": "damage",
+      "stat": "magPower",
+      "power": 1.0,
+      "school": "magical"
+    },
+    {
+      "kind": "status",
+      "status": "chilled",
+      "duration": 5
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "enemies_alive",
+        "cmp": ">=",
+        "value": 2
+      }
+    ],
+    "target": {
+      "selector": "all_enemies"
+    },
+    "targetConditions": []
+  },
+  "priority": 70,
+  "order": 908
+}

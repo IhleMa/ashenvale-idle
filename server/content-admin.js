@@ -22,6 +22,7 @@ export const TYPE_INFO = {
   abilities: { label: 'Abilities', icon: '⚔', group: 'Characters' },
   skilltree: { label: 'Skill tree specs', icon: '🌳', group: 'Characters' },
   minions: { label: 'Minions', icon: '☠', group: 'Characters' },
+  subclasses: { label: 'Subclasses (ascension)', icon: '🌟', group: 'Characters' },
   statuses: { label: 'Statuses', icon: '💫', group: 'Characters' },
   items: { label: 'Item bases', icon: '🗡', group: 'Items' },
   'legendaries/uniques': { label: 'Uniques', icon: '🟧', group: 'Items' },
@@ -286,7 +287,7 @@ export class ContentManager {
     const made = [];
     const rename = {};
     for (const [aid, a] of Object.entries(abilities)) {
-      if (a.classId !== from) continue;
+      if (a.classId !== from || a.subclass) continue; // subclasses (and their abilities) stay with the original class
       const nid = `${id}_${aid}`;
       if (nid in abilities) throw new ContentError(`Can't copy the abilities: "${nid}" already exists`);
       rename[aid] = nid;

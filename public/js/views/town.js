@@ -1,5 +1,6 @@
 // Town (garrison): buildings, construction, workers, salvage, crafting, enchanting, alchemy.
 // Gathering happens through expeditions (views/expeditions.js).
+import { classLabel } from '/shared/data/subclasses.js';
 import { state, hero } from '../state.js';
 import { act } from '../net.js';
 import { esc, fmt, run, toast, tipAttr, itemTooltipHtml, duration, bar, confirmBox, statValue, premiumTxt, confirmSpend } from '../ui.js';
@@ -95,7 +96,7 @@ function workerHtml(p, id) {
   const elsewhere = c => Object.entries(p.town.buildings).find(([bid, bb]) => bb.worker === c.id && bid !== id);
   return `<div class="worker-box">
     <h4>Worker · ${professionIcon(def.profession, 'xxs')} ${esc(prof.name)}</h4>
-    ${w ? `<div class="row gap">${portrait(w, 'sm')}<div class="grow"><b>${esc(w.name)}</b> <span class="muted small">Lv ${w.level} ${esc(CLASSES[w.classId].name)}</span>
+    ${w ? `<div class="row gap">${portrait(w, 'sm')}<div class="grow"><b>${esc(w.name)}</b> <span class="muted small">Lv ${w.level} ${esc(classLabel(w.classId, w.subclass))}</span>
         <div class="small">${esc(prof.name)} skill <b>${w.profession.level}</b></div>${bar(w.profession.xp, professionXpToNext(w.profession.level), 'xp thin', '')}</div>
         <button class="btn tiny ghost" data-unassign="${id}">Remove</button></div>`
       : `<p class="small ${b.level ? 'warn-text' : 'muted'}">A companion with ${esc(prof.name)} must work here before you can use it.</p>`}

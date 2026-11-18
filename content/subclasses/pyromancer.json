@@ -1,0 +1,41 @@
+{
+  "name": "Pyromancer",
+  "classId": "mage",
+  "glyph": "🔥",
+  "color": "#ff6a2a",
+  "description": "Master of fire. Burns whole packs of enemies and finishes off the wounded.",
+  "title": "Pyromancer",
+  "bonus": {
+    "magPowerPct": 0.08
+  },
+  "branches": [
+    {
+      "name": "Pyromancer",
+      "attrs": [
+        "int",
+        "dex"
+      ],
+      "abilities": {
+        "2": "inferno",
+        "5": "combustion"
+      },
+      "notables": {
+        "4": {
+          "name": "Kindling",
+          "stats": {
+            "damagePct": 0.08,
+            "critChance": 0.03
+          }
+        },
+        "8": {
+          "name": "Living Flame",
+          "stats": {
+            "magPowerPct": 0.15,
+            "critDamage": 0.25
+          }
+        }
+      }
+    }
+  ],
+  "order": 30
+}

@@ -1,0 +1,42 @@
+{
+  "name": "Call Wolf",
+  "classId": "ranger",
+  "subclass": "beastmaster",
+  "unlockLevel": 5,
+  "type": "summon",
+  "description": "Call a Wolf Companion that fights at your side until the fight ends (1 wolf; 2 with Pack Leader). Recasting at the limit heals your wolf.",
+  "cost": 30,
+  "cooldown": 20,
+  "target": "self",
+  "effects": [
+    {
+      "kind": "summon",
+      "minion": "wolf_companion",
+      "count": 1,
+      "max": 1
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "enemies_alive",
+        "cmp": ">=",
+        "value": 1
+      },
+      {
+        "type": "own_minions",
+        "minion": "wolf_companion",
+        "cmp": "<=",
+        "value": 1
+      }
+    ],
+    "target": {
+      "selector": "self"
+    },
+    "targetConditions": []
+  },
+  "priority": 88,
+  "order": 926
+}

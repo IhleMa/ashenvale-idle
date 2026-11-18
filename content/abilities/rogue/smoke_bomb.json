@@ -1,0 +1,41 @@
+{
+  "name": "Smoke Bomb",
+  "classId": "rogue",
+  "subclass": "trickster",
+  "unlockLevel": 5,
+  "type": "control",
+  "description": "Stun all enemies for 2 seconds and weaken them (20% less damage) for 6 seconds.",
+  "cost": 40,
+  "cooldown": 20,
+  "target": "enemy",
+  "area": true,
+  "effects": [
+    {
+      "kind": "status",
+      "status": "stun",
+      "duration": 2
+    },
+    {
+      "kind": "status",
+      "status": "weakened",
+      "duration": 6
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "enemies_alive",
+        "cmp": ">=",
+        "value": 2
+      }
+    ],
+    "target": {
+      "selector": "all_enemies"
+    },
+    "targetConditions": []
+  },
+  "priority": 80,
+  "order": 914
+}

@@ -1,0 +1,42 @@
+{
+  "name": "Summon Felguard",
+  "classId": "summoner",
+  "subclass": "demonologist",
+  "unlockLevel": 5,
+  "type": "summon",
+  "description": "Summon a Felguard for 40 seconds: a demon warrior that taunts and cleaves.",
+  "cost": 45,
+  "cooldown": 40,
+  "target": "self",
+  "effects": [
+    {
+      "kind": "summon",
+      "minion": "felguard",
+      "count": 1,
+      "max": 1
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "enemies_alive",
+        "cmp": ">=",
+        "value": 1
+      },
+      {
+        "type": "own_minions",
+        "minion": "felguard",
+        "cmp": "<=",
+        "value": 0
+      }
+    ],
+    "target": {
+      "selector": "self"
+    },
+    "targetConditions": []
+  },
+  "priority": 86,
+  "order": 932
+}

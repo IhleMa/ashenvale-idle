@@ -1,0 +1,36 @@
+{
+  "name": "Rallying Banner",
+  "classId": "warrior",
+  "subclass": "warlord",
+  "unlockLevel": 5,
+  "type": "buff",
+  "description": "Plant a banner: all allies deal 15% more damage and gain 10% defense for 12 seconds.",
+  "cost": 35,
+  "cooldown": 25,
+  "target": "ally",
+  "area": true,
+  "effects": [
+    {
+      "kind": "status",
+      "status": "rallied",
+      "duration": 12
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "enemies_alive",
+        "cmp": ">=",
+        "value": 1
+      }
+    ],
+    "target": {
+      "selector": "all_allies"
+    },
+    "targetConditions": []
+  },
+  "priority": 82,
+  "order": 904
+}

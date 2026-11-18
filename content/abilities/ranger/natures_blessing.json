@@ -1,0 +1,42 @@
+{
+  "name": "Nature's Blessing",
+  "classId": "ranger",
+  "subclass": "warden",
+  "unlockLevel": 20,
+  "type": "heal",
+  "description": "All allies heal every second for 10 seconds (25% physical power per second).",
+  "cost": 40,
+  "cooldown": 20,
+  "target": "ally",
+  "area": true,
+  "effects": [
+    {
+      "kind": "status",
+      "status": "nature_blessing",
+      "duration": 10,
+      "stat": "physPower",
+      "power": 0.25
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "ally_hp_below",
+        "value": 75
+      }
+    ],
+    "target": {
+      "selector": "all_allies"
+    },
+    "targetConditions": [
+      {
+        "type": "target_missing_status",
+        "status": "nature_blessing"
+      }
+    ]
+  },
+  "priority": 76,
+  "order": 929
+}

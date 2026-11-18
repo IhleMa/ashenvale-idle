@@ -1,0 +1,42 @@
+{
+  "name": "Sharpshooter",
+  "classId": "ranger",
+  "glyph": "🎯",
+  "color": "#e8c15a",
+  "description": "Never misses. Huge critical shots that take down the toughest targets.",
+  "title": "Sharpshooter",
+  "bonus": {
+    "critChance": 0.04,
+    "physPowerPct": 0.05
+  },
+  "branches": [
+    {
+      "name": "Sharpshooter",
+      "attrs": [
+        "dex",
+        "dex"
+      ],
+      "abilities": {
+        "2": "deadeye_shot",
+        "5": "steady_aim"
+      },
+      "notables": {
+        "4": {
+          "name": "Eagle Eye",
+          "stats": {
+            "critChance": 0.05,
+            "critDamage": 0.15
+          }
+        },
+        "8": {
+          "name": "One Shot",
+          "stats": {
+            "critDamage": 0.4,
+            "physPowerPct": 0.1
+          }
+        }
+      }
+    }
+  ],
+  "order": 120
+}

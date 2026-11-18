@@ -1,0 +1,42 @@
+{
+  "name": "Trickster",
+  "classId": "rogue",
+  "glyph": "🎭",
+  "color": "#e0a84a",
+  "description": "Controls the fight with smoke, tricks and blades flying everywhere.",
+  "title": "Trickster",
+  "bonus": {
+    "damagePct": 0.05,
+    "attackSpeed": 0.04
+  },
+  "branches": [
+    {
+      "name": "Trickster",
+      "attrs": [
+        "dex",
+        "dex"
+      ],
+      "abilities": {
+        "2": "smoke_bomb",
+        "5": "fan_of_knives"
+      },
+      "notables": {
+        "4": {
+          "name": "Sleight of Hand",
+          "stats": {
+            "attackSpeed": 0.06,
+            "damagePct": 0.05
+          }
+        },
+        "8": {
+          "name": "Now You See Me",
+          "stats": {
+            "damagePct": 0.12,
+            "damageTakenPct": -0.08
+          }
+        }
+      }
+    }
+  ],
+  "order": 70
+}

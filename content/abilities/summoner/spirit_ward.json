@@ -1,0 +1,41 @@
+{
+  "name": "Spirit Ward",
+  "classId": "summoner",
+  "subclass": "spiritcaller",
+  "unlockLevel": 20,
+  "type": "buff",
+  "description": "Spirits guard all allies: shield for 90% magic power and 35% less damage taken for 5 seconds.",
+  "cost": 45,
+  "cooldown": 25,
+  "target": "ally",
+  "area": true,
+  "effects": [
+    {
+      "kind": "shield",
+      "stat": "magPower",
+      "power": 0.9,
+      "duration": 8
+    },
+    {
+      "kind": "status",
+      "status": "unbreakable",
+      "duration": 5
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "ally_hp_below",
+        "value": 55
+      }
+    ],
+    "target": {
+      "selector": "all_allies"
+    },
+    "targetConditions": []
+  },
+  "priority": 84,
+  "order": 935
+}

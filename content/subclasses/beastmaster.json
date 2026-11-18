@@ -1,0 +1,43 @@
+{
+  "name": "Beastmaster",
+  "classId": "ranger",
+  "glyph": "🐾",
+  "color": "#8fbf6a",
+  "description": "Hunts together with a loyal wolf that fights for the whole battle.",
+  "title": "Beastmaster",
+  "bonus": {
+    "minionDamagePct": 0.15,
+    "minionHpPct": 0.15
+  },
+  "branches": [
+    {
+      "name": "Beastmaster",
+      "attrs": [
+        "dex",
+        "vit"
+      ],
+      "abilities": {
+        "2": "call_wolf",
+        "5": "pack_tactics"
+      },
+      "notables": {
+        "4": {
+          "name": "Feral Bond",
+          "stats": {
+            "minionDamagePct": 0.2,
+            "minionHpPct": 0.2
+          }
+        },
+        "8": {
+          "name": "Pack Leader",
+          "stats": {
+            "minionMax": 1,
+            "minionDamagePct": 0.2,
+            "damagePct": 0.05
+          }
+        }
+      }
+    }
+  ],
+  "order": 130
+}

@@ -1,0 +1,23 @@
+{
+  "name": "Wolf Companion",
+  "glyph": "🐺",
+  "color": "#9aa3ad",
+  "role": "damage",
+  "description": "A loyal wolf that fights at its master's side until the fight ends.",
+  "hp": 0.6,
+  "power": 0.55,
+  "defense": 0.7,
+  "attackSpeed": 1.2,
+  "attack": {
+    "name": "Bite",
+    "power": 1,
+    "school": "physical"
+  },
+  "abilities": [],
+  "duration": 0,
+  "threat": 25,
+  "tags": [
+    "beast"
+  ],
+  "order": 50
+}

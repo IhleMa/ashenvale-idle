@@ -1,0 +1,43 @@
+{
+  "name": "Warlord",
+  "classId": "warrior",
+  "glyph": "⚑",
+  "color": "#e0b25a",
+  "description": "A battlefield commander whose banners and shouts make the whole party stronger.",
+  "title": "Warlord",
+  "bonus": {
+    "damagePct": 0.04,
+    "hpPct": 0.05
+  },
+  "branches": [
+    {
+      "name": "Warlord",
+      "attrs": [
+        "str",
+        "vit"
+      ],
+      "abilities": {
+        "2": "rallying_banner",
+        "5": "commanding_shout"
+      },
+      "notables": {
+        "4": {
+          "name": "Inspiring Presence",
+          "stats": {
+            "healingPct": 0.1,
+            "hpPct": 0.06
+          }
+        },
+        "8": {
+          "name": "Born to Lead",
+          "stats": {
+            "damagePct": 0.1,
+            "defensePct": 0.15,
+            "hpPct": 0.08
+          }
+        }
+      }
+    }
+  ],
+  "order": 20
+}

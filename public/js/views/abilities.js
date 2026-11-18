@@ -1,4 +1,6 @@
 // Abilities: unlock/upgrade, loadout priority and the per-ability behaviour (rule) editor.
+import { classLabel } from '/shared/data/subclasses.js';
+import { SUBCLASSES } from '/shared/data/subclasses.js';
 import { state, selectedChar } from '../state.js';
 import { act } from '../net.js';
 import { esc, run, tipAttr, toast } from '../ui.js';
@@ -247,7 +249,7 @@ export const abilitiesView = {
   render(root) {
     const ch = selectedChar();
     if (!ch) return;
-    const all = classAbilities(ch.classId);
+    const all = classAbilities(ch.classId, ch.subclass);
     if (!selectedAbility || !ch.abilities[selectedAbility]) selectedAbility = ch.loadout[0] || Object.keys(ch.abilities)[0] || null;
     const slots = abilitySlots(ch);
     const unequipped = Object.keys(ch.abilities).filter(a => !ch.loadout.includes(a));
@@ -274,7 +276,7 @@ export const abilitiesView = {
             </div>` : ''}
           </section>
           <section class="panel">
-            <div class="panel-head"><h3>${esc(CLASSES[ch.classId].name)} abilities</h3>${availablePoints(ch) ? `<a class="points" href="#/skilltree">${availablePoints(ch)} skill point${availablePoints(ch) === 1 ? '' : 's'}</a>` : ''}</div>
+            <div class="panel-head"><h3>${esc(classLabel(ch.classId, ch.subclass))} abilities</h3>${availablePoints(ch) ? `<a class="points" href="#/skilltree">${availablePoints(ch)} skill point${availablePoints(ch) === 1 ? '' : 's'}</a>` : ''}</div>
             <p class="muted small">Abilities are learned and empowered through the <a href="#/skilltree">passive skill tree</a>.</p>
             <div class="ability-book">${all.map(a => abilityCard(ch, a)).join('')}</div>
           </section>
@@ -288,7 +290,7 @@ function abilityCard(ch, a) {
   const rank = ch.abilities[a.id] || 0;
   const unlocked = rank > 0;
   const cls = CLASSES[ch.classId];
-  const nodeId = abilityNodeId(ch.classId, a.id);
+  const nodeId = abilityNodeId(ch.classId, a.id, ch.subclass);
   const dist = unlocked ? 0 : pathTo(ch, nodeId).length;
   const action = unlocked
     ? `<span class="muted small">Rank ${rank}/${CONFIG.maxAbilityRank}</span>${rank < CONFIG.maxAbilityRank ? `<button class="btn tiny ghost" data-tree-goto="${nodeId}">Empower in tree</button>` : ''}`
@@ -297,7 +299,7 @@ function abilityCard(ch, a) {
   const tip = `<b>${esc(a.name)}</b><br>${esc(a.description)}<br><span class='muted'>${esc(meta)}</span><br>Each rank: +${Math.round(CONFIG.abilityRankBonus * 100)}% effect (ranks come from Empowered nodes in the skill tree)`;
   return `<div class="ability-card ${unlocked ? '' : 'locked'} ${a.id === selectedAbility ? 'active' : ''}" ${unlocked ? `data-select-ability="${a.id}"` : ''} ${tipAttr(tip)}>
     ${abilityIcon(a.id, 'md')}
-    <div class="grow"><b>${esc(a.name)}</b> <span class="type-tag t-${a.type}">${a.type}</span>
+    <div class="grow"><b>${esc(a.name)}</b> <span class="type-tag t-${a.type}">${a.type}</span>${a.subclass && SUBCLASSES[a.subclass] ? ` <span class="sub-tag" style="--sub-color:${esc(SUBCLASSES[a.subclass].color || '#c9a24a')}">${esc(SUBCLASSES[a.subclass].glyph || '')} ${esc(SUBCLASSES[a.subclass].name)}</span>` : ''}
       <div class="small muted">${esc(a.description)}</div>
       <div class="small faint">${esc(meta)}</div>
       <div class="ranks">${Array.from({ length: CONFIG.maxAbilityRank }, (_, i) => `<span class="pip ${i < rank ? 'on' : ''}"></span>`).join('')}</div>

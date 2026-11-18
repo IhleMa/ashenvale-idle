@@ -1,0 +1,41 @@
+{
+  "name": "Oracle",
+  "classId": "cleric",
+  "glyph": "☉",
+  "color": "#9fe0ff",
+  "description": "Sees what is coming and keeps the whole party alive with great heals and shields.",
+  "title": "Oracle",
+  "bonus": {
+    "healingPct": 0.1
+  },
+  "branches": [
+    {
+      "name": "Oracle",
+      "attrs": [
+        "int",
+        "vit"
+      ],
+      "abilities": {
+        "2": "prophecy",
+        "5": "divine_aegis"
+      },
+      "notables": {
+        "4": {
+          "name": "Foresight",
+          "stats": {
+            "healingPct": 0.1,
+            "healPowerPct": 0.05
+          }
+        },
+        "8": {
+          "name": "Eternal Light",
+          "stats": {
+            "healingPct": 0.2,
+            "healPowerPct": 0.1
+          }
+        }
+      }
+    }
+  ],
+  "order": 100
+}

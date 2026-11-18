@@ -1,0 +1,42 @@
+{
+  "name": "Consecration",
+  "classId": "cleric",
+  "subclass": "templar",
+  "unlockLevel": 20,
+  "type": "damage",
+  "description": "Consecrate the ground: 120% magic damage to all enemies, weakening them (20% less damage) for 5 seconds.",
+  "cost": 45,
+  "cooldown": 14,
+  "target": "enemy",
+  "area": true,
+  "effects": [
+    {
+      "kind": "damage",
+      "stat": "magPower",
+      "power": 1.2,
+      "school": "magical"
+    },
+    {
+      "kind": "status",
+      "status": "weakened",
+      "duration": 5
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "enemies_alive",
+        "cmp": ">=",
+        "value": 2
+      }
+    ],
+    "target": {
+      "selector": "all_enemies"
+    },
+    "targetConditions": []
+  },
+  "priority": 72,
+  "order": 919
+}

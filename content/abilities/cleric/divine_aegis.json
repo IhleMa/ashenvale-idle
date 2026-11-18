@@ -1,0 +1,36 @@
+{
+  "name": "Divine Aegis",
+  "classId": "cleric",
+  "subclass": "oracle",
+  "unlockLevel": 20,
+  "type": "buff",
+  "description": "Shield all allies for 100% healing power.",
+  "cost": 50,
+  "cooldown": 22,
+  "target": "ally",
+  "area": true,
+  "effects": [
+    {
+      "kind": "shield",
+      "stat": "healPower",
+      "power": 1.0,
+      "duration": 8
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "ally_hp_below",
+        "value": 60
+      }
+    ],
+    "target": {
+      "selector": "all_allies"
+    },
+    "targetConditions": []
+  },
+  "priority": 80,
+  "order": 921
+}

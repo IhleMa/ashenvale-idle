@@ -1,0 +1,43 @@
+{
+  "name": "Juggernaut",
+  "classId": "warrior",
+  "glyph": "⛨",
+  "color": "#9aa0a8",
+  "description": "An immovable wall of iron. Shrugs off blows and keeps every enemy busy.",
+  "title": "Juggernaut",
+  "bonus": {
+    "hpPct": 0.08,
+    "defensePct": 0.1
+  },
+  "branches": [
+    {
+      "name": "Juggernaut",
+      "attrs": [
+        "vit",
+        "str"
+      ],
+      "abilities": {
+        "2": "iron_bulwark",
+        "5": "seismic_slam"
+      },
+      "notables": {
+        "4": {
+          "name": "Living Fortress",
+          "stats": {
+            "hpPct": 0.1,
+            "damageTakenPct": -0.05
+          }
+        },
+        "8": {
+          "name": "Immovable",
+          "stats": {
+            "defensePct": 0.25,
+            "hpPct": 0.1,
+            "damageTakenPct": -0.08
+          }
+        }
+      }
+    }
+  ],
+  "order": 0
+}

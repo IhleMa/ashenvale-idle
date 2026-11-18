@@ -1,0 +1,35 @@
+{
+  "name": "Deadeye Shot",
+  "classId": "ranger",
+  "subclass": "sharpshooter",
+  "unlockLevel": 5,
+  "type": "damage",
+  "description": "A perfect shot: 350% physical damage with +40% crit chance.",
+  "cost": 40,
+  "cooldown": 12,
+  "target": "enemy",
+  "effects": [
+    {
+      "kind": "damage",
+      "stat": "physPower",
+      "power": 3.5,
+      "school": "physical",
+      "bonusCrit": 0.4
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "always"
+      }
+    ],
+    "target": {
+      "selector": "enemy_highest_hp"
+    },
+    "targetConditions": []
+  },
+  "priority": 76,
+  "order": 924
+}

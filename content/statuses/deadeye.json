@@ -1,0 +1,9 @@
+{
+  "name": "Deadeye",
+  "type": "buff",
+  "mods": {
+    "damagePct": 0.3
+  },
+  "description": "Deals 30% more damage.",
+  "order": 320
+}

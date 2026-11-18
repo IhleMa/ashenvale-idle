@@ -1,0 +1,40 @@
+{
+  "name": "Holy Strike",
+  "classId": "cleric",
+  "subclass": "templar",
+  "unlockLevel": 5,
+  "type": "damage",
+  "description": "Strike with holy light: 220% magic damage and heal yourself for 60% healing power.",
+  "cost": 25,
+  "cooldown": 6,
+  "target": "enemy",
+  "effects": [
+    {
+      "kind": "damage",
+      "stat": "magPower",
+      "power": 2.2,
+      "school": "magical"
+    },
+    {
+      "kind": "heal",
+      "stat": "healPower",
+      "power": 0.6,
+      "self": true
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "always"
+      }
+    ],
+    "target": {
+      "selector": "enemy_current"
+    },
+    "targetConditions": []
+  },
+  "priority": 65,
+  "order": 918
+}

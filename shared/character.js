@@ -109,8 +109,8 @@ export function treeRefundCost(ch) { return CONFIG.treeNodeRefundCostPerLevel * 
 export function treeResetCost(ch) { return CONFIG.treeResetCostPerLevel * ch.level; }
 
 // Where in the tree an ability can be found (for UI)
-export function abilityNodeId(classId, abilityId) {
-  const t = getTree(classId);
+export function abilityNodeId(classId, abilityId, subclassId = null) {
+  const t = getTree(classId, subclassId);
   return Object.values(t.nodes).find(n => n.ability === abilityId)?.id || null;
 }
 

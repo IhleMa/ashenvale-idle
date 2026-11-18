@@ -1,0 +1,42 @@
+{
+  "name": "Arcanist",
+  "classId": "mage",
+  "glyph": "✦",
+  "color": "#a678ff",
+  "description": "Bends raw magic and time itself — relentless barrages and a faster party.",
+  "title": "Arcanist",
+  "bonus": {
+    "magPowerPct": 0.06,
+    "attackSpeed": 0.04
+  },
+  "branches": [
+    {
+      "name": "Arcanist",
+      "attrs": [
+        "int",
+        "int"
+      ],
+      "abilities": {
+        "2": "arcane_torrent",
+        "5": "time_warp"
+      },
+      "notables": {
+        "4": {
+          "name": "Arcane Flow",
+          "stats": {
+            "attackSpeed": 0.06,
+            "magPowerPct": 0.05
+          }
+        },
+        "8": {
+          "name": "Master of Time",
+          "stats": {
+            "magPowerPct": 0.12,
+            "attackSpeed": 0.1
+          }
+        }
+      }
+    }
+  ],
+  "order": 50
+}

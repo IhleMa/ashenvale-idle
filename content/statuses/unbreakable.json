@@ -1,0 +1,9 @@
+{
+  "name": "Unbreakable",
+  "type": "buff",
+  "mods": {
+    "damageTakenPct": -0.35
+  },
+  "description": "Takes 35% less damage.",
+  "order": 300
+}

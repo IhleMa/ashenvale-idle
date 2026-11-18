@@ -19,6 +19,8 @@ import { rosterLimit, recruitOffers, bLevel } from '../shared/town.js';
 import { busyWith } from '../shared/expeditions.js';
 import { EXPEDITIONS } from '../shared/data/expeditions.js';
 import { BUILDINGS } from '../shared/data/town.js';
+import { SUBCLASSES } from '../shared/data/subclasses.js';
+import { killXp } from '../shared/encounters.js';
 
 const NAMES = ['Aldric', 'Brienna', 'Cassian', 'Dagna', 'Elowen', 'Fenris', 'Gwyn', 'Halvard', 'Isolde', 'Jorah', 'Kael', 'Liora', 'Merrick', 'Nyx', 'Orin', 'Perrin', 'Quill', 'Rowan', 'Sable', 'Thane', 'Ulric', 'Vesna', 'Wren', 'Xander', 'Yara', 'Zephyr', 'Ashka', 'Bram', 'Corin', 'Delia', 'Edda', 'Faelan', 'Garrick', 'Hesper', 'Ivo', 'Juniper', 'Kestrel', 'Lysa', 'Mordecai', 'Nessa', 'Oswin', 'Petra', 'Ronan', 'Selka', 'Tamsin', 'Vale'];
 
@@ -488,6 +490,64 @@ export function onBossDefeated(p, zoneId) {
 // called as fn(player, character, newLevel, secondsAtPreviousLevel) — used by the balance dashboard
 export const levelHooks = [];
 
+// An ascended hero gets XP as if enemies were at most ascension.xpLevelGap levels above it, so being carried
+// through a high zone by max-level companions doesn't skip the climb.
+export function ascendedXpFactor(ch, killList) {
+  const gap = CONFIG.ascension?.xpLevelGap;
+  if (!ch.subclass || !gap || !killList?.length) return 1;
+  let full = 0, capped = 0;
+  for (const k of killList) {
+    full += killXp(k);
+    capped += k.level > ch.level + gap ? killXp({ ...k, level: ch.level + gap }) : killXp(k);
+  }
+  return full > 0 ? capped / full : 1;
+}
+
+// --------------------------------------------------------------------------- ascension
+// At max level the hero may ascend into a subclass of its class: back to level 1 with a fresh skill tree that
+// has the subclass branches, a permanent subclass bonus and extra skill points. Equipped gear is mailed to the
+// player. An ascended hero at max level again may switch to another subclass the same way.
+export function canAscend(p) {
+  const h = hero(p);
+  if (!CONFIG.ascension?.enabled) return 'Ascension is turned off on this server';
+  if (!h) return 'No hero';
+  if (h.level < CONFIG.levelCap) return `Your hero needs level ${CONFIG.levelCap} to ascend`;
+  return null;
+}
+export function ascendHero(p, { subclassId }) {
+  const why = canAscend(p);
+  if (why) fail(why);
+  const h = hero(p);
+  const sub = SUBCLASSES[subclassId] || fail('Unknown subclass');
+  if (sub.classId !== h.classId) fail(`${sub.name} is not a ${CLASSES[h.classId].name} subclass`);
+  if (h.subclass === sub.id) fail(`${h.name} already is a ${sub.name}`);
+  // gear goes to the mailbox, one item per mail
+  let mailed = 0;
+  for (const slot of SLOT_IDS) {
+    const item = h.equipment[slot];
+    if (!item) continue;
+    sendMail(p, { item, from: 'Ascension', note: `${h.name}'s gear from before ascending as ${sub.name}.` });
+    h.equipment[slot] = null;
+    mailed++;
+  }
+  const from = h.subclass || null;
+  h.subclass = sub.id;
+  h.ascensions = (h.ascensions || 0) + 1;
+  h.ascendedAt = Date.now();
+  (h.ascensionHistory ||= []).push({ subclass: sub.id, from, at: h.ascendedAt });
+  h.level = 1;
+  h.xp = 0;
+  h.levelAt = Date.now();
+  h.tree = { allocated: ['start'] };
+  h.loadout = [];
+  syncTree(h);
+  h.loadout = autoLoadout(h);
+  if (p.settings?.autoDevelopHero) autoDevelop(h);
+  p.stats.ascensions = (p.stats.ascensions || 0) + 1;
+  p.stats.heroLevel = 1;
+  return { subclass: sub.id, name: sub.name, mailed, switched: !!from };
+}
+
 export function applyRewards(p, chars, rewards) {
   const levelUps = [];
   const now = Date.now();
@@ -495,7 +555,7 @@ export function applyRewards(p, chars, rewards) {
     if (!p.characters[ch.id]) continue;
     const bonus = ch.isMain ? CONFIG.mainCharacter.xpBonus : 0;
     const traitXp = ch.trait ? TRAITS[ch.trait]?.bonus?.xpPct || 0 : 0;
-    const gained = addXp(ch, rewards.xp * (1 + bonus + traitXp));
+    const gained = addXp(ch, rewards.xp * (1 + bonus + traitXp) * ascendedXpFactor(ch, rewards.killList));
     if (gained) {
       levelUps.push({ name: ch.name, level: ch.level, charId: ch.id });
       // time spent per level (split evenly when several levels came at once)

@@ -1,0 +1,43 @@
+{
+  "name": "Spiritcaller",
+  "classId": "summoner",
+  "glyph": "✧",
+  "color": "#8fe3d0",
+  "description": "Walks with the spirits of the ancestors: more healers and wards for the party.",
+  "title": "Spiritcaller",
+  "bonus": {
+    "healingPct": 0.1,
+    "minionDurationPct": 0.2
+  },
+  "branches": [
+    {
+      "name": "Spiritcaller",
+      "attrs": [
+        "int",
+        "vit"
+      ],
+      "abilities": {
+        "2": "ancestral_spirits",
+        "5": "spirit_ward"
+      },
+      "notables": {
+        "4": {
+          "name": "Ancestral Guidance",
+          "stats": {
+            "healingPct": 0.1,
+            "minionHpPct": 0.15
+          }
+        },
+        "8": {
+          "name": "Spirit Realm",
+          "stats": {
+            "healingPct": 0.15,
+            "damageTakenPct": -0.08,
+            "minionDurationPct": 0.3
+          }
+        }
+      }
+    }
+  ],
+  "order": 170
+}

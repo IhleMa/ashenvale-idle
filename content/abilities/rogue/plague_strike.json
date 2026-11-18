@@ -1,0 +1,42 @@
+{
+  "name": "Plague Strike",
+  "classId": "rogue",
+  "subclass": "venomancer",
+  "unlockLevel": 5,
+  "type": "damage",
+  "description": "150% physical damage and a deadly stacking poison.",
+  "cost": 30,
+  "cooldown": 6,
+  "target": "enemy",
+  "effects": [
+    {
+      "kind": "damage",
+      "stat": "physPower",
+      "power": 1.5,
+      "school": "physical"
+    },
+    {
+      "kind": "status",
+      "status": "poison",
+      "duration": 8,
+      "stat": "physPower",
+      "power": 0.35,
+      "stacks": 2
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "always"
+      }
+    ],
+    "target": {
+      "selector": "enemy_current"
+    },
+    "targetConditions": []
+  },
+  "priority": 70,
+  "order": 916
+}

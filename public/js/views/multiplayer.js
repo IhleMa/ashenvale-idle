@@ -1,4 +1,5 @@
 // Multiplayer: groups, invitations, co-op team selection, encounters and group chat.
+import { classLabel } from '/shared/data/subclasses.js';
 import { state, chars, bus } from '../state.js';
 import { act } from '../net.js';
 import { esc, run, tipAttr, botTag } from '../ui.js';
@@ -83,7 +84,7 @@ export const multiplayerView = {
               const picks = p.coopChars.length ? p.coopChars : p.parties[p.activeParty].members.filter(id => id !== p.heroId).slice(0, CONFIG.coop.charactersPerPlayer - 1);
               const busy = busyWith(p, c.id);
               const on = !busy && (c.isMain || picks.includes(c.id));
-              return `<button class="coop-pick ${on ? 'on' : ''}" ${c.isMain || busy ? 'disabled' : `data-coop-toggle="${c.id}"`} ${busy ? `title="${busy.type === 'work' ? 'Working in town' : 'On an expedition'}"` : ''}>${portrait(c, 'sm')}<span><b>${esc(c.name)}</b><small>Lv ${c.level} ${esc(CLASSES[c.classId].name)}</small></span>${on ? '<span class="check">✓</span>' : ''}</button>`;
+              return `<button class="coop-pick ${on ? 'on' : ''}" ${c.isMain || busy ? 'disabled' : `data-coop-toggle="${c.id}"`} ${busy ? `title="${busy.type === 'work' ? 'Working in town' : 'On an expedition'}"` : ''}>${portrait(c, 'sm')}<span><b>${esc(c.name)}</b><small>Lv ${c.level} ${esc(classLabel(c.classId, c.subclass))}</small></span>${on ? '<span class="check">✓</span>' : ''}</button>`;
             }).join('')}</div>
           </section>
 

@@ -1,0 +1,41 @@
+{
+  "name": "Steady Aim",
+  "classId": "ranger",
+  "subclass": "sharpshooter",
+  "unlockLevel": 20,
+  "type": "buff",
+  "description": "Focus: deal 30% more damage for 10 seconds.",
+  "cost": 25,
+  "cooldown": 24,
+  "target": "self",
+  "effects": [
+    {
+      "kind": "status",
+      "status": "deadeye",
+      "duration": 10,
+      "self": true
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "enemies_alive",
+        "cmp": ">=",
+        "value": 1
+      }
+    ],
+    "target": {
+      "selector": "self"
+    },
+    "targetConditions": [
+      {
+        "type": "target_missing_status",
+        "status": "deadeye"
+      }
+    ]
+  },
+  "priority": 82,
+  "order": 925
+}

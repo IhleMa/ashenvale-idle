@@ -1,0 +1,42 @@
+{
+  "name": "Army of the Dead",
+  "classId": "summoner",
+  "subclass": "lich",
+  "unlockLevel": 5,
+  "type": "summon",
+  "description": "Raise 2 more Skeleton Warriors at once (up to 5 skeletons).",
+  "cost": 40,
+  "cooldown": 18,
+  "target": "self",
+  "effects": [
+    {
+      "kind": "summon",
+      "minion": "skeleton",
+      "count": 2,
+      "max": 5
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "enemies_alive",
+        "cmp": ">=",
+        "value": 1
+      },
+      {
+        "type": "own_minions",
+        "minion": "skeleton",
+        "cmp": "<=",
+        "value": 3
+      }
+    ],
+    "target": {
+      "selector": "self"
+    },
+    "targetConditions": []
+  },
+  "priority": 74,
+  "order": 930
+}

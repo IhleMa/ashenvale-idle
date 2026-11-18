@@ -1,0 +1,35 @@
+{
+  "name": "Ice Barrier",
+  "classId": "mage",
+  "subclass": "cryomancer",
+  "unlockLevel": 20,
+  "type": "buff",
+  "description": "Shield the most wounded ally for 160% magic power.",
+  "cost": 35,
+  "cooldown": 14,
+  "target": "ally",
+  "effects": [
+    {
+      "kind": "shield",
+      "stat": "magPower",
+      "power": 1.6,
+      "duration": 8
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "ally_hp_below",
+        "value": 65
+      }
+    ],
+    "target": {
+      "selector": "ally_lowest_hp_pct"
+    },
+    "targetConditions": []
+  },
+  "priority": 78,
+  "order": 909
+}

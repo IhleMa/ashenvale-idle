@@ -1,0 +1,36 @@
+{
+  "name": "Combustion",
+  "classId": "mage",
+  "subclass": "pyromancer",
+  "unlockLevel": 20,
+  "type": "damage",
+  "description": "Detonate the target for 380% magic damage, doubled below 30% health.",
+  "cost": 50,
+  "cooldown": 16,
+  "target": "enemy",
+  "effects": [
+    {
+      "kind": "damage",
+      "stat": "magPower",
+      "power": 3.8,
+      "school": "magical",
+      "executeBelow": 0.3,
+      "executeMult": 2
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "always"
+      }
+    ],
+    "target": {
+      "selector": "enemy_lowest_hp_pct"
+    },
+    "targetConditions": []
+  },
+  "priority": 75,
+  "order": 907
+}

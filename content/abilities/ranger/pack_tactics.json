@@ -1,0 +1,41 @@
+{
+  "name": "Pack Tactics",
+  "classId": "ranger",
+  "subclass": "beastmaster",
+  "unlockLevel": 20,
+  "type": "buff",
+  "description": "You and your beasts attack 35% faster and deal 10% more damage for 10 seconds.",
+  "cost": 30,
+  "cooldown": 22,
+  "target": "self",
+  "effects": [
+    {
+      "kind": "status",
+      "status": "bloodlust",
+      "duration": 10,
+      "self": true
+    },
+    {
+      "kind": "status",
+      "status": "empowered",
+      "duration": 10
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "own_minions",
+        "cmp": ">=",
+        "value": 1
+      }
+    ],
+    "target": {
+      "selector": "own_minions"
+    },
+    "targetConditions": []
+  },
+  "priority": 78,
+  "order": 927
+}

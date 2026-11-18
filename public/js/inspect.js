@@ -1,4 +1,5 @@
 // "Inspect player" window: public profile with hero, gear, skill tree, loadout, party and group.
+import { classLabel } from '/shared/data/subclasses.js';
 import { state } from './state.js';
 import { act } from './net.js';
 import { esc, fmt, pct, modal, run, tipAttr, itemTooltipHtml, duration, botTag } from './ui.js';
@@ -57,7 +58,7 @@ function profileHtml(p) {
     ${portrait(h, 'lg')}
     <div class="grow">
       <h2>${esc(p.name)}${botTag(p)} ${me ? '<span class="tag hero">YOU</span>' : ''}</h2>
-      <div><b>${esc(h.name)}</b> · ${esc(h.title || '')} · Lv ${h.level} ${classBadge(h.classId)}</div>
+      <div><b>${esc(h.name)}</b> · ${esc(h.title || '')} · Lv ${h.level} ${classBadge(h.classId, h.subclass)}</div>
       <div class="small muted inspect-activity">${activityText(p.activity)}</div>
       <div class="rank-chips">${ranks.map(([k, r]) => `<span class="rank-chip ${r <= 3 ? 'top' : ''}">#${r} ${RANK_LABELS[k]}</span>`).join('')}</div>
     </div>
@@ -82,7 +83,7 @@ function overviewHtml(p) {
       <h3>Group</h3>
       ${g ? `<div class="small muted">${g.inBattle ? `⚔ Fighting <b>${esc(g.encounter || 'an encounter')}</b>` : 'Not in an encounter'}</div>
         <div class="group-mini">${g.members.map(m => `<div class="bench-row">${m.hero ? portrait(m.hero, 'xs') : ''}<div class="grow"><b>${m.leader ? '👑 ' : ''}${esc(m.name)}</b>${botTag(m)} <span class="conn-dot ${m.online ? 'on' : ''}"></span>
-          <div class="muted small">${m.hero ? `${esc(m.hero.name)} · Lv ${m.hero.level} ${esc(CLASSES[m.hero.classId].name)}` : ''}</div></div>
+          <div class="muted small">${m.hero ? `${esc(m.hero.name)} · Lv ${m.hero.level} ${esc(classLabel(m.hero.classId, m.hero.subclass))}` : ''}</div></div>
           ${m.name !== p.name ? `<button class="btn tiny ghost" data-inspect-name="${esc(m.name)}">Inspect</button>` : ''}</div>`).join('')}</div>`
         : '<p class="muted small">Not in a group.</p>'}
     </section>
@@ -114,12 +115,12 @@ function ruleText(abilityId, rule) {
 
 function charDetailHtml(c) {
   const s = c.stats;
-  const tree = getTree(c.classId);
+  const tree = getTree(c.classId, c.subclass);
   const notable = c.tree.notables;
   const bonus = describeNodeStats(c.tree.bonuses);
   return `<div class="inspect-grid">
     <section class="panel">
-      <div class="row gap">${portrait(c, 'md')}<div><b>${c.isMain ? '★ ' : ''}${esc(c.name)}</b> <span class="muted small">Lv ${c.level} · ${esc(c.title || '')}</span><div>${classBadge(c.classId)} ${roleBadge(c.role)}${c.trait ? ` <span class="trait">${esc(TRAITS[c.trait]?.name || '')}</span>` : ''}</div></div></div>
+      <div class="row gap">${portrait(c, 'md')}<div><b>${c.isMain ? '★ ' : ''}${esc(c.name)}</b> <span class="muted small">Lv ${c.level} · ${esc(c.title || '')}</span><div>${classBadge(c.classId, c.subclass)} ${roleBadge(c.role)}${c.trait ? ` <span class="trait">${esc(TRAITS[c.trait]?.name || '')}</span>` : ''}</div></div></div>
       <div class="attr-preview" style="margin-top:10px">${Object.entries(ATTRIBUTES).map(([k, a]) => `<div><span>${a.label}</span><b>${s.attributes[k]}</b></div>`).join('')}</div>
       <div class="stat-grid">
         ${[['Health', fmt(s.maxHp)], ['Physical Power', fmt(s.physPower)], ['Magic Power', fmt(s.magPower)], ['Healing Power', fmt(s.healPower)], ['Defense', fmt(s.defense)], ['Crit Chance', pct(s.critChance)], ['Crit Damage', pct(s.critDamage, 0)], ['Attack Speed', pct(s.attackSpeed, 0)], ['Power rating', fmt(c.power)]]
@@ -130,7 +131,7 @@ function charDetailHtml(c) {
     </section>
     <section class="panel">
       <h3>Skill tree <span class="muted small">${c.tree.spent}/${c.tree.total} points</span></h3>
-      ${miniTree(c.classId, c.tree.allocated)}
+      ${miniTree(c.classId, c.tree.allocated, c.subclass)}
       <div class="small">${notable.length ? notable.map(n => `<span class="notable-chip ${n.type}" ${tipAttr(describeNodeStats(n.stats).map(esc).join('<br>'))}>${n.type === 'keystone' ? '✹' : '◆'} ${esc(n.name)}</span>`).join(' ') : '<span class="muted">No notables yet.</span>'}</div>
       ${bonus.length ? `<ul class="tree-summary" style="margin-top:8px">${bonus.map(b => `<li>${esc(b)}</li>`).join('')}</ul>` : ''}
     </section>
@@ -145,7 +146,7 @@ function charDetailHtml(c) {
 function partyHtml(p) {
   return `<div class="inspect-party">${p.party.map(c => `<div class="panel inspect-member">
     <div class="row gap">${portrait(c, 'md')}<div class="grow"><b>${c.isMain ? '★ ' : ''}${esc(c.name)}</b> <span class="muted small">Lv ${c.level} · ${esc(c.title || '')}</span>
-      <div>${classBadge(c.classId)} ${roleBadge(c.role)} <span class="muted small">Power ${fmt(c.power)}</span></div></div></div>
+      <div>${classBadge(c.classId, c.subclass)} ${roleBadge(c.role)} <span class="muted small">Power ${fmt(c.power)}</span></div></div></div>
     <div class="row gap wrap" style="margin-top:8px">${c.loadout.map(a => `<span ${tipAttr(`<b>${esc(ABILITIES[a]?.name)}</b> (rank ${c.ranks[a] || 1})${c.rules ? `<br>${esc(ruleText(a, c.rules[a]))}` : ''}`)}>${abilityIcon(a, 'xs')}</span>`).join('')}</div>
     ${c.equipment ? `<div class="equip-icons small-icons">${SLOT_IDS.map(sl => { const it = c.equipment[sl]; return it ? `<span ${tipAttr(itemTooltipHtml(it))}>${itemIcon(it, 'xs')}</span>` : `<span>${slotIcon(sl, 'xs')}</span>`; }).join('')}</div>` : ''}
     ${c.tree ? `<div class="small muted">Skill tree: ${c.tree.spent}/${c.tree.total} points${c.tree.notables.length ? ' · ' + c.tree.notables.map(n => esc(n.name)).join(', ') : ''}</div>` : ''}
@@ -153,8 +154,8 @@ function partyHtml(p) {
 }
 
 // Small read-only rendering of a skill tree
-function miniTree(classId, allocated) {
-  const tree = getTree(classId);
+function miniTree(classId, allocated, subclass = null) {
+  const tree = getTree(classId, subclass);
   const set = new Set(allocated);
   const R = tree.radius + 40;
   const seen = new Set();

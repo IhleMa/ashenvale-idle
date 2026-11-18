@@ -1,4 +1,5 @@
 // Expeditions: send recruits out to gather materials.
+import { classLabel } from '/shared/data/subclasses.js';
 import { state } from '../state.js';
 import { act } from '../net.js';
 import { esc, fmt, run, toast, tipAttr, duration, bar, confirmBox, premiumTxt, confirmSpend } from '../ui.js';
@@ -74,7 +75,7 @@ function plannerHtml(p) {
       const on = ui.team.includes(c.id);
       const match = d.bonus && c.profession?.id === d.bonus;
       return `<button class="exp-pick ${on ? 'on' : ''} ${match ? 'match' : ''}" data-pick="${c.id}" ${busy ? 'disabled' : ''}>
-        ${portrait(c, 'sm')}<span><b>${esc(c.name)}</b><small>Lv ${c.level} ${esc(CLASSES[c.classId].name)}</small>
+        ${portrait(c, 'sm')}<span><b>${esc(c.name)}</b><small>Lv ${c.level} ${esc(classLabel(c.classId, c.subclass))}</small>
         <small>${c.profession ? `${professionIcon(c.profession.id, 'xxs')} ${esc(PROFESSIONS[c.profession.id].name)} ${c.profession.level}` : ''}</small>
         ${busy ? `<small class="warn-text">${esc(busy)}</small>` : ''}</span>${on ? '<span class="check">✓</span>' : ''}</button>`;
     }).join('') || '<p class="muted small">You have no companions yet. <a href="#/recruitment">Recruit some first.</a></p>'}</div>

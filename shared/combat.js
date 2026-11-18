@@ -22,7 +22,7 @@ export function makeCharacterUnit(ch, { ownerId, ownerName, position, bonuses = 
   const fx = equipmentEffects(ch); // uniques & set bonuses
   return {
     procs: fx.procs.map(p => ({ ...p, lastAt: -1e9, used: false })), passives: fx.passives,
-    uid: 0, side: 'A', kind: 'character', name: ch.name, defId: ch.classId, classId: ch.classId,
+    uid: 0, side: 'A', kind: 'character', name: ch.name, defId: ch.classId, classId: ch.classId, subclass: ch.subclass || null,
     charId: ch.id, ownerId, ownerName, isMain: !!ch.isMain, portrait: ch.portrait || null,
     level: ch.level, role: ch.role, tags: ['hero'], position,
     stats: s, maxHp: s.maxHp, hp: s.maxHp,
@@ -284,6 +284,7 @@ function applyEffect(b, src, tgt, eff, abilityId) {
       break;
     }
     case 'heal': {
+      if (eff.self) tgt = src; // e.g. a strike that also heals the caster
       if (!tgt.alive) return;
       healUnit(b, src, tgt, effPower(src, eff.stat) * eff.power * rm, abilityId, null, eff.proc);
       break;
@@ -573,7 +574,7 @@ const HOOK_API = {
 // ---------------------------------------------------------------- serialization for clients
 export function publicUnit(u) {
   return {
-    uid: u.uid, side: u.side, kind: u.kind, name: u.name, defId: u.defId, classId: u.classId || null,
+    uid: u.uid, side: u.side, kind: u.kind, name: u.name, defId: u.defId, classId: u.classId || null, subclass: u.subclass || null,
     level: u.level, isMain: !!u.isMain, ownerName: u.ownerName || null, ownerId: u.ownerId || null, portrait: u.portrait || null,
     role: u.role || null, tags: u.tags, boss: !!u.boss, position: u.position,
     ...(u.kind === 'minion' ? { ownerUid: u.ownerUid, charId: u.charId, summonerName: u.summonerName, duration: u.duration } : {}),

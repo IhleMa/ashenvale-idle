@@ -26,7 +26,7 @@ import { masteryMap } from '../shared/bestiary.js';
 import { RIFT, riftWaves, riftScale, riftHooks, affixesFor, maxStartTier, riftThemes, riftRewardOptions, riftChest, firstClearCrystals, riftCleared, repeatXpGold, riftLevel } from '../shared/rifts.js';
 
 const { GameError } = L;
-const SAVE_NOW = new Set(['ah_list', 'ah_buy', 'ah_cancel', 'collect_mail', 'town_speedup', 'expedition_speedup']);
+const SAVE_NOW = new Set(['ascend', 'ah_list', 'ah_buy', 'ah_cancel', 'collect_mail', 'town_speedup', 'expedition_speedup']);
 const READ_ONLY = new Set(['get_rankings', 'inspect_player', 'ah_search', 'ah_mine']);
 const fail = m => { throw new GameError(m); };
 
@@ -280,6 +280,15 @@ export class Game {
       ex.announced = true;
       p.stats.expeditionSpeedups = (p.stats.expeditionSpeedups || 0) + 1;
       return { cost };
+    },
+    // ---- ascension (subclasses)
+    ascend(s, d) {
+      const r = L.ascendHero(s.player, { subclassId: String(d.subclassId || '') });
+      const h = L.hero(s.player);
+      this.toast(s.player.id, `🌟 ${h.name} ascended as ${r.name}! Back to level 1 — with new skill-tree branches and ${CONFIG.ascension.bonusSkillPoints} bonus skill points.${r.mailed ? ` Your old gear (${r.mailed} items) is in your mailbox.` : ''}`, 'success');
+      for (const id of this.sessions.keys()) if (id !== s.player.id) this.toast(id, `🌟 ${s.player.name}'s ${h.name} ${r.switched ? 'became' : 'ascended as'} a ${r.name}!`, 'info');
+      this.store.savePlayerSoon(s.player);
+      return r;
     },
     // ---- tutorial
     tutorial_ack(s, d) { this.tutorialToasts(s, TU.ackTutorial(s.player, { stepId: d.stepId ? String(d.stepId) : null })); },
@@ -685,11 +694,13 @@ export class Game {
     const startLevels = Object.fromEntries(chars.map(c => [c.id, c.level]));
     let simTime = 0, fights = 0, wins = 0, xp = 0, gold = 0, kills = 0, itemsKept = 0, itemsSold = 0;
     const found = [];
+    let lastKills = null; // kills of the last simulated fight (for per-character XP adjustments)
     while (simTime < seconds && fights < CONFIG.offline.maxSimulatedFights) {
       const h = L.hero(p);
       const at = (p.lastActive || Date.now()) + simTime * 1000;
       const b = createBattle({ seed: rng.int(1, 2 ** 31), allies: buildPartyUnits(chars, { ownerId: p.id, ownerName: p.name, buffs: elixirBonuses(p, at), vsEnemy: masteryMap(p) }), waves: idleWaves(zone.id, h.level, rng, chars.length), scale: zone.scale || { hp: 1, damage: 1 } });
       runToEnd(b);
+      if (b.kills.length) lastKills = b.kills;
       fights++;
       simTime += b.time + (b.state === 'victory' ? CONFIG.combat.restBetweenFights : CONFIG.combat.reviveDelay);
       L.recordBestiary(p, { kills: b.kills });
@@ -707,7 +718,7 @@ export class Game {
     // Extrapolate the remaining time from the simulated average (only if the cap was hit)
     if (simTime < seconds && simTime > 0 && wins > 0) {
       const factor = (seconds - simTime) / simTime;
-      const ex = { xp: Math.round(xp * factor), gold: Math.round(gold * factor), items: [], kills: Math.round(kills * factor) };
+      const ex = { xp: Math.round(xp * factor), gold: Math.round(gold * factor), items: [], kills: Math.round(kills * factor), killList: lastKills };
       const extraItems = Math.min(20, Math.round((itemsKept + itemsSold) * factor));
       const h = L.hero(p);
       for (let i = 0; i < extraItems; i++) ex.items.push(generateItem(rng, zoneLevel(zone, h.level), {}));
@@ -859,7 +870,7 @@ export class Game {
     this.lastOnlineSent = Date.now();
     const list = [...this.sessions.values()].map(s => {
       const h = L.hero(s.player);
-      return { id: s.player.id, name: s.player.name, bot: this.showBot(s.player.id), hero: h ? { name: h.name, classId: h.classId, level: h.level } : null, inGroup: !!this.groupOf(s.player.id) };
+      return { id: s.player.id, name: s.player.name, bot: this.showBot(s.player.id), hero: h ? { name: h.name, classId: h.classId, subclass: h.subclass || null, level: h.level } : null, inGroup: !!this.groupOf(s.player.id) };
     });
     for (const s of this.sessions.values()) this.sendTo(s.player.id, { t: 'online', players: list });
   }

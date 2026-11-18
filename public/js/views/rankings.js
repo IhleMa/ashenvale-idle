@@ -1,4 +1,5 @@
 // Rankings / leaderboards. Click a player to inspect them.
+import { classLabel } from '/shared/data/subclasses.js';
 import { state } from '../state.js';
 import { act } from '../net.js';
 import { esc, fmt, toast, botTag } from '../ui.js';
@@ -39,7 +40,7 @@ function renderTable(root) {
       <tbody>${data.rows.map(r => `<tr class="${r.id === state.player?.id ? 'me' : ''} ${r.rank <= 3 ? 'top top' + r.rank : ''}" data-inspect="${esc(r.name)}">
         <td class="rank-no">${r.rank <= 3 ? ['🥇', '🥈', '🥉'][r.rank - 1] : r.rank}</td>
         <td><span class="conn-dot ${r.online ? 'on' : ''}" title="${r.online ? 'Online' : 'Offline'}"></span> <b>${esc(r.name)}</b>${botTag(r)}${r.inGroup ? ' <span class="tag" title="In a group">GROUP</span>' : ''}</td>
-        <td><span class="row gap">${portrait(r.hero, 'xs')}<span>${esc(r.hero.name)} <span class="muted small">Lv ${r.hero.level} ${esc(CLASSES[r.hero.classId].name)}</span></span></span></td>
+        <td><span class="row gap">${portrait(r.hero, 'xs')}<span>${esc(r.hero.name)} <span class="muted small">Lv ${r.hero.level} ${esc(classLabel(r.hero.classId, r.hero.subclass))}</span></span></span></td>
         <td class="hide-sm">${r.partyClasses.map(c => classIcon(c, 'xxs')).join(' ')}</td>
         <td class="num"><b>${typeof r.value === 'number' ? fmt(r.value) : esc(r.value)}</b></td>
         <td class="num"><button class="btn tiny ghost">Inspect</button></td>

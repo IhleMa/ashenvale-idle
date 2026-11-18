@@ -1,4 +1,5 @@
 // Passive skill tree: pan/zoom SVG web, path preview, multi-node allocation, refunds, search.
+import { SUBCLASSES } from '/shared/data/subclasses.js';
 import { state, selectedChar } from '../state.js';
 import { act } from '../net.js';
 import { esc, fmt, run, toast, confirmBox, tipAttr } from '../ui.js';
@@ -44,7 +45,7 @@ function nodeState(ch, n, set) {
 function nodeTip(ch, n, set) {
   const lines = describeNodeStats(n.stats);
   const ab = n.ability ? ABILITIES[n.ability] : null;
-  let html = `<b>${esc(n.name)}</b> <span class="muted">${n.type === 'start' ? 'Origin' : n.type === 'ability' ? 'Ability' : n.type === 'keystone' ? 'Keystone' : n.type === 'notable' ? 'Notable' : n.type === 'rank' ? 'Ability rank' : 'Passive'}</span>`;
+  let html = `<b>${esc(n.name)}</b> ${n.subclass ? `<span class="sub-tag" style="--sub-color:${esc(SUBCLASSES[n.subclass]?.color || '#c9a24a')}">${esc(SUBCLASSES[n.subclass]?.name || n.subclass)}</span> ` : ''}<span class="muted">${n.type === 'start' ? 'Origin' : n.type === 'ability' ? 'Ability' : n.type === 'keystone' ? 'Keystone' : n.type === 'notable' ? 'Notable' : n.type === 'rank' ? 'Ability rank' : 'Passive'}</span>`;
   if (ab) html += `<br>${esc(ab.description)}<br><span class="muted">${ab.cost ? `${ab.cost} ${esc(CLASSES[ch.classId].resource.name)} · ` : ''}${ab.cooldown}s cooldown</span>`;
   if (lines.length) html += `<br>${lines.map(esc).join('<br>')}`;
   if (n.type === 'rank' && !ch.abilities[n.rankFor]) html += `<br><i class="muted">Only has an effect once ${esc(ABILITIES[n.rankFor]?.name)} is learned.</i>`;
@@ -78,12 +79,12 @@ function nodeSvg(ch, n, set) {
     : `<circle class="shape" r="${r}"/>`;
   const label = (n.type === 'ability' || n.type === 'keystone' || n.type === 'notable' || n.type === 'start') ? `<text class="label" y="${r + 13}">${esc(n.name)}</text>` : '';
   const match = search && (`${n.name} ${describeNodeStats(n.stats).join(' ')}`.toLowerCase().includes(search)) ? ' match' : '';
-  return `<g class="node t-${n.type} s-${st}${match}${focusNode === n.id ? ' focus' : ''}" data-node="${n.id}" transform="translate(${n.x} ${n.y})" style="--cc:${cls.color}">
+  return `<g class="node t-${n.type} s-${st}${match}${focusNode === n.id ? ' focus' : ''}" data-node="${n.id}" transform="translate(${n.x} ${n.y})" style="--cc:${(n.subclass && SUBCLASSES[n.subclass]?.color) || cls.color}">
     <circle class="halo" r="${r + 6}"/>${shape}${inner}${label}</g>`;
 }
 
 function svgHtml(ch) {
-  const tree = getTree(ch.classId);
+  const tree = getTree(ch.classId, ch.subclass);
   const set = allocatedSet(ch);
   const seen = new Set();
   const lines = [];
@@ -104,7 +105,8 @@ function svgHtml(ch) {
     const ang = -Math.PI / 2 + b * (2 * Math.PI) / B;
     const c = Math.cos(ang);
     const anchor = c > 0.5 ? 'start' : c < -0.5 ? 'end' : 'middle';
-    return `<text class="branch-label" text-anchor="${anchor}" x="${c * (R + 50)}" y="${Math.sin(ang) * (R + 62)}">${esc(name)}</text>`;
+    const sub = tree.subclassBranches != null && b >= tree.subclassBranches ? SUBCLASSES[ch.subclass] : null;
+    return `<text class="branch-label${sub ? ' sub' : ''}" text-anchor="${anchor}" x="${c * (R + 50)}" y="${Math.sin(ang) * (R + 62)}" ${sub ? `style="fill:${esc(sub.color || '#c9a24a')}"` : ''}>${sub ? `${esc(sub.glyph || '🌟')} ` : ''}${esc(name)}</text>`;
   }).join('');
   const rings = TREE_CONFIG.rings.map((_, i) => `<circle class="ring" r="${(i + 1) * TREE_CONFIG.ringSpacing}"/>`).join('');
   const clips = Object.entries(SIZE).map(([t, r]) => `<clipPath id="clip-${t}"><circle r="${r - (t === 'rank' ? 2 : 3)}"/></clipPath>`).join('');
@@ -122,7 +124,7 @@ function sidebarHtml(ch) {
   const stats = treeStats(ch);
   const summary = describeNodeStats(stats);
   const owned = Object.entries(ch.abilities);
-  const tree = getTree(ch.classId);
+  const tree = getTree(ch.classId, ch.subclass);
   const allAbilities = Object.values(tree.nodes).filter(n => n.ability);
   return `
     <div class="tree-points ${avail > 0 ? 'has' : ''}"><span class="big-num">${avail}</span><span>skill point${avail === 1 ? '' : 's'} available</span><small class="muted">${spentPoints(ch)} / ${totalSkillPoints(ch)} spent${ch.isMain ? ` · hero: +1 bonus point every ${CONFIG.mainCharacter.bonusSkillPointEvery} levels` : ''}</small></div>
@@ -161,7 +163,7 @@ function highlightPath(root, ids) {
 }
 
 function centerOn(nodeId, ch) {
-  const n = getTree(ch.classId).nodes[nodeId];
+  const n = getTree(ch.classId, ch.subclass).nodes[nodeId];
   if (n) { view.x = n.x; view.y = n.y; view.w = Math.min(view.w, 900); }
 }
 
@@ -213,7 +215,7 @@ export const skilltreeView = {
       const ch = selectedChar();
       if (!g || !ch) { if (!e.target.closest('.node')) highlightPath(root, []); return; }
       const set = allocatedSet(ch);
-      const n = getTree(ch.classId).nodes[g.dataset.node];
+      const n = getTree(ch.classId, ch.subclass).nodes[g.dataset.node];
       g.dataset.tip = nodeTip(ch, n, set);
       highlightPath(root, set.has(n.id) ? [] : pathTo(ch, n.id));
     });
@@ -221,7 +223,7 @@ export const skilltreeView = {
     const doRefund = async (ch, nodeId) => {
       const err = canRefund(ch, nodeId);
       if (err) return toast(err, 'error');
-      const n = getTree(ch.classId).nodes[nodeId];
+      const n = getTree(ch.classId, ch.subclass).nodes[nodeId];
       if (await confirmBox(`Refund "${n.name}" for ${fmt(treeRefundCost(ch))} gold?`, 'Refund')) await run(act('refund_node', { charId: ch.id, nodeId }), 'Node refunded.');
     };
     root.addEventListener('contextmenu', async e => {
@@ -267,7 +269,7 @@ export const skilltreeView = {
       if (!e.target.matches('.tree-search')) return;
       search = e.target.value.trim().toLowerCase();
       const ch = selectedChar();
-      const tree = getTree(ch.classId);
+      const tree = getTree(ch.classId, ch.subclass);
       root.querySelectorAll('.node').forEach(g => {
         const n = tree.nodes[g.dataset.node];
         g.classList.toggle('match', !!search && `${n.name} ${describeNodeStats(n.stats).join(' ')}`.toLowerCase().includes(search));
@@ -305,7 +307,7 @@ export const skilltreeView = {
       host.innerHTML = svgHtml(ch);
       const svg = host.querySelector('svg');
       if (!view) {
-        const d = getTree(ch.classId).radius * 2 + 260;
+        const d = getTree(ch.classId, ch.subclass).radius * 2 + 260;
         const r = svg.getBoundingClientRect();
         view = { x: 0, y: 0, w: Math.max(d + 360, d * r.width / Math.max(1, r.height)) };
         if (focusNode) centerOn(focusNode, ch);
