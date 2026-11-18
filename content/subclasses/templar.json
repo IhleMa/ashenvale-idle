@@ -36,6 +36,47 @@
             "damagePct": 0.08
           }
         }
+      },
+      "mutators": {
+        "3": {
+          "name": "Radiant Smite",
+          "ability": "smite",
+          "description": "Smite hits much harder and Weakens the target.",
+          "changes": {
+            "power": 0.5,
+            "effects": [
+              {
+                "kind": "status",
+                "status": "weakened",
+                "duration": 5
+              }
+            ]
+          }
+        },
+        "6": {
+          "name": "Bulwark of Faith",
+          "ability": "power_word_barrier",
+          "description": "Power Word: Barrier absorbs more and recharges faster.",
+          "changes": {
+            "power": 0.4,
+            "cooldown": -3
+          }
+        },
+        "7": {
+          "name": "Crusader's Blessing",
+          "ability": "divine_blessing",
+          "description": "Divine Blessing lasts much longer and also Fortifies the party.",
+          "changes": {
+            "duration": 8,
+            "effects": [
+              {
+                "kind": "status",
+                "status": "fortified",
+                "duration": 8
+              }
+            ]
+          }
+        }
       }
     }
   ],

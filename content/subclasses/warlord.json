@@ -36,6 +36,54 @@
             "hpPct": 0.08
           }
         }
+      },
+      "mutators": {
+        "3": {
+          "name": "Rallying Cry",
+          "ability": "battle_cry",
+          "description": "Battle Cry lasts longer and also Rallies the party.",
+          "changes": {
+            "duration": 4,
+            "effects": [
+              {
+                "kind": "status",
+                "status": "rallied",
+                "duration": 10
+              }
+            ]
+          }
+        },
+        "6": {
+          "name": "Inspiring Taunt",
+          "ability": "taunt",
+          "description": "Taunt also shields you.",
+          "changes": {
+            "effects": [
+              {
+                "kind": "shield",
+                "stat": "physPower",
+                "power": 1.5,
+                "duration": 8
+              }
+            ]
+          }
+        },
+        "7": {
+          "name": "Tactical Sunder",
+          "ability": "sunder_armor",
+          "description": "Sunder Armor lasts longer, is cheaper and Exposes the target.",
+          "changes": {
+            "duration": 5,
+            "cost": -8,
+            "effects": [
+              {
+                "kind": "status",
+                "status": "exposed",
+                "duration": 8
+              }
+            ]
+          }
+        }
       }
     }
   ],

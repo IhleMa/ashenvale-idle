@@ -34,6 +34,54 @@
             "damagePct": 0.08
           }
         }
+      },
+      "mutators": {
+        "3": {
+          "name": "Condemn",
+          "ability": "smite",
+          "description": "Smite passes Judgement on the target.",
+          "changes": {
+            "effects": [
+              {
+                "kind": "status",
+                "status": "judged",
+                "duration": 6
+              }
+            ]
+          }
+        },
+        "6": {
+          "name": "Holy Fire",
+          "ability": "smite",
+          "description": "Smite hits harder and sets the target ablaze.",
+          "changes": {
+            "power": 0.25,
+            "effects": [
+              {
+                "kind": "status",
+                "status": "burn",
+                "duration": 6,
+                "stat": "magPower",
+                "power": 0.2
+              }
+            ]
+          }
+        },
+        "7": {
+          "name": "Zealous Purify",
+          "ability": "purify",
+          "description": "Purify heals much more and Rallies the ally.",
+          "changes": {
+            "power": 0.5,
+            "effects": [
+              {
+                "kind": "status",
+                "status": "rallied",
+                "duration": 6
+              }
+            ]
+          }
+        }
       }
     }
   ],

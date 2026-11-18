@@ -34,6 +34,42 @@
             "healPowerPct": 0.1
           }
         }
+      },
+      "mutators": {
+        "3": {
+          "name": "Foresight",
+          "ability": "renew",
+          "description": "Renew heals more and lasts longer.",
+          "changes": {
+            "power": 0.25,
+            "duration": 5
+          }
+        },
+        "6": {
+          "name": "Swift Mending",
+          "ability": "heal",
+          "description": "Heal is cheaper and recharges faster.",
+          "changes": {
+            "cooldown": -1,
+            "cost": -5
+          }
+        },
+        "7": {
+          "name": "Chorus of Light",
+          "ability": "prayer_of_healing",
+          "description": "Prayer of Healing also leaves Renew on everyone.",
+          "changes": {
+            "effects": [
+              {
+                "kind": "status",
+                "status": "renew",
+                "duration": 6,
+                "stat": "healPower",
+                "power": 0.15
+              }
+            ]
+          }
+        }
       }
     }
   ],

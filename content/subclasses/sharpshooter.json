@@ -35,6 +35,42 @@
             "physPowerPct": 0.1
           }
         }
+      },
+      "mutators": {
+        "3": {
+          "name": "Piercing Shot",
+          "ability": "aimed_shot",
+          "description": "Aimed Shot hits harder and crits more often.",
+          "changes": {
+            "power": 0.25,
+            "bonusCrit": 0.2
+          }
+        },
+        "6": {
+          "name": "Sniper's Patience",
+          "ability": "kill_shot",
+          "description": "Kill Shot can be used much earlier and recharges faster.",
+          "changes": {
+            "executeBelow": 0.35,
+            "cooldown": -3
+          }
+        },
+        "7": {
+          "name": "Hunter's Focus",
+          "ability": "rapid_fire",
+          "description": "Rapid Fire lasts longer and grants Deadeye.",
+          "changes": {
+            "duration": 4,
+            "effects": [
+              {
+                "kind": "status",
+                "status": "deadeye",
+                "duration": 6,
+                "self": true
+              }
+            ]
+          }
+        }
       }
     }
   ],

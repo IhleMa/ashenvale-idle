@@ -36,6 +36,47 @@
             "damageTakenPct": -0.08
           }
         }
+      },
+      "mutators": {
+        "3": {
+          "name": "Concussive Bash",
+          "ability": "shield_bash",
+          "description": "Shield Bash stuns longer and comes back sooner.",
+          "changes": {
+            "duration": 1,
+            "cooldown": -4
+          }
+        },
+        "6": {
+          "name": "Iron Wall",
+          "ability": "shield_wall",
+          "description": "Shield Wall lasts longer and also taunts every enemy.",
+          "changes": {
+            "duration": 3,
+            "effects": [
+              {
+                "kind": "taunt",
+                "duration": 3,
+                "once": true
+              }
+            ]
+          }
+        },
+        "7": {
+          "name": "Crushing Sunder",
+          "ability": "sunder_armor",
+          "description": "Sunder Armor hits much harder and draws the enemy's attention.",
+          "changes": {
+            "power": 0.5,
+            "effects": [
+              {
+                "kind": "taunt",
+                "duration": 2,
+                "once": true
+              }
+            ]
+          }
+        }
       }
     }
   ],

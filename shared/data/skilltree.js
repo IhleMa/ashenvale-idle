@@ -111,6 +111,23 @@ function buildTree(spec) {
     node.stats = p === s ? { [p + 'Pct']: 0.08 } : { [p + 'Pct']: 0.06, [s + 'Pct']: 0.03 };
   });
 
+  // ---- ability mutators (subclass branches): change a base ability, placed near the middle of their ring
+  spec.branches.forEach((br, b) => {
+    for (const [r, m] of Object.entries(br.mutators || {})) {
+      const ring = +r, cnt = rings[ring - 1];
+      if (!cnt) continue;
+      const order = Array.from({ length: cnt }, (_, i) => i).sort((x, y) => Math.abs(x - mid(ring)) - Math.abs(y - mid(ring)) || x - y);
+      const i = order.find(k => nodes[id(b, ring, k)].type === 'small');
+      if (i === undefined) continue;
+      const node = nodes[id(b, ring, i)];
+      node.type = 'mutator';
+      node.name = m.name;
+      node.description = m.description || '';
+      node.mutator = { ability: m.ability, changes: m.changes || {} };
+      node.stats = {};
+    }
+  });
+
   // ---- "Empowered" rank nodes: nearest free small nodes next to every ability (prefer outward)
   const abilityNodes = Object.values(nodes).filter(n => n.ability);
   for (const an of abilityNodes) {

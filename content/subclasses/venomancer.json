@@ -34,6 +34,49 @@
             "physPowerPct": 0.1
           }
         }
+      },
+      "mutators": {
+        "3": {
+          "name": "Virulent Blade",
+          "ability": "poison_blade",
+          "description": "Poison Blade's venom is stronger and lasts longer.",
+          "changes": {
+            "power": 0.4,
+            "duration": 4
+          }
+        },
+        "6": {
+          "name": "Septic Rupture",
+          "ability": "rupture",
+          "description": "Rupture also poisons the wound.",
+          "changes": {
+            "effects": [
+              {
+                "kind": "status",
+                "status": "poison",
+                "duration": 10,
+                "stat": "physPower",
+                "power": 0.25
+              }
+            ]
+          }
+        },
+        "7": {
+          "name": "Toxic Flurry",
+          "ability": "shadow_flurry",
+          "description": "Shadow Flurry coats each blade in poison.",
+          "changes": {
+            "effects": [
+              {
+                "kind": "status",
+                "status": "poison",
+                "duration": 8,
+                "stat": "physPower",
+                "power": 0.3
+              }
+            ]
+          }
+        }
       }
     }
   ],

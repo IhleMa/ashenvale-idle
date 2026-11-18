@@ -9,6 +9,7 @@ import { MINIONS } from './data/minions.js';
 import { computeStats } from './stats.js';
 import { equipmentEffects } from './data/legendaries.js';
 import { createRng } from './rng.js';
+import { mutatedAbilities } from './skilltree.js';
 import { resolveRule, hpPct, hasStatus, enemiesOf, alliesOf, ownMinions } from './rules.js';
 
 const C = CONFIG.combat;
@@ -28,7 +29,7 @@ export function makeCharacterUnit(ch, { ownerId, ownerName, position, bonuses = 
     stats: s, maxHp: s.maxHp, hp: s.maxHp,
     resource: cls.resource.start, resourceMax: cls.resource.max, resourceDef: cls.resource,
     cooldowns: {}, statuses: [], alive: true,
-    loadout: [...ch.loadout], ranks: { ...ch.abilities }, rules: JSON.parse(JSON.stringify(ch.rules)),
+    loadout: [...ch.loadout], ranks: { ...ch.abilities }, abilityDefs: mutatedAbilities(ch) /* subclass mutators */, rules: JSON.parse(JSON.stringify(ch.rules)),
     basicAttack: cls.basicAttack,
     threatMult: (cls.threatMult || 1) * (role.threatMult || 1),
     bonuses: {
@@ -226,7 +227,7 @@ function act(b, u) {
   // afforded yet, lower-priority abilities may only spend resource they can spare without delaying it.
   let reserved = 0;
   for (const abilityId of u.loadout) {
-    const ab = ABILITIES[abilityId];
+    const ab = u.abilityDefs?.[abilityId] || ABILITIES[abilityId];
     if (!ab || (u.cooldowns[abilityId] || 0) > 0) continue;
     const rule = u.rules[abilityId];
     const cost = Math.ceil(ab.cost * Math.max(0, 1 + (u.passives?.costPct || 0)));
@@ -243,7 +244,7 @@ function act(b, u) {
     u.cooldowns[abilityId] = ab.cooldown;
     emit(b, { type: 'ability', src: u.uid, ability: abilityId, tgts: targets.map(t => t.uid) });
     if (u.stat && u.kind === 'character') u.stat.casts[abilityId] = (u.stat.casts[abilityId] || 0) + 1;
-    for (const t of targets) for (const eff of ab.effects) applyEffect(b, u, t, eff, abilityId);
+    targets.forEach((t, i) => { for (const eff of ab.effects) if (!(eff.once && i > 0)) applyEffect(b, u, t, eff, abilityId); });
     fireProcs(b, u, 'cast', { ability: abilityId, area: !!ab.area, target: targets[0] });
     u.actionTimer = gcd;
     return;
@@ -300,6 +301,7 @@ function applyEffect(b, src, tgt, eff, abilityId) {
       break;
     }
     case 'shield': {
+      if (eff.self) tgt = src;
       if (!tgt.alive) return;
       const value = effPower(src, eff.stat) * eff.power * rm * (1 + src.bonuses.healingPct);
       applyStatus(b, src, tgt, 'barrier', eff.duration, value, 1);
@@ -323,6 +325,7 @@ function applyEffect(b, src, tgt, eff, abilityId) {
       break;
     }
     case 'resource': {
+      if (eff.self) tgt = src;
       if (tgt.resourceDef) tgt.resource = Math.min(tgt.resourceMax, tgt.resource + eff.amount);
       break;
     }
@@ -575,6 +578,7 @@ const HOOK_API = {
 export function publicUnit(u) {
   return {
     uid: u.uid, side: u.side, kind: u.kind, name: u.name, defId: u.defId, classId: u.classId || null, subclass: u.subclass || null,
+    ...(u.abilityDefs && Object.keys(u.abilityDefs).length ? { cdMax: Object.fromEntries(Object.entries(u.abilityDefs).map(([k, a]) => [k, a.cooldown])) } : {}),
     level: u.level, isMain: !!u.isMain, ownerName: u.ownerName || null, ownerId: u.ownerId || null, portrait: u.portrait || null,
     role: u.role || null, tags: u.tags, boss: !!u.boss, position: u.position,
     ...(u.kind === 'minion' ? { ownerUid: u.ownerUid, charId: u.charId, summonerName: u.summonerName, duration: u.duration } : {}),

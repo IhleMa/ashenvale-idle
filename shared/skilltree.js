@@ -4,6 +4,8 @@ import { CONFIG } from './config.js';
 import { CLASSES } from './data/classes.js';
 import { getTree, TREE_CONFIG } from './data/skilltree.js';
 import { SUBCLASSES } from './data/subclasses.js';
+import { ABILITIES } from './data/abilities.js';
+import { applyMutators } from './mutators.js';
 
 export { getTree };
 
@@ -132,6 +134,24 @@ export function treeStats(ch) {
   return out;
 }
 
+// Ability mutators from allocated subclass nodes: { abilityId: [changes, …] }
+export function treeMutators(ch) {
+  if (!ch.subclass) return {};
+  const tree = getTree(ch.classId, ch.subclass);
+  const out = {};
+  for (const id of allocatedSet(ch)) {
+    const m = tree.nodes[id]?.mutator;
+    if (m) (out[m.ability] ||= []).push(m.changes);
+  }
+  return out;
+}
+// The abilities of a character as they work in combat (only the mutated ones): { abilityId: ability }
+export function mutatedAbilities(ch) {
+  const out = {};
+  for (const [a, sets] of Object.entries(treeMutators(ch))) if (ABILITIES[a]) out[a] = applyMutators(ABILITIES[a], sets);
+  return out;
+}
+
 // ------------------------------------------------------------------ auto allocation (companions)
 function nodeValue(ch, node, owned) {
   const g = CLASSES[ch.classId].growth;
@@ -139,6 +159,7 @@ function nodeValue(ch, node, owned) {
   if (node.type === 'ability') return owned[node.ability] ? 0 : 120;
   if (node.type === 'rank') return owned[node.rankFor] ? 45 : 8;
   if (node.type === 'keystone') return 60;
+  if (node.type === 'mutator') return owned[node.mutator.ability] ? 55 : 6;
   if (node.type === 'notable') return 40;
   let v = 0;
   for (const [k, amt] of Object.entries(node.stats)) v += ((g[k] || 0) / maxG) * amt * 2.5;

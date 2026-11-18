@@ -112,7 +112,7 @@ export class Rankings {
         rules: Object.fromEntries(ch.loadout.map(a => [a, ch.rules[a]])),
         tree: {
           allocated, spent: spentPoints(ch), total: totalSkillPoints(ch), bonuses: treeStats(ch),
-          notables: allocated.map(id => tree.nodes[id]).filter(n => n && (n.type === 'notable' || n.type === 'keystone')).map(n => ({ name: n.name, type: n.type, stats: n.stats })),
+          notables: allocated.map(id => tree.nodes[id]).filter(n => n && (n.type === 'notable' || n.type === 'keystone' || n.type === 'mutator')).map(n => ({ name: n.name, type: n.type, stats: n.stats, ...(n.mutator ? { mutator: n.mutator, description: n.description } : {}) })),
         },
       };
     };

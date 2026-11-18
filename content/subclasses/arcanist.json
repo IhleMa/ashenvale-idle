@@ -35,6 +35,42 @@
             "attackSpeed": 0.1
           }
         }
+      },
+      "mutators": {
+        "3": {
+          "name": "Arcane Barrage",
+          "ability": "arcane_missiles",
+          "description": "Arcane Missiles fire two more missiles.",
+          "changes": {
+            "hits": 2
+          }
+        },
+        "6": {
+          "name": "Overflowing Power",
+          "ability": "arcane_power",
+          "description": "Arcane Power lasts longer, returns sooner and refills your mana.",
+          "changes": {
+            "duration": 5,
+            "cooldown": -10,
+            "effects": [
+              {
+                "kind": "resource",
+                "amount": 40,
+                "self": true,
+                "once": true
+              }
+            ]
+          }
+        },
+        "7": {
+          "name": "Efficient Casting",
+          "ability": "fireball",
+          "description": "Fireball costs much less mana and recharges faster.",
+          "changes": {
+            "cost": -8,
+            "cooldown": -1
+          }
+        }
       }
     }
   ],

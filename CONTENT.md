@@ -162,6 +162,16 @@ At the level cap a hero can **ascend** into a subclass of its class (optional): 
 | `name`, `glyph`, `color`, `description`, `title`, `order` | how it's shown (the name replaces the class name in the top bar, combat and rankings; `title` is the hero title at the cap) |
 | `bonus` | permanent passive with skill-tree stat keys, e.g. `{ "hpPct": 0.08, "defensePct": 0.1 }` |
 | `branches` | 1–2 extra branches: `{ "name", "attrs": [a, b], "abilities": { "2": id, "5": id }, "notables": { "4": { "name", "stats" }, "8": { … } } }` — keys are ring numbers, like the class trees |
+| `branches[].mutators` | **Ability mutators** (✦ nodes) that change a *base* class ability while allocated: `{ "3": { "name", "ability", "description", "changes": { … } } }` (key = ring) |
+
+Mutator `changes` (any combination): `power` (+0.3 = every damage/heal/shield/over-time effect of the ability 30 % stronger), `cost` and `cooldown` (added, e.g. `-5`), `hits` (extra hits on damage), `duration` (seconds added to its statuses, shields and taunts), `bonusCrit`, `executeBelow` (sets the execute threshold, e.g. `0.45`), and `effects` — extra effects in the normal ability-effect format. In extra effects, `"self": true` puts a status/heal/shield/resource on the caster and `"once": true` applies it only once even if the ability hits several targets. Example:
+
+```json
+"mutators": {
+  "3": { "name": "Bloody Cleave", "ability": "cleave", "description": "Cleave makes every enemy it hits bleed.",
+         "changes": { "effects": [{ "kind": "status", "status": "bleed", "duration": 6, "stat": "physPower", "power": 0.15 }] } }
+}
+```
 
 Subclass abilities live in `content/abilities/<class>/` with `"classId": "<class>"` **and** `"subclass": "<id>"`; only heroes of that subclass see them. Settings in `config.json` → `ascension`: `enabled`, `bonusSkillPoints` (extra points for ascended heroes, default 10) and `xpLevelGap` (while re-levelling, kill XP counts enemies as at most this many levels above the hero, so a strong party can't carry an ascended level-1 hero to the cap in minutes).
 

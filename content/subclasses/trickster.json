@@ -35,6 +35,48 @@
             "damageTakenPct": -0.08
           }
         }
+      },
+      "mutators": {
+        "3": {
+          "name": "Phantom Flurry",
+          "ability": "shadow_flurry",
+          "description": "Shadow Flurry strikes three more times and costs less.",
+          "changes": {
+            "hits": 3,
+            "cost": -10
+          }
+        },
+        "6": {
+          "name": "Vanishing Act",
+          "ability": "evasion",
+          "description": "Evasion lasts longer, returns sooner and makes you Hastened.",
+          "changes": {
+            "duration": 2,
+            "cooldown": -8,
+            "effects": [
+              {
+                "kind": "status",
+                "status": "hastened",
+                "duration": 8,
+                "self": true
+              }
+            ]
+          }
+        },
+        "7": {
+          "name": "Dirty Tricks",
+          "ability": "expose_weakness",
+          "description": "Expose Weakness also stuns the target briefly.",
+          "changes": {
+            "effects": [
+              {
+                "kind": "status",
+                "status": "stun",
+                "duration": 1.5
+              }
+            ]
+          }
+        }
       }
     }
   ],

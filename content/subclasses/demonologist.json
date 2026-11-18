@@ -34,6 +34,35 @@
             "minionDurationPct": 0.3
           }
         }
+      },
+      "mutators": {
+        "3": {
+          "name": "Infernal Pact",
+          "ability": "dark_pact",
+          "description": "Dark Pact lasts longer and comes back sooner.",
+          "changes": {
+            "duration": 4,
+            "cooldown": -6
+          }
+        },
+        "6": {
+          "name": "Imp Swarm",
+          "ability": "summon_imp",
+          "description": "Summon Imp is cheaper and recharges faster.",
+          "changes": {
+            "cost": -8,
+            "cooldown": -3
+          }
+        },
+        "7": {
+          "name": "Hellfire Burst",
+          "ability": "corpse_explosion",
+          "description": "Corpse Explosion is cheaper and recharges faster.",
+          "changes": {
+            "cost": -8,
+            "cooldown": -4
+          }
+        }
       }
     }
   ],

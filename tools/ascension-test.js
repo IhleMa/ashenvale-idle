@@ -96,6 +96,29 @@ const u = publicUnit(makeCharacterUnit(h, { ownerId: p.id, ownerName: p.name, po
 assert.equal(u.subclass, first.id);
 ok('combat units carry the subclass');
 
+// mutators: every subclass has some; allocated ones change the base ability in combat
+const { applyMutators } = await import('../shared/mutators.js');
+const { mutatedAbilities, treeMutators } = await import('../shared/skilltree.js');
+const { ABILITIES } = await import('../shared/data/abilities.js');
+for (const sub of Object.values(SUBCLASSES)) {
+  const muts = Object.values(getTree(sub.classId, sub.id).nodes).filter(nd => nd.type === 'mutator');
+  assert.ok(muts.length >= 2, `${sub.id} has ${muts.length} mutators`);
+  for (const m of muts) assert.ok(ABILITIES[m.mutator.ability] && !ABILITIES[m.mutator.ability].subclass, `${m.name} changes a base ability`);
+}
+const ab = applyMutators({ cost: 20, cooldown: 3, effects: [{ kind: 'damage', power: 1, stat: 'physPower' }, { kind: 'status', status: 'stun', duration: 2 }] },
+  [{ power: 0.5, cost: -30, cooldown: -5, hits: 2, duration: 1, effects: [{ kind: 'status', status: 'bleed', duration: 6 }] }]);
+assert.equal(ab.cost, 0); assert.equal(ab.cooldown, 0.5); assert.equal(ab.effects[0].power, 1.5); assert.equal(ab.effects[0].hits, 3);
+assert.equal(ab.effects[1].duration, 3); assert.equal(ab.effects.length, 3);
+const mutNode = Object.values(tree.nodes).find(nd => nd.type === 'mutator');
+for (const id of pathTo(h, mutNode.id)) allocateNode(h, id);
+syncTree(h);
+assert.ok(treeMutators(h)[mutNode.mutator.ability], 'mutator active');
+const mutated = mutatedAbilities(h)[mutNode.mutator.ability];
+assert.notDeepEqual(mutated, ABILITIES[mutNode.mutator.ability]);
+const unit = makeCharacterUnit(h, { ownerId: p.id, ownerName: p.name, position: 0 });
+assert.deepEqual(unit.abilityDefs[mutNode.mutator.ability], mutated);
+ok(`every subclass has ability mutators; ${mutNode.name} changes ${ABILITIES[mutNode.mutator.ability].name} in combat`);
+
 // same subclass rejected, switch only at the cap again
 h.level = CONFIG.levelCap;
 assert.throws(() => L.ascendHero(p, { subclassId: first.id }), /already/);

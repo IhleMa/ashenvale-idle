@@ -1145,3 +1145,13 @@ html.standalone body { padding-bottom: env(safe-area-inset-bottom); padding-left
 .btn.glow { animation: tut-glow 1.6s ease-in-out infinite; }
 .tree-node.subclass-node { box-shadow: 0 0 0 2px var(--sub-color, #c9a24a); }
 .sub-tag { display: inline-block; font-size: 11px; padding: 0 6px; border-radius: 9px; border: 1px solid var(--sub-color, #c9a24a); color: var(--sub-color, #c9a24a); }
+.tree-svg .t-mutator .shape { stroke: var(--cc); stroke-width: 3; fill: #1d1418; }
+.tree-svg .node.s-on.t-mutator .shape { fill: color-mix(in srgb, var(--cc) 45%, #2a1a10); stroke: #ffc35c; }
+.tree-svg .t-mutator .glyph { fill: var(--cc); }
+.lg.mutator { border-radius: 3px; border-color: #d65c8a; transform: rotate(30deg); }
+.mut-list { display: flex; flex-direction: column; gap: 4px; }
+.mut-chip { text-align: left; background: #120d0c; border: 1px dashed var(--line2); border-radius: 8px; padding: 4px 8px; color: var(--muted); cursor: pointer; font: 12px var(--font); }
+.mut-chip small { color: var(--faint); }
+.mut-chip.on { border-style: solid; border-color: #c9a24a; color: var(--text); }
+.mut-tag { display: inline-block; font-size: 11px; padding: 0 6px; margin: 2px 4px 0 0; border-radius: 9px; background: #2a1830; color: #f0c6ff; border: 1px solid #6a3a7a; }
+.notable-chip.mutator { background: #2a1830; color: #f0c6ff; }

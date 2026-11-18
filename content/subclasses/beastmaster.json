@@ -36,6 +36,47 @@
             "damagePct": 0.05
           }
         }
+      },
+      "mutators": {
+        "3": {
+          "name": "Pack Mark",
+          "ability": "hunters_mark",
+          "description": "Hunter's Mark lasts longer and also Exposes the prey.",
+          "changes": {
+            "duration": 5,
+            "effects": [
+              {
+                "kind": "status",
+                "status": "exposed",
+                "duration": 8
+              }
+            ]
+          }
+        },
+        "6": {
+          "name": "Feral Volley",
+          "ability": "volley",
+          "description": "Volley fires an extra wave of arrows.",
+          "changes": {
+            "hits": 1,
+            "cost": -5
+          }
+        },
+        "7": {
+          "name": "Wild Rapid Fire",
+          "ability": "rapid_fire",
+          "description": "Rapid Fire also sends you into Bloodlust.",
+          "changes": {
+            "effects": [
+              {
+                "kind": "status",
+                "status": "bloodlust",
+                "duration": 8,
+                "self": true
+              }
+            ]
+          }
+        }
       }
     }
   ],

@@ -1,4 +1,5 @@
 // "Inspect player" window: public profile with hero, gear, skill tree, loadout, party and group.
+import { describeChanges } from '/shared/mutators.js';
 import { classLabel } from '/shared/data/subclasses.js';
 import { state } from './state.js';
 import { act } from './net.js';
@@ -132,7 +133,7 @@ function charDetailHtml(c) {
     <section class="panel">
       <h3>Skill tree <span class="muted small">${c.tree.spent}/${c.tree.total} points</span></h3>
       ${miniTree(c.classId, c.tree.allocated, c.subclass)}
-      <div class="small">${notable.length ? notable.map(n => `<span class="notable-chip ${n.type}" ${tipAttr(describeNodeStats(n.stats).map(esc).join('<br>'))}>${n.type === 'keystone' ? '✹' : '◆'} ${esc(n.name)}</span>`).join(' ') : '<span class="muted">No notables yet.</span>'}</div>
+      <div class="small">${notable.length ? notable.map(n => `<span class="notable-chip ${n.type}" ${tipAttr(n.mutator ? `${esc(n.description || '')}<br>${describeChanges(n.mutator.changes).map(esc).join(', ')}` : describeNodeStats(n.stats).map(esc).join('<br>'))}>${n.type === 'keystone' ? '✹' : n.type === 'mutator' ? '✦' : '◆'} ${esc(n.name)}</span>`).join(' ') : '<span class="muted">No notables yet.</span>'}</div>
       ${bonus.length ? `<ul class="tree-summary" style="margin-top:8px">${bonus.map(b => `<li>${esc(b)}</li>`).join('')}</ul>` : ''}
     </section>
     <section class="panel">
@@ -167,7 +168,7 @@ function miniTree(classId, allocated, subclass = null) {
     const m = tree.nodes[l];
     lines += `<line x1="${n.x}" y1="${n.y}" x2="${m.x}" y2="${m.y}" class="${set.has(n.id) && set.has(l) ? 'on' : ''}"/>`;
   }
-  const size = { start: 22, ability: 16, keystone: 18, notable: 13, rank: 9, small: 7 };
+  const size = { start: 22, ability: 16, keystone: 18, notable: 13, mutator: 13, rank: 9, small: 7 };
   const nodes = Object.values(tree.nodes).map(n => `<circle cx="${n.x}" cy="${n.y}" r="${size[n.type]}" class="t-${n.type} ${set.has(n.id) ? 'on' : ''}"><title>${esc(n.name)}</title></circle>`).join('');
   return `<svg class="mini-tree" viewBox="${-R} ${-R} ${R * 2} ${R * 2}" style="--cc:${CLASSES[classId].color}">${lines}${nodes}</svg>`;
 }

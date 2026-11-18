@@ -2,6 +2,7 @@
 // missing references (an ability that doesn't exist, an enemy in a zone that isn't defined, a status
 // typo …), wrong value types and impossible settings. The server refuses to start with errors and
 // prints exactly where the problem is. Run "npm run content:check" or type "content" in the console.
+import { MUTATOR_CHANGES } from '../shared/mutators.js';
 import { CONDITIONS, TARGET_CONDITIONS, SELECTORS } from '../shared/rules.js';
 import { VIEW_IDS as TUTORIAL_VIEWS, METRIC_NAMES as TUTORIAL_METRICS } from '../shared/tutorialDefs.js';
 
@@ -238,6 +239,21 @@ export function validateContent(C) {
         if (abilities[a] && (abilities[a].classId !== sc.classId || abilities[a].subclass !== id)) err(`${w}.branches[${i}].abilities`, `"${a}" must have "classId": "${sc.classId}" and "subclass": "${id}"`);
       }
       for (const [r, n] of Object.entries(br.notables || {})) for (const k of Object.keys(n.stats || {})) if (k !== 'rank' && !(k in treeStats)) err(`${w}.branches[${i}].notables.${r}.stats.${k}`, 'unknown tree stat');
+      const ringCount = (C.skilltree?.config?.rings || []).length;
+      for (const [r, m] of Object.entries(br.mutators || {})) {
+        const mw = `${w}.branches[${i}].mutators.${r}`;
+        if (!(+r >= 1 && +r <= ringCount)) err(mw, `ring must be 1–${ringCount}`);
+        str(`${mw}.name`, m.name);
+        ref(`${mw}.ability`, m.ability, abilities, 'ability');
+        const ab = abilities[m.ability];
+        if (ab && (ab.classId !== sc.classId || ab.subclass)) err(`${mw}.ability`, `"${m.ability}" must be a base ${sc.classId} ability (mutators change the class's own abilities)`);
+        if (!m.changes || typeof m.changes !== 'object' || !Object.keys(m.changes).length) err(`${mw}.changes`, 'needs at least one change');
+        for (const [k, v] of Object.entries(m.changes || {})) {
+          if (!MUTATOR_CHANGES.includes(k)) { err(`${mw}.changes.${k}`, `unknown change (use ${MUTATOR_CHANGES.join(', ')})`); continue; }
+          if (k === 'effects') { if (!Array.isArray(v)) err(`${mw}.changes.effects`, 'must be a list of effects'); else v.forEach((e, j) => checkEffect(`${mw}.changes.effects[${j}]`, e)); }
+          else num(`${mw}.changes.${k}`, v);
+        }
+      }
     });
   }
   for (const [id, a] of Object.entries(abilities)) {

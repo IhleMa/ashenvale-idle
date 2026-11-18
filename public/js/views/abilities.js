@@ -14,7 +14,8 @@ import { ENEMIES } from '/shared/data/enemies.js';
 import { MINIONS } from '/shared/data/minions.js';
 import { CONDITIONS, TARGET_CONDITIONS, SELECTORS, selectorsForAbility, describeCondition } from '/shared/rules.js';
 import { abilitySlots, abilityNodeId } from '/shared/character.js';
-import { pathTo, availablePoints } from '/shared/skilltree.js';
+import { pathTo, availablePoints, mutatedAbilities, getTree } from '/shared/skilltree.js';
+import { describeChanges } from '/shared/mutators.js';
 import { focusTreeNode } from './skilltree.js';
 
 let selectedAbility = null;
@@ -286,7 +287,16 @@ export const abilitiesView = {
   },
 };
 
-function abilityCard(ch, a) {
+function mutatorNodes(ch, abilityId) {
+  if (!ch.subclass) return [];
+  const tree = getTree(ch.classId, ch.subclass);
+  return Object.values(tree.nodes).filter(n => n.mutator?.ability === abilityId).map(n => ({ n, on: ch.tree.allocated.includes(n.id) }));
+}
+
+function abilityCard(ch, base) {
+  const muts = mutatorNodes(ch, base.id);
+  const a = mutatedAbilities(ch)[base.id] ? { ...mutatedAbilities(ch)[base.id], id: base.id } : base;
+  const mutHtml = muts.length ? `<div>${muts.map(({ n, on }) => `<span class="mut-tag" style="${on ? '' : 'opacity:.45'}" ${tipAttr(`<b>${esc(n.name)}</b>${on ? '' : ' <span class=\'muted\'>(not allocated)</span>'}<br>${esc(n.description)}<br>${describeChanges(n.mutator.changes).map(esc).join(', ')}`)}>✦ ${esc(n.name)}</span>`).join('')}</div>` : '';
   const rank = ch.abilities[a.id] || 0;
   const unlocked = rank > 0;
   const cls = CLASSES[ch.classId];
@@ -302,6 +312,7 @@ function abilityCard(ch, a) {
     <div class="grow"><b>${esc(a.name)}</b> <span class="type-tag t-${a.type}">${a.type}</span>${a.subclass && SUBCLASSES[a.subclass] ? ` <span class="sub-tag" style="--sub-color:${esc(SUBCLASSES[a.subclass].color || '#c9a24a')}">${esc(SUBCLASSES[a.subclass].glyph || '')} ${esc(SUBCLASSES[a.subclass].name)}</span>` : ''}
       <div class="small muted">${esc(a.description)}</div>
       <div class="small faint">${esc(meta)}</div>
+      ${mutHtml}
       <div class="ranks">${Array.from({ length: CONFIG.maxAbilityRank }, (_, i) => `<span class="pip ${i < rank ? 'on' : ''}"></span>`).join('')}</div>
     </div>
     <div class="ability-action col">${action}</div>

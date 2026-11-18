@@ -1,4 +1,5 @@
 // Passive skill tree: pan/zoom SVG web, path preview, multi-node allocation, refunds, search.
+import { describeChanges, mutatorAbilityName } from '/shared/mutators.js';
 import { SUBCLASSES } from '/shared/data/subclasses.js';
 import { state, selectedChar } from '../state.js';
 import { act } from '../net.js';
@@ -12,8 +13,8 @@ import { availablePoints, totalSkillPoints, spentPoints, pathTo, canRefund, tree
 import { treeRefundCost, treeResetCost } from '/shared/character.js';
 import { CONFIG } from '/shared/config.js';
 
-const SIZE = { start: 30, ability: 21, keystone: 25, notable: 16, rank: 12, small: 9 };
-const GLYPH = { keystone: '✹', notable: '◆', rank: '▲', small: '' };
+const SIZE = { start: 30, ability: 21, keystone: 25, notable: 16, mutator: 17, rank: 12, small: 9 };
+const GLYPH = { keystone: '✹', notable: '◆', mutator: '✦', rank: '▲', small: '' };
 let view = null;          // { x, y, w } current viewBox (h follows aspect ratio)
 let lastSig = null;
 let refundMode = false;
@@ -45,7 +46,12 @@ function nodeState(ch, n, set) {
 function nodeTip(ch, n, set) {
   const lines = describeNodeStats(n.stats);
   const ab = n.ability ? ABILITIES[n.ability] : null;
-  let html = `<b>${esc(n.name)}</b> ${n.subclass ? `<span class="sub-tag" style="--sub-color:${esc(SUBCLASSES[n.subclass]?.color || '#c9a24a')}">${esc(SUBCLASSES[n.subclass]?.name || n.subclass)}</span> ` : ''}<span class="muted">${n.type === 'start' ? 'Origin' : n.type === 'ability' ? 'Ability' : n.type === 'keystone' ? 'Keystone' : n.type === 'notable' ? 'Notable' : n.type === 'rank' ? 'Ability rank' : 'Passive'}</span>`;
+  let html = `<b>${esc(n.name)}</b> ${n.subclass ? `<span class="sub-tag" style="--sub-color:${esc(SUBCLASSES[n.subclass]?.color || '#c9a24a')}">${esc(SUBCLASSES[n.subclass]?.name || n.subclass)}</span> ` : ''}<span class="muted">${n.type === 'start' ? 'Origin' : n.type === 'ability' ? 'Ability' : n.type === 'keystone' ? 'Keystone' : n.type === 'notable' ? 'Notable' : n.type === 'rank' ? 'Ability rank' : n.type === 'mutator' ? 'Ability mutator' : 'Passive'}</span>`;
+  if (n.mutator) {
+    const owned = !!ch.abilities[n.mutator.ability];
+    html += `<br><i>${esc(n.description)}</i><br><b>${esc(mutatorAbilityName(n.mutator))}:</b> ${describeChanges(n.mutator.changes).map(esc).join(', ')}`;
+    if (!owned) html += `<br><i class="muted">Only has an effect once ${esc(mutatorAbilityName(n.mutator))} is learned.</i>`;
+  }
   if (ab) html += `<br>${esc(ab.description)}<br><span class="muted">${ab.cost ? `${ab.cost} ${esc(CLASSES[ch.classId].resource.name)} · ` : ''}${ab.cooldown}s cooldown</span>`;
   if (lines.length) html += `<br>${lines.map(esc).join('<br>')}`;
   if (n.type === 'rank' && !ch.abilities[n.rankFor]) html += `<br><i class="muted">Only has an effect once ${esc(ABILITIES[n.rankFor]?.name)} is learned.</i>`;
@@ -74,10 +80,11 @@ function nodeSvg(ch, n, set) {
     inner = url ? `<image href="${esc(url)}" x="${-r + 2}" y="${-r + 2}" width="${(r - 2) * 2}" height="${(r - 2) * 2}" clip-path="url(#clip-${n.type})" preserveAspectRatio="xMidYMid slice" opacity=".9"/>`
       : `<text class="glyph" font-size="${r * 0.95}">${GLYPH[n.type]}</text>`;
   }
-  const shape = n.type === 'rank'
+  const hex = Array.from({ length: 6 }, (_, k) => { const a = Math.PI / 6 + (k * Math.PI) / 3; return `${(Math.cos(a) * r).toFixed(1)},${(Math.sin(a) * r).toFixed(1)}`; }).join(' ');
+  const shape = n.type === 'mutator' ? `<polygon class="shape" points="${hex}"/>` : n.type === 'rank'
     ? `<rect class="shape" x="${-r}" y="${-r}" width="${r * 2}" height="${r * 2}" rx="3" transform="rotate(45)"/>`
     : `<circle class="shape" r="${r}"/>`;
-  const label = (n.type === 'ability' || n.type === 'keystone' || n.type === 'notable' || n.type === 'start') ? `<text class="label" y="${r + 13}">${esc(n.name)}</text>` : '';
+  const label = (n.type === 'ability' || n.type === 'keystone' || n.type === 'notable' || n.type === 'mutator' || n.type === 'start') ? `<text class="label" y="${r + 13}">${esc(n.name)}</text>` : '';
   const match = search && (`${n.name} ${describeNodeStats(n.stats).join(' ')}`.toLowerCase().includes(search)) ? ' match' : '';
   return `<g class="node t-${n.type} s-${st}${match}${focusNode === n.id ? ' focus' : ''}" data-node="${n.id}" transform="translate(${n.x} ${n.y})" style="--cc:${(n.subclass && SUBCLASSES[n.subclass]?.color) || cls.color}">
     <circle class="halo" r="${r + 6}"/>${shape}${inner}${label}</g>`;
@@ -141,9 +148,18 @@ function sidebarHtml(ch) {
     }).join('')}</div>
     <h4>Tree bonuses</h4>
     ${summary.length ? `<ul class="tree-summary">${summary.map(s => `<li>${esc(s)}</li>`).join('')}</ul>` : '<p class="muted small">Allocate nodes to gain attributes and bonuses.</p>'}
+    ${(() => {
+      const muts = allocatedSet(ch).size ? [...allocatedSet(ch)].map(id => tree.nodes[id]).filter(n => n?.mutator) : [];
+      if (!ch.subclass) return '';
+      const all = Object.values(tree.nodes).filter(n => n.mutator);
+      return `<h4>Ability mutators</h4><div class="mut-list">${all.map(n => {
+        const on = muts.includes(n);
+        return `<button class="mut-chip ${on ? 'on' : ''}" data-goto="${n.id}" ${tipAttr(`<b>${esc(n.name)}</b><br>${esc(n.description)}<br>${describeChanges(n.mutator.changes).map(esc).join(', ')}`)}>✦ <b>${esc(n.name)}</b> <small>${esc(mutatorAbilityName(n.mutator))}</small></button>`;
+      }).join('')}</div>`;
+    })()}
     <div class="tree-legend small muted">
       <span><i class="lg start"></i>Origin</span><span><i class="lg ability"></i>Ability</span><span><i class="lg rank"></i>Ability rank</span>
-      <span><i class="lg notable"></i>Notable</span><span><i class="lg keystone"></i>Keystone</span><span><i class="lg small"></i>Attribute</span>
+      <span><i class="lg notable"></i>Notable</span><span><i class="lg keystone"></i>Keystone</span>${ch.subclass ? '<span><i class="lg mutator"></i>Ability mutator</span>' : ''}<span><i class="lg small"></i>Attribute</span>
     </div>
     <p class="muted small">Drag to pan · scroll to zoom · hover a node to preview the path · ${owned.length} abilities learned.</p>`;
 }

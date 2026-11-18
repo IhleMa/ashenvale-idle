@@ -36,6 +36,58 @@
             "critDamage": 0.2
           }
         }
+      },
+      "mutators": {
+        "3": {
+          "name": "Reckless Strike",
+          "ability": "heroic_strike",
+          "description": "Heroic Strike hits harder and opens a bleeding wound.",
+          "changes": {
+            "power": 0.25,
+            "effects": [
+              {
+                "kind": "status",
+                "status": "bleed",
+                "duration": 6,
+                "stat": "physPower",
+                "power": 0.3
+              }
+            ]
+          }
+        },
+        "6": {
+          "name": "Bloody Cleave",
+          "ability": "cleave",
+          "description": "Cleave makes every enemy it hits bleed.",
+          "changes": {
+            "effects": [
+              {
+                "kind": "status",
+                "status": "bleed",
+                "duration": 6,
+                "stat": "physPower",
+                "power": 0.15
+              }
+            ]
+          }
+        },
+        "7": {
+          "name": "Frenzied Cry",
+          "ability": "battle_cry",
+          "description": "Battle Cry also sends you into Bloodlust.",
+          "changes": {
+            "cooldown": -8,
+            "effects": [
+              {
+                "kind": "status",
+                "status": "bloodlust",
+                "duration": 8,
+                "self": true,
+                "once": true
+              }
+            ]
+          }
+        }
       }
     }
   ],

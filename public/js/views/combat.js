@@ -348,7 +348,7 @@ function update() {
       for (const [ab, rem] of Object.entries(u.cd)) {
         const w = el.querySelector(`.cd-wrap[data-ab="${ab}"]`);
         if (!w) continue;
-        const total = ABILITIES[ab]?.cooldown || 1;
+        const total = u.cdMax?.[ab] || ABILITIES[ab]?.cooldown || 1;
         w.querySelector('.cd-overlay').style.height = `${Math.min(100, (rem / total) * 100)}%`;
         w.querySelector('.cd-num').textContent = rem > 0 ? Math.ceil(rem) : '';
         w.classList.toggle('ready', rem <= 0);

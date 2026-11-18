@@ -15,6 +15,7 @@ import { PROFESSIONS, BUILDINGS, professionXpToNext } from '/shared/data/town.js
 import { SUBCLASSES, subclassesOf } from '/shared/data/subclasses.js';
 import { ABILITIES } from '/shared/data/abilities.js';
 import { describeNodeStats } from '/shared/data/skilltree.js';
+import { describeChanges } from '/shared/mutators.js';
 import { professionIcon } from '../assets.js';
 
 export const characterView = {
@@ -118,10 +119,12 @@ export const characterView = {
 function subclassCard(sub, { pick = false, current = false } = {}) {
   const abil = sub.branches.flatMap(b => Object.values(b.abilities || {})).map(id => ABILITIES[id]).filter(Boolean);
   const keys = sub.branches.flatMap(b => Object.values(b.notables || {}));
+  const muts = sub.branches.flatMap(b => Object.values(b.mutators || {}));
   return `<div class="subclass-card ${current ? 'current' : ''}" style="--sub-color:${esc(sub.color || '#c9a24a')}">
     <div class="subclass-head"><span class="subclass-glyph">${esc(sub.glyph || '🌟')}</span><div><b>${esc(sub.name)}</b>${current ? ' <span class="tag hero">CURRENT</span>' : ''}<div class="small muted">${esc(sub.description || '')}</div></div></div>
     <div class="small"><b>Passive:</b> ${describeNodeStats(sub.bonus).map(esc).join(' · ') || '—'}</div>
     <div class="subclass-abil">${abil.map(a => `<div class="small"><b>${esc(a.name)}</b> <span class="muted">— ${esc(a.description)}</span></div>`).join('')}</div>
+    ${muts.length ? `<div class="subclass-abil">${muts.map(m => `<div class="small" ${tipAttr(esc(describeChanges(m.changes).join(', ')))}><span class="mut-tag">✦ ${esc(m.name)}</span> <span class="muted">${esc(m.description || '')}</span></div>`).join('')}</div>` : ''}
     ${keys.length ? `<div class="small muted">Notables: ${keys.map(k => `<span ${tipAttr(esc(describeNodeStats(k.stats).join(', ')))}>${esc(k.name)}</span>`).join(' · ')}</div>` : ''}
     ${pick ? `<div class="row end"><button class="btn primary small" data-pick="${esc(sub.id)}">Ascend as ${esc(sub.name)}</button></div>` : ''}
   </div>`;

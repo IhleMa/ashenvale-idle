@@ -35,6 +35,35 @@
             "damagePct": 0.1
           }
         }
+      },
+      "mutators": {
+        "3": {
+          "name": "Lethal Backstab",
+          "ability": "backstab",
+          "description": "Backstab crits far more often and hits harder.",
+          "changes": {
+            "bonusCrit": 0.25,
+            "power": 0.15
+          }
+        },
+        "6": {
+          "name": "Merciless Execute",
+          "ability": "execute",
+          "description": "Execute triggers much earlier and recharges faster.",
+          "changes": {
+            "executeBelow": 0.45,
+            "cooldown": -2
+          }
+        },
+        "7": {
+          "name": "Death Mark",
+          "ability": "expose_weakness",
+          "description": "Expose Weakness lasts longer and costs less.",
+          "changes": {
+            "duration": 6,
+            "cost": -10
+          }
+        }
       }
     }
   ],

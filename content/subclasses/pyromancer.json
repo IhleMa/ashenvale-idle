@@ -34,6 +34,42 @@
             "critDamage": 0.25
           }
         }
+      },
+      "mutators": {
+        "3": {
+          "name": "Searing Fireball",
+          "ability": "fireball",
+          "description": "Fireball and its burn hit harder, and the burn lasts longer.",
+          "changes": {
+            "power": 0.25,
+            "duration": 3
+          }
+        },
+        "6": {
+          "name": "Living Flame",
+          "ability": "flame_wave",
+          "description": "Flame Wave sets every enemy on fire.",
+          "changes": {
+            "effects": [
+              {
+                "kind": "status",
+                "status": "burn",
+                "duration": 6,
+                "stat": "magPower",
+                "power": 0.15
+              }
+            ]
+          }
+        },
+        "7": {
+          "name": "Cataclysm",
+          "ability": "meteor",
+          "description": "Meteor falls far more often and hits harder.",
+          "changes": {
+            "cooldown": -12,
+            "power": 0.2
+          }
+        }
       }
     }
   ],

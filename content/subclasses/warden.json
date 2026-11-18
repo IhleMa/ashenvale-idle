@@ -36,6 +36,45 @@
             "hpPct": 0.06
           }
         }
+      },
+      "mutators": {
+        "3": {
+          "name": "Thorned Sting",
+          "ability": "serpent_sting",
+          "description": "Serpent Sting's poison is stronger and lasts longer.",
+          "changes": {
+            "power": 0.35,
+            "duration": 4
+          }
+        },
+        "6": {
+          "name": "Entangling Shot",
+          "ability": "multi_shot",
+          "description": "Multi-Shot slows every enemy it hits.",
+          "changes": {
+            "effects": [
+              {
+                "kind": "status",
+                "status": "frostbite",
+                "duration": 4
+              }
+            ]
+          }
+        },
+        "7": {
+          "name": "Warden's Mark",
+          "ability": "hunters_mark",
+          "description": "Hunter's Mark also Weakens the target.",
+          "changes": {
+            "effects": [
+              {
+                "kind": "status",
+                "status": "weakened",
+                "duration": 8
+              }
+            ]
+          }
+        }
       }
     }
   ],

@@ -36,6 +36,43 @@
             "minionDurationPct": 0.3
           }
         }
+      },
+      "mutators": {
+        "3": {
+          "name": "Spirit Bond",
+          "ability": "soul_link",
+          "description": "Soul Link heals your minions much more.",
+          "changes": {
+            "power": 0.6
+          }
+        },
+        "6": {
+          "name": "Wisp Choir",
+          "ability": "spirit_wisp",
+          "description": "Spirit Wisp returns much sooner and costs less.",
+          "changes": {
+            "cooldown": -10,
+            "cost": -10
+          }
+        },
+        "7": {
+          "name": "Ancestral Pact",
+          "ability": "dark_pact",
+          "description": "Dark Pact also gives you Regeneration.",
+          "changes": {
+            "effects": [
+              {
+                "kind": "status",
+                "status": "regeneration",
+                "duration": 8,
+                "self": true,
+                "once": true,
+                "stat": "magPower",
+                "power": 0.2
+              }
+            ]
+          }
+        }
       }
     }
   ],

@@ -36,6 +36,46 @@
             "hpPct": 0.08
           }
         }
+      },
+      "mutators": {
+        "3": {
+          "name": "Deep Freeze",
+          "ability": "frost_bolt",
+          "description": "Frost Bolt hits harder and also Chills the target.",
+          "changes": {
+            "power": 0.2,
+            "effects": [
+              {
+                "kind": "status",
+                "status": "chilled",
+                "duration": 4
+              }
+            ]
+          }
+        },
+        "6": {
+          "name": "Shatter Nova",
+          "ability": "frost_nova",
+          "description": "Frost Nova freezes enemies longer and shatters them for heavy damage.",
+          "changes": {
+            "duration": 1,
+            "power": 1.0
+          }
+        },
+        "7": {
+          "name": "Glacial Missiles",
+          "ability": "arcane_missiles",
+          "description": "Arcane Missiles turn to ice and give the target Frostbite.",
+          "changes": {
+            "effects": [
+              {
+                "kind": "status",
+                "status": "frostbite",
+                "duration": 6
+              }
+            ]
+          }
+        }
       }
     }
   ],

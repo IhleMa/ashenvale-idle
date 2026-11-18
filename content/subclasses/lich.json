@@ -36,6 +36,34 @@
             "magPowerPct": 0.08
           }
         }
+      },
+      "mutators": {
+        "3": {
+          "name": "Grave Detonation",
+          "ability": "corpse_explosion",
+          "description": "Corpse Explosion hits much harder.",
+          "changes": {
+            "power": 0.4
+          }
+        },
+        "6": {
+          "name": "Endless Legion",
+          "ability": "raise_skeleton",
+          "description": "Raise Skeleton is cheaper and recharges faster.",
+          "changes": {
+            "cost": -8,
+            "cooldown": -2
+          }
+        },
+        "7": {
+          "name": "Soul Siphon",
+          "ability": "soul_link",
+          "description": "Soul Link lasts longer and heals more.",
+          "changes": {
+            "duration": 4,
+            "power": 0.4
+          }
+        }
       }
     }
   ],

@@ -4,7 +4,7 @@ import { CONFIG, xpToNext } from './config.js';
 import { CLASSES } from './data/classes.js';
 import { ABILITIES, abilityPriority } from './data/abilities.js';
 import { SLOT_IDS } from './data/items.js';
-import { treeAbilities, availablePoints, autoAllocate, sanitizeTree, getTree } from './skilltree.js';
+import { treeAbilities, availablePoints, autoAllocate, sanitizeTree, getTree, treeMutators } from './skilltree.js';
 import { TREE_SPECS } from './data/skilltree.js';
 
 export function abilitySlots(ch) {
@@ -117,7 +117,9 @@ export function abilityNodeId(classId, abilityId, subclassId = null) {
 // Best loadout for an automatically managed character: core ability + highest-priority others, ordered by priority
 export function autoLoadout(ch) {
   const core = TREE_SPECS[ch.classId]?.start;
-  const others = Object.keys(ch.abilities).filter(a => a !== core).sort((a, b) => abilityPriority(b) - abilityPriority(a));
+  const muts = treeMutators(ch); // abilities changed by subclass mutators are worth a slot
+  const pickScore = a => abilityPriority(a) + (muts[a] ? 1000 * muts[a].length : 0);
+  const others = Object.keys(ch.abilities).filter(a => a !== core).sort((a, b) => pickScore(b) - pickScore(a));
   const pick = [...(ch.abilities[core] ? [core] : []), ...others].slice(0, abilitySlots(ch));
   return pick.sort((a, b) => abilityPriority(b) - abilityPriority(a));
 }
