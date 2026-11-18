@@ -180,6 +180,7 @@ export function validateContent(C) {
     if (!z.enemies?.length) err(`${w}.enemies`, 'needs at least one enemy');
     if (z.boss) { ref(`${w}.boss`, z.boss, enemies, 'enemy'); if (enemies[z.boss] && !enemies[z.boss].boss) warn(`${w}.boss`, `"${z.boss}" is not marked "boss": true`); }
     if (z.unlock) ref(`${w}.unlock`, z.unlock, zones, 'zone');
+    if (z.material) ref(`${w}.material`, z.material, materials, 'material');
   }
   if (!Object.values(zones).some(z => !z.unlock)) err('zones', 'at least one zone must be open from the start (no "unlock")');
   for (const [id, e] of Object.entries(C.zones?.coopEncounters || {})) {
@@ -199,9 +200,11 @@ export function validateContent(C) {
     for (const k of Object.keys(u.stats || {})) if (!(k in affixStats)) err(`${w}.stats.${k}`, 'unknown stat');
     (u.procs || []).forEach((p, i) => checkProc(`${w}.procs[${i}]`, p));
     for (const k of Object.keys(u.passive || {})) if (!PASSIVES.includes(k)) err(`${w}.passive.${k}`, `unknown passive (use ${PASSIVES.join(', ')})`);
+    for (const z of u.zones || []) ref(`${w}.zones`, z, zones, 'zone');
   }
   for (const [id, s] of Object.entries(C.legendaries?.sets || {})) {
     for (const b of Object.keys(s.pieces || {})) ref(`legendaries.sets.${id}.pieces`, b, items.bases, 'item base');
+    for (const z of s.zones || []) ref(`legendaries.sets.${id}.zones`, z, zones, 'zone');
     for (const [n, bonus] of Object.entries(s.bonuses || {})) (bonus.procs || []).forEach((p, i) => checkProc(`legendaries.sets.${id}.bonuses.${n}.procs[${i}]`, p));
   }
 

@@ -1,0 +1,34 @@
+{
+  "name": "Heart of the Void",
+  "baseId": "ring",
+  "minLevel": 55,
+  "zones": [
+    "voidscar"
+  ],
+  "flavor": "It beats, slowly, against your finger.",
+  "stats": {
+    "vit": [
+      3,
+      0.8
+    ],
+    "hp": [
+      10,
+      5
+    ]
+  },
+  "procs": [
+    {
+      "name": "Heart of the Void",
+      "trigger": "kill",
+      "chance": 1,
+      "icd": 2,
+      "target": "self",
+      "effect": {
+        "kind": "healPct",
+        "pct": 0.1
+      }
+    }
+  ],
+  "description": "Killing an enemy heals you for 10% of your max health.",
+  "order": 115
+}

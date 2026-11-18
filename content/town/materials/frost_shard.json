@@ -1,0 +1,9 @@
+{
+  "name": "Frost Shard",
+  "glyph": "❄",
+  "color": "#a8dcff",
+  "group": "zone",
+  "zone": "frostpeak",
+  "description": "Ice that does not melt, chipped from Frostpeak. Needed for town upgrades and Superior/Masterwork crafting.",
+  "order": 206
+}

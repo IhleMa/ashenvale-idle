@@ -122,7 +122,11 @@ try {
   res = await a.act('inspect_player', { name: 'nobody' });
   check(!res.ok, 'inspecting unknown player fails');
 
-  // groups
+  // groups (co-op and trading unlock by hero level: lock first, then level both heroes up)
+  res = await a.act('group_create');
+  check(!res.ok && /unlocks at hero level/.test(res.error), 'co-op locked for a new hero');
+  for (const id of [a.state.id, b.state.id]) await a.act('admin_give_xp', { id, target: 'hero', mode: 'set', amount: 20 });
+  await sleep(200);
   res = await a.act('group_create');
   check(res.ok, 'group created');
   res = await a.act('group_invite', { name: 'bob' });
@@ -133,9 +137,9 @@ try {
   check(res.ok, 'bob accepted');
   await sleep(200);
   check(a.group?.members.length === 2, 'group has 2 members');
-  res = await b.act('group_start', { encounterId: 'ashen_crypt' });
+  res = await b.act('group_start', { encounterId: 'void_incursion' });
   check(!res.ok, 'non-leader cannot start');
-  res = await a.act('group_start', { encounterId: 'ashen_crypt' });
+  res = await a.act('group_start', { encounterId: 'void_incursion' });
   check(!res.ok && /level/.test(res.error), 'level requirement enforced: ' + res.error);
   res = await a.act('group_chat', { text: 'hello <b>bob</b>' });
   await sleep(200);

@@ -41,6 +41,7 @@ try {
   var s = game.connect(ws, account);
   ok(act('create_hero', { name: 'Hero', classId: 'warrior' }).ok, 'hero created');
   const p = s.player;
+  L.hero(p).level = 30; // quests, rifts and gems unlock by hero level
 
   // ---------------------------------------------------------------- quests
   game.tick();
@@ -79,13 +80,14 @@ try {
   ok(p.quests.day === dayKey() && p.quests.daily.every(q => !q.claimed) && !p.quests.bonusClaimed, 'new day → fresh dailies');
 
   // ---------------------------------------------------------------- rifts
+  L.hero(p).level = 10;
   r = act('rift_start', { tier: 1 });
-  ok(!r.ok && /level 8/.test(r.error), 'rifts locked below level 8');
+  ok(!r.ok && /level 15/.test(r.error), 'rifts locked below level 15');
   // level the party up and gear it
   const h = L.hero(p);
   const rng = createRng(3);
-  const team = [h, ...['cleric', 'mage', 'rogue'].map((c, i) => { const ch = createCharacter({ id: 'r' + i, name: c, classId: c, level: 14 }); p.characters[ch.id] = ch; return ch; })];
-  Object.assign(h, createCharacter({ id: h.id, name: h.name, classId: 'warrior', isMain: true, level: 14 }));
+  const team = [h, ...['cleric', 'mage', 'rogue'].map((c, i) => { const ch = createCharacter({ id: 'r' + i, name: c, classId: c, level: 16 }); p.characters[ch.id] = ch; return ch; })];
+  Object.assign(h, createCharacter({ id: h.id, name: h.name, classId: 'warrior', isMain: true, level: 16 }));
   for (const ch of team) for (const slot of Object.keys(ch.equipment)) for (let t = 0; t < 80; t++) { const it = generateItem(rng, 14, { minRarity: 'rare' }); if (it.slot === slot && (!it.classes || it.classes.includes(ch.classId))) { ch.equipment[slot] = it; break; } }
   p.parties[0].members = team.map(c => c.id);
   p.unlockedZones = ['whispering_woods', 'ashen_barrows'];
@@ -177,6 +179,7 @@ try {
     r = act('salvage_items', { itemUids: [sal.uid] });
     const gotShards = Object.keys(sal.stats).every(st => (p.town.materials[G.shardId(st)] || 0) > (before[G.shardId(st)] || 0));
     ok(r.ok && gotShards, `salvage gives shards for every stat: ${Object.entries(r.result.materials).filter(([k]) => k.startsWith('shard_')).map(([k, v]) => `${v} ${k}`).join(', ')}`);
+    L.hero(p).level = Math.max(L.hero(p).level, 25); // gems unlock at hero level 20
     r = act('gem_cut', { stat: 'str' });
     ok(!r.ok && /Jeweler/.test(r.error), 'cutting needs a Jeweler: ' + r.error);
     const jw = createCharacter({ id: 'jw', name: 'Gemma', classId: 'rogue', level: 5 });

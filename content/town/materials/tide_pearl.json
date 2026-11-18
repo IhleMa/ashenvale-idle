@@ -1,0 +1,9 @@
+{
+  "name": "Tide Pearl",
+  "glyph": "🐚",
+  "color": "#8fd8e8",
+  "group": "zone",
+  "zone": "sunken_temple",
+  "description": "A pearl from the drowned halls of the Sunken Temple. Needed for town upgrades and Superior/Masterwork crafting.",
+  "order": 205
+}

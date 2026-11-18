@@ -1,0 +1,29 @@
+{
+  "name": "Drowned Acolyte",
+  "tags": [
+    "undead",
+    "caster",
+    "minion"
+  ],
+  "stats": {
+    "hp": 115,
+    "physPower": 5,
+    "magPower": 17,
+    "defense": 4,
+    "critChance": 0.07,
+    "attackSpeed": 1.0
+  },
+  "abilities": [
+    "e_chill",
+    "e_curse"
+  ],
+  "xp": 25,
+  "gold": [
+    5,
+    11
+  ],
+  "loot": {
+    "chance": 0.15
+  },
+  "order": 145
+}

@@ -1,0 +1,29 @@
+{
+  "name": "Sun Priest",
+  "tags": [
+    "humanoid",
+    "caster",
+    "minion"
+  ],
+  "stats": {
+    "hp": 110,
+    "physPower": 5,
+    "magPower": 17,
+    "defense": 4,
+    "critChance": 0.07,
+    "attackSpeed": 1.0
+  },
+  "abilities": [
+    "e_firebolt",
+    "e_dark_mend"
+  ],
+  "xp": 24,
+  "gold": [
+    5,
+    11
+  ],
+  "loot": {
+    "chance": 0.15
+  },
+  "order": 143
+}

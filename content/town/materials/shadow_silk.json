@@ -1,0 +1,9 @@
+{
+  "name": "Shadow Silk",
+  "glyph": "🕸",
+  "color": "#6b5b8a",
+  "group": "zone",
+  "zone": "shadowfell",
+  "description": "Silk spun from darkness in the Shadowfell. Needed for town upgrades and Superior/Masterwork crafting.",
+  "order": 209
+}

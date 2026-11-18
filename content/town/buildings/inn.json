@@ -1,15 +1,26 @@
 {
   "name": "Inn",
   "kind": "core",
-  "maxLevel": 5,
+  "maxLevel": 10,
   "start": 1,
   "description": "Houses your companions. More rooms mean a bigger roster and more recruits to choose from.",
-  "cost": { "gold": 250, "leather_scrap": 8, "cloth_scrap": 8, "metal_scrap": 4 },
+  "cost": {
+    "gold": 250,
+    "leather_scrap": 8,
+    "cloth_scrap": 8,
+    "metal_scrap": 4
+  },
   "effects": [
     "Roster: {innRoster} companions",
     "{innOffers} recruits offered",
-    { "minLevel": 3, "text": "Recruits arrive with higher profession skill" },
-    { "maxLevel": 2, "text": "Higher levels attract skilled professionals" }
+    {
+      "minLevel": 3,
+      "text": "Recruits arrive with higher profession skill"
+    },
+    {
+      "maxLevel": 2,
+      "text": "Higher levels attract skilled professionals"
+    }
   ],
   "order": 20
 }

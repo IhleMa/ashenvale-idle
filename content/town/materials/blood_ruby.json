@@ -1,0 +1,9 @@
+{
+  "name": "Blood Ruby",
+  "glyph": "♦",
+  "color": "#d4243c",
+  "group": "zone",
+  "zone": "crimson_keep",
+  "description": "A gem the colour of the Crimson Keep's wine. Needed for town upgrades and Superior/Masterwork crafting.",
+  "order": 208
+}

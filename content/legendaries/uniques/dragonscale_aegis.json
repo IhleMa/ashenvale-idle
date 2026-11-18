@@ -1,0 +1,35 @@
+{
+  "name": "Dragonscale Aegis",
+  "baseId": "shield",
+  "minLevel": 50,
+  "zones": [
+    "dragonbone_wastes"
+  ],
+  "flavor": "Each scale was taken from a different dragon.",
+  "stats": {
+    "vit": [
+      3,
+      0.8
+    ],
+    "defense": [
+      2,
+      0.65
+    ]
+  },
+  "procs": [
+    {
+      "name": "Dragonscale Aegis",
+      "trigger": "struck",
+      "chance": 0.15,
+      "icd": 10,
+      "target": "self",
+      "effect": {
+        "kind": "status",
+        "status": "fortified",
+        "duration": 5
+      }
+    }
+  ],
+  "description": "When struck, 15% chance to become Fortified (+35% defense) for 5s (10s cooldown).",
+  "order": 105
+}

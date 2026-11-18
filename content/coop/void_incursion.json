@@ -1,7 +1,7 @@
 {
   "name": "Void Incursion",
   "type": "challenge",
-  "minLevel": 25,
+  "minLevel": 45,
   "rewardMult": 1.8,
   "description": "Multiplayer challenge: survive four escalating waves from the Voidscar.",
   "waves": [

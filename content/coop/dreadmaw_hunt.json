@@ -1,7 +1,7 @@
 {
   "name": "Hunt: Dreadmaw",
   "type": "elite",
-  "minLevel": 10,
+  "minLevel": 20,
   "rewardMult": 1.4,
   "description": "An elite beast that tears through unprepared parties.",
   "waves": [["dreadmaw", "wolf", "wolf"]],

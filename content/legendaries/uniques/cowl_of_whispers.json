@@ -1,9 +1,18 @@
 {
   "name": "Cowl of Whispers",
   "baseId": "leather_hood",
-  "minLevel": 16,
+  "minLevel": 45,
   "flavor": "It tells you where they are weakest.",
-  "stats": { "dex": [2, 0.6], "critDamage": [0.06, 0.003] },
+  "stats": {
+    "dex": [
+      2,
+      0.6
+    ],
+    "critDamage": [
+      0.06,
+      0.003
+    ]
+  },
   "procs": [
     {
       "name": "Whispers",
@@ -11,9 +20,16 @@
       "chance": 1,
       "icd": 4,
       "target": "target",
-      "effect": { "kind": "status", "status": "exposed", "duration": 5 }
+      "effect": {
+        "kind": "status",
+        "status": "exposed",
+        "duration": 5
+      }
     }
   ],
   "description": "Critical hits expose the target (+15% damage taken for 5s).",
-  "order": 100
+  "order": 100,
+  "zones": [
+    "shadowfell"
+  ]
 }

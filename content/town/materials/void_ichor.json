@@ -1,0 +1,9 @@
+{
+  "name": "Void Ichor",
+  "glyph": "🟣",
+  "color": "#a04bff",
+  "group": "zone",
+  "zone": "voidscar",
+  "description": "The black blood of the Voidscar. Needed for town upgrades and Superior/Masterwork crafting.",
+  "order": 211
+}

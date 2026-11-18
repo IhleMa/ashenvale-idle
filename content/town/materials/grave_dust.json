@@ -1,0 +1,9 @@
+{
+  "name": "Grave Dust",
+  "glyph": "⚱",
+  "color": "#a59a8a",
+  "group": "zone",
+  "zone": "ashen_barrows",
+  "description": "Fine ash from the tombs of the Ashen Barrows. Needed for town upgrades and Superior/Masterwork crafting.",
+  "order": 201
+}

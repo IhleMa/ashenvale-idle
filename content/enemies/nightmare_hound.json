@@ -1,0 +1,28 @@
+{
+  "name": "Nightmare Hound",
+  "tags": [
+    "beast",
+    "minion"
+  ],
+  "stats": {
+    "hp": 170,
+    "physPower": 20,
+    "magPower": 6,
+    "defense": 7,
+    "critChance": 0.13,
+    "attackSpeed": 1.2
+  },
+  "abilities": [
+    "e_bite",
+    "e_frenzy"
+  ],
+  "xp": 33,
+  "gold": [
+    8,
+    16
+  ],
+  "loot": {
+    "chance": 0.15
+  },
+  "order": 192
+}

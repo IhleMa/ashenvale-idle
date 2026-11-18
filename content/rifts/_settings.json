@@ -1,7 +1,7 @@
 {
   "_about": "Rift scaling, time limit, wave composition, weekly rotation and rewards. Enemies do not depend on the player: tier N has enemies of level startLevel + (N-1) × levelsPerTier (also past the level cap), with health × baseHp × hpGrowth^(N-1) and damage × baseDamage × damageGrowth^(N-1) — so tiers start easy and keep getting harder without end. minLevel: hero level needed to enter. Affixes: rifts/affixes/. rewards.repeatXpGold: share of XP and gold paid when a player clears a tier again (0 = XP and gold only on the first clear of each tier; loot and chests always drop).",
   "config": {
-    "minLevel": 8,
+    "minLevel": 15,
     "maxTier": 100000,
     "trashWaves": 3,
     "timeLimit": 210,

@@ -1,0 +1,28 @@
+{
+  "name": "Naga Warrior",
+  "tags": [
+    "humanoid",
+    "minion"
+  ],
+  "stats": {
+    "hp": 175,
+    "physPower": 17,
+    "magPower": 5,
+    "defense": 9,
+    "critChance": 0.08,
+    "attackSpeed": 1.0
+  },
+  "abilities": [
+    "e_cleave",
+    "e_shield_bash"
+  ],
+  "xp": 26,
+  "gold": [
+    6,
+    12
+  ],
+  "loot": {
+    "chance": 0.15
+  },
+  "order": 146
+}

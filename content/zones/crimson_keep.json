@@ -1,0 +1,17 @@
+{
+  "name": "Crimson Keep",
+  "levelRange": [
+    40,
+    46
+  ],
+  "order": 9,
+  "description": "A fortress of blood knights and thralls in the service of Countess Vael.",
+  "enemies": [
+    "vampire_thrall",
+    "blood_knight",
+    "gargoyle"
+  ],
+  "boss": "countess_vael",
+  "unlock": "stormspire_heights",
+  "material": "blood_ruby"
+}

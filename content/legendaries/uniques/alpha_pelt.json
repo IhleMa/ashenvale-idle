@@ -1,0 +1,37 @@
+{
+  "name": "Pelt of the Alpha",
+  "baseId": "leather_chest",
+  "minLevel": 1,
+  "zones": [
+    "whispering_woods"
+  ],
+  "flavor": "Taken from the wolf that led the pack.",
+  "stats": {
+    "dex": [
+      2,
+      0.6
+    ],
+    "hp": [
+      10,
+      4
+    ]
+  },
+  "procs": [
+    {
+      "name": "Pelt of the Alpha",
+      "trigger": "hit",
+      "chance": 0.1,
+      "icd": 1,
+      "target": "target",
+      "effect": {
+        "kind": "status",
+        "status": "bleed",
+        "duration": 5,
+        "stat": "physPower",
+        "power": 0.2
+      }
+    }
+  ],
+  "description": "Hits have a 10% chance to make the target bleed for 20% Physical Power per second for 5s.",
+  "order": 5
+}

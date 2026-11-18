@@ -1,0 +1,29 @@
+{
+  "name": "Bone Drake",
+  "tags": [
+    "dragon",
+    "undead",
+    "minion"
+  ],
+  "stats": {
+    "hp": 210,
+    "physPower": 20,
+    "magPower": 10,
+    "defense": 10,
+    "critChance": 0.08,
+    "attackSpeed": 0.95
+  },
+  "abilities": [
+    "e_bite",
+    "e_firebolt"
+  ],
+  "xp": 34,
+  "gold": [
+    8,
+    16
+  ],
+  "loot": {
+    "chance": 0.15
+  },
+  "order": 195
+}

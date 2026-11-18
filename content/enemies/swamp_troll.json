@@ -1,0 +1,28 @@
+{
+  "name": "Swamp Troll",
+  "tags": [
+    "giant",
+    "minion"
+  ],
+  "stats": {
+    "hp": 220,
+    "physPower": 15,
+    "magPower": 4,
+    "defense": 7,
+    "critChance": 0.05,
+    "attackSpeed": 0.8
+  },
+  "abilities": [
+    "e_regenerate",
+    "e_slam"
+  ],
+  "xp": 22,
+  "gold": [
+    4,
+    9
+  ],
+  "loot": {
+    "chance": 0.15
+  },
+  "order": 103
+}

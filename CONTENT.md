@@ -188,6 +188,14 @@ Subclass abilities live in `content/abilities/<class>/` with `"classId": "<class
 
 Ability effects for summoners: `{ "kind": "summon", "minion": "skeleton", "count": 1, "max": 3 }` (at the limit the oldest one is renewed instead), `{ "kind": "sacrifice", "count": 1, "power": 1.2, "school": "magical" }` (the minion closest to fading explodes for `power` × its max health to every enemy), `{ "kind": "extend", "seconds": 10 }` (on minion targets). Targets `own_minions` / `own_minion_lowest_hp` and the condition `own_minions` (optionally of one kind) work in every rule. Skill-tree stats: `minionDamagePct`, `minionHpPct`, `minionDurationPct`, `minionMax` (+N of each kind). Minions fade when their summoner falls, and a party with only minions left loses.
 
+### Zone drops, zone materials and the town
+- **Zone material:** `content/zones/<id>.json` → `"material": "<material id>"` (materials live in `content/town/materials/`, zone ones have `"group": "zone"`). It drops only in that zone: `zones/_settings.json` → `materialDrops` = `{ "normal": 0.02, "elite": 0.25, "boss": [3, 5] }`.
+- **Zone-exclusive uniques and sets:** add `"zones": ["<zone id>"]` to a unique or set; it then only drops in those zones (and in rifts themed on them). Without `zones` it drops everywhere.
+- **Town levels:** buildings go up to `maxLevel` 10. Per-level tables in `town/_settings.json` (`buildTime` in seconds, `innRoster`, `innOffers`, `salvageBonus`, `craftLevelCap`, `concurrentBuilds`; `expeditions/_settings.json` → `campSlots`, `campMembers`) have one value per level 0–10. `levelMaterials` lists the zone materials every building needs for a level (× the building's `zoneMaterialMult`, Town Hall 1.5). A building's `unlockLevel` is the hero level needed to build it.
+- **Crafting:** qualities with `"zoneMaterial": n` (Superior 2, Masterwork 4) also cost n + item level / 20 of the material of the zone for that item level.
+- **Feature unlocks:** `config.json` → `featureUnlocks` = `{ "quests": 4, "bestiary": 6, "auction": 8, "multiplayer": 12, "rifts": 15, "gems": 20 }` (hero level; ascended heroes keep everything). Rifts also check `rifts/_settings.json` → `minLevel`.
+- **XP curve:** `config.json` → `xp.curve` (points `[level, xp]`, smooth curve through them — the 📈 XP curve editor writes the same thing).
+
 ### Add a rift affix
 `content/rifts/affixes/<id>.json` with `name`, `icon`, `description` and a list of `mechanics`:
 

@@ -2,14 +2,25 @@
   "name": "Enchanter's Study",
   "kind": "special",
   "profession": "enchanting",
-  "maxLevel": 5,
+  "maxLevel": 10,
   "start": 0,
   "description": "Imbue any item with a permanent bonus stat. A worker here also improves disenchanting at the Salvage Yard.",
-  "cost": { "gold": 300, "cloth_scrap": 10, "arcane_dust": 10 },
+  "cost": {
+    "gold": 300,
+    "cloth_scrap": 10,
+    "arcane_dust": 10
+  },
   "effects": [
     "Enchantment strength {enchantPowerPct}%",
-    { "minLevel": 3, "text": "Can enchant with any stat" },
-    { "maxLevel": 2, "text": "Stats: {enchantStatCount} options" }
+    {
+      "minLevel": 3,
+      "text": "Can enchant with any stat"
+    },
+    {
+      "maxLevel": 2,
+      "text": "Stats: {enchantStatCount} options"
+    }
   ],
-  "order": 90
+  "order": 90,
+  "unlockLevel": 16
 }

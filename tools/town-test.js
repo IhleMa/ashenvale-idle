@@ -11,6 +11,7 @@ const tryErr = f => { try { f(); return null; } catch (e) { return e.message; } 
 const p = L.newPlayer({ id: 'abc', username: 'tester' });
 L.migratePlayer(p);
 L.createHero(p, { name: 'Hero', classId: 'warrior' }, {});
+L.hero(p).level = 30; // buildings like the Blacksmith and Jeweler unlock by hero level
 ok(p.town && p.town.buildings.inn.level === 1 && p.town.buildings.blacksmith.level === 0, 'town created with starter buildings');
 ok(p.recruitment.offers.length === T.recruitOffers(p) && p.recruitment.offers.every(o => o.profession), `offers (${p.recruitment.offers.length}) have professions`);
 // roster limit

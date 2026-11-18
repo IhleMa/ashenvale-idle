@@ -1,0 +1,28 @@
+{
+  "name": "Dune Raider",
+  "tags": [
+    "humanoid",
+    "minion"
+  ],
+  "stats": {
+    "hp": 140,
+    "physPower": 17,
+    "magPower": 5,
+    "defense": 6,
+    "critChance": 0.12,
+    "attackSpeed": 1.15
+  },
+  "abilities": [
+    "e_stab",
+    "e_frenzy"
+  ],
+  "xp": 24,
+  "gold": [
+    5,
+    11
+  ],
+  "loot": {
+    "chance": 0.15
+  },
+  "order": 142
+}

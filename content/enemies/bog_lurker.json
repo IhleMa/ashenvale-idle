@@ -1,0 +1,28 @@
+{
+  "name": "Bog Lurker",
+  "tags": [
+    "beast",
+    "minion"
+  ],
+  "stats": {
+    "hp": 170,
+    "physPower": 14,
+    "magPower": 4,
+    "defense": 6,
+    "critChance": 0.06,
+    "attackSpeed": 0.9
+  },
+  "abilities": [
+    "e_bite",
+    "e_venom"
+  ],
+  "xp": 20,
+  "gold": [
+    3,
+    8
+  ],
+  "loot": {
+    "chance": 0.15
+  },
+  "order": 101
+}

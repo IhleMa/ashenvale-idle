@@ -1,4 +1,6 @@
 // App entry: authentication, layout, routing and global message handling.
+import { featureLock, FEATURE_LABELS } from '/shared/unlocks.js';
+import { MATERIALS } from '/shared/data/town.js';
 import { classLabel, subclassesOf } from '/shared/data/subclasses.js';
 import { bus, state, hero } from './state.js';
 import { connect, disconnect, apiPost, getToken, setToken, act } from './net.js';
@@ -80,22 +82,56 @@ function startGame() {
 // pages appear one by one during the tutorial; freshly unlocked ones get a NEW mark until visited
 const newViews = new Set();
 let navKey = null;
+// pages locked by hero level (the Auction House page stays open: its mailbox always works, only trading is locked)
+const pageLock = id => (id === 'auction' ? 0 : featureLock(state.player, id));
+// menu state: visible pages (tutorial) + pages still locked by hero level (config.featureUnlocks)
+function navStateKey() {
+  return `${visibleKey()}|${VIEWS.filter(v => pageLock(v.id)).map(v => v.id).join(',')}`;
+}
+// placeholder page for a feature that isn't unlocked yet
+const lockedViews = new Map();
+function lockedView(v) {
+  if (!lockedViews.has(v.id)) lockedViews.set(v.id, {
+    id: v.id, label: v.label, icon: v.icon,
+    render(root) {
+      const need = pageLock(v.id);
+      const h = hero();
+      root.innerHTML = `<section class="panel locked-feature"><div class="lock-big">🔒</div><h2>${v.icon} ${esc(v.label)}</h2>
+        <p>${esc(FEATURE_LABELS[v.id] || v.label)} unlocks at <b>hero level ${need}</b>. ${h ? `${esc(h.name)} is level ${h.level} — ${need - h.level} level${need - h.level === 1 ? '' : 's'} to go.` : ''}</p>
+        ${h ? bar(h.level, need, 'xp', `Level ${h.level} / ${need}`) : ''}</section>`;
+    },
+  });
+  return lockedViews.get(v.id);
+}
+
 function renderNav() {
   const nav = document.getElementById('sidebar');
-  const key = visibleKey();
+  const key = navStateKey();
   if (navKey && key !== navKey) {
-    const before = new Set(navKey === '*' ? VIEWS.map(v => v.id) : navKey.split(','));
-    for (const v of VIEWS) if (!before.has(v.id) && isViewVisible(v.id)) newViews.add(v.id);
+    const [vis, locks] = navKey.split('|');
+    const before = new Set(vis === '*' ? VIEWS.map(v => v.id) : vis.split(','));
+    const lockedBefore = new Set((locks || '').split(',').filter(Boolean));
+    for (const v of VIEWS) {
+      if (!isViewVisible(v.id) || pageLock(v.id)) continue;
+      if (!before.has(v.id) || lockedBefore.has(v.id)) {
+        newViews.add(v.id);
+        if (lockedBefore.has(v.id)) toast(`🔓 New feature unlocked: ${v.label}!`, 'success', 8000);
+      }
+    }
   }
   navKey = key;
-  nav.innerHTML = VIEWS.filter(v => (!v.adminOnly || state.isAdmin) && isViewVisible(v.id)).map(v => `<a href="#/${v.id}" data-view="${v.id}" class="${newViews.has(v.id) ? 'nav-new' : ''} ${current?.id === v.id ? 'active' : ''}"><span class="nav-icon">${v.icon}</span><span class="nav-label">${v.label}</span><span class="nav-badge" data-badge="${v.id}"></span></a>`).join('');
+  nav.innerHTML = VIEWS.filter(v => (!v.adminOnly || state.isAdmin) && isViewVisible(v.id)).map(v => {
+    const lock = pageLock(v.id);
+    return `<a href="#/${v.id}" data-view="${v.id}" class="${newViews.has(v.id) ? 'nav-new' : ''} ${current?.id === v.id ? 'active' : ''} ${lock ? 'nav-locked' : ''}" ${lock ? `title="Unlocks at hero level ${lock}"` : ''}><span class="nav-icon">${v.icon}</span><span class="nav-label">${v.label}</span>${lock ? `<span class="nav-lock">🔒 ${lock}</span>` : `<span class="nav-badge" data-badge="${v.id}"></span>`}</a>`;
+  }).join('');
 }
 
 function route() {
   if (!state.player) return;
   if (!state.player.heroId) { mount(createView); return; }
   const id = (location.hash.match(/^#\/(\w+)/) || [])[1] || 'combat';
-  const v = VIEWS.find(x => x.id === id && (!x.adminOnly || state.isAdmin) && isViewVisible(x.id)) || combatView;
+  let v = VIEWS.find(x => x.id === id && (!x.adminOnly || state.isAdmin) && isViewVisible(x.id)) || combatView;
+  if (pageLock(v.id)) v = lockedView(v);
   if (newViews.delete(v.id)) document.querySelector(`#sidebar a[data-view="${v.id}"]`)?.classList.remove('nav-new');
   mount(v);
   renderTutorial();
@@ -286,7 +322,7 @@ bus.on('msg:state', m => {
   const hadHero = !!state.player?.heroId;
   state.player = m.player;
   if (m.player.serverTime) state.timeOffset = m.player.serverTime - Date.now();
-  if (visibleKey() !== navKey) { renderNav(); if (!isViewVisible(current?.id)) route(); }
+  if (navStateKey() !== navKey) { renderNav(); route(); }
   renderTopbar();
   if (first || hadHero !== !!m.player.heroId) route(); else requestRender();
   renderTutorial();
@@ -310,6 +346,7 @@ function showOfflineSummary(s) {
       <div><span class="big-num gold-text">${fmt(s.gold)}</span><span>gold</span></div>
       <div><span class="big-num">${fmt(s.itemsKept)}</span><span>items kept${s.itemsSold ? ` (${fmt(s.itemsSold)} sold)` : ''}</span></div>
     </div>
+    ${Object.keys(s.materials || {}).length ? `<h3>Zone materials</h3><p>${Object.entries(s.materials).map(([k, v]) => `<span class="cost">${esc(MATERIALS[k]?.glyph || '')} ${fmt(v)} ${esc(MATERIALS[k]?.name || k)}</span>`).join(' ')}</p>` : ''}
     ${lv ? `<h3>Level ups</h3><ul>${lv}</ul>` : ''}
     ${found ? `<h3>Notable loot</h3><ul>${found}</ul>` : ''}
     ${s.achievements.length ? `<h3>Achievements</h3><ul>${s.achievements.map(a => `<li>★ ${esc(a)}</li>`).join('')}</ul>` : ''}

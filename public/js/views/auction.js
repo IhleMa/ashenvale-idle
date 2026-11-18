@@ -1,4 +1,5 @@
 // Auction House: browse/buy, sell, manage listings, mailbox.
+import { featureLock } from '/shared/unlocks.js';
 import { state, chars } from '../state.js';
 import { act } from '../net.js';
 import { esc, fmt, run, toast, tipAttr, itemTooltipHtml, duration, confirmBox, premiumTxt } from '../ui.js';
@@ -111,7 +112,9 @@ function mailHtml() {
 function renderBody(root) {
   const host = root.querySelector('.ah-body');
   if (!host) return;
-  host.innerHTML = ui.tab === 'browse' ? browseHtml() : ui.tab === 'sell' ? sellHtml() : ui.tab === 'mine' ? mineHtml() : mailHtml();
+  const lock = ui.tab !== 'mail' && featureLock(state.player, 'auction');
+  host.innerHTML = (lock ? `<div class="sync-note">🔒 Buying and selling on the Auction House unlocks at <b>hero level ${lock}</b>. Your mailbox works already.</div>` : '')
+    + (ui.tab === 'browse' ? browseHtml() : ui.tab === 'sell' ? sellHtml() : ui.tab === 'mine' ? mineHtml() : mailHtml());
 }
 
 export const auctionView = {

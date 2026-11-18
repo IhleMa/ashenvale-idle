@@ -21,8 +21,12 @@ export const DROP_CHANCE = LG.dropChance;
 onContentReload(() => { withIds(UNIQUES); withIds(SETS); });
 
 // ---------------------------------------------------------------- generation
-export function generateUnique(rng, level, uniqueId = null) {
-  const pool = Object.values(UNIQUES).filter(u => u.minLevel <= Math.max(level, 1));
+// Zone-exclusive items ("zones": [...]) only drop in those zones; items without "zones" drop everywhere.
+// zoneId null (e.g. co-op encounters) = any item.
+export const dropsIn = (def, zoneId) => !zoneId || !def.zones?.length || def.zones.includes(zoneId);
+
+export function generateUnique(rng, level, uniqueId = null, zoneId = null) {
+  const pool = Object.values(UNIQUES).filter(u => u.minLevel <= Math.max(level, 1) && dropsIn(u, zoneId));
   const u = UNIQUES[uniqueId] || (pool.length ? pool[Math.floor(rng() * pool.length)] : null);
   if (!u) return null;
   const lvl = Math.max(u.minLevel, Math.round(level));
@@ -36,8 +40,8 @@ export function generateUnique(rng, level, uniqueId = null) {
   return item;
 }
 
-export function generateSetItem(rng, level, setId = null, baseId = null) {
-  const pool = Object.values(SETS).filter(s => s.minLevel <= Math.max(level, 1));
+export function generateSetItem(rng, level, setId = null, baseId = null, zoneId = null) {
+  const pool = Object.values(SETS).filter(s => s.minLevel <= Math.max(level, 1) && dropsIn(s, zoneId));
   const set = SETS[setId] || (pool.length ? pool[Math.floor(rng() * pool.length)] : null);
   if (!set) return null;
   const bases = Object.keys(set.pieces);

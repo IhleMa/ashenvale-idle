@@ -1,0 +1,29 @@
+{
+  "name": "Wyrm Cultist",
+  "tags": [
+    "humanoid",
+    "caster",
+    "minion"
+  ],
+  "stats": {
+    "hp": 140,
+    "physPower": 6,
+    "magPower": 22,
+    "defense": 6,
+    "critChance": 0.08,
+    "attackSpeed": 1.0
+  },
+  "abilities": [
+    "e_firebolt",
+    "e_dark_mend"
+  ],
+  "xp": 34,
+  "gold": [
+    8,
+    16
+  ],
+  "loot": {
+    "chance": 0.15
+  },
+  "order": 196
+}

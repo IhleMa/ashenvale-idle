@@ -1,0 +1,9 @@
+{
+  "name": "Sunstone",
+  "glyph": "☀",
+  "color": "#ffd04a",
+  "group": "zone",
+  "zone": "sunscorch_dunes",
+  "description": "Glassy stone baked by the sun of the Sunscorch Dunes. Needed for town upgrades and Superior/Masterwork crafting.",
+  "order": 204
+}

@@ -1,0 +1,28 @@
+{
+  "name": "Storm Harpy",
+  "tags": [
+    "beast",
+    "minion"
+  ],
+  "stats": {
+    "hp": 130,
+    "physPower": 17,
+    "magPower": 6,
+    "defense": 5,
+    "critChance": 0.12,
+    "attackSpeed": 1.25
+  },
+  "abilities": [
+    "e_bite",
+    "e_frenzy"
+  ],
+  "xp": 28,
+  "gold": [
+    6,
+    13
+  ],
+  "loot": {
+    "chance": 0.15
+  },
+  "order": 181
+}

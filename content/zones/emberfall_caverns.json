@@ -1,9 +1,17 @@
 {
   "name": "Emberfall Caverns",
-  "levelRange": [13, 23],
-  "order": 3,
+  "levelRange": [
+    15,
+    21
+  ],
+  "order": 4,
   "description": "Volcanic tunnels swarming with imps, golems and fanatics.",
-  "enemies": ["fire_imp", "magma_golem", "ash_cultist"],
+  "enemies": [
+    "fire_imp",
+    "magma_golem",
+    "ash_cultist"
+  ],
   "boss": "cinder_wyrm",
-  "unlock": "ashen_barrows"
+  "unlock": "mirefen_marsh",
+  "material": "ember_core"
 }

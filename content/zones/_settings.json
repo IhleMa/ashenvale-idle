@@ -1,4 +1,12 @@
 {
-  "_about": "Zone settings. Every zone is its own file in this folder; co-op encounters are in content/coop/.",
-  "bossWaveEscorts": 1
+  "_about": "Zone settings. Every zone is its own file in this folder; co-op encounters are in content/coop/. Each zone has its own material (zone.material) that drops there: materialDrops = chance per normal/elite kill, and the amount a boss drops. Unique and set items with \"zones\": [...] only drop in those zones (rifts count as the zone they are themed on).",
+  "bossWaveEscorts": 1,
+  "materialDrops": {
+    "normal": 0.02,
+    "elite": 0.25,
+    "boss": [
+      3,
+      5
+    ]
+  }
 }

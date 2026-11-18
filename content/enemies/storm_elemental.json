@@ -1,0 +1,29 @@
+{
+  "name": "Storm Elemental",
+  "tags": [
+    "elemental",
+    "caster",
+    "minion"
+  ],
+  "stats": {
+    "hp": 140,
+    "physPower": 6,
+    "magPower": 19,
+    "defense": 6,
+    "critChance": 0.08,
+    "attackSpeed": 1.0
+  },
+  "abilities": [
+    "e_void_bolt",
+    "e_chill"
+  ],
+  "xp": 29,
+  "gold": [
+    6,
+    13
+  ],
+  "loot": {
+    "chance": 0.15
+  },
+  "order": 182
+}

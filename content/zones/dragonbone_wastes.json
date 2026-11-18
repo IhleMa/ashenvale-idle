@@ -1,0 +1,17 @@
+{
+  "name": "Dragonbone Wastes",
+  "levelRange": [
+    50,
+    56
+  ],
+  "order": 11,
+  "description": "A graveyard of ancient dragons that refuse to stay dead.",
+  "enemies": [
+    "bone_drake",
+    "wyrm_cultist",
+    "ash_drake"
+  ],
+  "boss": "the_bone_wyrm",
+  "unlock": "shadowfell",
+  "material": "dragonbone"
+}

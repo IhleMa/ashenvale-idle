@@ -2,6 +2,8 @@
 import { rarityIndex, rarityById } from './config.js';
 import { AFFIXES, ITEM_BASES } from './data/items.js';
 import { CONTENT } from './content.js';
+import { ZONES } from './data/zones.js';
+import { unlockHeroLevel } from './unlocks.js';
 import {
   BUILDINGS, BUILD_TIME, INN_ROSTER, INN_OFFERS, SALVAGE_BONUS,
   CRAFT_LEVEL_CAP, ITEM_MATERIAL, MATERIAL_OF_TYPE, QUALITIES, ELIXIRS, ELIXIR_BASE_MINUTES, enchantPower,
@@ -40,6 +42,8 @@ export function upgradeCost(id, toLevel) {
     else if (v > 0) mats[k] = qty(v, toLevel);
   }
   for (const [k, [from, base]] of Object.entries(def.costFrom || {})) if (toLevel >= from) mats[k] = qty(base, toLevel - from + 1);
+  // zone materials: every level from 2 on needs the material of a zone (see town/_settings.json → levelMaterials)
+  for (const [k, n] of Object.entries(CONTENT.town.levelMaterials?.[toLevel] || {})) mats[k] = (mats[k] || 0) + Math.ceil(n * (def.zoneMaterialMult ?? 1));
   return { gold, mats };
 }
 export const buildSeconds = (id, toLevel) => Math.round((BUILD_TIME[toLevel] || 0) * (BUILDINGS[id].timeMult || 1));
@@ -59,6 +63,8 @@ export function upgradeBlocker(p, id) {
   if (!def || !b) return 'Unknown building';
   if (b.upgrade) return 'Already under construction';
   if (b.level >= def.maxLevel) return 'Maximum level reached';
+  const heroLevel = unlockHeroLevel(p) || 1;
+  if (def.unlockLevel && heroLevel < def.unlockLevel) return `Unlocks at hero level ${def.unlockLevel}`;
   if (id !== 'town_hall' && b.level + 1 > bLevel(p, 'town_hall')) return `Requires Town Hall level ${b.level + 1}`;
   const max = CONTENT.town.concurrentBuilds[bLevel(p, 'town_hall')] || 1;
   if (activeBuilds(p) >= max) return `Only ${max} construction${max > 1 ? 's' : ''} at a time — upgrade the Town Hall for more`;
@@ -86,6 +92,11 @@ export function salvageYield(item, salvageLevel = 1, enchanterBonus = false) {
 }
 
 // ---------------------------------------------------------------- crafting
+// The material of the zone whose level range an item level belongs to (highest zone starting at or below it)
+export function zoneMaterialForLevel(level) {
+  const z = Object.values(ZONES).filter(z => z.material && z.levelRange[0] <= level).sort((a, b) => b.levelRange[0] - a.levelRange[0])[0];
+  return z?.material || null;
+}
 export function craftableBases(type) {
   return Object.values(ITEM_BASES).filter(b => ITEM_MATERIAL[b.id] === type);
 }
@@ -100,6 +111,7 @@ export function craftCost(baseId, level, quality = 'standard') {
   if (q?.extra === 'magic_essence') mats.magic_essence = Math.ceil(2 + level / 15);
   if (q?.extra === 'prismatic_shard') mats.prismatic_shard = Math.ceil(1 + level / 25);
   if (q?.extra === 'void_crystal') mats.void_crystal = Math.ceil(1 + level / 30);
+  if (q?.zoneMaterial) { const zm = zoneMaterialForLevel(level); if (zm) mats[zm] = Math.ceil(q.zoneMaterial + level / 20); } // the material of the zone for that item level
   const goldMult = { standard: 1, fine: 1.5, superior: 2.5, masterwork: 4 }[quality] || 1;
   return { gold: Math.round((25 + level * 6) * goldMult), mats };
 }

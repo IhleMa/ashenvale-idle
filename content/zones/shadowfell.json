@@ -1,0 +1,17 @@
+{
+  "name": "Shadowfell",
+  "levelRange": [
+    45,
+    51
+  ],
+  "order": 10,
+  "description": "A land of endless night where nightmares take shape.",
+  "enemies": [
+    "shade",
+    "nightmare_hound",
+    "dread_wraith"
+  ],
+  "boss": "the_dreamless",
+  "unlock": "crimson_keep",
+  "material": "shadow_silk"
+}

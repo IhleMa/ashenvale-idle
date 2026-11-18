@@ -3,15 +3,27 @@
   "kind": "craft",
   "profession": "leatherworking",
   "type": "leather",
-  "maxLevel": 5,
+  "maxLevel": 10,
   "start": 0,
   "description": "Craft leather armor, bows and quivers, and reforge leather gear.",
-  "cost": { "gold": 250, "leather_scrap": 15, "metal_scrap": 5 },
+  "cost": {
+    "gold": 250,
+    "leather_scrap": 15,
+    "metal_scrap": 5
+  },
   "effects": [
     "Craft up to item level {craftLevelCap}",
     "Best quality: {bestQuality} ({bestQualityRarity}+)",
-    { "minLevel": 5, "text": "Greatly increased mythic chance" },
-    { "maxLevel": 4, "text": "Reforge old gear to a higher level" }
+    {
+      "minLevel": 5,
+      "text": "Greatly increased mythic chance"
+    },
+    "Reforge gear to a higher level (up to your hero's level)",
+    {
+      "minLevel": 6,
+      "text": "Higher rarity chances with every level above 5"
+    }
   ],
-  "order": 60
+  "order": 60,
+  "unlockLevel": 5
 }

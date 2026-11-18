@@ -1,0 +1,28 @@
+{
+  "name": "Ash Drake",
+  "tags": [
+    "dragon",
+    "minion"
+  ],
+  "stats": {
+    "hp": 190,
+    "physPower": 21,
+    "magPower": 12,
+    "defense": 9,
+    "critChance": 0.1,
+    "attackSpeed": 1.05
+  },
+  "abilities": [
+    "e_bite",
+    "e_frenzy"
+  ],
+  "xp": 35,
+  "gold": [
+    8,
+    17
+  ],
+  "loot": {
+    "chance": 0.15
+  },
+  "order": 197
+}

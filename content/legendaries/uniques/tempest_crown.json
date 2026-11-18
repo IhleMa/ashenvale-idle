@@ -1,0 +1,35 @@
+{
+  "name": "Tempest Crown",
+  "baseId": "cloth_hat",
+  "minLevel": 35,
+  "zones": [
+    "stormspire_heights"
+  ],
+  "flavor": "Crackles whenever its wearer speaks.",
+  "stats": {
+    "int": [
+      3,
+      0.75
+    ],
+    "critChance": [
+      0.02,
+      0.0004
+    ]
+  },
+  "procs": [
+    {
+      "name": "Tempest Crown",
+      "trigger": "cast",
+      "chance": 0.2,
+      "icd": 4,
+      "target": "self",
+      "effect": {
+        "kind": "status",
+        "status": "hastened",
+        "duration": 4
+      }
+    }
+  ],
+  "description": "Casting an ability has a 20% chance to make you Hastened for 4s.",
+  "order": 75
+}

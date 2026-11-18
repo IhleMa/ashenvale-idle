@@ -1,11 +1,47 @@
 {
   "_about": "Expedition durations and camp limits. Every destination is its own file in this folder.",
   "durations": [
-    { "hours": 0.25, "label": "15 min" },
-    { "hours": 1, "label": "1 hour" },
-    { "hours": 4, "label": "4 hours" },
-    { "hours": 8, "label": "8 hours" }
+    {
+      "hours": 0.25,
+      "label": "15 min"
+    },
+    {
+      "hours": 1,
+      "label": "1 hour"
+    },
+    {
+      "hours": 4,
+      "label": "4 hours"
+    },
+    {
+      "hours": 8,
+      "label": "8 hours"
+    }
   ],
-  "campSlots": [0, 1, 2, 3, 4, 5],
-  "campMembers": [0, 1, 2, 2, 3, 3]
+  "campSlots": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    5,
+    6,
+    6,
+    7,
+    7
+  ],
+  "campMembers": [
+    0,
+    1,
+    2,
+    2,
+    3,
+    3,
+    3,
+    4,
+    4,
+    4,
+    5
+  ]
 }

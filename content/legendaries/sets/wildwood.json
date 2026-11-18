@@ -1,6 +1,6 @@
 {
   "name": "Wildwood Trappings",
-  "minLevel": 14,
+  "minLevel": 10,
   "pieces": {
     "bow": "Wildwood Longbow",
     "quiver": "Wildwood Quiver",
@@ -8,7 +8,12 @@
     "leather_boots": "Wildwood Boots"
   },
   "bonuses": {
-    "2": { "description": "+8% Attack Speed", "stats": { "attackSpeed": 0.08 } },
+    "2": {
+      "description": "+8% Attack Speed",
+      "stats": {
+        "attackSpeed": 0.08
+      }
+    },
     "4": {
       "description": "Hits have a 15% chance to poison the target.",
       "procs": [
@@ -17,10 +22,19 @@
           "trigger": "hit",
           "chance": 0.15,
           "target": "target",
-          "effect": { "kind": "status", "status": "poison", "duration": 8, "stat": "physPower", "power": 0.18 }
+          "effect": {
+            "kind": "status",
+            "status": "poison",
+            "duration": 8,
+            "stat": "physPower",
+            "power": 0.18
+          }
         }
       ]
     }
   },
-  "order": 50
+  "order": 50,
+  "zones": [
+    "mirefen_marsh"
+  ]
 }

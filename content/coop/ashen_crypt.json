@@ -1,7 +1,7 @@
 {
   "name": "Ashenvale Crypt",
   "type": "dungeon",
-  "minLevel": 6,
+  "minLevel": 12,
   "rewardMult": 1.5,
   "description": "A group dungeon: three waves of undead, then Malgrath, Lord of the Crypt.",
   "waves": [

@@ -1,0 +1,9 @@
+{
+  "name": "Storm Feather",
+  "glyph": "⚡",
+  "color": "#c3b6ff",
+  "group": "zone",
+  "zone": "stormspire_heights",
+  "description": "A harpy feather still humming with lightning from Stormspire Heights. Needed for town upgrades and Superior/Masterwork crafting.",
+  "order": 207
+}

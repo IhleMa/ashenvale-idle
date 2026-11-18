@@ -1,0 +1,40 @@
+{
+  "name": "Mirecaller",
+  "baseId": "wand",
+  "minLevel": 10,
+  "zones": [
+    "mirefen_marsh"
+  ],
+  "flavor": "Carved from a hag's walking stick; it still drips.",
+  "stats": {
+    "int": [
+      3,
+      0.7
+    ],
+    "magPower": [
+      2,
+      0.5
+    ]
+  },
+  "procs": [
+    {
+      "name": "Mirecaller",
+      "trigger": "hit",
+      "chance": 0.15,
+      "icd": 1,
+      "filter": {
+        "school": "magical"
+      },
+      "target": "target",
+      "effect": {
+        "kind": "status",
+        "status": "poison",
+        "duration": 6,
+        "stat": "magPower",
+        "power": 0.25
+      }
+    }
+  ],
+  "description": "Magic damage has a 15% chance to poison the target for 25% Magic Power per second for 6s.",
+  "order": 15
+}

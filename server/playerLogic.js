@@ -63,6 +63,12 @@ export function migratePlayer(p) {
   // players from before the tutorial existed don't get it
   if (!p.tutorial && p.heroId) p.tutorial = { done: true, step: 0, legacy: true };
   migrateTown(p);
+  // zones inserted into the chain later: a player who reached a zone also has every zone before it
+  const chain = Object.values(ZONES).sort((x, y) => (x.order ?? 0) - (y.order ?? 0));
+  const furthest = Math.max(-1, ...chain.map((z, i) => (p.unlockedZones.includes(z.id) ? i : -1)));
+  for (let i = 0; i < furthest; i++) if (!p.unlockedZones.includes(chain[i].id)) p.unlockedZones.push(chain[i].id);
+  p.unlockedZones = p.unlockedZones.filter(id => ZONES[id]);
+  if (!ZONES[p.zone]) p.zone = chain[0].id;
   while (p.parties.length < CONFIG.party.presets) p.parties.push({ name: `Party ${p.parties.length + 1}`, members: p.heroId ? [p.heroId] : [] });
   for (const ch of Object.values(p.characters)) {
     for (const s of SLOT_IDS) if (!(s in ch.equipment)) ch.equipment[s] = null;
@@ -608,6 +614,7 @@ export function applyRewards(p, chars, rewards) {
     }
   }
   p.gold += rewards.gold;
+  if (rewards.materials && p.town) for (const [k, v] of Object.entries(rewards.materials)) p.town.materials[k] = (p.town.materials[k] || 0) + v;
   let sold = 0, kept = 0;
   for (const it of rewards.items) (receiveItem(p, it) === 'kept' ? kept++ : sold++);
   p.stats.kills += rewards.kills || 0;

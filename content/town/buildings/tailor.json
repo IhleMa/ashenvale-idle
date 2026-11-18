@@ -3,15 +3,27 @@
   "kind": "craft",
   "profession": "tailoring",
   "type": "cloth",
-  "maxLevel": 5,
+  "maxLevel": 10,
   "start": 0,
   "description": "Sew cloth armor, staves, wands and tomes, and reforge cloth gear.",
-  "cost": { "gold": 250, "cloth_scrap": 15, "leather_scrap": 5 },
+  "cost": {
+    "gold": 250,
+    "cloth_scrap": 15,
+    "leather_scrap": 5
+  },
   "effects": [
     "Craft up to item level {craftLevelCap}",
     "Best quality: {bestQuality} ({bestQualityRarity}+)",
-    { "minLevel": 5, "text": "Greatly increased mythic chance" },
-    { "maxLevel": 4, "text": "Reforge old gear to a higher level" }
+    {
+      "minLevel": 5,
+      "text": "Greatly increased mythic chance"
+    },
+    "Reforge gear to a higher level (up to your hero's level)",
+    {
+      "minLevel": 6,
+      "text": "Higher rarity chances with every level above 5"
+    }
   ],
-  "order": 70
+  "order": 70,
+  "unlockLevel": 5
 }

@@ -1,0 +1,17 @@
+{
+  "name": "Stormspire Heights",
+  "levelRange": [
+    35,
+    41
+  ],
+  "order": 8,
+  "description": "Lightning-scarred peaks above the clouds, home of harpies, giants and the Storm Tyrant.",
+  "enemies": [
+    "storm_harpy",
+    "storm_elemental",
+    "thunder_giant"
+  ],
+  "boss": "the_storm_tyrant",
+  "unlock": "frostpeak",
+  "material": "storm_feather"
+}

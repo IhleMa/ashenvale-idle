@@ -1,45 +1,215 @@
 {
-  "_about": "Town settings: shard stats, profession XP, tables per building level, cost formulas, enchanting, salvage. Materials, professions, buildings, qualities and elixirs are in the sub-folders.",
+  "_about": "Town settings: shard stats, profession XP, tables per building level, cost formulas, enchanting, salvage. Materials, professions, buildings, qualities and elixirs are in the sub-folders. levelMaterials: zone materials every building needs to reach a level (× the building's zoneMaterialMult, default 1). Per-level tables (buildTime in seconds, innRoster, …) have one entry per level 0–10. Buildings can have unlockLevel = hero level needed to build or upgrade them.",
   "shardStats": [
-    { "stat": "str", "label": "Strength", "color": "#e0464e" },
-    { "stat": "int", "label": "Intelligence", "color": "#4f7cff" },
-    { "stat": "dex", "label": "Dexterity", "color": "#3fbf6a" },
-    { "stat": "vit", "label": "Vitality", "color": "#e8a33a" },
-    { "stat": "hp", "label": "Health", "color": "#b0303a" },
-    { "stat": "defense", "label": "Defense", "color": "#8e8e9a" },
-    { "stat": "physPower", "label": "Physical Power", "color": "#c2413c" },
-    { "stat": "magPower", "label": "Magic Power", "color": "#a160e8" },
-    { "stat": "healPower", "label": "Healing Power", "color": "#f0ecdc" },
-    { "stat": "critChance", "label": "Critical Chance", "color": "#f2c14e" },
-    { "stat": "critDamage", "label": "Critical Damage", "color": "#c8f2ff" },
-    { "stat": "attackSpeed", "label": "Attack Speed", "color": "#ffd84a" }
+    {
+      "stat": "str",
+      "label": "Strength",
+      "color": "#e0464e"
+    },
+    {
+      "stat": "int",
+      "label": "Intelligence",
+      "color": "#4f7cff"
+    },
+    {
+      "stat": "dex",
+      "label": "Dexterity",
+      "color": "#3fbf6a"
+    },
+    {
+      "stat": "vit",
+      "label": "Vitality",
+      "color": "#e8a33a"
+    },
+    {
+      "stat": "hp",
+      "label": "Health",
+      "color": "#b0303a"
+    },
+    {
+      "stat": "defense",
+      "label": "Defense",
+      "color": "#8e8e9a"
+    },
+    {
+      "stat": "physPower",
+      "label": "Physical Power",
+      "color": "#c2413c"
+    },
+    {
+      "stat": "magPower",
+      "label": "Magic Power",
+      "color": "#a160e8"
+    },
+    {
+      "stat": "healPower",
+      "label": "Healing Power",
+      "color": "#f0ecdc"
+    },
+    {
+      "stat": "critChance",
+      "label": "Critical Chance",
+      "color": "#f2c14e"
+    },
+    {
+      "stat": "critDamage",
+      "label": "Critical Damage",
+      "color": "#c8f2ff"
+    },
+    {
+      "stat": "attackSpeed",
+      "label": "Attack Speed",
+      "color": "#ffd84a"
+    }
   ],
   "professionMax": 50,
-  "professionXp": { "base": 40, "perLevel": 20 },
-  "materialOfType": { "metal": "metal_scrap", "leather": "leather_scrap", "cloth": "cloth_scrap", "gem": "gem_fragment" },
-  "craftBuildingOfType": { "metal": "blacksmith", "leather": "leatherworker", "cloth": "tailor", "gem": "jeweler" },
-  "buildTime": [0, 30, 240, 900, 2700, 7200],
-  "costFormula": { "materialExponent": 1.5, "goldExponent": 2.2 },
-  "innRoster": [0, 3, 5, 7, 9, 12],
-  "innOffers": [0, 3, 4, 4, 5, 6],
-  "salvageBonus": [0, 0, 0.1, 0.2, 0.35, 0.5],
-  "craftLevelCap": [0, 12, 24, 36, 48, 60],
-  "concurrentBuilds": [0, 1, 1, 2, 2, 3],
+  "professionXp": {
+    "base": 40,
+    "perLevel": 20
+  },
+  "materialOfType": {
+    "metal": "metal_scrap",
+    "leather": "leather_scrap",
+    "cloth": "cloth_scrap",
+    "gem": "gem_fragment"
+  },
+  "craftBuildingOfType": {
+    "metal": "blacksmith",
+    "leather": "leatherworker",
+    "cloth": "tailor",
+    "gem": "jeweler"
+  },
+  "buildTime": [
+    0,
+    60,
+    600,
+    1800,
+    3600,
+    7200,
+    14400,
+    28800,
+    57600,
+    115200,
+    216000
+  ],
+  "costFormula": {
+    "materialExponent": 1.5,
+    "goldExponent": 2.2
+  },
+  "innRoster": [
+    0,
+    3,
+    5,
+    7,
+    9,
+    12,
+    13,
+    14,
+    15,
+    16,
+    18
+  ],
+  "innOffers": [
+    0,
+    3,
+    4,
+    4,
+    5,
+    6,
+    6,
+    7,
+    7,
+    8,
+    8
+  ],
+  "salvageBonus": [
+    0,
+    0,
+    0.1,
+    0.2,
+    0.35,
+    0.5,
+    0.6,
+    0.7,
+    0.8,
+    0.9,
+    1.0
+  ],
+  "craftLevelCap": [
+    0,
+    12,
+    24,
+    36,
+    48,
+    60,
+    60,
+    60,
+    60,
+    60,
+    60
+  ],
+  "concurrentBuilds": [
+    0,
+    1,
+    1,
+    2,
+    2,
+    3,
+    3,
+    3,
+    4,
+    4,
+    4
+  ],
   "enchanting": {
     "statsByLevel": {
-      "1": ["str", "int", "dex", "vit", "hp"],
-      "2": ["str", "int", "dex", "vit", "hp", "defense", "physPower", "magPower", "healPower"],
+      "1": [
+        "str",
+        "int",
+        "dex",
+        "vit",
+        "hp"
+      ],
+      "2": [
+        "str",
+        "int",
+        "dex",
+        "vit",
+        "hp",
+        "defense",
+        "physPower",
+        "magPower",
+        "healPower"
+      ],
       "3": [
-        "str", "int", "dex", "vit", "hp", "defense", "physPower", "magPower", "healPower", "critChance", "critDamage",
+        "str",
+        "int",
+        "dex",
+        "vit",
+        "hp",
+        "defense",
+        "physPower",
+        "magPower",
+        "healPower",
+        "critChance",
+        "critDamage",
         "attackSpeed"
       ]
     },
-    "power": { "base": 0.5, "perLevel": 0.1, "perSkill": 0.006 }
+    "power": {
+      "base": 0.5,
+      "perLevel": 0.1,
+      "perSkill": 0.006
+    }
   },
   "elixirBaseMinutes": 60,
   "elixirMaxHours": 8,
   "salvage": {
-    "baseMaterial": { "base": 1, "levelDivisor": 7, "perRarity": 0.25 },
+    "baseMaterial": {
+      "base": 1,
+      "levelDivisor": 7,
+      "perRarity": 0.25
+    },
     "enchanterArcaneBonus": 0.25,
     "arcane": [
       {
@@ -64,6 +234,44 @@
         "betterMult": 1.5
       }
     ],
-    "voidCrystal": { "material": "void_crystal", "fromRarity": "legendary", "amount": 1, "mythicAmount": 2, "arcaneFactor": 0.9 }
+    "voidCrystal": {
+      "material": "void_crystal",
+      "fromRarity": "legendary",
+      "amount": 1,
+      "mythicAmount": 2,
+      "arcaneFactor": 0.9
+    }
+  },
+  "levelMaterials": {
+    "2": {
+      "sylvan_sap": 6
+    },
+    "3": {
+      "grave_dust": 8
+    },
+    "4": {
+      "bog_iron": 10
+    },
+    "5": {
+      "ember_core": 12
+    },
+    "6": {
+      "sunstone": 15,
+      "tide_pearl": 15
+    },
+    "7": {
+      "frost_shard": 25
+    },
+    "8": {
+      "storm_feather": 25,
+      "blood_ruby": 25
+    },
+    "9": {
+      "shadow_silk": 35
+    },
+    "10": {
+      "dragonbone": 40,
+      "void_ichor": 40
+    }
   }
 }

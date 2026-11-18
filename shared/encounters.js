@@ -1,5 +1,6 @@
 // Encounter generation and reward calculation (shared by live and offline progression).
 import { CONFIG } from './config.js';
+import { CONTENT } from './content.js';
 import { ENEMIES } from './data/enemies.js';
 import { ZONES, COOP_ENCOUNTERS, bossWave } from './data/zones.js';
 import { generateItem } from './data/items.js';
@@ -52,9 +53,13 @@ export function killGold(kill, rng) {
 }
 
 // Returns { xp, gold, items[] } for a finished (won) battle
-export function computeRewards(kills, rng, { rewardMult = 1, lootBoost = 0, lootMult = 1 } = {}) {
+// zoneId: where the fight happened — zone-exclusive uniques/sets and the zone's material can drop
+export function computeRewards(kills, rng, { rewardMult = 1, lootBoost = 0, lootMult = 1, zoneId = null } = {}) {
   let xp = 0, gold = 0;
   const items = [];
+  const materials = {};
+  const zone = zoneId ? ZONES[zoneId] : null;
+  const MD = CONTENT.zones.materialDrops || {};
   for (const k of kills) {
     xp += killXp(k);
     gold += killGold(k, rng);
@@ -68,10 +73,17 @@ export function computeRewards(kills, rng, { rewardMult = 1, lootBoost = 0, loot
     if (!k.summoned) {
       const tier = k.boss ? 'boss' : k.elite ? 'elite' : 'normal';
       const mult = Math.min(3, rewardMult) * lootMult;
-      if (rng() < DROP_CHANCE.unique[tier] * mult) { const u = generateUnique(rng, k.level); if (u) items.push(u); }
-      if (rng() < DROP_CHANCE.set[tier] * mult) { const si = generateSetItem(rng, k.level); if (si) items.push(si); }
+      if (rng() < DROP_CHANCE.unique[tier] * mult) { const u = generateUnique(rng, k.level, null, zoneId); if (u) items.push(u); }
+      if (rng() < DROP_CHANCE.set[tier] * mult) { const si = generateSetItem(rng, k.level, null, null, zoneId); if (si) items.push(si); }
+      // the zone's own material
+      if (zone?.material) {
+        let n = 0;
+        if (k.boss) n = Array.isArray(MD.boss) ? rng.int(MD.boss[0], MD.boss[1]) : (MD.boss || 0);
+        else if (rng() < (k.elite ? MD.elite ?? 0.25 : MD.normal ?? 0.02) * Math.min(2, rewardMult)) n = 1;
+        if (n) materials[zone.material] = (materials[zone.material] || 0) + n;
+      }
     }
   }
   // killList: lets XP be adjusted per character (ascended heroes, see applyRewards)
-  return { xp: Math.round(xp * rewardMult), gold: Math.round(gold * rewardMult), items, killList: kills };
+  return { xp: Math.round(xp * rewardMult), gold: Math.round(gold * rewardMult), items, materials, killList: kills };
 }

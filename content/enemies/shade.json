@@ -1,0 +1,29 @@
+{
+  "name": "Shade",
+  "tags": [
+    "undead",
+    "caster",
+    "minion"
+  ],
+  "stats": {
+    "hp": 130,
+    "physPower": 6,
+    "magPower": 20,
+    "defense": 5,
+    "critChance": 0.09,
+    "attackSpeed": 1.05
+  },
+  "abilities": [
+    "e_void_bolt",
+    "e_weaken"
+  ],
+  "xp": 32,
+  "gold": [
+    7,
+    15
+  ],
+  "loot": {
+    "chance": 0.15
+  },
+  "order": 191
+}

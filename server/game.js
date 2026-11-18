@@ -1,4 +1,5 @@
 // Game server: sessions, action dispatch, server-authoritative battle loop, offline progression, groups.
+import { ACTION_FEATURE, FEATURE_LABELS, featureLock, unlockHeroLevel } from '../shared/unlocks.js';
 import crypto from 'node:crypto';
 import { CONFIG } from '../shared/config.js';
 import { ZONES, COOP_ENCOUNTERS } from '../shared/data/zones.js';
@@ -207,6 +208,8 @@ export class Game {
       const payload = msg.payload && typeof msg.payload === 'object' ? msg.payload : {};
       const p = s.player;
       if (!p.heroId && msg.type !== 'create_hero' && !isAdminAction) fail('Create your hero first');
+      const feature = ACTION_FEATURE[msg.type];
+      if (feature && featureLock(p, feature)) fail(`${FEATURE_LABELS[feature] || feature} unlocks at hero level ${featureLock(p, feature)}`);
       const result = handler.call(this, s, payload);
       if (!READ_ONLY.has(msg.type) && !isAdminAction) this.markDirty(s);
       // value moving between players (trades, mail, admin gifts) is written to disk right away, in one transaction
@@ -324,7 +327,7 @@ export class Game {
     rift_start(s, d) {
       const p = s.player;
       const h = L.hero(p);
-      if (h.level < RIFT.minLevel) fail(`Rifts open at hero level ${RIFT.minLevel}`);
+      if (unlockHeroLevel(p) < RIFT.minLevel) fail(`Rifts open at hero level ${RIFT.minLevel}`);
       const tier = Math.floor(Number(d.tier));
       if (!(tier >= 1 && tier <= maxStartTier(p))) fail(`You can start tiers 1–${maxStartTier(p)} (time a tier to unlock the next)`);
       const themes = riftThemes(p);
@@ -528,7 +531,7 @@ export class Game {
     const summary = { result: battle.state, kind, zoneId };
     p.stats.fights++;
     if (battle.state === 'victory') {
-      const rewards = this.applyElixirRewards(p, computeRewards(battle.kills, createRng(randomSeed()), { lootMult: this.settings.get('lootRate') }));
+      const rewards = this.applyElixirRewards(p, computeRewards(battle.kills, createRng(randomSeed()), { lootMult: this.settings.get('lootRate'), zoneId }));
       rewards.kills = battle.kills.length;
       const chars = s.solo.chars.map(id => p.characters[id]).filter(Boolean);
       if (kind === 'boss') {
@@ -577,7 +580,7 @@ export class Game {
       const firstClear = !riftCleared(p, tier);
       // enemies above the level cap still drop items (and give XP) of the level cap
       const rewardKills = b.kills.map(k => (k.level > CONFIG.levelCap ? { ...k, level: CONFIG.levelCap } : k));
-      const rewards = this.applyElixirRewards(p, computeRewards(rewardKills, rng, { ...riftRewardOptions(tier, timed), lootMult: this.settings.get('lootRate') }));
+      const rewards = this.applyElixirRewards(p, computeRewards(rewardKills, rng, { ...riftRewardOptions(tier, timed), lootMult: this.settings.get('lootRate'), zoneId: s.solo.zoneId }));
       if (firstClear) {
         if (!timed && RIFT.untimedRewardMult > 0) { rewards.xp = Math.round(rewards.xp / RIFT.untimedRewardMult); rewards.gold = Math.round(rewards.gold / RIFT.untimedRewardMult); }
         r.cleared = [...(r.cleared || []), tier].sort((a, c) => a - c);
@@ -637,7 +640,7 @@ export class Game {
     return {
       xp: rewards.xp, gold: rewards.gold,
       items: rewards.items.map(i => ({ name: i.name, rarity: i.rarity, baseId: i.baseId })),
-      sold: res.sold, levelUps: res.levelUps,
+      sold: res.sold, levelUps: res.levelUps, materials: rewards.materials || {},
     };
   }
 
@@ -694,6 +697,7 @@ export class Game {
     const startLevels = Object.fromEntries(chars.map(c => [c.id, c.level]));
     let simTime = 0, fights = 0, wins = 0, xp = 0, gold = 0, kills = 0, itemsKept = 0, itemsSold = 0;
     const found = [];
+    const mats = {}; // zone materials found
     let lastKills = null; // kills of the last simulated fight (for per-character XP adjustments)
     while (simTime < seconds && fights < CONFIG.offline.maxSimulatedFights) {
       const h = L.hero(p);
@@ -706,7 +710,8 @@ export class Game {
       L.recordBestiary(p, { kills: b.kills });
       if (b.state !== 'victory') { Q.onBattle(p, { won: false, kills: b.kills }); this.balance.recordBattle(p, b, { activity: 'offline', place: zone.id }); continue; }
       wins++;
-      const r = this.applyElixirRewards(p, computeRewards(b.kills, rng, { rewardMult: CONFIG.offline.efficiency, lootMult: this.settings.get('lootRate') }), at);
+      const r = this.applyElixirRewards(p, computeRewards(b.kills, rng, { rewardMult: CONFIG.offline.efficiency, lootMult: this.settings.get('lootRate'), zoneId: zone.id }), at);
+      for (const [k, v] of Object.entries(r.materials || {})) mats[k] = (mats[k] || 0) + v;
       r.kills = b.kills.length;
       xp += r.xp; gold += r.gold; kills += r.kills;
       Q.onBattle(p, { won: true, kills: b.kills, gold: r.gold });
@@ -718,7 +723,9 @@ export class Game {
     // Extrapolate the remaining time from the simulated average (only if the cap was hit)
     if (simTime < seconds && simTime > 0 && wins > 0) {
       const factor = (seconds - simTime) / simTime;
-      const ex = { xp: Math.round(xp * factor), gold: Math.round(gold * factor), items: [], kills: Math.round(kills * factor), killList: lastKills };
+      const ex = { xp: Math.round(xp * factor), gold: Math.round(gold * factor), items: [], kills: Math.round(kills * factor), killList: lastKills,
+        materials: Object.fromEntries(Object.entries(mats).map(([k, v]) => [k, Math.floor(v * factor)]).filter(([, v]) => v > 0)) };
+      for (const [k, v] of Object.entries(ex.materials)) mats[k] += v;
       const extraItems = Math.min(20, Math.round((itemsKept + itemsSold) * factor));
       const h = L.hero(p);
       for (let i = 0; i < extraItems; i++) ex.items.push(generateItem(rng, zoneLevel(zone, h.level), {}));
@@ -728,7 +735,7 @@ export class Game {
     p.stats.fights += fights;
     const achievements = L.checkAchievements(p).map(a => a.name);
     return {
-      seconds: Math.round(seconds), zone: zone.name, fights, wins, kills, xp, gold, itemsKept, itemsSold, found: found.slice(0, 10), achievements,
+      seconds: Math.round(seconds), zone: zone.name, fights, wins, kills, xp, gold, itemsKept, itemsSold, found: found.slice(0, 10), achievements, materials: mats,
       levels: chars.filter(c => c.level > startLevels[c.id]).map(c => ({ name: c.name, from: startLevels[c.id], to: c.level })),
     };
   }

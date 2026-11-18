@@ -1,0 +1,29 @@
+{
+  "name": "Dread Wraith",
+  "tags": [
+    "undead",
+    "caster",
+    "minion"
+  ],
+  "stats": {
+    "hp": 150,
+    "physPower": 7,
+    "magPower": 21,
+    "defense": 6,
+    "critChance": 0.08,
+    "attackSpeed": 1.0
+  },
+  "abilities": [
+    "e_curse",
+    "e_chill"
+  ],
+  "xp": 33,
+  "gold": [
+    8,
+    16
+  ],
+  "loot": {
+    "chance": 0.15
+  },
+  "order": 193
+}

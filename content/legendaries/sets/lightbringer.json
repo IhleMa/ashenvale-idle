@@ -1,6 +1,6 @@
 {
   "name": "Vestments of the Lightbringer",
-  "minLevel": 12,
+  "minLevel": 25,
   "pieces": {
     "cloth_hat": "Lightbringer Halo",
     "robe": "Lightbringer Vestment",
@@ -8,7 +8,12 @@
     "cloth_boots": "Lightbringer Sandals"
   },
   "bonuses": {
-    "2": { "description": "+10% healing done", "stats": { "healingPct": 0.1 } },
+    "2": {
+      "description": "+10% healing done",
+      "stats": {
+        "healingPct": 0.1
+      }
+    },
     "4": {
       "description": "Your heals have a 25% chance to also heal the most injured ally for 60% Healing Power.",
       "procs": [
@@ -18,10 +23,17 @@
           "chance": 0.25,
           "icd": 1,
           "target": "lowestAlly",
-          "effect": { "kind": "heal", "stat": "healPower", "power": 0.6 }
+          "effect": {
+            "kind": "heal",
+            "stat": "healPower",
+            "power": 0.6
+          }
         }
       ]
     }
   },
-  "order": 40
+  "order": 40,
+  "zones": [
+    "sunken_temple"
+  ]
 }

@@ -3,15 +3,27 @@
   "kind": "craft",
   "profession": "blacksmithing",
   "type": "metal",
-  "maxLevel": 5,
+  "maxLevel": 10,
   "start": 0,
   "description": "Forge weapons, plate armor and shields, and reforge old metal gear to a higher item level.",
-  "cost": { "gold": 250, "metal_scrap": 15, "ore": 8 },
+  "cost": {
+    "gold": 250,
+    "metal_scrap": 15,
+    "ore": 8
+  },
   "effects": [
     "Craft up to item level {craftLevelCap}",
     "Best quality: {bestQuality} ({bestQualityRarity}+)",
-    { "minLevel": 5, "text": "Greatly increased mythic chance" },
-    { "maxLevel": 4, "text": "Reforge old gear to a higher level" }
+    {
+      "minLevel": 5,
+      "text": "Greatly increased mythic chance"
+    },
+    "Reforge gear to a higher level (up to your hero's level)",
+    {
+      "minLevel": 6,
+      "text": "Higher rarity chances with every level above 5"
+    }
   ],
-  "order": 50
+  "order": 50,
+  "unlockLevel": 5
 }

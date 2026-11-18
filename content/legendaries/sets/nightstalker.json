@@ -1,6 +1,6 @@
 {
   "name": "Nightstalker Garb",
-  "minLevel": 12,
+  "minLevel": 40,
   "pieces": {
     "leather_hood": "Nightstalker Mask",
     "leather_chest": "Nightstalker Tunic",
@@ -8,7 +8,12 @@
     "leather_boots": "Nightstalker Treads"
   },
   "bonuses": {
-    "2": { "description": "+5% Critical Chance", "stats": { "critChance": 0.05 } },
+    "2": {
+      "description": "+5% Critical Chance",
+      "stats": {
+        "critChance": 0.05
+      }
+    },
     "4": {
       "description": "Critical hits make the target bleed for 6s.",
       "procs": [
@@ -18,10 +23,19 @@
           "chance": 1,
           "icd": 1,
           "target": "target",
-          "effect": { "kind": "status", "status": "bleed", "duration": 6, "stat": "physPower", "power": 0.2 }
+          "effect": {
+            "kind": "status",
+            "status": "bleed",
+            "duration": 6,
+            "stat": "physPower",
+            "power": 0.2
+          }
         }
       ]
     }
   },
-  "order": 30
+  "order": 30,
+  "zones": [
+    "crimson_keep"
+  ]
 }

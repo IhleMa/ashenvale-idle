@@ -1,0 +1,17 @@
+{
+  "name": "Sunken Temple",
+  "levelRange": [
+    25,
+    31
+  ],
+  "order": 6,
+  "description": "A temple swallowed by the sea, still tended by drowned acolytes and their prophet.",
+  "enemies": [
+    "drowned_acolyte",
+    "naga_warrior",
+    "tide_caller"
+  ],
+  "boss": "the_drowned_prophet",
+  "unlock": "sunscorch_dunes",
+  "material": "tide_pearl"
+}

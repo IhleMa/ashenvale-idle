@@ -1,0 +1,28 @@
+{
+  "name": "Thunder Giant",
+  "tags": [
+    "giant",
+    "minion"
+  ],
+  "stats": {
+    "hp": 250,
+    "physPower": 19,
+    "magPower": 6,
+    "defense": 10,
+    "critChance": 0.05,
+    "attackSpeed": 0.8
+  },
+  "abilities": [
+    "e_slam",
+    "e_cleave"
+  ],
+  "xp": 30,
+  "gold": [
+    7,
+    14
+  ],
+  "loot": {
+    "chance": 0.15
+  },
+  "order": 183
+}

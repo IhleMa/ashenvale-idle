@@ -1,0 +1,35 @@
+{
+  "name": "Sandstrider Wraps",
+  "baseId": "leather_boots",
+  "minLevel": 20,
+  "zones": [
+    "sunscorch_dunes"
+  ],
+  "flavor": "Light enough to run across burning sand.",
+  "stats": {
+    "dex": [
+      3,
+      0.7
+    ],
+    "attackSpeed": [
+      0.02,
+      0.0005
+    ]
+  },
+  "procs": [
+    {
+      "name": "Sandstrider Wraps",
+      "trigger": "struck",
+      "chance": 0.1,
+      "icd": 12,
+      "target": "self",
+      "effect": {
+        "kind": "status",
+        "status": "evasion",
+        "duration": 3
+      }
+    }
+  ],
+  "description": "When struck, 10% chance to gain Evasion for 3s (12s cooldown).",
+  "order": 45
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Bog Iron",
+  "glyph": "🪨",
+  "color": "#7a8a5a",
+  "group": "zone",
+  "zone": "mirefen_marsh",
+  "description": "Rust-red iron dredged from the Mirefen Marsh. Needed for town upgrades and Superior/Masterwork crafting.",
+  "order": 202
+}

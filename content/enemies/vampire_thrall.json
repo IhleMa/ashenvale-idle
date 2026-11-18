@@ -1,0 +1,28 @@
+{
+  "name": "Vampire Thrall",
+  "tags": [
+    "undead",
+    "minion"
+  ],
+  "stats": {
+    "hp": 160,
+    "physPower": 18,
+    "magPower": 6,
+    "defense": 7,
+    "critChance": 0.1,
+    "attackSpeed": 1.1
+  },
+  "abilities": [
+    "e_bite",
+    "e_dark_mend"
+  ],
+  "xp": 30,
+  "gold": [
+    7,
+    14
+  ],
+  "loot": {
+    "chance": 0.15
+  },
+  "order": 185
+}

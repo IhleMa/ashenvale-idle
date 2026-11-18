@@ -1,10 +1,17 @@
 {
   "name": "Salvage Yard",
   "kind": "core",
-  "maxLevel": 5,
+  "maxLevel": 10,
   "start": 1,
   "description": "Break down unwanted equipment into crafting materials. Uncommon and better items also yield arcane materials.",
-  "cost": { "gold": 150, "metal_scrap": 6, "leather_scrap": 4 },
-  "effects": ["+{salvageBonusPct}% salvage yield", "Enchanter worker: +25% arcane materials"],
+  "cost": {
+    "gold": 150,
+    "metal_scrap": 6,
+    "leather_scrap": 4
+  },
+  "effects": [
+    "+{salvageBonusPct}% salvage yield",
+    "Enchanter worker: +25% arcane materials"
+  ],
   "order": 30
 }

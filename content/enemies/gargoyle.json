@@ -1,0 +1,28 @@
+{
+  "name": "Gargoyle",
+  "tags": [
+    "elemental",
+    "minion"
+  ],
+  "stats": {
+    "hp": 230,
+    "physPower": 17,
+    "magPower": 5,
+    "defense": 14,
+    "critChance": 0.05,
+    "attackSpeed": 0.85
+  },
+  "abilities": [
+    "e_slam",
+    "e_regenerate"
+  ],
+  "xp": 31,
+  "gold": [
+    7,
+    15
+  ],
+  "loot": {
+    "chance": 0.15
+  },
+  "order": 187
+}

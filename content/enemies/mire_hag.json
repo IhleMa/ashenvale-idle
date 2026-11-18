@@ -1,0 +1,29 @@
+{
+  "name": "Mire Hag",
+  "tags": [
+    "humanoid",
+    "caster",
+    "minion"
+  ],
+  "stats": {
+    "hp": 105,
+    "physPower": 5,
+    "magPower": 16,
+    "defense": 3,
+    "critChance": 0.07,
+    "attackSpeed": 1.0
+  },
+  "abilities": [
+    "e_curse",
+    "e_dark_mend"
+  ],
+  "xp": 21,
+  "gold": [
+    4,
+    9
+  ],
+  "loot": {
+    "chance": 0.15
+  },
+  "order": 102
+}

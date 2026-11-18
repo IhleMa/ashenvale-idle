@@ -1,0 +1,9 @@
+{
+  "name": "Dragonbone",
+  "glyph": "🦴",
+  "color": "#e8dcc0",
+  "group": "zone",
+  "zone": "dragonbone_wastes",
+  "description": "Bone from the ancient dragons of the Dragonbone Wastes. Needed for town upgrades and Superior/Masterwork crafting.",
+  "order": 210
+}

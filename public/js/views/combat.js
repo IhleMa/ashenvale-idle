@@ -1,4 +1,6 @@
 // Combat view: live, server-driven battle display (presentation only — all math happens on the server).
+import { UNIQUES, SETS } from '/shared/data/legendaries.js';
+import { MATERIALS } from '/shared/data/town.js';
 import { classLabel } from '/shared/data/subclasses.js';
 import { bus, state } from '../state.js';
 import { act } from '../net.js';
@@ -89,7 +91,7 @@ bus.on('msg:battle_end', m => {
       meterDirty = true;
     }
     if (s.result === 'victory') {
-      const items = s.items?.length ? ` · ${s.items.length} item${s.items.length > 1 ? 's' : ''}` : '';
+      const items = (s.items?.length ? ` · ${s.items.length} item${s.items.length > 1 ? 's' : ''}` : '') + Object.entries(s.materials || {}).map(([k, v]) => ` · <b>+${v} ${esc(MATERIALS[k]?.name || k)}</b>`).join('');
       addLog(b, { cat: 'event', t: b.time, html: `<span class="log-win">Victory! +${fmt(s.xp)} XP, +${fmt(s.gold)} gold${items}</span>` });
     } else addLog(b, { cat: 'event', t: b.time, html: '<span class="log-loss">Defeat… your party regroups.</span>' });
   }
@@ -256,6 +258,7 @@ function headerHtml(k, b) {
   return `<div class="combat-title">
       <h2>${esc(b?.meta?.title || zone.name)}</h2>
       <span class="muted">${esc(zone.description)}</span>
+      ${zoneDropsHtml(zone)}
     </div>
     <div class="combat-controls">
       <select data-zone aria-label="Zone">${zones.map(z => `<option value="${z.id}" ${z.id === p.zone ? 'selected' : ''} ${p.unlockedZones.includes(z.id) ? '' : 'disabled'}>${esc(z.name)} (Lv ${z.levelRange[0]}–${z.levelRange[1]})${p.unlockedZones.includes(z.id) ? '' : ' 🔒'}</option>`).join('')}</select>
@@ -393,7 +396,7 @@ function showBanner(s) {
   el.className = `result-banner ${s.result}`;
   const riftLine = s.kind === 'rift' ? `<span>Rift tier ${s.tier}: ${Math.floor(s.time / 60)}:${String(s.time % 60).padStart(2, '0')} — ${s.timed ? '⏱ in time!' : s.result === 'victory' ? 'over time' : 'defeated'}${s.crystals ? ` · +${s.crystals} 💠` : ''}</span>` : '';
   el.innerHTML = s.result === 'victory'
-    ? `<b>${s.kind === 'rift' ? (s.timed ? 'Rift timed!' : 'Rift cleared') : 'Victory'}</b>${riftLine}<span>${s.repeat && !s.xp ? 'Tier already cleared — no XP or gold' : `+${fmt(s.xp)} XP · +${fmt(s.gold)} gold${s.firstClear ? ' (first clear)' : ''}`}${s.items?.length ? ` · ${s.items.length} loot` : ''}</span>`
+    ? `<b>${s.kind === 'rift' ? (s.timed ? 'Rift timed!' : 'Rift cleared') : 'Victory'}</b>${riftLine}<span>${s.repeat && !s.xp ? 'Tier already cleared — no XP or gold' : `+${fmt(s.xp)} XP · +${fmt(s.gold)} gold${s.firstClear ? ' (first clear)' : ''}`}${s.items?.length ? ` · ${s.items.length} loot` : ''}${Object.entries(s.materials || {}).map(([k, v]) => ` · +${v} ${esc(MATERIALS[k]?.glyph || '')} ${esc(MATERIALS[k]?.name || k)}`).join('')}</span>`
     : `<b>Defeat</b>${riftLine}<span>Tip: click an enemy to see its abilities in the Bestiary, then adjust behaviour, gear or party.</span>`;
   setTimeout(() => { if (el.isConnected) el.hidden = true; }, s.kind === 'rift' ? 5000 : 2200);
 }
@@ -477,3 +480,17 @@ export const combatView = {
 };
 
 export { rarityById };
+
+// What only drops in this zone: its material and its exclusive uniques/sets
+function zoneDropsHtml(zone) {
+  const mat = zone.material && MATERIALS[zone.material];
+  const uniq = Object.values(UNIQUES).filter(u => u.zones?.includes(zone.id));
+  const sets = Object.values(SETS).filter(x => x.zones?.includes(zone.id));
+  if (!mat && !uniq.length && !sets.length) return '';
+  const have = mat ? Math.floor(state.player.town?.materials?.[zone.material] || 0) : 0;
+  return `<div class="zone-drops small">Only here:
+    ${mat ? `<span class="zone-drop mat" ${tipAttr(`<b>${esc(mat.name)}</b><br>${esc(mat.description)}<br><span class='muted'>You have ${have}</span>`)}>${esc(mat.glyph || '')} ${esc(mat.name)} <span class="muted">(${have})</span></span>` : ''}
+    ${uniq.map(u => `<span class="zone-drop unique" ${tipAttr(`<b class='rarity-text rarity-legendary'>${esc(u.name)}</b> <span class='muted'>unique · from level ${u.minLevel}</span><br>${esc(u.description || '')}`)}>${esc(u.name)}</span>`).join('')}
+    ${sets.map(x => `<span class="zone-drop set" ${tipAttr(`<b class='set-name'>${esc(x.name)}</b> <span class='muted'>set · from level ${x.minLevel}</span><br>${Object.entries(x.bonuses).map(([n, bo]) => `${n} pieces: ${esc(bo.description)}`).join('<br>')}`)}>${esc(x.name)}</span>`).join('')}
+  </div>`;
+}

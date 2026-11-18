@@ -1,6 +1,6 @@
 {
   "name": "Juggernaut's Bulwark",
-  "minLevel": 10,
+  "minLevel": 5,
   "pieces": {
     "plate_helm": "Juggernaut Helm",
     "plate_chest": "Juggernaut Breastplate",
@@ -8,7 +8,12 @@
     "plate_boots": "Juggernaut Sabatons"
   },
   "bonuses": {
-    "2": { "description": "+15% Defense", "stats": { "defensePct": 0.15 } },
+    "2": {
+      "description": "+15% Defense",
+      "stats": {
+        "defensePct": 0.15
+      }
+    },
     "4": {
       "description": "Using Taunt also grants Shield Wall for 4s.",
       "procs": [
@@ -16,12 +21,21 @@
           "name": "Juggernaut",
           "trigger": "cast",
           "chance": 1,
-          "filter": { "ability": "taunt" },
+          "filter": {
+            "ability": "taunt"
+          },
           "target": "self",
-          "effect": { "kind": "status", "status": "shield_wall", "duration": 4 }
+          "effect": {
+            "kind": "status",
+            "status": "shield_wall",
+            "duration": 4
+          }
         }
       ]
     }
   },
-  "order": 10
+  "order": 10,
+  "zones": [
+    "ashen_barrows"
+  ]
 }

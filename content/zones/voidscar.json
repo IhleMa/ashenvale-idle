@@ -1,9 +1,17 @@
 {
   "name": "The Voidscar",
-  "levelRange": [33, 60],
-  "order": 5,
+  "levelRange": [
+    55,
+    60
+  ],
+  "order": 12,
   "description": "A wound in the world where reality frays.",
-  "enemies": ["void_stalker", "abyssal_priest", "void_horror"],
+  "enemies": [
+    "void_stalker",
+    "abyssal_priest",
+    "void_horror"
+  ],
   "boss": "hollow_sovereign",
-  "unlock": "frostpeak"
+  "unlock": "dragonbone_wastes",
+  "material": "void_ichor"
 }

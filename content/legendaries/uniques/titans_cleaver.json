@@ -1,10 +1,24 @@
 {
   "name": "Titan's Cleaver",
   "baseId": "axe",
-  "minLevel": 22,
+  "minLevel": 50,
   "flavor": "The first blow decides everything.",
-  "stats": { "str": [3, 0.8], "critChance": [0.01, 0.0003] },
-  "passive": { "damageVsHighHpPct": 0.3 },
+  "stats": {
+    "str": [
+      3,
+      0.8
+    ],
+    "critChance": [
+      0.01,
+      0.0003
+    ]
+  },
+  "passive": {
+    "damageVsHighHpPct": 0.3
+  },
   "description": "You deal 30% more damage to enemies above 80% health.",
-  "order": 120
+  "order": 120,
+  "zones": [
+    "dragonbone_wastes"
+  ]
 }

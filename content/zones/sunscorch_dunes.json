@@ -1,0 +1,17 @@
+{
+  "name": "Sunscorch Dunes",
+  "levelRange": [
+    20,
+    26
+  ],
+  "order": 5,
+  "description": "Endless burning sands where raiders and scorpions serve the Sand King.",
+  "enemies": [
+    "sand_scorpion",
+    "dune_raider",
+    "sun_priest"
+  ],
+  "boss": "the_sand_king",
+  "unlock": "emberfall_caverns",
+  "material": "sunstone"
+}

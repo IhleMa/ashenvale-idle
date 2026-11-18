@@ -1,0 +1,9 @@
+{
+  "name": "Sylvan Sap",
+  "glyph": "🌿",
+  "color": "#7bc96f",
+  "group": "zone",
+  "zone": "whispering_woods",
+  "description": "Sticky sap from the ancient trees of the Whispering Woods. Needed for town upgrades and Superior/Masterwork crafting.",
+  "order": 200
+}

@@ -1,0 +1,17 @@
+{
+  "name": "Mirefen Marsh",
+  "levelRange": [
+    10,
+    16
+  ],
+  "order": 3,
+  "description": "A drowned fen of bog lurkers, hags and trolls, ruled by the Mother of the Mire.",
+  "enemies": [
+    "bog_lurker",
+    "mire_hag",
+    "swamp_troll"
+  ],
+  "boss": "mother_of_the_mire",
+  "unlock": "ashen_barrows",
+  "material": "bog_iron"
+}

@@ -291,6 +291,18 @@ Slots: `weapon`, `offhand`, `head`, `chest`, `hands`, `feet`, `ring`, `amulet`
 | `magic_essence` | Magic Essence | Disenchanted from Rare or better items. |
 | `prismatic_shard` | Prismatic Shard | Disenchanted from Epic or better items. |
 | `void_crystal` | Void Crystal | Disenchanted from Legendary or Mythic items. |
+| `sylvan_sap` | Sylvan Sap | Sticky sap from the ancient trees of the Whispering Woods. Needed for town upgrades and Superior/Masterwork crafting. |
+| `grave_dust` | Grave Dust | Fine ash from the tombs of the Ashen Barrows. Needed for town upgrades and Superior/Masterwork crafting. |
+| `bog_iron` | Bog Iron | Rust-red iron dredged from the Mirefen Marsh. Needed for town upgrades and Superior/Masterwork crafting. |
+| `ember_core` | Ember Core | A coal that never goes out, from the Emberfall Caverns. Needed for town upgrades and Superior/Masterwork crafting. |
+| `sunstone` | Sunstone | Glassy stone baked by the sun of the Sunscorch Dunes. Needed for town upgrades and Superior/Masterwork crafting. |
+| `tide_pearl` | Tide Pearl | A pearl from the drowned halls of the Sunken Temple. Needed for town upgrades and Superior/Masterwork crafting. |
+| `frost_shard` | Frost Shard | Ice that does not melt, chipped from Frostpeak. Needed for town upgrades and Superior/Masterwork crafting. |
+| `storm_feather` | Storm Feather | A harpy feather still humming with lightning from Stormspire Heights. Needed for town upgrades and Superior/Masterwork crafting. |
+| `blood_ruby` | Blood Ruby | A gem the colour of the Crimson Keep's wine. Needed for town upgrades and Superior/Masterwork crafting. |
+| `shadow_silk` | Shadow Silk | Silk spun from darkness in the Shadowfell. Needed for town upgrades and Superior/Masterwork crafting. |
+| `dragonbone` | Dragonbone | Bone from the ancient dragons of the Dragonbone Wastes. Needed for town upgrades and Superior/Masterwork crafting. |
+| `void_ichor` | Void Ichor | The black blood of the Voidscar. Needed for town upgrades and Superior/Masterwork crafting. |
 | `shard_str` | Strength Shard | Salvaged from items with Strength. The Jeweler cuts these into gems. |
 | `shard_int` | Intelligence Shard | Salvaged from items with Intelligence. The Jeweler cuts these into gems. |
 | `shard_dex` | Dexterity Shard | Salvaged from items with Dexterity. The Jeweler cuts these into gems. |
@@ -326,15 +338,43 @@ Building effect template values: `{level}`, `{concurrentBuilds}`, `{innRoster}`,
 | [`ghoul`](content/enemies/ghoul.json) | Ravenous Ghoul | undead, minion | e_bite, e_frenzy |
 | [`barrow_wight`](content/enemies/barrow_wight.json) | Barrow Wight | undead, caster, elite | e_curse, e_chill, e_dark_mend |
 | [`barrow_king`](content/enemies/barrow_king.json) | The Barrow King (boss) | undead, boss | b_war_stomp, b_crushing_blow, e_curse |
+| [`bog_lurker`](content/enemies/bog_lurker.json) | Bog Lurker | beast, minion | e_bite, e_venom |
+| [`mire_hag`](content/enemies/mire_hag.json) | Mire Hag | humanoid, caster, minion | e_curse, e_dark_mend |
+| [`swamp_troll`](content/enemies/swamp_troll.json) | Swamp Troll | giant, minion | e_regenerate, e_slam |
+| [`mother_of_the_mire`](content/enemies/mother_of_the_mire.json) | Mother of the Mire (boss) | beast, boss | b_crushing_blow, e_venom, e_curse |
 | [`fire_imp`](content/enemies/fire_imp.json) | Fire Imp | demon, caster, minion | e_firebolt |
 | [`magma_golem`](content/enemies/magma_golem.json) | Magma Golem | elemental, minion | e_slam |
 | [`ash_cultist`](content/enemies/ash_cultist.json) | Ash Cultist | humanoid, caster, minion | e_dark_mend, e_curse |
 | [`cinder_wyrm`](content/enemies/cinder_wyrm.json) | Cinder Wyrm (boss) | dragon, boss | b_inferno, b_crushing_blow |
+| [`sand_scorpion`](content/enemies/sand_scorpion.json) | Sand Scorpion | beast, minion | e_venom, e_stab |
+| [`dune_raider`](content/enemies/dune_raider.json) | Dune Raider | humanoid, minion | e_stab, e_frenzy |
+| [`sun_priest`](content/enemies/sun_priest.json) | Sun Priest | humanoid, caster, minion | e_firebolt, e_dark_mend |
+| [`the_sand_king`](content/enemies/the_sand_king.json) | The Sand King (boss) | humanoid, boss | b_crushing_blow, b_war_stomp, e_frenzy |
+| [`drowned_acolyte`](content/enemies/drowned_acolyte.json) | Drowned Acolyte | undead, caster, minion | e_chill, e_curse |
+| [`naga_warrior`](content/enemies/naga_warrior.json) | Naga Warrior | humanoid, minion | e_cleave, e_shield_bash |
+| [`tide_caller`](content/enemies/tide_caller.json) | Tide Caller | elemental, caster, minion | e_chill, e_void_bolt |
+| [`the_drowned_prophet`](content/enemies/the_drowned_prophet.json) | The Drowned Prophet (boss) | undead, boss | b_blizzard, e_curse, e_dark_mend |
 | [`ice_wraith`](content/enemies/ice_wraith.json) | Ice Wraith | undead, caster, minion | e_chill |
 | [`frost_troll`](content/enemies/frost_troll.json) | Frost Troll | giant, minion | e_regenerate, e_cleave |
 | [`yeti`](content/enemies/yeti.json) | Yeti | beast, minion | e_bite, e_frenzy |
 | [`frost_matriarch`](content/enemies/frost_matriarch.json) | The Frost Matriarch (boss) | giant, boss | b_blizzard, b_war_stomp, e_regenerate |
+| [`storm_harpy`](content/enemies/storm_harpy.json) | Storm Harpy | beast, minion | e_bite, e_frenzy |
+| [`storm_elemental`](content/enemies/storm_elemental.json) | Storm Elemental | elemental, caster, minion | e_void_bolt, e_chill |
+| [`thunder_giant`](content/enemies/thunder_giant.json) | Thunder Giant | giant, minion | e_slam, e_cleave |
+| [`the_storm_tyrant`](content/enemies/the_storm_tyrant.json) | The Storm Tyrant (boss) | giant, boss | b_war_stomp, b_blizzard, b_crushing_blow |
+| [`vampire_thrall`](content/enemies/vampire_thrall.json) | Vampire Thrall | undead, minion | e_bite, e_dark_mend |
+| [`blood_knight`](content/enemies/blood_knight.json) | Blood Knight | humanoid, minion | e_shield_bash, e_cleave |
+| [`gargoyle`](content/enemies/gargoyle.json) | Gargoyle | elemental, minion | e_slam, e_regenerate |
+| [`countess_vael`](content/enemies/countess_vael.json) | Countess Vael (boss) | undead, boss | b_crushing_blow, e_curse, e_dark_mend, e_frenzy |
 | [`void_stalker`](content/enemies/void_stalker.json) | Void Stalker | void, minion | e_stab, e_weaken |
+| [`shade`](content/enemies/shade.json) | Shade | undead, caster, minion | e_void_bolt, e_weaken |
+| [`nightmare_hound`](content/enemies/nightmare_hound.json) | Nightmare Hound | beast, minion | e_bite, e_frenzy |
+| [`dread_wraith`](content/enemies/dread_wraith.json) | Dread Wraith | undead, caster, minion | e_curse, e_chill |
+| [`the_dreamless`](content/enemies/the_dreamless.json) | The Dreamless (boss) | void, boss | b_void_rift, e_weaken, e_curse |
+| [`bone_drake`](content/enemies/bone_drake.json) | Bone Drake | dragon, undead, minion | e_bite, e_firebolt |
+| [`wyrm_cultist`](content/enemies/wyrm_cultist.json) | Wyrm Cultist | humanoid, caster, minion | e_firebolt, e_dark_mend |
+| [`ash_drake`](content/enemies/ash_drake.json) | Ash Drake | dragon, minion | e_bite, e_frenzy |
+| [`the_bone_wyrm`](content/enemies/the_bone_wyrm.json) | The Bone Wyrm (boss) | dragon, undead, boss | b_inferno, b_crushing_blow, e_curse |
 | [`abyssal_priest`](content/enemies/abyssal_priest.json) | Abyssal Priest | void, caster, minion | e_dark_mend, e_void_bolt, e_curse |
 | [`void_horror`](content/enemies/void_horror.json) | Void Horror | void, elite | e_cleave, e_void_bolt |
 | [`hollow_sovereign`](content/enemies/hollow_sovereign.json) | The Hollow Sovereign (boss) | void, boss | b_void_rift, b_annihilate, e_weaken |
@@ -346,34 +386,48 @@ Building effect template values: `{level}`, `{concurrentBuilds}`, `{innRoster}`,
 
 | id | name | levels | enemies | boss | unlocked by |
 | --- | --- | --- | --- | --- | --- |
-| [`whispering_woods`](content/zones/whispering_woods.json) | Whispering Woods | 1–7 | wolf, goblin, forest_spider, goblin_shaman | goblin_chieftain | start |
-| [`ashen_barrows`](content/zones/ashen_barrows.json) | Ashen Barrows | 6–14 | skeleton_warrior, bone_archer, ghoul, barrow_wight | barrow_king | whispering_woods |
-| [`emberfall_caverns`](content/zones/emberfall_caverns.json) | Emberfall Caverns | 13–23 | fire_imp, magma_golem, ash_cultist | cinder_wyrm | ashen_barrows |
-| [`frostpeak`](content/zones/frostpeak.json) | Frostpeak | 22–34 | ice_wraith, frost_troll, yeti | frost_matriarch | emberfall_caverns |
-| [`voidscar`](content/zones/voidscar.json) | The Voidscar | 33–60 | void_stalker, abyssal_priest, void_horror | hollow_sovereign | frostpeak |
+| [`whispering_woods`](content/zones/whispering_woods.json) | Whispering Woods | 1–6 | wolf, goblin, forest_spider, goblin_shaman | goblin_chieftain | start |
+| [`ashen_barrows`](content/zones/ashen_barrows.json) | Ashen Barrows | 5–11 | skeleton_warrior, bone_archer, ghoul, barrow_wight | barrow_king | whispering_woods |
+| [`mirefen_marsh`](content/zones/mirefen_marsh.json) | Mirefen Marsh | 10–16 | bog_lurker, mire_hag, swamp_troll | mother_of_the_mire | ashen_barrows |
+| [`emberfall_caverns`](content/zones/emberfall_caverns.json) | Emberfall Caverns | 15–21 | fire_imp, magma_golem, ash_cultist | cinder_wyrm | mirefen_marsh |
+| [`sunscorch_dunes`](content/zones/sunscorch_dunes.json) | Sunscorch Dunes | 20–26 | sand_scorpion, dune_raider, sun_priest | the_sand_king | emberfall_caverns |
+| [`sunken_temple`](content/zones/sunken_temple.json) | Sunken Temple | 25–31 | drowned_acolyte, naga_warrior, tide_caller | the_drowned_prophet | sunscorch_dunes |
+| [`frostpeak`](content/zones/frostpeak.json) | Frostpeak | 30–36 | ice_wraith, frost_troll, yeti | frost_matriarch | sunken_temple |
+| [`stormspire_heights`](content/zones/stormspire_heights.json) | Stormspire Heights | 35–41 | storm_harpy, storm_elemental, thunder_giant | the_storm_tyrant | frostpeak |
+| [`crimson_keep`](content/zones/crimson_keep.json) | Crimson Keep | 40–46 | vampire_thrall, blood_knight, gargoyle | countess_vael | stormspire_heights |
+| [`shadowfell`](content/zones/shadowfell.json) | Shadowfell | 45–51 | shade, nightmare_hound, dread_wraith | the_dreamless | crimson_keep |
+| [`dragonbone_wastes`](content/zones/dragonbone_wastes.json) | Dragonbone Wastes | 50–56 | bone_drake, wyrm_cultist, ash_drake | the_bone_wyrm | shadowfell |
+| [`voidscar`](content/zones/voidscar.json) | The Voidscar | 55–60 | void_stalker, abyssal_priest, void_horror | hollow_sovereign | dragonbone_wastes |
 
 | co-op id | name | min level | waves |
 | --- | --- | --- | --- |
-| [`ashen_crypt`](content/coop/ashen_crypt.json) | Ashenvale Crypt | 6 | skeleton_warrior + bone_archer + ghoul → barrow_wight + skeleton_warrior + skeleton_warrior → crypt_lord + bone_archer |
-| [`dreadmaw_hunt`](content/coop/dreadmaw_hunt.json) | Hunt: Dreadmaw | 10 | dreadmaw + wolf + wolf |
-| [`void_incursion`](content/coop/void_incursion.json) | Void Incursion | 25 | void_stalker + void_stalker + abyssal_priest → void_horror + abyssal_priest → void_horror + void_stalker + void_stalker → hollow_sovereign |
-| [`ashen_colossus`](content/coop/ashen_colossus.json) | World Boss: The Ashen Colossus | 15 | ashen_colossus |
+| [`ashen_crypt`](content/coop/ashen_crypt.json) | Ashenvale Crypt | 12 | skeleton_warrior + bone_archer + ghoul → barrow_wight + skeleton_warrior + skeleton_warrior → crypt_lord + bone_archer |
+| [`dreadmaw_hunt`](content/coop/dreadmaw_hunt.json) | Hunt: Dreadmaw | 20 | dreadmaw + wolf + wolf |
+| [`void_incursion`](content/coop/void_incursion.json) | Void Incursion | 45 | void_stalker + void_stalker + abyssal_priest → void_horror + abyssal_priest → void_horror + void_stalker + void_stalker → hollow_sovereign |
+| [`ashen_colossus`](content/coop/ashen_colossus.json) | World Boss: The Ashen Colossus | 30 | ashen_colossus |
 
 ## Uniques and sets
 
 | unique id | name | base |
 | --- | --- | --- |
+| [`alpha_pelt`](content/legendaries/uniques/alpha_pelt.json) | Pelt of the Alpha | leather_chest |
 | [`emberheart`](content/legendaries/uniques/emberheart.json) | Emberheart | staff |
+| [`mirecaller`](content/legendaries/uniques/mirecaller.json) | Mirecaller | wand |
 | [`dawnbringer`](content/legendaries/uniques/dawnbringer.json) | Dawnbringer | mace |
 | [`widowmaker`](content/legendaries/uniques/widowmaker.json) | Widowmaker | dagger |
 | [`bulwark_of_ages`](content/legendaries/uniques/bulwark_of_ages.json) | Bulwark of Ages | shield |
+| [`sandstrider_wraps`](content/legendaries/uniques/sandstrider_wraps.json) | Sandstrider Wraps | leather_boots |
 | [`thornhide`](content/legendaries/uniques/thornhide.json) | Thornhide Carapace | plate_chest |
 | [`stormstring`](content/legendaries/uniques/stormstring.json) | Stormstring | bow |
 | [`last_breath`](content/legendaries/uniques/last_breath.json) | Band of the Last Breath | ring |
+| [`tempest_crown`](content/legendaries/uniques/tempest_crown.json) | Tempest Crown | cloth_hat |
 | [`kingslayer`](content/legendaries/uniques/kingslayer.json) | Kingslayer Pendant | amulet |
+| [`bloodthirst`](content/legendaries/uniques/bloodthirst.json) | Bloodthirst | sword |
 | [`quickening_grips`](content/legendaries/uniques/quickening_grips.json) | Grips of Quickening | leather_gloves |
 | [`cowl_of_whispers`](content/legendaries/uniques/cowl_of_whispers.json) | Cowl of Whispers | leather_hood |
+| [`dragonscale_aegis`](content/legendaries/uniques/dragonscale_aegis.json) | Dragonscale Aegis | shield |
 | [`voidwalkers`](content/legendaries/uniques/voidwalkers.json) | Voidwalkers | cloth_boots |
+| [`heart_of_the_void`](content/legendaries/uniques/heart_of_the_void.json) | Heart of the Void | ring |
 | [`titans_cleaver`](content/legendaries/uniques/titans_cleaver.json) | Titan's Cleaver | axe |
 
 | set id | name | pieces |

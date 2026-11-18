@@ -1,9 +1,17 @@
 {
   "name": "Frostpeak",
-  "levelRange": [22, 34],
-  "order": 4,
+  "levelRange": [
+    30,
+    36
+  ],
+  "order": 7,
   "description": "Frozen mountain passes ruled by trolls and the Frost Matriarch.",
-  "enemies": ["ice_wraith", "frost_troll", "yeti"],
+  "enemies": [
+    "ice_wraith",
+    "frost_troll",
+    "yeti"
+  ],
   "boss": "frost_matriarch",
-  "unlock": "emberfall_caverns"
+  "unlock": "sunken_temple",
+  "material": "frost_shard"
 }

@@ -1,0 +1,9 @@
+{
+  "name": "Ember Core",
+  "glyph": "🔥",
+  "color": "#ff7a3a",
+  "group": "zone",
+  "zone": "emberfall_caverns",
+  "description": "A coal that never goes out, from the Emberfall Caverns. Needed for town upgrades and Superior/Masterwork crafting.",
+  "order": 203
+}

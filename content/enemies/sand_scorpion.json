@@ -1,0 +1,28 @@
+{
+  "name": "Sand Scorpion",
+  "tags": [
+    "beast",
+    "minion"
+  ],
+  "stats": {
+    "hp": 150,
+    "physPower": 16,
+    "magPower": 4,
+    "defense": 9,
+    "critChance": 0.1,
+    "attackSpeed": 1.05
+  },
+  "abilities": [
+    "e_venom",
+    "e_stab"
+  ],
+  "xp": 23,
+  "gold": [
+    5,
+    10
+  ],
+  "loot": {
+    "chance": 0.15
+  },
+  "order": 141
+}
