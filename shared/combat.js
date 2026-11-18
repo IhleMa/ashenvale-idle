@@ -41,9 +41,12 @@ export function makeCharacterUnit(ch, { ownerId, ownerName, position, bonuses = 
     actionTimer: 0.3 + position * 0.25,
     danger: 0,
     vsEnemy, // bestiary mastery: { enemyId: damage bonus }
+    stat: newStat(), // per-fight totals for the balance dashboard
     minionBonus: { damagePct: s.minionDamagePct || 0, hpPct: s.minionHpPct || 0, durationPct: s.minionDurationPct || 0, extraMax: s.minionMax || 0 },
   };
 }
+
+const newStat = () => ({ dmg: 0, heal: 0, taken: 0, deaths: 0, casts: {} });
 
 // A player's summoned minion: stats come from its summoner (content/minions/)
 export function makeMinionUnit(minionId, owner, battleTime) {
@@ -75,6 +78,7 @@ export function makeMinionUnit(minionId, owner, battleTime) {
     danger: 0,
     expiresAt: duration > 0 ? battleTime + duration : null,
     duration,
+    stat: owner.stat, // a minion's damage and healing count for its summoner
   };
 }
 
@@ -238,6 +242,7 @@ function act(b, u) {
     if (u.resourceDef) u.resource -= cost;
     u.cooldowns[abilityId] = ab.cooldown;
     emit(b, { type: 'ability', src: u.uid, ability: abilityId, tgts: targets.map(t => t.uid) });
+    if (u.stat && u.kind === 'character') u.stat.casts[abilityId] = (u.stat.casts[abilityId] || 0) + 1;
     for (const t of targets) for (const eff of ab.effects) applyEffect(b, u, t, eff, abilityId);
     fireProcs(b, u, 'cast', { ability: abilityId, area: !!ab.area, target: targets[0] });
     u.actionTimer = gcd;
@@ -448,6 +453,8 @@ function dealDamage(b, src, tgt, raw, { school, ability, bonusCrit = 0, dot = nu
     amount -= absorbed;
   }
   tgt.hp = Math.max(0, tgt.hp - amount);
+  if (src.stat && src.side !== tgt.side) src.stat.dmg += amount;
+  if (tgt.stat && tgt.kind === 'character') tgt.stat.taken += amount + absorbed;
   emit(b, { type: 'damage', src: src.uid, tgt: tgt.uid, amount, absorbed, crit, ability, dot, school, ...(proc ? { proc } : {}) });
 
   if (tgt.threatTable && src.side !== tgt.side) tgt.threatTable[src.uid] = (tgt.threatTable[src.uid] || 0) + (amount + absorbed) * src.threatMult;
@@ -524,6 +531,7 @@ function healUnit(b, src, tgt, raw, ability, hot = null, proc = null) {
   amount = Math.round(amount);
   const effective = Math.min(amount, tgt.maxHp - tgt.hp);
   tgt.hp += effective;
+  if (src.stat) src.stat.heal += effective;
   emit(b, { type: 'heal', src: src.uid, tgt: tgt.uid, amount: effective, overheal: amount - effective, crit, ability, hot, ...(proc ? { proc } : {}) });
   if (ability && !hot && !proc) fireProcs(b, src, 'heal', { target: tgt, ability });
   // healing generates a little threat on all enemies
@@ -538,6 +546,7 @@ function kill(b, src, tgt) {
   tgt.hp = 0;
   tgt.statuses = [];
   emit(b, { type: 'death', src: src.uid, tgt: tgt.uid });
+  if (tgt.stat && tgt.kind === 'character') tgt.stat.deaths++;
   if (tgt.side === 'B') b.kills.push({ enemyId: tgt.defId, level: tgt.level, boss: !!tgt.boss, elite: !!tgt.tags?.includes('elite'), summoned: !!tgt.summoned });
   if (src !== tgt) fireProcs(b, src, 'kill', { target: tgt });
   b.hooks?.kill?.(b, src, tgt, HOOK_API);

@@ -15,6 +15,7 @@ import { Announcements } from './announcements.js';
 import * as TL from './townLogic.js';
 import * as XL from './expeditionLogic.js';
 import * as TU from './tutorialLogic.js';
+import { BalanceStats } from './balance.js';
 import { EXPEDITIONS } from '../shared/data/expeditions.js';
 import { elixirBonuses } from '../shared/town.js';
 import { speedUpCost } from '../shared/premium.js';
@@ -33,6 +34,9 @@ export class Game {
   constructor({ store, assets, settings, admins = null, buildId = 'dev', log = console.log }) {
     this.buildId = buildId;
     this.settings = settings;
+    // live balance statistics (Admin → ⚖ Balance); bots are counted separately
+    this.balance = new BalanceStats(store, { isBot: id => !!this.bots?.bots?.has(id) });
+    L.levelHooks.push((p, ch, level, seconds) => { if (ch.isMain) this.balance.recordLevel(p, ch, level, seconds); });
     this.admins = admins;
     this.startedAt = Date.now();
 
@@ -528,7 +532,7 @@ export class Game {
       Object.assign(summary, this.rewardSummary(rewards, res));
       for (const lu of res.levelUps) this.toast(p.id, `${lu.name} reached level ${lu.level}!`, 'success');
     }
-    this.afterBattle(p, battle, summary.gold || 0);
+    this.afterBattle(p, battle, summary.gold || 0, summary.xp || 0);
     for (const a of L.checkAchievements(p)) this.toast(p.id, `Achievement unlocked: ${a.name} (+${a.reward.gold} gold)`, 'achievement');
     this.sendTo(p.id, { t: 'battle_end', k: 'solo', summary });
     L.maybeAutoRefreshRecruits(p, this.assets.get());
@@ -537,7 +541,8 @@ export class Game {
   }
 
   // bestiary kills + quest progress after any finished battle
-  afterBattle(p, b, gold = 0) {
+  afterBattle(p, b, gold = 0, xp = 0) {
+    try { this.balance.recordBattle(p, b, { gold, xp }); } catch (e) { this.log(`balance stats: ${e.message}`); }
     for (const m of L.recordBestiary(p, { kills: b.kills })) this.toast(p.id, `📖 Bestiary mastery ${'★'.repeat(m.level)} — ${m.name}: you now deal more damage to it.`, 'achievement');
     this.questDone(p, Q.onBattle(p, { won: b.state === 'victory', kills: b.kills, gold }));
   }
@@ -600,7 +605,7 @@ export class Game {
     }
     p.stats.riftBest = r.best || 0;
     r.history = [{ tier, theme: s.solo.zoneId, time: Math.round(b.time), timed, result: b.state, affixes: b.meta.affixes, at: Date.now() }, ...(r.history || [])].slice(0, 12);
-    this.afterBattle(p, b, summary.gold || 0);
+    this.afterBattle(p, b, summary.gold || 0, summary.xp || 0);
     for (const a of L.checkAchievements(p)) this.toast(p.id, `Achievement unlocked: ${a.name} (+${a.reward.gold} gold)`, 'achievement');
     this.sendTo(p.id, { t: 'battle_end', k: 'solo', summary });
     // auto-continue
@@ -688,12 +693,13 @@ export class Game {
       fights++;
       simTime += b.time + (b.state === 'victory' ? CONFIG.combat.restBetweenFights : CONFIG.combat.reviveDelay);
       L.recordBestiary(p, { kills: b.kills });
-      if (b.state !== 'victory') { Q.onBattle(p, { won: false, kills: b.kills }); continue; }
+      if (b.state !== 'victory') { Q.onBattle(p, { won: false, kills: b.kills }); this.balance.recordBattle(p, b, { activity: 'offline', place: zone.id }); continue; }
       wins++;
       const r = this.applyElixirRewards(p, computeRewards(b.kills, rng, { rewardMult: CONFIG.offline.efficiency, lootMult: this.settings.get('lootRate') }), at);
       r.kills = b.kills.length;
       xp += r.xp; gold += r.gold; kills += r.kills;
       Q.onBattle(p, { won: true, kills: b.kills, gold: r.gold });
+      this.balance.recordBattle(p, b, { activity: 'offline', place: zone.id, gold: r.gold, xp: r.xp });
       const res = L.applyRewards(p, chars, r);
       itemsKept += res.kept; itemsSold += res.sold;
       for (const it of r.items) if (['epic', 'legendary', 'mythic'].includes(it.rarity)) found.push({ name: it.name, rarity: it.rarity });
@@ -833,7 +839,7 @@ export class Game {
         this.questDone(p, Q.track(p, 'coop', 1));
       }
       L.recordBestiary(p, { seen: b.waves.flat().map(w => w.enemyId) });
-      this.afterBattle(p, b, summary.gold || 0);
+      this.afterBattle(p, b, summary.gold || 0, summary.xp || 0);
       for (const a of L.checkAchievements(p)) this.toast(p.id, `Achievement unlocked: ${a.name} (+${a.reward.gold} gold)`, 'achievement');
       this.sendTo(p.id, { t: 'battle_end', k: 'coop', summary });
       const ss = this.sessions.get(p.id);

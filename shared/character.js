@@ -27,6 +27,7 @@ export function createCharacter({ id, name, classId, isMain = false, level = 1, 
     rules: {},       // abilityId -> behaviour rule
     equipment: Object.fromEntries(SLOT_IDS.map(s => [s, null])),
     loadoutV2: true,
+    levelAt: Date.now(), // when the current level was reached (balance statistics)
   };
   if (autoTree) autoAllocate(ch);
   syncTree(ch);

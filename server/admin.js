@@ -101,6 +101,13 @@ export function adminActions(game) {
       admins.audit(s.player.name, 'content_reset', `${d.type}/${d.id}`, '');
       return r;
     },
+    // ---- live balance statistics (server/balance.js)
+    admin_balance(s, d) {
+      const hours = [24, 72, 168, 720, 2160].includes(Number(d.hours)) ? Number(d.hours) : 168;
+      const who = ['human', 'bot', 'all'].includes(d.who) ? d.who : 'human';
+      const activity = ['all', 'idle', 'boss', 'rift', 'coop', 'offline'].includes(d.activity) ? d.activity : 'all';
+      return game.balance.query({ hours, who, activity });
+    },
     // ---- XP curve test runs (server/levelSim.js)
     admin_levelsim_status() { return game.levelSim?.status() || { running: false, current: null, history: [] }; },
     admin_levelsim_start(s, d) {

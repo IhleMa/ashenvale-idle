@@ -103,6 +103,17 @@ export class Store {
     try { return JSON.parse(row.data); } catch { return fallback; }
   }
   putDoc(key, value) { this.dirtyDocs.set(key, value); }
+  // documents whose key is in [from, to) — e.g. all hourly balance buckets of a time range (flush first)
+  docsBetween(from, to) {
+    this.q.docsBetween ||= this.db.prepare('SELECT key, data FROM docs WHERE key >= ? AND key < ? ORDER BY key');
+    const out = [];
+    for (const row of this.q.docsBetween.all(from, to)) { try { out.push(JSON.parse(row.data)); } catch { /* skip broken */ } }
+    return out;
+  }
+  deleteDocsBetween(from, to) {
+    this.q.deleteDocsBetween ||= this.db.prepare('DELETE FROM docs WHERE key >= ? AND key < ?');
+    this.q.deleteDocsBetween.run(from, to);
+  }
 
   // ------------------------------------------------------------------ saving
   // Writes everything that changed since the last flush in one transaction.

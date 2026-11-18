@@ -485,8 +485,12 @@ export function onBossDefeated(p, zoneId) {
 
 // --------------------------------------------------------------------------- rewards & achievements
 // chars: characters who participated. Returns { levelUps: [{name, level}], sold, kept }
+// called as fn(player, character, newLevel, secondsAtPreviousLevel) — used by the balance dashboard
+export const levelHooks = [];
+
 export function applyRewards(p, chars, rewards) {
   const levelUps = [];
+  const now = Date.now();
   for (const ch of chars) {
     if (!p.characters[ch.id]) continue;
     const bonus = ch.isMain ? CONFIG.mainCharacter.xpBonus : 0;
@@ -494,6 +498,9 @@ export function applyRewards(p, chars, rewards) {
     const gained = addXp(ch, rewards.xp * (1 + bonus + traitXp));
     if (gained) {
       levelUps.push({ name: ch.name, level: ch.level, charId: ch.id });
+      // time spent per level (split evenly when several levels came at once)
+      if (ch.levelAt) for (let l = ch.level - gained + 1; l <= ch.level; l++) for (const fn of levelHooks) fn(p, ch, l, (now - ch.levelAt) / 1000 / gained);
+      ch.levelAt = now;
       if ((ch.isMain && p.settings.autoDevelopHero) || (!ch.isMain && p.settings.autoDevelopRecruits)) {
         autoDevelop(ch);
       } else {

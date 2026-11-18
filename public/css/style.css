@@ -1106,3 +1106,30 @@ html.standalone body { padding-bottom: env(safe-area-inset-bottom); padding-left
 .minion-exp { font-weight: 400; color: var(--faint); font-size: 10px; margin-left: 2px; }
 .minion-art.xs, .unit.minion .art { width: 26px; height: 26px; font-size: 15px; }
 .unit.minion .floaters .floater { font-size: 11px; }
+
+/* ---------------------------------------------------------------- admin: live balance */
+.bl-chips { display: flex; flex-wrap: wrap; gap: 16px; font-size: 13px; color: var(--muted); margin: 6px 0 12px; }
+.bl-chips b { color: var(--text); font-size: 15px; }
+.bl-section { margin: 14px 0; }
+.bl-section h4 { margin: 4px 0 8px; }
+.bl-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 18px; }
+.bl-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.bl-table th { text-align: left; font-size: 11px; font-weight: 600; color: var(--muted); padding: 5px 8px; border-bottom: 1px solid var(--line); }
+.bl-table td { padding: 5px 8px; border-bottom: 1px solid #241b18; }
+.bl-table tr.few td { opacity: .55; }
+.bl-table td.bad { color: #ff8a73; } .bl-table td.warn { color: #f5dc9b; }
+.bl-cls { white-space: nowrap; }
+.bl-matrix td.bl-cell { text-align: center; font-variant-numeric: tabular-nums; border-radius: 4px; cursor: help; }
+.bl-matrix td.bl-cell small { display: block; font-size: 10px; opacity: .85; }
+.bl-cell.up { background: rgba(76, 175, 80, .14); } .bl-cell.up2 { background: rgba(76, 175, 80, .3); }
+.bl-cell.down { background: rgba(229, 83, 61, .14); } .bl-cell.down2 { background: rgba(229, 83, 61, .3); }
+.bl-cell.few { opacity: .45; }
+.bl-svg { display: block; width: 100%; height: auto; background: #120d0c; border: 1px solid var(--line); border-radius: var(--radius); }
+.bl-abil { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+.bl-abil-card { background: #17110f; border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; }
+.bl-abil-card h4 { margin: 2px 0 8px; font-size: 13px; }
+.bl-bar { display: grid; grid-template-columns: 120px 1fr 44px; align-items: center; gap: 8px; font-size: 12px; margin: 3px 0; }
+.bl-bar span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bl-bar i { display: block; height: 8px; background: linear-gradient(90deg, #b5651d, var(--gold)); border-radius: 4px; }
+.bl-bar b { text-align: right; font-weight: 600; }
+.bl-bar.none { color: #ff8a73; } .bl-bar.none b { font-weight: 400; }

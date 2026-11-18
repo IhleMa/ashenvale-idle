@@ -9,7 +9,7 @@
     "dev": "node --watch server/index.js",
     "simulate": "node tools/simulate.js",
     "assets": "node tools/asset-checklist.js",
-    "test": "node tools/content-check.js && node tools/content-admin-test.js && node tools/tutorial-test.js && node tools/levelsim-test.js && node tools/summoner-test.js && node tools/rift-reward-test.js && node tools/migrate-test.js && node tools/smoke-test.js && node tools/tls-test.js",
+    "test": "node tools/content-check.js && node tools/content-admin-test.js && node tools/tutorial-test.js && node tools/levelsim-test.js && node tools/summoner-test.js && node tools/rift-reward-test.js && node tools/balance-test.js && node tools/migrate-test.js && node tools/smoke-test.js && node tools/tls-test.js",
     "test:full": "npm test && node tools/town-test.js && node tools/endgame-test.js && node tools/bot-test.js 4",
     "rift-sim": "node tools/rift-sim.js",
     "content:check": "node tools/content-check.js",
