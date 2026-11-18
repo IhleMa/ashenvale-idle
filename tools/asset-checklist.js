@@ -16,6 +16,8 @@ import { AssetIndex } from '../server/assets.js';
 import { BUILDINGS, MATERIALS, PROFESSIONS, ELIXIRS } from '../shared/data/town.js';
 import { EXPEDITIONS } from '../shared/data/expeditions.js';
 import { UNIQUES, SETS } from '../shared/data/legendaries.js';
+import { MINIONS } from '../shared/data/minions.js';
+import { SUBCLASSES } from '../shared/data/subclasses.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const index = new AssetIndex(path.join(ROOT, 'public', 'assets')).get();
@@ -37,8 +39,11 @@ md += section('Class icons', 'classes', Object.entries(CLASSES).map(([id, c]) =>
 md += section('Default portraits', 'portraits', Object.entries(CLASSES).map(([id, c]) => [id, `Default ${c.name} portrait`]),
   `Optional. Add **extra appearance options** by naming files \`portraits/<class>_<anything>.png\`, e.g. \`portraits/warrior_1.png\`, \`portraits/mage_female.png\`.
 They automatically appear as appearance choices during hero creation and are randomly assigned to recruits of that class.`);
-md += section('Abilities', 'abilities', Object.values(ABILITIES).filter(a => a.classId !== 'enemy').map(a => [a.id, `${a.name} (${CLASSES[a.classId].name})`]),
-  'Square icons (64–128 px recommended).');
+const owner = a => (a.subclass ? `${SUBCLASSES[a.subclass]?.name || a.subclass} — ${CLASSES[a.classId]?.name} subclass` : CLASSES[a.classId]?.name || a.classId);
+md += section('Abilities', 'abilities', Object.values(ABILITIES).filter(a => CLASSES[a.classId]).sort((x, y) => (x.subclass ? 1 : 0) - (y.subclass ? 1 : 0)).map(a => [a.id, `${a.name} (${owner(a)})`]),
+  'Square icons (64–128 px recommended). Subclass abilities (ascension) are listed after the class abilities.');
+md += section('Minions (Summoner)', 'minions', Object.entries(MINIONS).map(([id, m]) => [id, `${m.name} (summoned minion)`]), 'Square or portrait images; shown in small circles under their summoner. Without art they show their glyph.');
+md += section('Minion abilities (optional)', 'abilities', Object.values(ABILITIES).filter(a => a.classId === 'minion').map(a => [a.id, a.name]));
 md += section('Enemy abilities (optional)', 'abilities', Object.values(ABILITIES).filter(a => a.classId === 'enemy').map(a => [a.id, a.name]));
 md += section('Item bases', 'items', Object.entries(ITEM_BASES).map(([id, b]) => [id, `${b.name} (${SLOTS[b.slot].label})`]),
   `Square icons. You can also add a rarity-specific version: \`items/<base>_<rarity>.png\` (rarities: ${CONFIG.rarities.map(r => r.id).join(', ')}), e.g. \`items/sword_legendary.png\`.`);
@@ -52,7 +57,7 @@ md += section('Zone backgrounds', 'zones', [...Object.values(ZONES).map(z => [z.
   'Wide images (e.g. 1920×1080). Darkened automatically so units stay readable.');
 md += section('Co-op encounter art', 'encounters', Object.values(COOP_ENCOUNTERS).map(e => [e.id, e.name]), 'Wide images used as encounter card and combat background.');
 md += section('Achievements', 'achievements', Object.values(ACHIEVEMENTS).map(a => [a.id, a.name]));
-md += section('Skill tree nodes (optional)', 'skilltree', [['keystone', 'Keystone node icon'], ['notable', 'Notable node icon'], ['rank', 'Ability-rank node icon (falls back to the ability icon)']],
+md += section('Skill tree nodes (optional)', 'skilltree', [['keystone', 'Keystone node icon'], ['notable', 'Notable node icon'], ['mutator', 'Ability-mutator node icon (subclass branches)'], ['rank', 'Ability-rank node icon (falls back to the ability icon)']],
   'Ability nodes use the ability icons above. Small attribute nodes are drawn as plain dots.');
 md += section('Town buildings', 'buildings', Object.entries(BUILDINGS).map(([id, b]) => [id, b.name]), 'Square or slightly wide images shown on the Town page.');
 md += section('Materials', 'materials', Object.entries(MATERIALS).map(([id, m]) => [id, m.name]), 'Small square icons (64 px).');
