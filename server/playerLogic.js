@@ -15,7 +15,7 @@ import { allocateNode as treeAllocate, refundNode as treeRefund, resetTree as tr
 import { sanitizeRule } from '../shared/rules.js';
 import { createRng, randomSeed } from '../shared/rng.js';
 import { migrateTown, rollProfession, autoSalvage, returnGems } from './townLogic.js';
-import { rosterLimit, recruitOffers, bLevel } from '../shared/town.js';
+import { rosterLimit, recruitOffers, bLevel, rescaleItem } from '../shared/town.js';
 import { busyWith } from '../shared/expeditions.js';
 import { EXPEDITIONS } from '../shared/data/expeditions.js';
 import { BUILDINGS } from '../shared/data/town.js';
@@ -521,14 +521,13 @@ export function ascendHero(p, { subclassId }) {
   const sub = SUBCLASSES[subclassId] || fail('Unknown subclass');
   if (sub.classId !== h.classId) fail(`${sub.name} is not a ${CLASSES[h.classId].name} subclass`);
   if (h.subclass === sub.id) fail(`${h.name} already is a ${sub.name}`);
-  // gear goes to the mailbox, one item per mail
-  let mailed = 0;
+  // the hero keeps its gear, scaled down to level 1 (reforge it back up in town while levelling)
+  let rescaled = 0;
   for (const slot of SLOT_IDS) {
     const item = h.equipment[slot];
     if (!item) continue;
-    sendMail(p, { item, from: 'Ascension', note: `${h.name}'s gear from before ascending as ${sub.name}.` });
-    h.equipment[slot] = null;
-    mailed++;
+    rescaleItem(item, 1);
+    rescaled++;
   }
   const from = h.subclass || null;
   h.subclass = sub.id;
@@ -548,7 +547,7 @@ export function ascendHero(p, { subclassId }) {
   // the party now fights at the hero's level (level sync): start again in the lowest unlocked zone
   const start = Object.values(ZONES).filter(z => (p.unlockedZones || []).includes(z.id)).sort((a, b) => a.levelRange[0] - b.levelRange[0])[0];
   if (start) p.zone = start.id;
-  return { subclass: sub.id, name: sub.name, mailed, switched: !!from };
+  return { subclass: sub.id, name: sub.name, rescaled, switched: !!from };
 }
 
 // Admin: give experience to characters. mode "xp" adds raw XP (no hero/trait bonus, no ascension cap),

@@ -285,7 +285,7 @@ export class Game {
     ascend(s, d) {
       const r = L.ascendHero(s.player, { subclassId: String(d.subclassId || '') });
       const h = L.hero(s.player);
-      this.toast(s.player.id, `🌟 ${h.name} ascended as ${r.name}! Back to level 1 — with new skill-tree branches and ${CONFIG.ascension.bonusSkillPoints} bonus skill points.${r.mailed ? ` Your old gear (${r.mailed} items) is in your mailbox.` : ''}`, 'success');
+      this.toast(s.player.id, `🌟 ${h.name} ascended as ${r.name}! Back to level 1 — with new skill-tree branches and ${CONFIG.ascension.bonusSkillPoints} bonus skill points.${r.rescaled ? ` ${h.name} keeps all ${r.rescaled} equipped items, now at item level 1 — reforge them back up in town as you level.` : ''}`, 'success');
       for (const id of this.sessions.keys()) if (id !== s.player.id) this.toast(id, `🌟 ${s.player.name}'s ${h.name} ${r.switched ? 'became' : 'ascended as'} a ${r.name}!`, 'info');
       this.store.savePlayerSoon(s.player);
       return r;

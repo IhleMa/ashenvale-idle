@@ -116,18 +116,45 @@ export function reforgeCost(item, targetLevel) {
   return { gold: Math.round(gain * 12 * rm), mats: { [MATERIAL_OF_TYPE[type]]: Math.ceil(gain * 1.5 * rm), arcane_dust: Math.ceil(gain * 0.5 * rm) } };
 }
 
+// Items scaled down by ascension remember their original stats (item.statRef), so reforging them back up is exact
+// instead of compounding rounding errors from the small level-1 values.
 export function reforgedStats(item, targetLevel) {
   const base = ITEM_BASES[item.baseId];
+  const src = item.statRef || { level: item.level, stats: item.stats };
   const stats = {};
-  for (const [k, v] of Object.entries(item.stats)) {
+  for (const [k, v] of Object.entries(src.stats)) {
     let from, to;
-    if (base?.stats[k]) { const [b, per] = base.stats[k]; from = b + per * item.level; to = b + per * targetLevel; }
-    else if (AFFIXES[k]) { from = AFFIXES[k].base + AFFIXES[k].perLevel * item.level; to = AFFIXES[k].base + AFFIXES[k].perLevel * targetLevel; }
+    if (base?.stats[k]) { const [b, per] = base.stats[k]; from = b + per * src.level; to = b + per * targetLevel; }
+    else if (AFFIXES[k]) { from = AFFIXES[k].base + AFFIXES[k].perLevel * src.level; to = AFFIXES[k].base + AFFIXES[k].perLevel * targetLevel; }
     else { from = 1; to = 1; }
     const nv = v * (to / Math.max(1e-9, from));
     stats[k] = AFFIXES[k]?.pct ? Math.round(nv * 1000) / 1000 : Math.round(nv);
   }
   return stats;
+}
+
+// Rescales an item to another level in place (used by ascension: the hero's gear drops to level 1 and can be
+// reforged back up). Keeps rarity, affixes, unique/set identity and sockets; enchantments scale with it.
+export function rescaleItem(item, level) {
+  if (!item || item.level === level) return item;
+  if (!item.statRef) item.statRef = { level: item.level, stats: { ...item.stats }, enchant: item.enchant ? { ...item.enchant } : null };
+  if (item.enchant) item.enchant = { ...reforgedEnchant(item, level), scaled: true };
+  item.stats = reforgedStats(item, level);
+  item.level = level;
+  item.requiredLevel = Math.max(1, level - 2);
+  if (level >= item.statRef.level) delete item.statRef; // back at (or above) its original level
+  return item;
+}
+
+// The item's enchantment at another level (from the remembered original while it's still the same enchantment).
+export function reforgedEnchant(item, targetLevel) {
+  const e = item.enchant;
+  if (!e) return null;
+  const a = AFFIXES[e.stat];
+  if (!a) return e;
+  const src = e.scaled && item.statRef?.enchant?.stat === e.stat ? { ...item.statRef.enchant, level: item.statRef.level } : { ...e, level: item.level };
+  const v = src.value * (a.base + a.perLevel * targetLevel) / Math.max(1e-9, a.base + a.perLevel * src.level);
+  return { ...e, value: a.pct ? Math.round(v * 1000) / 1000 : Math.max(1, Math.round(v)) };
 }
 
 // ---------------------------------------------------------------- enchanting

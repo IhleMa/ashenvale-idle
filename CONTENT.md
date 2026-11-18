@@ -152,7 +152,7 @@ The bestiary picks the new enemy up automatically, including its tips.
 The validator tells you if a piece is missing.
 
 ### Add or change a subclass (ascension)
-At the level cap a hero can **ascend** into a subclass of its class (optional): back to level 1, the old gear goes to the mailbox, and the skill tree gets the subclass branch on top of the 4 class branches. Later, at the cap again, the hero may switch to another subclass of the same class (again from level 1). Only the hero ascends, not recruits.
+At the level cap a hero can **ascend** into a subclass of its class (optional): back to level 1, its equipped gear is scaled down to item level 1 (reforge it back up in town; the item remembers its original stats, so that is exact), and the skill tree gets the subclass branch on top of the 4 class branches. Later, at the cap again, the hero may switch to another subclass of the same class (again from level 1). Only the hero ascends, not recruits.
 
 `content/subclasses/<id>.json`:
 

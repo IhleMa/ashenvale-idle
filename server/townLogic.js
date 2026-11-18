@@ -320,9 +320,7 @@ export function reforge(p, { buildingId, itemUid, charId }, heroLevel) {
   const target = T.craftLevelCap(p, buildingId, heroLevel);
   if (target <= item.level) fail(`This item is already item level ${item.level} (the ${def.name} reforges up to ${target})`);
   pay(p, T.reforgeCost(item, target));
-  item.stats = T.reforgedStats(item, target);
-  item.level = target;
-  item.requiredLevel = Math.max(1, target - 2);
+  T.rescaleItem(item, target); // stats and enchantment (exact for gear scaled down by ascension)
   if (ch && !canEquip(item, ch)) { // shouldn't happen (target ≤ hero level) but never leave unusable gear equipped
     const slot = Object.keys(ch.equipment).find(s => ch.equipment[s] === item);
     ch.equipment[slot] = null;

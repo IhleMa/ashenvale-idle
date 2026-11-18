@@ -168,7 +168,7 @@ function openAscend(ch) {
     const ok = await confirmBox(`<b>Ascend ${esc(ch.name)} as ${esc(sub.name)}?</b>
       <ul class="small">
         <li>${esc(ch.name)} goes back to <b>level 1</b> and the skill tree is reset (now with the ${esc(sub.name)} branch).</li>
-        <li>All ${gear} equipped item${gear === 1 ? '' : 's'} will be <b>sent to your mailbox</b> (Auction House → Mailbox).</li>
+        <li>${gear ? `${esc(ch.name)} <b>keeps all ${gear} equipped item${gear === 1 ? '' : 's'}</b> (rarity, affixes, unique effects, set bonuses, enchantments and gems stay), but they are <b>scaled down to item level 1</b>. Reforge them back up at the Forge/Workshops in town as you level.` : 'Your hero has no gear equipped.'}</li>
         <li>+${cfg.bonusSkillPoints} bonus skill points and the ${esc(sub.name)} passive: ${describeNodeStats(sub.bonus).map(esc).join(', ')}.</li>
         ${cfg.levelSync?.enabled ? `<li><b>Level sync:</b> until ${esc(ch.name)} reaches level ${CONFIG.levelCap} again, everyone in the hero's party fights at the hero's level + ${cfg.levelSync.levelGap} (stats, skill points and gear scaled down). Your party starts again in the first zone.</li>` : ''}
         <li>Gold, items, recruits, town and everything else are kept.</li>

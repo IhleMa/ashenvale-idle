@@ -56,8 +56,15 @@ h.xp = 0;
 assert.throws(() => L.ascendHero(p, { subclassId: subclassesOf('mage')[0].id }), /not a Warrior subclass/);
 ok('subclass must belong to the hero class');
 
+// endgame gear: a rare level-60 item with an enchantment, plus whatever the hero wears
+const { generateItem } = await import('../shared/data/items.js');
+const { createRng } = await import('../shared/rng.js');
+const { rescaleItem } = await import('../shared/town.js');
+const big = generateItem(createRng(3), CONFIG.levelCap, { baseId: 'sword', rarity: 'epic' });
+big.enchant = { stat: 'str', value: 40 };
+h.equipment.weapon = big;
+const original = JSON.parse(JSON.stringify(big));
 const equipped = Object.values(h.equipment).filter(Boolean).length;
-assert.ok(equipped > 0, 'hero starts with some gear');
 const mailBefore = (p.mailbox || []).length;
 const res = action('ascend', { subclassId: first.id });
 assert.ok(!res?.error, res?.error);
@@ -65,12 +72,21 @@ assert.equal(h.subclass, first.id);
 assert.equal(h.level, 1);
 assert.equal(h.xp, 0);
 assert.equal(h.ascensions, 1);
-assert.equal(Object.values(h.equipment).filter(Boolean).length, 0);
-assert.equal(p.mailbox.length - mailBefore, equipped);
-assert.ok(p.mailbox.slice(-equipped).every(m => m.item && m.from === 'Ascension'));
+assert.equal(Object.values(h.equipment).filter(Boolean).length, equipped, 'gear stays equipped');
+assert.equal((p.mailbox || []).length, mailBefore, 'nothing mailed');
+assert.ok(Object.values(h.equipment).filter(Boolean).every(it => it.level === 1 && it.requiredLevel === 1));
+assert.equal(h.equipment.weapon.uid, original.uid); assert.equal(h.equipment.weapon.rarity, 'epic');
+assert.ok(Object.values(h.equipment.weapon.stats).reduce((a, b) => a + b, 0) < Object.values(original.stats).reduce((a, b) => a + b, 0) * 0.2, 'stats scaled down');
+assert.ok(h.equipment.weapon.enchant.value < 40);
 assert.equal(p.stats.ascensions, 1);
 assert.equal(p.zone, 'whispering_woods', 'party moved to the first zone');
-ok(`ascended as ${first.name}: level 1, ${equipped} items mailed, subclass set`);
+// reforging back up is exact (from the remembered original), also in steps
+const copy = JSON.parse(JSON.stringify(h.equipment.weapon));
+rescaleItem(copy, 25); rescaleItem(copy, CONFIG.levelCap);
+assert.deepEqual(copy.stats, original.stats);
+assert.equal(copy.enchant.value, 40);
+assert.equal(copy.statRef, undefined);
+ok(`ascended as ${first.name}: level 1, ${equipped} items kept and scaled to item level 1, reforging back is exact`);
 
 // tree: base branches kept, subclass branch added, subclass ability reachable
 const base = getTree('warrior');
