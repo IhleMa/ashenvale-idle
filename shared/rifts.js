@@ -137,14 +137,23 @@ export function riftHooks(affixIds) {
 export function maxStartTier(p) { return Math.min(RIFT.maxTier, (p.rift?.best || 0) + 1); }
 // Rifts don't scale with the player: every tier has a fixed enemy level (rising without end, past the level cap)
 // and health/damage multipliers that grow a little every tier — easy at first, then an endless climb.
+// includes the tier's theme balance (rifts/_settings.json → themeBalance), so every theme is about equally hard
 export function riftScale(tier) {
-  return { hp: RIFT.baseHp * Math.pow(RIFT.hpGrowth, tier - 1), damage: RIFT.baseDamage * Math.pow(RIFT.damageGrowth, tier - 1) };
+  const tb = RF.themeBalance?.[riftTheme(tier)] || {};
+  return { hp: RIFT.baseHp * Math.pow(RIFT.hpGrowth, tier - 1) * (tb.hp ?? 1), damage: RIFT.baseDamage * Math.pow(RIFT.damageGrowth, tier - 1) * (tb.damage ?? 1) };
 }
 export function riftLevel(tier) { return Math.max(1, Math.round((RIFT.startLevel ?? 5) + (tier - 1) * (RIFT.levelsPerTier ?? 1))); }
 
-// Builds the waves of a tier, themed after one of the player's unlocked zones
-export function riftWaves(themeZoneId, tier, rng, partySize = 4) {
-  const zone = ZONES[themeZoneId];
+// Every tier has a fixed theme: the zones (with a boss) in zone order, repeating — tier 1 is the first zone,
+// tier 13 the first again with 12 zones. Its enemy line-up is fixed too (seeded by the tier), so a tier is
+// equally hard for everyone and the leaderboard compares the same fight.
+export const riftThemeList = () => Object.values(ZONES).filter(z => z.boss && ENEMIES[z.boss]).sort((a, b) => a.order - b.order).map(z => z.id);
+export function riftTheme(tier) { const list = riftThemeList(); return list[(Math.max(1, tier) - 1) % list.length]; }
+
+// Builds the waves of a tier (rng is no longer used: the composition is fixed per tier)
+export function riftWaves(themeZoneId, tier, _rng, partySize = 4) {
+  const zone = ZONES[themeZoneId || riftTheme(tier)];
+  const rng = createRng(tier * 7919 + 17);
   const lvl = riftLevel(tier);
   const C = RF.composition;
   const size = Math.max(C.minWaveSize, Math.min(C.maxWaveSize, partySize));
@@ -159,7 +168,7 @@ export function riftWaves(themeZoneId, tier, rng, partySize = 4) {
   return waves;
 }
 
-export function riftThemes(p) { return p.unlockedZones.filter(z => ZONES[z]?.boss && ENEMIES[ZONES[z].boss]); }
+
 
 // ---------------------------------------------------------------- rewards
 export function riftRewardOptions(tier, timed) {

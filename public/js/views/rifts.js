@@ -6,10 +6,10 @@ import { enemyArt } from '../assets.js';
 import { openInspect } from '../inspect.js';
 import { ZONES } from '/shared/data/zones.js';
 import { ENEMIES } from '/shared/data/enemies.js';
-import { RIFT, AFFIXES, weeklyAffixes, weekEndsAt, affixesFor, maxStartTier, riftThemes, riftScale, riftChest, firstClearCrystals, riftRewardOptions, riftCleared, repeatXpGold, riftLevel } from '/shared/rifts.js';
+import { RIFT, AFFIXES, weeklyAffixes, weekEndsAt, affixesFor, maxStartTier, riftTheme, riftThemeList, riftScale, riftChest, firstClearCrystals, riftRewardOptions, riftCleared, repeatXpGold, riftLevel } from '/shared/rifts.js';
 import { openBestiary } from './bestiary.js';
 
-const ui = { tier: null, theme: '' };
+const ui = { tier: null };
 let board = null;
 let boardAt = 0;
 let timer = null;
@@ -49,7 +49,8 @@ function html() {
   const r = p.rift || { best: 0, bestTimes: {}, history: [] };
   const max = maxStartTier(p);
   if (ui.tier == null || ui.tier > max) ui.tier = max;
-  const themes = riftThemes(p);
+  const themes = riftThemeList();
+  const theme = ZONES[riftTheme(ui.tier)];
   const week = weeklyAffixes(now());
   const active = affixesFor(ui.tier, now());
   const sc = riftScale(ui.tier);
@@ -61,14 +62,14 @@ function html() {
   return `<div class="rift-layout">
     <section class="panel rift-start">
       <div class="panel-head"><h3>🌀 Rifts</h3><span class="muted small">Best timed: <b>${r.best ? `Tier ${r.best}${r.bestTimes?.[r.best] ? ` (${mmss(r.bestTimes[r.best])})` : ''}` : '—'}</b></span></div>
-      <p class="muted small">Fight through ${RIFT.trashWaves} waves and a Rift Guardian before the clock runs out (<b>${mmss(RIFT.timeLimit)}</b>). Health carries over between waves. Finish in time to unlock the next tier. Rifts use your active party. Every tier has stronger enemies — tier 1 starts easy and there is no top: past the level cap they just keep growing.</p>
+      <p class="muted small">Fight through ${RIFT.trashWaves} waves and a Rift Guardian before the clock runs out (<b>${mmss(RIFT.timeLimit)}</b>). Health carries over between waves. Finish in time to unlock the next tier. Rifts use your active party. Every tier has stronger enemies — tier 1 starts easy and there is no top: past the level cap they just keep growing. Each tier always has the same theme and enemies (the zones in order, repeating), so a tier is equally hard for everyone.</p>
       ${locked ? `<p class="warn-text">🔒 Rifts open at hero level ${RIFT.minLevel}.</p>` : `
       <div class="rift-form">
         <label>Tier <select data-rift-tier>${Array.from({ length: Math.min(max, 250) }, (_, i) => max - i).map(t => `<option value="${t}" ${t === ui.tier ? 'selected' : ''}>Tier ${t}${r.bestTimes?.[t] ? ` · best ${mmss(r.bestTimes[t])}` : t > (r.best || 0) ? ' · new!' : ''}${riftCleared(state.player, t) ? '' : ' · XP & gold'}</option>`).join('')}</select></label>
-        <label>Theme <select data-rift-theme><option value="">🎲 Random</option>${themes.map(z => `<option value="${z}" ${ui.theme === z ? 'selected' : ''}>${esc(ZONES[z].name)} — ${esc(ENEMIES[ZONES[z].boss].name)}</option>`).join('')}</select></label>
         <label>After a run <select data-rift-auto>${[['off', 'Return to idle farming'], ['repeat', 'Repeat the same tier (loot only)'], ['push', 'Push: next tier if timed']].map(([v, l]) => `<option value="${v}" ${r.auto === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
       </div>
       <div class="rift-preview">
+        <div class="stat-row"><span>Theme</span><b>${esc(theme.name)} <span class="muted small">· Guardian: ${esc(ENEMIES[theme.boss].name)}</span></b></div>
         <div class="stat-row"><span>Enemy level</span><b class="${riftLevel(ui.tier) > h.level + 2 ? 'warn-text' : ''}">${riftLevel(ui.tier)}${riftLevel(ui.tier) > h.level ? ` <span class="muted small">(your hero: ${h.level})</span>` : ''}</b></div>
         <div class="stat-row"><span>Enemy health</span><b>×${sc.hp.toFixed(2)}</b></div>
         <div class="stat-row"><span>Enemy damage</span><b>×${sc.damage.toFixed(2)}</b></div>
@@ -113,12 +114,11 @@ export const riftsView = {
     root.addEventListener('change', async e => {
       const t = e.target;
       if (t.matches('[data-rift-tier]')) { ui.tier = Number(t.value); this.render(root); }
-      if (t.matches('[data-rift-theme]')) ui.theme = t.value;
       if (t.matches('[data-rift-auto]')) await run(act('rift_settings', { auto: t.value }));
     });
     root.addEventListener('click', async e => {
       if (e.target.closest('[data-rift-start]')) {
-        const r = await run(act('rift_start', { tier: ui.tier, theme: ui.theme || null }));
+        const r = await run(act('rift_start', { tier: ui.tier }));
         if (r) { toast(`Entering Rift Tier ${r.tier}: ${ZONES[r.theme].name}…`, 'success'); location.hash = '#/combat'; }
         return;
       }

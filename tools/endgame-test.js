@@ -10,6 +10,7 @@ import { Game } from '../server/game.js';
 import * as L from '../server/playerLogic.js';
 import * as Q from '../server/questLogic.js';
 import { createCharacter } from '../shared/character.js';
+import { ZONES } from '../shared/data/zones.js';
 import { generateItem } from '../shared/data/items.js';
 import { createRng } from '../shared/rng.js';
 import { createBattle, runToEnd } from '../shared/combat.js';
@@ -94,7 +95,7 @@ try {
   r = act('rift_start', { tier: 2 });
   ok(!r.ok && /1–1/.test(r.error), 'only tier 1 available at first: ' + r.error);
   r = act('rift_start', { tier: 1, theme: 'ashen_barrows' });
-  ok(r.ok && r.result.theme === 'ashen_barrows', 'rift tier 1 started');
+  ok(r.ok && r.result.theme === 'whispering_woods', 'rift tier 1 started, always themed after the first zone');
   act('rift_settings', { auto: 'push' });
   let end = null;
   for (let i = 0; i < 6000 && !end; i++) { game.tick(); end = msgs.find(m => m.t === 'battle_end' && m.summary.kind === 'rift'); }
@@ -106,7 +107,7 @@ try {
     ok(s.solo.next?.kind === 'rift' && s.solo.next.tier === 2, 'auto "push" queues tier 2');
   }
   ok(p.rift.history.length === 1 && p.rift.runs === 1, 'run recorded in history');
-  ok(Object.values(p.bestiary).some(e => e.kills > 0) && p.bestiary.barrow_king, `bestiary filled: ${Object.keys(p.bestiary).length} entries`);
+  ok(Object.values(p.bestiary).some(e => e.kills > 0) && p.bestiary[ZONES.whispering_woods.boss], `bestiary filled: ${Object.keys(p.bestiary).length} entries`);
   r = act('rift_stop');
   ok(r.ok && !s.solo.next, 'rift stopped');
   const board = game.rankings.board({ category: 'rift' }, p.id);

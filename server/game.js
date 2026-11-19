@@ -27,7 +27,7 @@ import { BUILDINGS } from '../shared/data/town.js';
 import * as L from './playerLogic.js';
 import * as Q from './questLogic.js';
 import { masteryMap } from '../shared/bestiary.js';
-import { RIFT, riftWaves, riftScale, riftHooks, affixesFor, maxStartTier, riftThemes, riftRewardOptions, riftChest, firstClearCrystals, riftCleared, repeatXpGold, riftLevel } from '../shared/rifts.js';
+import { RIFT, riftWaves, riftScale, riftHooks, affixesFor, maxStartTier, riftTheme, riftRewardOptions, riftChest, firstClearCrystals, riftCleared, repeatXpGold, riftLevel } from '../shared/rifts.js';
 
 const { GameError } = L;
 const SAVE_NOW = new Set(['ascend', 'ah_list', 'ah_buy', 'ah_cancel', 'collect_mail', 'town_speedup', 'expedition_speedup']);
@@ -337,12 +337,11 @@ export class Game {
       if (unlockHeroLevel(p) < RIFT.minLevel) fail(`Rifts open at hero level ${RIFT.minLevel}`);
       const tier = Math.floor(Number(d.tier));
       if (!(tier >= 1 && tier <= maxStartTier(p))) fail(`You can start tiers 1–${maxStartTier(p)} (time a tier to unlock the next)`);
-      const themes = riftThemes(p);
-      const theme = themes.includes(d.theme) ? d.theme : themes[Math.floor(Math.random() * themes.length)];
+      const theme = riftTheme(tier); // every tier has a fixed theme
       if (!L.activePartyChars(p).length) fail('Your active party is empty');
       this.ensureNotInCoop(p.id);
       this.abortSolo(s);
-      s.solo = { next: { kind: 'rift', tier, theme, random: !themes.includes(d.theme) }, restUntil: 0 };
+      s.solo = { next: { kind: 'rift', tier, theme }, restUntil: 0 };
       return { tier, theme };
     },
     rift_stop(s) {
@@ -644,9 +643,9 @@ export class Game {
     this.sendTo(p.id, { t: 'battle_end', k: 'solo', summary });
     // auto-continue
     let next = null;
-    if (won && r.auto === 'repeat') next = { kind: 'rift', tier, theme: rift.random ? null : rift.theme, random: rift.random };
-    if (won && r.auto === 'push') next = { kind: 'rift', tier: timed ? Math.min(maxStartTier(p), tier + 1) : tier, theme: rift.random ? null : rift.theme, random: rift.random };
-    if (next && next.random) { const th = riftThemes(p); next.theme = th[Math.floor(Math.random() * th.length)]; }
+    if (won && r.auto === 'repeat') next = { kind: 'rift', tier };
+    if (won && r.auto === 'push') next = { kind: 'rift', tier: timed ? Math.min(maxStartTier(p), tier + 1) : tier };
+    if (next) next.theme = riftTheme(next.tier);
     s.solo = { restUntil: Date.now() + (won ? 3000 : CONFIG.combat.reviveDelay * 1000), ...(next ? { next } : {}) };
     this.markDirty(s);
   }
