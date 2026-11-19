@@ -1,7 +1,7 @@
 {
   "_about": "The new-player tutorial: steps in order. protectedSteps: during these steps the party can't die in normal fights (it never drops below 1 health), so the first fights can't be lost. Each step names the page it happens on (view), what to highlight there, the goal that completes it and an optional reward. Pages are only shown in the menu once a step unlocks them; the last step unlocks everything. Goals: { \"type\": \"ack\" } (a Continue button) or { \"metric\": …, \"count\": n } counted from the start of the step (\"absolute\": true counts the total instead), or { \"any\": [goal, …] }. Metrics: kills, fights, recruited, heroNodes, buildingUpgrades, expeditionsSent, expeditionSpeedups, expeditionsReady, expeditionsClaimed, partySize, heroLevel. Rewards: gold, premium, xp (hero), materials { id: n }, coverUpgrade (a building id: gives whatever is missing to upgrade it). highlight: what to click, in order — \"selector\" or { \"el\": selector, \"done\": selector }; the first entry that is not done and exists on the page glows and gets a Click-here arrow.",
   "enabled": true,
-  "alwaysVisible": ["progression", "admin"],
+  "alwaysVisible": ["progression", "wiki", "admin"],
   "protectedSteps": ["welcome", "first_fight"],
   "steps": [
     {
