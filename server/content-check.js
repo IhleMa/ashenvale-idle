@@ -89,7 +89,7 @@ export function validateContent(C) {
     if (e.kind === 'summon') {
       if (e.minion !== undefined) { ref(`${w}.minion`, e.minion, minions, 'minion'); num(`${w}.max`, e.max, { min: 1, max: 10, optional: true }); }
       else ref(`${w}.enemyId`, e.enemyId, enemies, 'enemy');
-      num(`${w}.count`, e.count, { min: 1, max: 10, optional: true });
+      num(`${w}.count`, e.count, { min: 1, max: 10, optional: true }); if (e.all !== undefined && typeof e.all !== 'boolean') err(`${w}.all`, 'must be true or false');
     }
     if (e.kind === 'sacrifice') { num(`${w}.power`, e.power, { min: 0 }); num(`${w}.count`, e.count, { min: 1, max: 10, optional: true }); if (e.school && !['physical', 'magical'].includes(e.school)) err(`${w}.school`, 'must be "physical" or "magical"'); }
     if (e.kind === 'extend') num(`${w}.seconds`, e.seconds, { min: 0 });

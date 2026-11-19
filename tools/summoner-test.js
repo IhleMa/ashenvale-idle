@@ -75,6 +75,20 @@ const cast = (b, u, abilityId, target = u) => { for (const eff of ABILITIES[abil
   assert.ok(a.statuses.some(s => s.id === 'soul_link'));
   ok('Corpse Explosion detonates a minion for area damage; Soul Link extends and protects');
 }
+
+// Lich "Grave Detonation": every minion explodes
+{
+  const { applyMutators } = await import('../shared/mutators.js');
+  const { b, su } = battle(20, [[{ enemyId: 'wolf', level: 60 }]]);
+  cast(b, su, 'raise_skeleton'); cast(b, su, 'raise_skeleton');
+  const wolf = b.units.find(u => u.side === 'B');
+  const ab = applyMutators(ABILITIES.corpse_explosion, [{ set: { sacrifice: { all: true } } }]);
+  const before = wolf.hp;
+  for (const eff of ab.effects) C.__test.applyEffect(b, su, su, eff, 'corpse_explosion');
+  assert.equal(ownMinions(b, su).length, 0, 'every minion detonated');
+  assert.ok(before - wolf.hp > 0);
+  ok('Lich Grave Detonation: Corpse Explosion detonates every minion at once');
+}
 // battle end: minions alone can't keep a fight going
 {
   const { b, su, wu } = battle();

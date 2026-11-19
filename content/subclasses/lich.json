@@ -41,9 +41,13 @@
         "3": {
           "name": "Grave Detonation",
           "ability": "corpse_explosion",
-          "description": "Corpse Explosion hits much harder.",
+          "description": "Corpse Explosion detonates every minion you have at once.",
           "changes": {
-            "power": 0.4
+            "set": {
+              "sacrifice": {
+                "all": true
+              }
+            }
           }
         },
         "6": {

@@ -430,8 +430,8 @@ function expireMinion(b, u, reason = 'expire') {
 }
 
 function sacrificeMinions(b, src, eff, abilityId) {
-  // the minions closest to fading go first
-  const victims = ownMinions(b, src).sort((a, c) => (a.expiresAt ?? 1e9) - (c.expiresAt ?? 1e9)).slice(0, eff.count || 1);
+  // the minions closest to fading go first (all: every minion detonates)
+  const victims = ownMinions(b, src).sort((a, c) => (a.expiresAt ?? 1e9) - (c.expiresAt ?? 1e9)).slice(0, eff.all ? undefined : eff.count || 1);
   for (const m of victims) {
     const amount = m.maxHp * (eff.power || 1) * rankMult(src, abilityId);
     expireMinion(b, m, 'sacrifice');

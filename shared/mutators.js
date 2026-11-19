@@ -63,6 +63,7 @@ export function describeChanges(ch) {
   if (ch.cooldown) out.push(`${sgn(ch.cooldown)}s cooldown`);
   if (ch.cost) out.push(`${sgn(ch.cost)} cost`);
   for (const fields of Object.values(ch.set || {})) {
+    if (fields.all) out.push('detonates every minion you have at once');
     if (fields.splash) out.push(`also hits every other enemy for ${Math.round(fields.splash * 100)}% of the damage`);
     if (fields.refundPerStack) out.push(`refunds ${fields.refundPerStack} resource per effect consumed`);
     if (fields.lifesteal) out.push(`heals for ${Math.round(fields.lifesteal * 100)}% of the damage`);
