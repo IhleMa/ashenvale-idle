@@ -93,7 +93,7 @@ function guardClick(e) {
   } else if (ctx.currentView() === step.view && (step.highlight || []).length && !targets(step).els.length) return; // target missing: don't trap the player
   e.preventDefault();
   e.stopImmediatePropagation();
-  if (arrows && !arrows.hidden) { arrows.classList.remove('tut-nudge'); void arrows.offsetWidth; arrows.classList.add('tut-nudge'); }
+  for (const h of document.querySelectorAll('.tut-hl, .tut-hl-nav')) { h.classList.remove('tut-nudge'); void h.offsetWidth; h.classList.add('tut-nudge'); setTimeout(() => h.classList.remove('tut-nudge'), 900); }
   if (e.type === 'click' && Date.now() - lastNudge > 4000) {
     lastNudge = Date.now();
     toast('Tutorial: click the highlighted button first (or skip the tutorial).', 'info');
@@ -136,7 +136,7 @@ export function renderTutorial() {
       ${reward ? `<div class="tut-reward">🎁 Reward: ${esc(reward)}</div>` : ''}
       <div class="tut-actions">
         ${isAck ? `<button class="btn primary" data-tut-ack="${esc(step.id)}">${esc(step.button || 'Continue')}</button>`
-          : here ? '<span class="tut-hint">Follow the <b>Click here</b> arrow</span>'
+          : here ? '<span class="tut-hint">Click the <b>highlighted</b> button</span>'
           : `<button class="btn primary small" data-tut-go="${esc(step.view)}">Go to ${esc(ctx.viewLabel(step.view))} →</button>`}
         <span class="grow"></span>
         ${idx < steps.length - 1 ? '<button class="tut-skip" data-tut-skip>Skip tutorial</button>' : ''}
@@ -146,9 +146,8 @@ export function renderTutorial() {
 }
 
 // One target at a time: the first highlight entry that is not done yet and exists on the page gets the glow
-// and a bouncing "Click here" arrow. Entries: "selector" or { "el": selector, "done": selector } — the entry
+// (a pulsing outline). Entries: "selector" or { "el": selector, "done": selector } — the entry
 // is skipped once something matches "done" (e.g. the destination is already selected).
-let arrows = null;
 let scrolledFor = null;
 function targets(step) {
   if (ctx.currentView() !== step.view) {
@@ -173,7 +172,7 @@ function applyHighlights() {
   for (const el of document.querySelectorAll('.tut-hl, .tut-hl-nav')) el.classList.remove('tut-hl', 'tut-hl-nav');
   const p = state.player;
   const step = p && currentStep(p);
-  if (!step || step.goal?.type === 'ack') { placeArrow(null); return; }
+  if (!step || step.goal?.type === 'ack') return;
   const t = targets(step);
   for (const el of t.els) el.classList.add(t.nav ? 'tut-hl-nav' : 'tut-hl');
   const first = t.els[0] || null;
@@ -184,38 +183,4 @@ function applyHighlights() {
     const r = first.getBoundingClientRect();
     if (r.top < 60 || r.bottom > innerHeight - 160) first.scrollIntoView({ block: 'center', behavior: 'smooth' });
   }
-  placeArrow(first, t.nav);
 }
-
-function placeArrow(el, nav = false) {
-  if (!arrows) {
-    arrows = document.createElement('div');
-    arrows.className = 'tut-arrow';
-    arrows.hidden = true;
-    document.body.appendChild(arrows);
-  }
-  arrows.target = el;
-  arrows.nav = nav;
-  positionArrow();
-}
-function positionArrow() {
-  const a = arrows, el = a?.target;
-  if (!a) return;
-  if (!el || !el.isConnected) { a.hidden = true; return; }
-  const r = el.getBoundingClientRect();
-  if (!r.width && !r.height) { a.hidden = true; return; }
-  a.hidden = false;
-  const side = a.nav && el.id !== 'menu-toggle' ? 'right' : r.top > 90 ? 'above' : 'below';
-  a.className = `tut-arrow ${side}${a.classList.contains('tut-nudge') ? ' tut-nudge' : ''}`;
-  a.innerHTML = side === 'right' ? '<span>👈</span><b>Click here</b>' : side === 'above' ? '<b>Click here</b><span>👇</span>' : '<span>👆</span><b>Click here</b>';
-  const w = a.offsetWidth, h = a.offsetHeight;
-  let x, y;
-  if (side === 'right') { x = r.right + 10; y = r.top + r.height / 2 - h / 2; }
-  else { x = r.left + r.width / 2 - w / 2; y = side === 'above' ? r.top - h - 8 : r.bottom + 8; }
-  a.style.left = `${Math.max(6, Math.min(innerWidth - w - 6, x))}px`;
-  a.style.top = `${Math.max(6, Math.min(innerHeight - h - 6, y))}px`;
-}
-// targets move with scrolling, resizing and layout changes
-addEventListener('scroll', () => positionArrow(), true);
-addEventListener('resize', () => positionArrow());
-setInterval(() => { if (arrows?.target) positionArrow(); }, 400);
