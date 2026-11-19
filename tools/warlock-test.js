@@ -157,13 +157,18 @@ ok('Warlock: 7 base abilities, 4-branch tree, 3 subclasses');
   assert.equal(TARGET_CONDITIONS.target_own_debuffs.test(cond, foes[0], b, wu), false, 'two stacks of one debuff = one kind');
   cast(b, wu, 'agony', foes[0]);
   assert.equal(TARGET_CONDITIONS.target_own_debuffs.test(cond, foes[0], b, wu), true);
+  const stacks3 = { type: 'target_own_debuff_stacks', cmp: '>=', value: 3 };
+  assert.equal(TARGET_CONDITIONS.target_own_debuff_stacks.test(stacks3, foes[0], b, wu), true, '2 Corruption + 1 Agony = 3 stacks');
+  assert.equal(TARGET_CONDITIONS.target_own_debuff_stacks.test(stacks3, foes[1], b, wu), false);
+  for (let i = 0; i < 3; i++) cast(b, wu, 'corruption', foes[1]);
+  assert.equal(TARGET_CONDITIONS.target_own_debuff_stacks.test(stacks3, foes[1], b, wu), true, '3 stacks of one debuff count');
   assert.ok(resolveRule(ABILITIES.reap.defaultRule, ABILITIES.reap, b, wu));
   const reap = applyMutators(ABILITIES.reap, [{ set: { consume_dots: { splash: 0.08 } } }]);
   for (let i = 0; i < 3; i++) cast(b, wu, 'corruption', foes[0]);
   const others = foes.slice(1).map(f => f.hp);
   cast(b, wu, 'reap', foes[0], reap);
   assert.ok(foes.slice(1).every((f, i) => f.hp < others[i]), 'splash hit the others');
-  ok('the own-debuff condition counts different debuffs, not stacks; the Plaguelord mutator adds splash damage');
+  ok('the own-debuff conditions count different debuffs or every stack; the Plaguelord mutator adds splash damage');
 }
 
 console.log(`Warlock: all ${n} checks passed.`);

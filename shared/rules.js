@@ -64,6 +64,7 @@ export const TARGET_CONDITIONS = {
   target_role:           { label: 'Target has role', params: [P.role()], test: (c, t) => t.role === c.role },
   target_is_type:        { label: 'Target is enemy type', params: [P.tag()], test: (c, t) => t.tags?.includes(c.param) || t.defId === c.param },
   target_own_debuffs:    { label: 'Number of my different debuffs on the target', params: [P.cmp(), P.count('value', 3)], test: (c, t, b, u) => cmp(new Set(t.statuses.filter(s => s.src === u?.uid && STATUSES[s.id]?.type === 'debuff').map(s => s.id)).size, c.cmp, c.value), format: c => `my different debuffs on target: ${c.cmp === '<=' ? 'at most' : c.cmp === '==' ? 'exactly' : 'at least'} ${c.value}` },
+  target_own_debuff_stacks: { label: 'Number of my debuff stacks on the target (every stack counts)', params: [P.cmp(), P.count('value', 3)], test: (c, t, b, u) => cmp(t.statuses.reduce((n, s) => n + (s.src === u?.uid && STATUSES[s.id]?.type === 'debuff' ? (STATUSES[s.id].maxStacks ? s.stacks || 1 : 1) : 0), 0), c.cmp, c.value), format: c => `my debuff stacks on target: ${c.cmp === '<=' ? 'at most' : c.cmp === '==' ? 'exactly' : 'at least'} ${c.value}` },
   target_is_minion:      { label: 'Target is a minion', params: [P.minion()], test: (c, t) => t.kind === 'minion' && (!c.minion || t.defId === c.minion) },
 };
 

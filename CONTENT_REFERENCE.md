@@ -189,6 +189,7 @@ Target conditions (`targetConditions[].type`):
 | `target_role` | Target has role |
 | `target_is_type` | Target is enemy type |
 | `target_own_debuffs` | Number of my different debuffs on the target |
+| `target_own_debuff_stacks` | Number of my debuff stacks on the target (every stack counts) |
 | `target_is_minion` | Target is a minion |
 
 Target selectors (`target.selector`):
