@@ -49,9 +49,14 @@ bus.on('msg:battle_start', m => {
   if (root && shown() === m.k) build();
   updateActivity();
 });
+let lastResync = 0;
 bus.on('msg:bt', m => {
   const b = battles[m.k];
-  if (!b) return;
+  if (!b) {
+    // ticks for a fight we don't know (missed or lost its start): ask the server for a fresh snapshot
+    if (Date.now() - lastResync > 3000) { lastResync = Date.now(); act('battle_resync').catch(() => {}); }
+    return;
+  }
   b.time = m.time; b.wave = m.wave;
   let structural = false;
   for (const d of m.u) { const u = b.units.get(d.uid); if (u) Object.assign(u, d); }
@@ -95,7 +100,8 @@ bus.on('msg:battle_end', m => {
       addLog(b, { cat: 'event', t: b.time, html: `<span class="log-win">Victory! +${fmt(s.xp)} XP, +${fmt(s.gold)} gold${items}</span>` });
     } else addLog(b, { cat: 'event', t: b.time, html: '<span class="log-loss">Defeat… your party regroups.</span>' });
   }
-  if (m.k === 'coop') setTimeout(() => { battles.coop = null; state.battles.coop = null; if (root) build(); updateActivity(); }, 4000);
+  // after a co-op fight, go back to the solo view — unless the next co-op fight already started in the meantime
+  if (m.k === 'coop') { const ended = b; setTimeout(() => { if (battles.coop !== ended) return; battles.coop = null; state.battles.coop = null; if (root) build(); updateActivity(); }, 4000); }
   if (root && shown() === m.k) { update(); renderResults(); showBanner(s); }
   updateActivity();
 });

@@ -457,6 +457,12 @@ export class Game {
       this.broadcastGroup(g);
     },
     group_start(s, d) { this.startCoop(s, d.encounterId); },
+    // the client lost track of its fight (e.g. a race between two co-op fights): send the current snapshot again
+    battle_resync(s) {
+      const g = this.groupOf(s.player.id);
+      if (g?.battle) this.sendTo(s.player.id, { t: 'battle_start', k: 'coop', battle: battleSnapshot(g.battle) });
+      else if (s.solo?.battle) this.sendTo(s.player.id, { t: 'battle_start', k: 'solo', battle: battleSnapshot(s.solo.battle) });
+    },
   };
 
   // A companion who just left for work/expedition must not keep fighting in the running battle
