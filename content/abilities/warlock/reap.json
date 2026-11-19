@@ -33,7 +33,7 @@
       {
         "type": "target_own_debuffs",
         "cmp": ">=",
-        "value": 2
+        "value": 1
       }
     ]
   },
