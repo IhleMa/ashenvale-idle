@@ -221,7 +221,7 @@ function checkEnd(b) {
     if (b.waveIndex + 1 < b.waves.length) nextWave(b);
     else { finish(b, 'victory'); return true; }
   }
-  if (b.time > C.maxBattleSeconds * b.waves.length) { finish(b, 'defeat'); return true; }
+  if (b.time > C.maxBattleSeconds * b.waves.length * (b.protected ? 4 : 1)) { finish(b, 'defeat'); return true; } // protected (first tutorial fights): much more time
   return false;
 }
 
@@ -640,7 +640,7 @@ function dealDamage(b, src, tgt, raw, { school, ability, bonusCrit = 0, dot = nu
     amount -= absorbed;
   }
   tgt.hp = Math.max(0, tgt.hp - amount);
-  if (tgt.hp <= 0 && mod(tgt, 'undying') > 0) tgt.hp = 1; // Borrowed Time, Fortress
+  if (tgt.hp <= 0 && (tgt.undying || mod(tgt, 'undying') > 0)) tgt.hp = 1; // Borrowed Time, Fortress, the first tutorial fights
   if (src.stat && src.side !== tgt.side) src.stat.dmg += amount;
   if (tgt.stat && tgt.kind === 'character') tgt.stat.taken += amount + absorbed;
   emit(b, { type: 'damage', src: src.uid, tgt: tgt.uid, amount, absorbed, crit, ability, dot, school, ...(proc ? { proc } : {}) });

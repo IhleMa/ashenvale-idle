@@ -402,6 +402,7 @@ export function validateContent(C) {
     const views = new Set([...TUTORIAL_VIEWS, '*']);
     for (const v of T.alwaysVisible || []) if (!views.has(v)) err('tutorial.alwaysVisible', `unknown page "${v}" (pages: ${TUTORIAL_VIEWS.join(', ')})`);
     if (!Array.isArray(T.steps)) err('tutorial.steps', 'must be a list');
+    for (const id of T.protectedSteps || []) if (!(T.steps || []).some(s => s?.id === id)) err('tutorial.protectedSteps', `unknown step "${id}"`);
     (T.steps || []).forEach((s, i) => {
       const w = `tutorial.steps[${i}]${s?.id ? ` (${s.id})` : ''}`;
       if (!s?.id || ids.has(s.id)) err(w, s?.id ? `id "${s.id}" is used twice` : 'needs an id');

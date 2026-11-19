@@ -19,6 +19,28 @@ let n = 0;
 const ok = m => { n++; console.log(`  ✔ ${m}`); };
 const stepId = p => currentStep(p)?.id ?? (p.tutorial.done ? 'DONE' : '?');
 
+// ---------------------------------------------------------------- the first fights can't be lost, whatever the class
+{
+  const { TUTORIAL } = await import('../shared/tutorial.js');
+  const C = await import('../shared/combat.js');
+  const { buildPartyUnits } = await import('../shared/party.js');
+  const { idleWaves } = await import('../shared/encounters.js');
+  const { createRng } = await import('../shared/rng.js');
+  const { CLASS_IDS } = await import('../shared/data/classes.js');
+  const { createCharacter } = await import('../shared/character.js');
+  assert.ok(TUTORIAL.protectedSteps.includes('first_fight'));
+  for (const classId of CLASS_IDS) for (let seed = 1; seed <= 3; seed++) {
+    const ch = createCharacter({ id: 'h', name: 'H', classId, level: 1, isMain: true });
+    // three times the usual damage: without protection most classes would lose
+    const b = C.createBattle({ seed, allies: buildPartyUnits([ch], { ownerId: 'p', ownerName: 'P' }), waves: idleWaves('whispering_woods', 1, createRng(seed), 1), scale: { hp: 1.5, damage: 3 } });
+    b.protected = true; for (const u of b.units) if (u.side === 'A') u.undying = true; // what game.startSoloBattle does during the protected steps
+    C.runToEnd(b);
+    assert.equal(b.state, 'victory', `${classId} seed ${seed}`);
+    assert.equal(b.units.find(u => u.side === 'A').stat.deaths, 0);
+  }
+  ok(`the first tutorial fights can't be lost: every class wins at level 1 even against 3× enemy damage`);
+}
+
 // ---------------------------------------------------------------- logic walk-through
 const p = L.migratePlayer(L.newPlayer({ id: 'tut1', username: 'Tutee' }));
 assert.equal(p.tutorial, null);

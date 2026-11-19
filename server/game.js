@@ -16,6 +16,7 @@ import { Announcements } from './announcements.js';
 import * as TL from './townLogic.js';
 import * as XL from './expeditionLogic.js';
 import * as TU from './tutorialLogic.js';
+import { TUTORIAL, currentStep } from '../shared/tutorial.js';
 import { BalanceStats } from './balance.js';
 import { EXPEDITIONS } from '../shared/data/expeditions.js';
 import { elixirBonuses } from '../shared/town.js';
@@ -520,6 +521,9 @@ export class Game {
         meta: { kind: next.kind, zoneId: zone.id, title: next.kind === 'boss' ? `Boss: ${zone.name}` : zone.name, level: zoneLevel(zone, h.level) },
       });
     }
+    // the first tutorial fights can't be lost: the party never drops below 1 health (tutorial.json "protectedSteps")
+    const step = currentStep(p);
+    if (step && (TUTORIAL.protectedSteps || []).includes(step.id) && next.kind === 'idle') { battle.protected = true; for (const u of battle.units) if (u.side === 'A') u.undying = true; }
     s.solo = { battle, kind: next.kind, zoneId: zone.id, chars: chars.map(c => c.id), rift: next.kind === 'rift' ? next : null };
     L.recordBestiary(p, { seen: battle.waves.flat().map(w => w.enemyId) });
     drainEvents(battle);
