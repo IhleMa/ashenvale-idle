@@ -52,12 +52,13 @@ export function makeCharacterUnit(ch, { ownerId, ownerName, position, bonuses = 
 const newStat = () => ({ dmg: 0, heal: 0, taken: 0, deaths: 0, casts: {} });
 
 // A player's summoned minion: stats come from its summoner (content/minions/)
-export function makeMinionUnit(minionId, owner, battleTime) {
+// strength: the summon ability's rank multiplier (+20% health and power per rank above 1)
+export function makeMinionUnit(minionId, owner, battleTime, strength = 1) {
   const def = MINIONS[minionId];
   if (!def) throw new Error('Unknown minion ' + minionId);
   const mb = owner.minionBonus || {};
-  const power = Math.max(owner.stats.magPower || 0, owner.stats.physPower || 0);
-  const maxHp = Math.max(1, Math.round(owner.maxHp * def.hp * (1 + (mb.hpPct || 0))));
+  const power = Math.max(owner.stats.magPower || 0, owner.stats.physPower || 0) * strength;
+  const maxHp = Math.max(1, Math.round(owner.maxHp * def.hp * (1 + (mb.hpPct || 0)) * strength));
   const stats = {
     maxHp, physPower: Math.round(power * def.power), magPower: Math.round(power * def.power), healPower: Math.round(power * def.power),
     defense: Math.round((owner.stats.defense || 0) * (def.defense ?? 0.5)),
@@ -440,7 +441,7 @@ function applyEffect(b, src, tgt, eff, abilityId) {
       break;
     }
     case 'summon': {
-      if (eff.minion) { summonMinions(b, src, eff); break; }
+      if (eff.minion) { summonMinions(b, src, eff, abilityId); break; }
       const current = b.units.filter(u => u.side === src.side && u.alive).length;
       const n = Math.min(eff.count || 1, Math.max(0, (eff.max || 4) - current + 1));
       for (let i = 0; i < n; i++) {
@@ -528,7 +529,7 @@ function consumeDots(b, src, tgt, eff, abilityId, rm) {
 }
 
 // ---------------------------------------------------------------- minions
-function summonMinions(b, src, eff) {
+function summonMinions(b, src, eff, abilityId) {
   if (!MINIONS[eff.minion]) return;
   const max = (eff.max || 1) + (src.minionBonus?.extraMax || 0);
   for (let i = 0; i < (eff.count || 1); i++) {
@@ -539,7 +540,7 @@ function summonMinions(b, src, eff) {
       if (oldest) { oldest.expiresAt = b.time + oldest.duration; oldest.hp = oldest.maxHp; emit(b, { type: 'renew', src: src.uid, tgt: oldest.uid }); }
       continue;
     }
-    const nu = addUnit(b, makeMinionUnit(eff.minion, src, b.time));
+    const nu = addUnit(b, makeMinionUnit(eff.minion, src, b.time, rankMult(src, abilityId)));
     // enemies notice the newcomer (tanky minions loudly)
     for (const e of enemiesOf(b, nu)) if (e.threatTable) e.threatTable[nu.uid] = MINIONS[eff.minion].threat ?? 10;
     emit(b, { type: 'spawn', src: src.uid, unit: publicUnit(nu) });

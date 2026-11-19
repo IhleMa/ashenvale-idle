@@ -44,6 +44,17 @@ const cast = (b, u, abilityId, target = u) => { for (const eff of ABILITIES[abil
   assert.ok(pact.every(t => t.kind === 'minion'));
   ok('rules: "number of my minions" and "all my minions" target the summoner\'s minions');
 }
+
+// ranks on summon abilities make the minion stronger: +20% health and power per rank
+{
+  const r1 = battle(), r3 = battle();
+  r3.su.ranks.bone_golem = 3;
+  cast(r1.b, r1.su, 'bone_golem'); cast(r3.b, r3.su, 'bone_golem');
+  const g1 = ownMinions(r1.b, r1.su, 'bone_golem')[0], g3 = ownMinions(r3.b, r3.su, 'bone_golem')[0];
+  assert.ok(Math.abs(g3.maxHp / g1.maxHp - 1.4) < 0.01, `${g3.maxHp} vs ${g1.maxHp}`);
+  assert.ok(Math.abs(g3.stats.physPower / g1.stats.physPower - 1.4) < 0.02);
+  ok('a rank 3 Bone Golem has 40% more health and power than rank 1');
+}
 // expiry, owner death
 {
   const { b, su } = battle();
