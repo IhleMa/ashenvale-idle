@@ -34,11 +34,17 @@ export const createView = {
     <div class="create-screen">
       <h1 class="title">Create your Hero</h1>
       <p class="muted">Your hero is your permanent main character: slightly stronger than any recruit, with an extra ability slot, bonus attribute points and a unique hero-only class title at level 40.</p>
-      <div class="class-grid">
-        ${CLASS_IDS.map(id => {
-          const c = CLASSES[id];
-          return `<button class="class-card ${id === draft.classId ? 'active' : ''}" data-class="${id}" style="--cc:${c.color}">
-            ${classIcon(id, 'lg')}<b>${esc(c.name)}</b><small>${esc(CONFIG.roles[c.role].label)}</small></button>`;
+      <div class="class-roles">
+        ${Object.entries(CONFIG.roles).map(([role, r]) => {
+          const ids = CLASS_IDS.filter(id => CLASSES[id].role === role);
+          if (!ids.length) return '';
+          return `<div class="class-role"><h4>${esc(r.label)}${ids.length > 1 ? 's' : ''}</h4><div class="class-grid">
+            ${ids.map(id => {
+              const c = CLASSES[id];
+              return `<button class="class-card ${id === draft.classId ? 'active' : ''}" data-class="${id}" style="--cc:${c.color}">
+                ${classIcon(id, 'lg')}<b>${esc(c.name)}</b></button>`;
+            }).join('')}
+          </div></div>`;
         }).join('')}
       </div>
       <div class="create-detail panel">
