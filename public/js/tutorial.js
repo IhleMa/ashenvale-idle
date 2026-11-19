@@ -63,11 +63,41 @@ export function initTutorial(options) {
       }
     }
   });
+  // during a goal step only the highlighted things can be clicked, so steps happen in order
+  document.addEventListener('click', guardClick, true);
+  document.addEventListener('mousedown', e => { if (e.target instanceof Element && e.target.closest('select, input, textarea')) guardClick(e); }, true);
   // highlights follow the page as it re-renders
   let queued = false;
   const schedule = () => { if (queued) return; queued = true; requestAnimationFrame(() => { queued = false; applyHighlights(); }); };
   new MutationObserver(schedule).observe(document.getElementById('view'), { childList: true, subtree: true });
   new MutationObserver(schedule).observe(document.getElementById('sidebar'), { childList: true });
+}
+
+// Clicks on the page or the menu that aren't on the highlighted target are swallowed during a goal step.
+// Dialogs, the tutorial card, toasts and the top bar stay usable. If a step's target isn't on the page
+// (nothing to highlight right now), nothing is blocked, so the player can never get stuck. Steps without any
+// highlight (the first fights) block the whole page: there is nothing to click, the fights run by themselves.
+let lastNudge = 0;
+function guardClick(e) {
+  const p = state.player;
+  const step = p && currentStep(p);
+  if (!step || step.goal?.type === 'ack') return;
+  const el = e.target instanceof Element ? e.target : e.target?.parentElement;
+  if (!el) return;
+  const inView = el.closest('#view'), inMenu = el.closest('#sidebar');
+  if (!inView && !inMenu) return;
+  if (el.closest('.tut-hl, .tut-hl-nav, #menu-toggle')) return;
+  if (inMenu) {
+    const link = el.closest('[data-view]');
+    if (!link || link.dataset.view === step.view) return; // the menu entry of this step's page is always fine
+  } else if (ctx.currentView() === step.view && (step.highlight || []).length && !targets(step).els.length) return; // target missing: don't trap the player
+  e.preventDefault();
+  e.stopImmediatePropagation();
+  if (arrows && !arrows.hidden) { arrows.classList.remove('tut-nudge'); void arrows.offsetWidth; arrows.classList.add('tut-nudge'); }
+  if (e.type === 'click' && Date.now() - lastNudge > 4000) {
+    lastNudge = Date.now();
+    toast('Tutorial: click the highlighted button first (or skip the tutorial).', 'info');
+  }
 }
 
 function setMin(v) {
@@ -176,7 +206,7 @@ function positionArrow() {
   if (!r.width && !r.height) { a.hidden = true; return; }
   a.hidden = false;
   const side = a.nav && el.id !== 'menu-toggle' ? 'right' : r.top > 90 ? 'above' : 'below';
-  a.className = `tut-arrow ${side}`;
+  a.className = `tut-arrow ${side}${a.classList.contains('tut-nudge') ? ' tut-nudge' : ''}`;
   a.innerHTML = side === 'right' ? '<span>👈</span><b>Click here</b>' : side === 'above' ? '<b>Click here</b><span>👇</span>' : '<span>👆</span><b>Click here</b>';
   const w = a.offsetWidth, h = a.offsetHeight;
   let x, y;
