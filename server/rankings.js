@@ -16,6 +16,7 @@ export const RANKING_CATEGORIES = {
   coopWins:     { label: 'Co-op victories', value: s => s.coopWins, display: s => s.coopWins },
   achievements: { label: 'Achievements', value: s => s.achievements, display: s => `${s.achievements}/${Object.keys(ACHIEVEMENTS).length}` },
   rift:         { label: 'Highest rift', value: s => s.riftBest * 1e5 - (s.riftTime || 0), display: s => (s.riftBest ? `Tier ${s.riftBest}${s.riftTime ? ` · ${Math.floor(s.riftTime / 60)}:${String(Math.round(s.riftTime % 60)).padStart(2, '0')}` : ''}` : '—') },
+  arena:        { label: 'Arena rating', only: s => s.arenaReady || s.arenaGames > 0, value: s => s.arenaRating, display: s => (s.arenaReady || s.arenaGames ? `${s.arenaRating} · ${s.arenaWins}–${s.arenaLosses}` : '—') },
   progress:     { label: 'World progress', value: s => s.zonesUnlocked * 1e6 + s.bossKills, display: s => `${s.zonesUnlocked} zone${s.zonesUnlocked === 1 ? '' : 's'}` },
 };
 
@@ -51,6 +52,8 @@ export class Rankings {
       achievements: Object.keys(p.achievements || {}).length, zonesUnlocked: p.unlockedZones.length,
       riftBest: p.rift?.best || 0, riftTime: p.rift?.bestTimes?.[p.rift?.best] || 0,
       bestiary: Object.keys(p.bestiary || {}).length,
+      arenaRating: p.arena?.rating ?? 1000, arenaReady: p.arena?.party != null && !!p.parties[p.arena.party]?.members.length,
+      arenaWins: p.arena?.wins || 0, arenaLosses: p.arena?.losses || 0, arenaGames: (p.arena?.wins || 0) + (p.arena?.losses || 0),
       inGroup: !!this.game.groupOf(p.id),
     };
   }
@@ -67,7 +70,7 @@ export class Rankings {
 
   board({ category = 'level', classId = null, search = '', limit = 100 } = {}, me) {
     const cat = RANKING_CATEGORIES[category] || RANKING_CATEGORIES.level;
-    let list = [...this.all()].sort((a, b) => cat.value(b) - cat.value(a) || a.name.localeCompare(b.name));
+    let list = [...this.all()].filter(s => !cat.only || cat.only(s)).sort((a, b) => cat.value(b) - cat.value(a) || a.name.localeCompare(b.name));
     if (classId && CLASSES[classId]) list = list.filter(s => s.hero.classId === classId);
     const ranked = list.map((s, i) => ({ ...s, rank: i + 1, value: cat.display(s) }));
     const mine = ranked.find(s => s.id === me) || null;

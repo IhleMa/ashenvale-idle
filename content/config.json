@@ -43,8 +43,22 @@
   "offline": { "maxHours": 8, "minSeconds": 60, "maxSimulatedFights": 250, "efficiency": 1 },
   "recruitment": { "offers": 4, "refreshSeconds": 600, "refreshCostPerLevel": 15, "costBase": 100, "costPerLevel": 40 },
   "inventory": { "limit": 80 },
-  "featureUnlocks": { "quests": 4, "bestiary": 6, "auction": 8, "multiplayer": 12, "rifts": 15, "gems": 20 },
+  "featureUnlocks": { "quests": 4, "bestiary": 6, "auction": 8, "multiplayer": 12, "arena": 12, "rifts": 15, "gems": 20 },
   "ascension": { "enabled": true, "bonusSkillPoints": 10, "xpLevelGap": 5, "levelSync": { "enabled": true, "levelGap": 3, "gearCurve": 4 } },
+  "arena": {
+    "startRating": 1000,
+    "kFactor": 32,
+    "attacksMax": 5,
+    "attackRefillMinutes": 120,
+    "opponentChoices": 3,
+    "sameOpponentMinutes": 60,
+    "damageMult": 0.4,
+    "healingMult": 0.5,
+    "controlMult": 0.5,
+    "timeLimit": 90,
+    "winGoldPerLevel": 15,
+    "logSize": 20
+  },
   "coop": {
     "maxPlayers": 4,
     "partySize": 4,

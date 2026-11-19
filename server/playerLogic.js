@@ -21,6 +21,7 @@ import { EXPEDITIONS } from '../shared/data/expeditions.js';
 import { BUILDINGS } from '../shared/data/town.js';
 import { SUBCLASSES } from '../shared/data/subclasses.js';
 import { killXp } from '../shared/encounters.js';
+import { newArena, refillAttacks } from '../shared/arena.js';
 
 const NAMES = ['Aldric', 'Brienna', 'Cassian', 'Dagna', 'Elowen', 'Fenris', 'Gwyn', 'Halvard', 'Isolde', 'Jorah', 'Kael', 'Liora', 'Merrick', 'Nyx', 'Orin', 'Perrin', 'Quill', 'Rowan', 'Sable', 'Thane', 'Ulric', 'Vesna', 'Wren', 'Xander', 'Yara', 'Zephyr', 'Ashka', 'Bram', 'Corin', 'Delia', 'Edda', 'Faelan', 'Garrick', 'Hesper', 'Ivo', 'Juniper', 'Kestrel', 'Lysa', 'Mordecai', 'Nessa', 'Oswin', 'Petra', 'Ronan', 'Selka', 'Tamsin', 'Vale'];
 
@@ -42,6 +43,7 @@ export function newPlayer(account) {
     bestiary: {},       // enemyId -> { kills, seen }
     quests: null,       // daily/weekly quests (questLogic)
     rift: { best: 0, bestTimes: {}, runs: 0, timed: 0, history: [], auto: 'off', cleared: [] },
+    arena: newArena(),
     lootFilter: { enabled: false, protectUpgrades: true, rules: [] },
     lootLog: [],        // recent items handled by the loot filter
     tutorial: null,     // new-player tutorial (tutorialLogic): { step, done, base }
@@ -663,6 +665,7 @@ export function publicPlayer(p) {
     town: p.town, expeditions: p.expeditions || [], mailbox: p.mailbox || [], serverTime: Date.now(),
     bestiary: p.bestiary || {}, quests: p.quests, rift: p.rift, lootFilter: p.lootFilter, lootLog: p.lootLog || [],
     tutorial: p.tutorial || null,
+    arena: p.arena ? (refillAttacks(p.arena), { ...p.arena, recent: undefined, nextAttackAt: refillAttacks(p.arena) }) : null,
   };
 }
 

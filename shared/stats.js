@@ -29,7 +29,7 @@ export function equipmentStats(ch) {
   const out = {};
   for (const item of Object.values(ch.equipment || {})) {
     if (!item) continue;
-    const f = ch.gearSync ? gearSyncFactor(ch.gearSync, item.level) : 1; // level sync (ascension) scales gear down
+    const f = ch.gearSync ? gearSyncFactor(ch.gearSync, item.level, ch.gearUp) : 1; // level sync (ascension) scales gear down
     for (const [k, v] of Object.entries(item.stats)) out[k] = (out[k] || 0) + v * f;
     if (item.enchant) out[item.enchant.stat] = (out[item.enchant.stat] || 0) + item.enchant.value * f; // Enchanter's Study
     if (item.sockets) for (const [k, v] of Object.entries(socketStats(item))) out[k] = (out[k] || 0) + v * f; // socketed gems

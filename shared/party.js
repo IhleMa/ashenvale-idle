@@ -1,7 +1,7 @@
 // Party composition bonuses & building combat units from characters.
 import { CONFIG } from './config.js';
 import { makeCharacterUnit } from './combat.js';
-import { syncParty } from './levelsync.js';
+import { syncParty, syncedCharacter } from './levelsync.js';
 
 // characters: array of character objects in position order
 export function partyBonuses(characters) {
@@ -27,9 +27,10 @@ export function partyBonuses(characters) {
 }
 
 // buffs: extra temporary bonuses (e.g. elixirs) { damagePct, damageTakenPct, allStatsPct }
-export function buildPartyUnits(characters, { ownerId, ownerName, positionOffset = 0, extraBonuses = null, buffs = null, vsEnemy = null } = {}) {
+// syncLevel (Arena): every character is synced up or down to that level instead of the ascension level sync
+export function buildPartyUnits(characters, { ownerId, ownerName, positionOffset = 0, extraBonuses = null, buffs = null, vsEnemy = null, syncLevel = null } = {}) {
   const pb = extraBonuses || partyBonuses(characters);
-  characters = syncParty(characters).characters; // ascension level sync
+  characters = syncLevel ? characters.map(c => syncedCharacter(c, syncLevel, { up: true })) : syncParty(characters).characters; // ascension level sync
   return characters.map((ch, i) => makeCharacterUnit(ch, {
     ownerId, ownerName, position: positionOffset + i, vsEnemy,
     bonuses: {

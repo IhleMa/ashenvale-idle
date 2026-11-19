@@ -112,9 +112,11 @@ export function makeEnemyUnit(enemyId, level, { position = 0, scale = { hp: 1, d
 // waves: array of arrays of { enemyId, level } ; scale: { hp, damage } multiplier for enemies
 // hooks (optional, e.g. rift affixes): { spawn(b, unit, api), kill(b, src, tgt, api), damaged(b, src, tgt, info, api),
 //   tick(b, api), damageMult(src, tgt, school) -> number }
-export function createBattle({ seed, allies, waves, scale = { hp: 1, damage: 1 }, meta = {}, hooks = null }) {
+// pvp (Arena): { damageMult, healingMult, controlMult, timeLimit } — waves then hold { unit } entries: player characters
+// on the enemy side (built with makeCharacterUnit), and the fight is decided by remaining health at the time limit.
+export function createBattle({ seed, allies, waves, scale = { hp: 1, damage: 1 }, meta = {}, hooks = null, pvp = null }) {
   const b = {
-    seed, rng: createRng(seed), time: 0, ticks: 0, nextUid: 1,
+    seed, rng: createRng(seed), time: 0, ticks: 0, nextUid: 1, pvp,
     units: [], waves, waveIndex: -1, scale, meta, hooks,
     state: 'running', events: [], kills: [], phaseTime: 0,
   };
@@ -135,6 +137,7 @@ function nextWave(b) {
   b.units = b.units.filter(u => u.side === 'A' || u.alive); // drop dead enemies
   const wave = b.waves[b.waveIndex];
   wave.forEach((spec, i) => {
+    if (spec.unit) { spec.unit.side = 'B'; addUnit(b, spec.unit); return; } // Arena: a player's character on the enemy side
     const u = addUnit(b, makeEnemyUnit(spec.enemyId, spec.level, { position: i, scale: b.scale }));
     seedThreat(b, u);
     b.hooks?.spawn?.(b, u, HOOK_API);
@@ -202,6 +205,8 @@ export function stepBattle(b) {
     }
   }
   if (b.hooks?.tick) { b.hooks.tick(b, HOOK_API); if (checkEnd(b)) return; }
+  // Arena: at the time limit the side with more health left (share of maximum, characters only) wins
+  if (b.pvp?.timeLimit && b.time >= b.pvp.timeLimit) { finish(b, healthShare(b, 'A') >= healthShare(b, 'B') ? 'victory' : 'defeat'); return; }
   for (const u of b.units) {
     if (!u.alive) continue;
     u.actionTimer -= DT;
@@ -211,6 +216,12 @@ export function stepBattle(b) {
     if (checkEnd(b)) return;
   }
   checkEnd(b);
+}
+
+export function healthShare(b, side) {
+  const cs = b.units.filter(u => u.side === side && u.kind === 'character');
+  const max = cs.reduce((n, u) => n + u.maxHp, 0);
+  return max ? cs.reduce((n, u) => n + (u.alive ? u.hp : 0), 0) / max : 0;
 }
 
 function checkEnd(b) {
@@ -284,7 +295,7 @@ function basicTarget(b, u) {
   const foes = enemiesOf(b, u);
   if (!foes.length) return null;
   const taunter = foes.find(f => hasStatus(f, 'taunting'));
-  if (taunter && u.threatTable) return taunter;
+  if (taunter && (u.threatTable || b.pvp)) return taunter; // in the Arena taunts pull the other players' basic attacks too
   if (u.threatTable) {
     let best = null, bestT = -1;
     for (const f of foes) { const t = u.threatTable[f.uid] || 0; if (t > bestT) { bestT = t; best = f; } }
@@ -347,6 +358,7 @@ function applyEffect(b, src, tgt, eff, abilityId) {
       if (STATUSES[eff.status]?.type === 'buff') dur *= 1 + (src.bonuses.buffDurationPct || 0);
       if (STATUSES[eff.status]?.tick === 'damage') { dur *= 1 + (src.bonuses.dotDurationPct || 0); v *= 1 + (src.bonuses.dotDamagePct || 0); }
       if (STATUSES[eff.status]?.control && target.boss) dur *= STATUSES[eff.status].bossDurationMult ?? 1;
+      if (STATUSES[eff.status]?.control && b.pvp) dur *= b.pvp.controlMult ?? 1; // Arena: shorter stuns
       // Volatile Mixture: the next element flask lands on every enemy
       const volatile = STATUSES[eff.status]?.element && src.statuses.find(s => STATUSES[s.id]?.volatile);
       if (volatile) src.statuses = src.statuses.filter(s => s !== volatile);
@@ -621,6 +633,7 @@ function dealDamage(b, src, tgt, raw, { school, ability, bonusCrit = 0, dot = nu
   }
   if (src.vsEnemy && tgt.defId in src.vsEnemy) amount *= 1 + src.vsEnemy[tgt.defId];
   if (b.hooks?.damageMult) amount *= b.hooks.damageMult(src, tgt, school);
+  if (b.pvp && src.side !== tgt.side) amount *= b.pvp.damageMult ?? 1; // Arena: players hit each other softer
   let crit = false;
   if (!noCrit && b.rng() < Math.min(C.critCap, src.stats.critChance + bonusCrit + mod(src, 'critChance'))) { crit = true; amount *= src.stats.critDamage; }
   if (!ignoreArmor) {
@@ -719,7 +732,7 @@ function applyProcEffect(b, u, t, p, ctx) {
 
 function healUnit(b, src, tgt, raw, ability, hot = null, proc = null) {
   if (!tgt.alive) return 0;
-  let amount = raw * (1 + src.bonuses.healingPct) * Math.max(0, 1 + mod(tgt, 'healingTakenPct')) * Math.max(0, 1 + mod(src, 'healingDonePct'));
+  let amount = raw * (1 + src.bonuses.healingPct) * Math.max(0, 1 + mod(tgt, 'healingTakenPct')) * Math.max(0, 1 + mod(src, 'healingDonePct')) * (b.pvp?.healingMult ?? 1);
   let crit = false;
   if (!hot && b.rng() < src.stats.critChance * 0.5) { crit = true; amount *= 1.5; }
   amount = Math.round(amount);

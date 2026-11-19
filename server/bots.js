@@ -18,6 +18,7 @@ import { availablePoints } from '../shared/skilltree.js';
 import { rosterLimit, upgradeCost, canAfford, upgradeBlocker, bLevel } from '../shared/town.js';
 import { busyWith } from '../shared/expeditions.js';
 import { maxStartTier, RIFT } from '../shared/rifts.js';
+import { featureLock } from '../shared/unlocks.js';
 import { GEM_STATS, GEM_CONFIG, shardId, parseGemKey } from '../shared/gems.js';
 import { rarityIndex, CONFIG } from '../shared/config.js';
 import { PRESETS, newRule } from '../shared/lootfilter.js';
@@ -281,6 +282,8 @@ export class BotManager {
     const party = p.parties[p.activeParty];
     const want = [p.heroId, ...this.balancedPick(fighters, CONFIG.party.size - 1)];
     if (want.join() !== party.members.join() && chance(0.4 + b.persona.skill * 0.6)) this.act(b, 'set_party', { index: p.activeParty, members: want });
+    // arena: bots defend with their active party, so the arena has opponents (they don't attack)
+    if (p.arena && p.arena.party == null && !featureLock(p, 'arena') && p.parties[p.activeParty]?.members.length) this.act(b, 'arena_set_party', { party: p.activeParty });
     void h;
   }
 

@@ -95,7 +95,8 @@ bus.on('msg:battle_end', m => {
       mergeMeter(meters[m.k].session, b.meter);
       meterDirty = true;
     }
-    if (s.result === 'victory') {
+    if (s.kind === 'arena') addLog(b, { cat: 'event', t: b.time, html: `<span class="${s.result === 'victory' ? 'log-win' : 'log-loss'}">${s.result === 'victory' ? 'Arena victory' : 'Arena defeat'} against ${esc(s.opponent)}${s.byTime ? ' (on time)' : ''}: ${s.delta >= 0 ? '+' : ''}${s.delta} rating → ${fmt(s.rating)}${s.gold ? `, +${fmt(s.gold)} gold` : ''}</span>` });
+    else if (s.result === 'victory') {
       const items = (s.items?.length ? ` · ${s.items.length} item${s.items.length > 1 ? 's' : ''}` : '') + Object.entries(s.materials || {}).map(([k, v]) => ` · <b>+${v} ${esc(MATERIALS[k]?.name || k)}</b>`).join('');
       addLog(b, { cat: 'event', t: b.time, html: `<span class="log-win">Victory! +${fmt(s.xp)} XP, +${fmt(s.gold)} gold${items}</span>` });
     } else addLog(b, { cat: 'event', t: b.time, html: '<span class="log-loss">Defeat… your party regroups.</span>' });
@@ -255,6 +256,11 @@ function headerHtml(k, b) {
   }
   const zone = ZONES[p.zone];
   const zones = Object.values(ZONES).sort((a, c) => a.order - c.order);
+  if (b?.meta?.kind === 'arena') {
+    return `<div class="combat-title"><h2>🏟 ${esc(b.meta.title)}</h2>
+        <span class="muted">Both teams at level ${b.meta.level} · decided by remaining health after ${b.meta.timeLimit} s</span></div>
+      <div class="combat-controls"><a class="btn" href="#/arena">Back to the Arena</a></div>`;
+  }
   if (b?.meta?.kind === 'rift' && b.state === 'running') {
     return `<div class="combat-title">
         <h2>🌀 ${esc(b.meta.title)}</h2>
@@ -411,6 +417,11 @@ function showBanner(s) {
   el.hidden = false;
   el.className = `result-banner ${s.result}`;
   const riftLine = s.kind === 'rift' ? `<span>Rift tier ${s.tier}: ${Math.floor(s.time / 60)}:${String(s.time % 60).padStart(2, '0')} — ${s.timed ? '⏱ in time!' : s.result === 'victory' ? 'over time' : 'defeated'}${s.crystals ? ` · +${s.crystals} 💠` : ''}</span>` : '';
+  if (s.kind === 'arena') {
+    el.innerHTML = `<b>${s.result === 'victory' ? 'Arena victory!' : 'Arena defeat'}</b><span>vs ${esc(s.opponent)}${s.byTime ? ' · decided on time' : ''} · ${s.delta >= 0 ? '+' : ''}${s.delta} rating (${fmt(s.rating)})${s.gold ? ` · +${fmt(s.gold)} gold` : ''}</span>`;
+    setTimeout(() => { if (el.isConnected) el.hidden = true; }, 4000);
+    return;
+  }
   el.innerHTML = s.result === 'victory'
     ? `<b>${s.kind === 'rift' ? (s.timed ? 'Rift timed!' : 'Rift cleared') : 'Victory'}</b>${riftLine}<span>${s.repeat && !s.xp ? 'Tier already cleared — no XP or gold' : `+${fmt(s.xp)} XP · +${fmt(s.gold)} gold${s.firstClear ? ' (first clear)' : ''}`}${s.items?.length ? ` · ${s.items.length} loot` : ''}${Object.entries(s.materials || {}).map(([k, v]) => ` · +${v} ${esc(MATERIALS[k]?.glyph || '')} ${esc(MATERIALS[k]?.name || k)}`).join('')}</span>`
     : `<b>Defeat</b>${riftLine}<span>Tip: click an enemy to see its abilities in the Bestiary, then adjust behaviour, gear or party.</span>`;
@@ -423,7 +434,7 @@ function renderResults() {
   const list = [...results.coop, ...results.solo].sort((a, b) => b.at - a.at).slice(0, 8);
   el.innerHTML = list.length ? list.map(r => `<div class="result-row ${r.result}">
       <div><b>${r.result === 'victory' ? 'Victory' : 'Defeat'}</b> <span class="muted small">${esc(r.title || '')}</span></div>
-      ${r.result === 'victory' ? `<div class="small"><span class="xp-text">+${fmt(r.xp)} XP</span> · <span class="gold-text">+${fmt(r.gold)}g</span>
+      ${r.kind === 'arena' ? `<div class="small">${r.delta >= 0 ? '+' : ''}${r.delta} arena rating${r.gold ? ` · <span class="gold-text">+${fmt(r.gold)}g</span>` : ''}</div>` : r.result === 'victory' ? `<div class="small"><span class="xp-text">+${fmt(r.xp)} XP</span> · <span class="gold-text">+${fmt(r.gold)}g</span>
         ${(r.items || []).map(i => `<div class="rarity-text rarity-${i.rarity}">${esc(i.name)}</div>`).join('')}
         ${r.sold ? `<div class="muted">${r.sold} item(s) auto-sold/salvaged</div>` : ''}
         ${(r.levelUps || []).map(l => `<div class="lvlup">▲ ${esc(l.name)} → Lv ${l.level}</div>`).join('')}</div>` : ''}
@@ -455,7 +466,7 @@ export const combatView = {
       const foe = e.target.closest('.unit.foe');
       if (foe && !e.target.closest('button')) {
         const u = battles[shown()]?.units.get(Number(foe.dataset.uid));
-        if (u) openBestiary(u.defId);
+        if (u && u.kind === 'enemy') openBestiary(u.defId);
         return;
       }
       const cat = e.target.closest('[data-cat]');

@@ -11,6 +11,7 @@ import { coopLineup } from '../shared/coop.js';
 import { createRng, randomSeed } from '../shared/rng.js';
 import { ABILITIES } from '../shared/data/abilities.js';
 import { Rankings } from './rankings.js';
+import { Arena } from './arena.js';
 import { AuctionHouse } from './auction.js';
 import { adminActions } from './admin.js';
 import { Announcements } from './announcements.js';
@@ -30,7 +31,7 @@ import { RIFT, riftWaves, riftScale, riftHooks, affixesFor, maxStartTier, riftTh
 
 const { GameError } = L;
 const SAVE_NOW = new Set(['ascend', 'ah_list', 'ah_buy', 'ah_cancel', 'collect_mail', 'town_speedup', 'expedition_speedup']);
-const READ_ONLY = new Set(['get_rankings', 'inspect_player', 'ah_search', 'ah_mine']);
+const READ_ONLY = new Set(['get_rankings', 'inspect_player', 'ah_search', 'ah_mine', 'arena_view']);
 const fail = m => { throw new GameError(m); };
 
 export class Game {
@@ -53,6 +54,7 @@ export class Game {
     this.saveHandle = null;
     this.onlineDirty = true;
     this.rankings = new Rankings(this);
+    this.arena = new Arena(this);
     this.auction = new AuctionHouse(this);
     this.announcements = new Announcements(store);
     this.adminActions = adminActions(this);
@@ -391,6 +393,11 @@ export class Game {
       this.abortSolo(s);
       s.solo = { next: { kind: 'boss', zoneId }, restUntil: 0 };
     },
+    // ---- arena
+    arena_set_party(s, d) { this.arena.setParty(s.player, d); },
+    arena_view(s) { return this.arena.view(s.player); },
+    arena_refresh(s) { this.arena.refresh(s.player); return this.arena.view(s.player); },
+    arena_attack(s, d) { this.arena.attack(s, { opponentId: String(d.opponentId || '') }); },
     set_coop_chars(s, d) { L.setCoopChars(s.player, d); const g = this.groupOf(s.player.id); if (g) this.broadcastGroup(g); },
 
     // ---- groups
@@ -539,6 +546,7 @@ export class Game {
 
   finishSoloBattle(s) {
     if (s.solo.kind === 'rift') return this.finishRift(s);
+    if (s.solo.kind === 'arena') return this.arena.finish(s);
     const p = s.player;
     const { battle, kind, zoneId } = s.solo;
     const rest = battle.state === 'victory' ? CONFIG.combat.restBetweenFights : CONFIG.combat.reviveDelay;

@@ -10,7 +10,7 @@ import { CLASSES, CLASS_IDS } from '/shared/data/classes.js';
 
 const CATEGORIES = [
   ['level', 'Hero level'], ['power', 'Party power'], ['heroPower', 'Hero power'], ['kills', 'Enemies slain'],
-  ['bossKills', 'Bosses slain'], ['coopWins', 'Co-op victories'], ['rift', 'Highest rift'], ['achievements', 'Achievements'], ['progress', 'World progress'],
+  ['bossKills', 'Bosses slain'], ['coopWins', 'Co-op victories'], ['rift', 'Highest rift'], ['arena', 'Arena rating'], ['achievements', 'Achievements'], ['progress', 'World progress'],
 ];
 const ui = { category: 'level', classId: '', search: '' };
 let data = null;
