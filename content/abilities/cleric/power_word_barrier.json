@@ -15,6 +15,6 @@
     "target": { "selector": "ally_tank" },
     "targetConditions": [{ "type": "target_missing_status", "status": "barrier" }]
   },
-  "priority": 65,
+  "priority": 78,
   "order": 270
 }

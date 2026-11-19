@@ -1,0 +1,40 @@
+{
+  "name": "Regrowth",
+  "classId": "druid",
+  "unlockLevel": 5,
+  "type": "heal",
+  "description": "Heals an ally for 120% healing power at once, then 30% every second for 8 seconds (any form).",
+  "cost": 18,
+  "cooldown": 5,
+  "target": "ally",
+  "effects": [
+    {
+      "kind": "heal",
+      "stat": "healPower",
+      "power": 1.2
+    },
+    {
+      "kind": "status",
+      "status": "regrowth",
+      "duration": 8,
+      "stat": "healPower",
+      "power": 0.3
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "ally_hp_below",
+        "value": 60
+      }
+    ],
+    "target": {
+      "selector": "ally_lowest_hp_pct"
+    },
+    "targetConditions": []
+  },
+  "priority": 75,
+  "order": 205
+}

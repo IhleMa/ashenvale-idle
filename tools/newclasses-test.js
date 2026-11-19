@@ -234,4 +234,19 @@ ok('6 new classes, each with 7+ base abilities, a 4-branch tree and 3 ascendanci
   void foes;
 }
 
+// ---- Cleric (burst) vs Druid (over time): Holy Nova hits every enemy and heals every ally once
+{
+  const { b, me, ally, foes } = battle('cleric');
+  me.hp = me.maxHp * 0.5; ally.hp = ally.maxHp * 0.5;
+  const before = [me.hp, ally.hp];
+  C.drainEvents(b);
+  foes.forEach((f, i) => { for (const eff of ABILITIES.holy_nova.effects) if (!(eff.once && i > 0)) C.__test.applyEffect(b, me, f, eff, 'holy_nova'); });
+  const ev = C.drainEvents(b);
+  assert.ok(foes.every(f => ev.some(e => e.type === 'damage' && e.tgt === f.uid)));
+  assert.equal(ev.filter(e => e.type === 'heal').length, 2, 'each ally healed once');
+  assert.ok(me.hp > before[0] && ally.hp > before[1]);
+  assert.ok(!ABILITIES.renew && !ABILITIES.purify && ABILITIES.regrowth && ABILITIES.natures_cure);
+  ok('Cleric Holy Nova damages every enemy and heals each ally once; heal-over-time and cleansing moved to the Druid');
+}
+
 console.log(`New classes: all ${n} checks passed.`);

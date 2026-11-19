@@ -3,10 +3,10 @@
   "role": "healer",
   "color": "#f0d27a",
   "glyph": "✚",
-  "description": "Holy healer. Heals single allies or the whole party, shields, buffs and cleanses.",
-  "strengths": ["Powerful healing", "Shields & buffs", "Removes debuffs"],
+  "description": "Holy healer with burst: big direct heals, shields and Holy Nova, which damages every enemy and heals the party at once.",
+  "strengths": ["Powerful healing", "Shields & buffs", "Deals damage while healing"],
   "weaknesses": ["Low damage", "Mana management"],
-  "resource": { "id": "mana", "name": "Mana", "color": "#3a7bff", "max": 100, "start": 100, "regen": 5 },
+  "resource": { "id": "mana", "name": "Mana", "color": "#3a7bff", "max": 100, "start": 100, "regen": 7 },
   "baseAttributes": { "str": 6, "int": 13, "dex": 5, "vit": 11 },
   "growth": { "str": 0.7, "int": 2.5, "dex": 0.7, "vit": 2.2 },
   "scaling": {

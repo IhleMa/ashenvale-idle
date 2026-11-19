@@ -3,11 +3,12 @@
   "role": "healer",
   "color": "#3f8f3a",
   "glyph": "☘",
-  "description": "A shapeshifting healer: Tree form to heal, Bear form to tank, Cat form to fight. Its rules decide when to shift.",
+  "description": "A shapeshifting healer that heals over time: Rejuvenation, Regrowth and Wild Growth keep the party topped up, Nature's Cure removes debuffs, and Tree, Bear and Cat forms switch its role by its rules.",
   "strengths": [
-    "Can heal, tank or deal damage in one fight",
     "Strong healing over time",
-    "Revives a fallen ally once per fight"
+    "Removes debuffs",
+    "Revives a fallen ally once per fight",
+    "Can tank or deal damage in other forms"
   ],
   "weaknesses": [
     "Weaker than a dedicated healer, tank or damage dealer in any one role",

@@ -1,0 +1,40 @@
+{
+  "name": "Nature's Cure",
+  "classId": "druid",
+  "unlockLevel": 7,
+  "type": "utility",
+  "description": "Removes up to 2 harmful effects from an ally and heals them for 60% healing power (any form).",
+  "cost": 12,
+  "cooldown": 6,
+  "target": "ally",
+  "effects": [
+    {
+      "kind": "cleanse",
+      "count": 2
+    },
+    {
+      "kind": "heal",
+      "stat": "healPower",
+      "power": 0.6
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "always"
+      }
+    ],
+    "target": {
+      "selector": "ally_lowest_hp_pct"
+    },
+    "targetConditions": [
+      {
+        "type": "target_has_debuff"
+      }
+    ]
+  },
+  "priority": 50,
+  "order": 206
+}

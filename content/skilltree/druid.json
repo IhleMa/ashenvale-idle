@@ -10,7 +10,8 @@
       "abilities": {
         "1": "tree_form",
         "3": "wild_growth",
-        "6": "rebirth"
+        "6": "rebirth",
+        "2": "regrowth"
       },
       "notables": {
         "4": {
@@ -85,7 +86,9 @@
         "int",
         "dex"
       ],
-      "abilities": {},
+      "abilities": {
+        "2": "natures_cure"
+      },
       "notables": {
         "4": {
           "name": "Nature's Pulse",

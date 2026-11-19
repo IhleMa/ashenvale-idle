@@ -330,6 +330,7 @@ function applyEffect(b, src, tgt, eff, abilityId) {
       break;
     }
     case 'heal': {
+      if (eff.allies) { for (const a of alliesOf(b, src)) healUnit(b, src, a, effPower(src, eff.stat) * eff.power * rm, abilityId, null, eff.proc); break; } // Holy Nova
       if (eff.self) tgt = src; // e.g. a strike that also heals the caster
       if (!tgt.alive) return;
       healUnit(b, src, tgt, effPower(src, eff.stat) * eff.power * rm, abilityId, null, eff.proc);

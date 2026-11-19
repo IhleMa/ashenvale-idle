@@ -16,6 +16,6 @@
     "target": { "selector": "all_allies" },
     "targetConditions": []
   },
-  "priority": 75,
+  "priority": 60,
   "order": 280
 }

@@ -1,0 +1,54 @@
+{
+  "name": "Holy Nova",
+  "classId": "cleric",
+  "unlockLevel": 3,
+  "type": "damage",
+  "description": "A burst of holy light: 90% magic damage to every enemy and heals every ally for 60% healing power.",
+  "cost": 30,
+  "cooldown": 8,
+  "target": "enemy",
+  "area": true,
+  "effects": [
+    {
+      "kind": "damage",
+      "stat": "magPower",
+      "power": 0.9,
+      "school": "magical"
+    },
+    {
+      "kind": "heal",
+      "stat": "healPower",
+      "power": 0.6,
+      "allies": true,
+      "once": true
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "group",
+        "mode": "any",
+        "conditions": [
+          {
+            "type": "enemies_alive",
+            "cmp": ">=",
+            "value": 2
+          },
+          {
+            "type": "allies_below_hp",
+            "value": 85,
+            "count": 2
+          }
+        ]
+      }
+    ],
+    "target": {
+      "selector": "all_enemies"
+    },
+    "targetConditions": []
+  },
+  "priority": 72,
+  "order": 240
+}

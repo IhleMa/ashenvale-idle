@@ -1,17 +1,17 @@
 # Missing assets
 
-**566 of 566** images still missing (478 recommended, 88 optional).
+**568 of 568** images still missing (480 recommended, 88 optional).
 Only the missing files are listed; see [ASSETS.md](ASSETS.md) for everything, sizes and naming rules. Drop files into `public/assets/<folder>/`
 (any of .png, .webp, .jpg, .jpeg, .gif, .svg, .avif).
 
 | Section | Missing |
 |---|---|
 | [Class icons](#class-icons) | 13 |
-| [Abilities](#abilities) | 170 |
+| [Abilities](#abilities) | 171 |
 | [Minions (Summoner)](#minions-summoner) | 6 |
 | [Item bases](#item-bases) | 26 |
 | [Enemies & bosses](#enemies--bosses) | 53 |
-| [Status effects](#status-effects) | 99 |
+| [Status effects](#status-effects) | 100 |
 | [Zone backgrounds](#zone-backgrounds) | 13 |
 | [Co-op encounter art](#co-op-encounter-art) | 4 |
 | [Achievements](#achievements) | 16 |
@@ -125,11 +125,12 @@ Only the missing files are listed; see [ASSETS.md](ASSETS.md) for everything, si
 - [ ] `abilities/execute.png` — Execute (Rogue)
 - [ ] `abilities/rupture.png` — Rupture (Rogue)
 - [ ] `abilities/expose_weakness.png` — Expose Weakness (Rogue)
+- [ ] `abilities/regrowth.png` — Regrowth (Druid)
+- [ ] `abilities/natures_cure.png` — Nature's Cure (Druid)
 - [ ] `abilities/shadow_flurry.png` — Shadow Flurry (Rogue)
 - [ ] `abilities/heal.png` — Heal (Cleric)
 - [ ] `abilities/smite.png` — Smite (Cleric)
-- [ ] `abilities/renew.png` — Renew (Cleric)
-- [ ] `abilities/purify.png` — Purify (Cleric)
+- [ ] `abilities/holy_nova.png` — Holy Nova (Cleric)
 - [ ] `abilities/prayer_of_healing.png` — Prayer of Healing (Cleric)
 - [ ] `abilities/power_word_barrier.png` — Power Word: Barrier (Cleric)
 - [ ] `abilities/divine_blessing.png` — Divine Blessing (Cleric)
@@ -414,6 +415,7 @@ Only the missing files are listed; see [ASSETS.md](ASSETS.md) for everything, si
 - [ ] `statuses/draught.png` — Philosopher's Draught (buff)
 - [ ] `statuses/chain_reaction.png` — Chain Reaction (buff)
 - [ ] `statuses/lullaby.png` — Lullaby (debuff)
+- [ ] `statuses/regrowth.png` — Regrowth (buff)
 
 ## Zone backgrounds
 

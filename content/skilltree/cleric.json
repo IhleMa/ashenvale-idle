@@ -4,7 +4,7 @@
     {
       "name": "Restoration",
       "attrs": ["int", "vit"],
-      "abilities": { "1": "renew", "5": "prayer_of_healing" },
+      "abilities": { "1": "holy_nova", "3": "prayer_of_healing" },
       "notables": {
         "4": { "name": "Mending", "stats": { "healPowerPct": 0.1 } },
         "8": { "name": "Saintly Grace", "stats": { "healingPct": 0.15 } }
@@ -31,7 +31,7 @@
     {
       "name": "Purity",
       "attrs": ["int", "dex"],
-      "abilities": { "2": "purify" },
+      "abilities": {},
       "notables": {
         "4": { "name": "Clarity", "stats": { "attackSpeed": 0.06 } },
         "8": { "name": "Divine Favor", "stats": { "critChance": 0.05, "healingPct": 0.06 } }

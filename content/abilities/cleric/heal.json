@@ -4,7 +4,7 @@
   "unlockLevel": 1,
   "type": "heal",
   "description": "Restore health to one ally (220% healing power).",
-  "cost": 15,
+  "cost": 12,
   "cooldown": 2.5,
   "target": "ally",
   "effects": [{ "kind": "heal", "stat": "healPower", "power": 2.2 }],

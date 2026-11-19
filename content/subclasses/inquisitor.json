@@ -68,18 +68,11 @@
           }
         },
         "7": {
-          "name": "Zealous Purify",
-          "ability": "purify",
-          "description": "Purify heals much more and Rallies the ally.",
+          "name": "Zealous Nova",
+          "ability": "holy_nova",
+          "description": "Holy Nova deals 40% more damage and heals 40% more.",
           "changes": {
-            "power": 0.5,
-            "effects": [
-              {
-                "kind": "status",
-                "status": "rallied",
-                "duration": 6
-              }
-            ]
+            "power": 0.4
           }
         }
       }

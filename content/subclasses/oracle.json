@@ -38,11 +38,11 @@
       "mutators": {
         "3": {
           "name": "Foresight",
-          "ability": "renew",
-          "description": "Renew heals more and lasts longer.",
+          "ability": "power_word_barrier",
+          "description": "Power Word: Barrier absorbs 30% more and lasts 4 seconds longer.",
           "changes": {
-            "power": 0.25,
-            "duration": 5
+            "power": 0.3,
+            "duration": 4
           }
         },
         "6": {

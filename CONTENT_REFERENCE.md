@@ -140,11 +140,12 @@ Roles (config.json → roles): `tank`, `healer`, `damage`, `support`
 | [`execute`](content/abilities/rogue/execute.json) | Execute | rogue | damage | 6 | enemy |
 | [`rupture`](content/abilities/rogue/rupture.json) | Rupture | rogue | debuff | 10 | enemy |
 | [`expose_weakness`](content/abilities/rogue/expose_weakness.json) | Expose Weakness | rogue | debuff | 15 | enemy |
+| [`regrowth`](content/abilities/druid/regrowth.json) | Regrowth | druid | heal | 5 | ally |
+| [`natures_cure`](content/abilities/druid/natures_cure.json) | Nature's Cure | druid | utility | 6 | ally |
 | [`shadow_flurry`](content/abilities/rogue/shadow_flurry.json) | Shadow Flurry | rogue | damage | 14 | enemy |
 | [`heal`](content/abilities/cleric/heal.json) | Heal | cleric | heal | 2.5 | ally |
 | [`smite`](content/abilities/cleric/smite.json) | Smite | cleric | damage | 3 | enemy |
-| [`renew`](content/abilities/cleric/renew.json) | Renew | cleric | heal | 4 | ally |
-| [`purify`](content/abilities/cleric/purify.json) | Purify | cleric | utility | 6 | ally |
+| [`holy_nova`](content/abilities/cleric/holy_nova.json) | Holy Nova | cleric | damage | 8 | enemy |
 | [`prayer_of_healing`](content/abilities/cleric/prayer_of_healing.json) | Prayer of Healing | cleric | heal | 10 | ally |
 | [`power_word_barrier`](content/abilities/cleric/power_word_barrier.json) | Power Word: Barrier | cleric | buff | 12 | ally |
 | [`divine_blessing`](content/abilities/cleric/divine_blessing.json) | Divine Blessing | cleric | buff | 35 | ally |
@@ -407,6 +408,7 @@ Target selectors (`target.selector`):
 | [`draught`](content/statuses/draught.json) | Philosopher's Draught | buff | 40% more damage, Reagents regenerate twice as fast. |
 | [`chain_reaction`](content/statuses/chain_reaction.json) | Chain Reaction | buff | Reactions happen again on another enemy at half strength. |
 | [`lullaby`](content/statuses/lullaby.json) | Lullaby | debuff | Attacks 30% slower. |
+| [`regrowth`](content/statuses/regrowth.json) | Regrowth | buff | Restores health every second. |
 
 ## Stats
 
