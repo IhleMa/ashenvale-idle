@@ -465,13 +465,14 @@ export function setCoopChars(p, { charIds }) {
   if (!Array.isArray(charIds)) fail('Invalid selection');
   const clean = [...new Set(charIds)].filter(id => p.characters[id] && id !== p.heroId);
   for (const id of clean) { const busy = busyText(p, p.characters[id]); if (busy) fail(busy); }
-  p.coopChars = clean.slice(0, CONFIG.coop.charactersPerPlayer - 1);
+  p.coopChars = clean.slice(0, (CONFIG.coop.partySize || 4) - 1);
 }
 
-export function coopCharacters(p) {
-  // default to companions from the active party when nothing was chosen
+// The recruits a player offers for co-op, in preference order (who actually fights is decided by shared/coop.js).
+// Defaults to the companions of the active party when nothing was chosen.
+export function coopPicks(p) {
   const picks = (p.coopChars.length ? p.coopChars : (p.parties[p.activeParty]?.members || []).filter(id => id !== p.heroId)).filter(id => !busyWith(p, id));
-  return [p.heroId, ...picks].map(id => p.characters[id]).filter(Boolean).slice(0, CONFIG.coop.charactersPerPlayer);
+  return picks.map(id => p.characters[id]).filter(Boolean).slice(0, (CONFIG.coop.partySize || 4) - 1);
 }
 
 // --------------------------------------------------------------------------- zones

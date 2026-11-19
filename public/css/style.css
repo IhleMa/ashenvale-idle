@@ -1220,3 +1220,5 @@ html.standalone body { padding-bottom: env(safe-area-inset-bottom); padding-left
 .wiki-sub h4 { margin: 2px 0 4px; }
 @media (max-width: 800px) { .wiki { grid-template-columns: 1fr; } .wiki-nav { position: static; max-height: 260px; } .wiki-table { display: block; overflow-x: auto; } }
 .wiki-nav-item .art { width: 22px !important; height: 22px !important; min-width: 22px; font-size: 13px; border-radius: 5px; }
+
+.member-char.benched { opacity: .5; font-style: italic; }

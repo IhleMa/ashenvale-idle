@@ -13,6 +13,8 @@ import { ENEMIES } from '/shared/data/enemies.js';
 import { CLASSES } from '/shared/data/classes.js';
 
 let unsub = null;
+const MAX_PICKS = (CONFIG.coop.partySize || 4) - 1;
+const ROLE_LABEL = r => CONFIG.roles[r]?.label || r;
 
 export const multiplayerView = {
   id: 'multiplayer', label: 'Multiplayer', icon: '🤝',
@@ -47,8 +49,8 @@ export const multiplayerView = {
       }
       if (d.coopToggle) {
         const p = state.player;
-        const cur = p.coopChars.length ? p.coopChars : p.parties[p.activeParty].members.filter(id => id !== p.heroId).slice(0, CONFIG.coop.charactersPerPlayer - 1);
-        const next = cur.includes(d.coopToggle) ? cur.filter(x => x !== d.coopToggle) : [...cur, d.coopToggle].slice(-(CONFIG.coop.charactersPerPlayer - 1));
+        const cur = p.coopChars.length ? p.coopChars : p.parties[p.activeParty].members.filter(id => id !== p.heroId).slice(0, MAX_PICKS);
+        const next = cur.includes(d.coopToggle) ? cur.filter(x => x !== d.coopToggle) : [...cur, d.coopToggle].slice(-MAX_PICKS);
         await run(act('set_coop_chars', { charIds: next }));
       }
     });
@@ -75,16 +77,18 @@ export const multiplayerView = {
 
           <section class="panel">
             <div class="panel-head"><h3>Your group</h3>${g ? `<button class="btn small ghost danger" data-leave>Leave group</button>` : `<button class="btn small primary" data-create>Create group</button>`}</div>
-            ${g ? groupHtml(g, me, isLeader) : `<p class="muted">Create a group and invite other players to take on dungeons, elite hunts and world bosses together. Each player brings their hero plus ${CONFIG.coop.charactersPerPlayer - 1} companion(s). You can also tackle encounters alone.</p>`}
+            ${g ? groupHtml(g, me, isLeader) : `<p class="muted">Create a group and invite other players to take on dungeons, elite hunts and world bosses together. Up to ${CONFIG.coop.partySize} characters fight: every player's hero, and recruits fill the free places. You can also tackle encounters alone with your hero and ${MAX_PICKS} recruits.</p>`}
           </section>
 
           <section class="panel">
-            <div class="panel-head"><h3>Your co-op team</h3><span class="muted small">Hero + up to ${CONFIG.coop.charactersPerPlayer - 1}</span></div>
+            <div class="panel-head"><h3>Your co-op recruits</h3><span class="muted small">Hero + up to ${MAX_PICKS}, in order</span></div>
+            <p class="muted small">Alone, all of them come along. In a group only ${CONFIG.coop.partySize} characters fight: every hero, then the free places go first to a recruit that fills a missing role (${(CONFIG.coop.fillRoles || []).map(ROLE_LABEL).join(', then ')}), the rest in turn — one recruit per player.</p>
             <div class="coop-team">${chars().map(c => {
-              const picks = p.coopChars.length ? p.coopChars : p.parties[p.activeParty].members.filter(id => id !== p.heroId).slice(0, CONFIG.coop.charactersPerPlayer - 1);
+              const picks = p.coopChars.length ? p.coopChars : p.parties[p.activeParty].members.filter(id => id !== p.heroId).slice(0, MAX_PICKS);
               const busy = busyWith(p, c.id);
               const on = !busy && (c.isMain || picks.includes(c.id));
-              return `<button class="coop-pick ${on ? 'on' : ''}" ${c.isMain || busy ? 'disabled' : `data-coop-toggle="${c.id}"`} ${busy ? `title="${busy.type === 'work' ? 'Working in town' : 'On an expedition'}"` : ''}>${portrait(c, 'sm')}<span><b>${esc(c.name)}</b><small>Lv ${c.level} ${esc(classLabel(c.classId, c.subclass))}</small></span>${on ? '<span class="check">✓</span>' : ''}</button>`;
+              const nr = picks.indexOf(c.id) + 1;
+              return `<button class="coop-pick ${on ? 'on' : ''}" ${c.isMain || busy ? 'disabled' : `data-coop-toggle="${c.id}"`} ${busy ? `title="${busy.type === 'work' ? 'Working in town' : 'On an expedition'}"` : ''}>${portrait(c, 'sm')}<span><b>${esc(c.name)}</b><small>Lv ${c.level} ${esc(classLabel(c.classId, c.subclass))} · ${esc(ROLE_LABEL(CLASSES[c.classId]?.role))}</small></span>${on ? `<span class="check">${c.isMain ? '★' : nr}</span>` : ''}</button>`;
             }).join('')}</div>
           </section>
 
@@ -131,10 +135,11 @@ function groupHtml(g, me, isLeader) {
   return `<div class="group-members">${g.members.map(m => `<div class="group-member">
       <div class="row gap"><b>${m.id === g.leaderId ? '👑 ' : ''}${esc(m.name)}</b>${botTag(m)}<span class="conn-dot ${m.online ? 'on' : ''}" title="${m.online ? 'Online' : 'Offline'}"></span>
         <span class="grow"></span>${m.id !== me ? `<button class="btn tiny ghost" data-inspect="${esc(m.name)}">Inspect</button>` : ''}${isLeader && m.id !== me ? `<button class="btn tiny ghost" data-promote="${m.id}">Make leader</button><button class="btn tiny ghost danger" data-kick="${m.id}">Remove</button>` : ''}</div>
-      <div class="member-chars">${m.characters.map(c => `<span class="member-char">${portrait(c, 'xs')}<span>${c.isMain ? '★ ' : ''}${esc(c.name)} <small class="muted">Lv ${c.level}</small> ${classBadge(c.classId)}</span></span>`).join('')}</div>
+      <div class="member-chars">${m.characters.map(c => `<span class="member-char">${portrait(c, 'xs')}<span>${c.isMain ? '★ ' : ''}${esc(c.name)} <small class="muted">Lv ${c.level}</small> ${classBadge(c.classId)}${c.reason?.startsWith('role:') ? ` <span class="tag small" title="Brought along because the group has no ${esc(ROLE_LABEL(c.reason.slice(5)))}">fills ${esc(ROLE_LABEL(c.reason.slice(5)))}</span>` : c.reason === 'turn' && g.members.length > 2 ? ' <span class="tag small" title="This player\'s turn for the recruit place">their turn</span>' : ''}</span></span>`).join('')}
+        ${m.bench?.length && g.members.length > 1 ? `<span class="member-char benched" title="No free place in the next fight">${m.bench.map(c => esc(c.name)).join(', ')} <small class="muted">sit${m.bench.length > 1 ? '' : 's'} out</small></span>` : ''}</div>
     </div>`).join('')}
     ${g.invites.length ? `<div class="muted small">Pending: ${g.invites.map(esc).join(', ')}</div>` : ''}
-    ${g.members.length < CONFIG.coop.maxPlayers ? '' : '<div class="muted small">Group is full.</div>'}
+    <div class="muted small">Next fight: ${g.members.reduce((n, m) => n + m.characters.length, 0)} / ${CONFIG.coop.partySize} characters.${g.members.length < CONFIG.coop.maxPlayers ? '' : ' Group is full.'}</div>
     ${g.inBattle ? '<div class="notice good">Your group is fighting! <a href="#/combat">Watch the battle →</a></div>' : ''}
   </div>`;
 }

@@ -508,7 +508,7 @@ export class BotManager {
 
   prepareCoop(b, p) {
     const best = this.fighters(p).filter(c => !c.isMain).sort((x, y) => this.power(y) - this.power(x));
-    this.act(b, 'set_coop_chars', { charIds: this.balancedPick(best, CONFIG.coop.charactersPerPlayer - 1) });
+    this.act(b, 'set_coop_chars', { charIds: this.balancedPick(best, (CONFIG.coop.partySize || 4) - 1) });
   }
 
   formGroup(b, p) {

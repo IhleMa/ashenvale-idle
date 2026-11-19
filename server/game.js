@@ -7,6 +7,7 @@ import { generateItem, itemSellValue } from '../shared/data/items.js';
 import { createBattle, stepBattle, drainEvents, battleSnapshot, dynamicUnit, runToEnd } from '../shared/combat.js';
 import { buildPartyUnits, partyBonuses } from '../shared/party.js';
 import { idleWaves, bossWaves, coopWaves, coopScale, computeRewards, zoneLevel } from '../shared/encounters.js';
+import { coopLineup } from '../shared/coop.js';
 import { createRng, randomSeed } from '../shared/rng.js';
 import { ABILITIES } from '../shared/data/abilities.js';
 import { Rankings } from './rankings.js';
@@ -756,16 +757,25 @@ export class Game {
   // ------------------------------------------------------------------ groups & co-op
   groupOf(playerId) { const id = this.playerGroup.get(playerId); return id ? this.groups.get(id) : null; }
 
+  // who fights in the group's next co-op fight (max CONFIG.coop.partySize characters)
+  coopLineupOf(g, players) {
+    return coopLineup(players.map(p => ({ id: p.id, hero: L.hero(p), picks: L.coopPicks(p) })), g.recruitTurn || 0);
+  }
+
   publicGroup(g) {
     const now = Date.now();
+    const players = g.members.map(id => this.sessions.get(id)?.player || this.store.loadPlayer(id)).filter(Boolean);
+    const lineup = this.coopLineupOf(g, players);
     return {
       id: g.id, leaderId: g.leaderId,
       members: g.members.map(id => {
-        const p = this.sessions.get(id)?.player || this.store.loadPlayer(id);
-        const chars = p ? L.coopCharacters(p) : [];
+        const p = players.find(x => x.id === id);
+        const chars = p ? lineup.byPlayer[id] || [] : [];
+        const card = c => ({ id: c.id, name: c.name, classId: c.classId, level: c.level, isMain: c.isMain, portrait: c.portrait, role: c.role, reason: lineup.reasons[c.id] || null });
         return {
           id, name: this.nameOf(id), online: this.sessions.has(id), bot: this.showBot(id),
-          characters: chars.map(c => ({ id: c.id, name: c.name, classId: c.classId, level: c.level, isMain: c.isMain, portrait: c.portrait, role: c.role })),
+          characters: chars.map(card),
+          bench: p ? L.coopPicks(p).filter(c => !chars.includes(c)).map(card) : [],
         };
       }),
       invites: [...g.invites.entries()].filter(([, exp]) => exp > now).map(([id]) => this.nameOf(id)),
@@ -819,12 +829,13 @@ export class Game {
       if (!h) fail(`${p.name} has no hero yet`);
       if (h.level < enc.minLevel) fail(`${p.name}'s hero must be level ${enc.minLevel}+`);
     }
-    const allChars = players.flatMap(p => L.coopCharacters(p));
+    const lineup = this.coopLineupOf(g, players).byPlayer;
+    const allChars = players.flatMap(p => lineup[p.id]);
     const bonuses = partyBonuses(allChars);
     let offset = 0;
     const allies = [];
     for (const p of players) {
-      const chars = L.coopCharacters(p);
+      const chars = lineup[p.id];
       allies.push(...buildPartyUnits(chars, { ownerId: p.id, ownerName: p.name, positionOffset: offset, extraBonuses: bonuses, buffs: elixirBonuses(p), vsEnemy: masteryMap(p) }));
       offset += chars.length;
     }
@@ -835,7 +846,8 @@ export class Game {
     });
     drainEvents(g.battle);
     g.encounterId = enc.id;
-    g.participants = players.map(p => ({ id: p.id, chars: L.coopCharacters(p).map(c => c.id) }));
+    g.participants = players.map(p => ({ id: p.id, chars: lineup[p.id].map(c => c.id) }));
+    g.recruitTurn = ((g.recruitTurn || 0) + 1) % players.length; // next fight, the next player goes first for the recruit slots
     for (const p of players) {
       const ss = this.sessions.get(p.id);
       if (ss?.solo?.battle) this.sendTo(p.id, { t: 'battle_abort', k: 'solo' });

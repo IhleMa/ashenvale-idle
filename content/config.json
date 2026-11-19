@@ -47,9 +47,10 @@
   "ascension": { "enabled": true, "bonusSkillPoints": 10, "xpLevelGap": 5, "levelSync": { "enabled": true, "levelGap": 3, "gearCurve": 4 } },
   "coop": {
     "maxPlayers": 4,
-    "charactersPerPlayer": 2,
-    "hpScalePerExtraPlayer": 0.75,
-    "damageScalePerExtraPlayer": 0.12,
+    "partySize": 4,
+    "fillRoles": ["healer", "tank"],
+    "hpScalePerExtraPlayer": 0.1,
+    "damageScalePerExtraPlayer": 0.03,
     "inviteTimeoutSeconds": 300
   },
   "rarities": [
