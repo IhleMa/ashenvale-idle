@@ -47,7 +47,7 @@ assert.equal(p.tutorial, null);
 L.createHero(p, { name: 'Tutee', classId: 'warrior' }, {});
 TU.startTutorial(p);
 assert.equal(stepId(p), 'welcome');
-assert.deepEqual([...visibleViews(p)].sort(), ['admin', 'combat', 'progression']);
+assert.deepEqual([...visibleViews(p)].sort(), ['admin', 'combat', 'progression', 'wiki']);
 ok('a new hero starts the tutorial; only Combat (and Progression) are visible');
 
 assert.deepEqual(TU.checkTutorial(p), [], 'acknowledge steps never complete by themselves');
