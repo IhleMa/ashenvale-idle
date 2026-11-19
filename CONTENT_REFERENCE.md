@@ -143,6 +143,7 @@ Roles (config.json → roles): `tank`, `healer`, `damage`, `support`
 | [`regrowth`](content/abilities/druid/regrowth.json) | Regrowth | druid | heal | 5 | ally |
 | [`natures_cure`](content/abilities/druid/natures_cure.json) | Nature's Cure | druid | utility | 6 | ally |
 | [`shadow_flurry`](content/abilities/rogue/shadow_flurry.json) | Shadow Flurry | rogue | damage | 14 | enemy |
+| [`assassins_mark`](content/abilities/rogue/assassins_mark.json) | Assassin's Mark | rogue | debuff | 24 | enemy |
 | [`heal`](content/abilities/cleric/heal.json) | Heal | cleric | heal | 2.5 | ally |
 | [`smite`](content/abilities/cleric/smite.json) | Smite | cleric | damage | 3 | enemy |
 | [`holy_nova`](content/abilities/cleric/holy_nova.json) | Holy Nova | cleric | damage | 8 | enemy |
@@ -316,6 +317,7 @@ Target selectors (`target.selector`):
 | [`stun`](content/statuses/stun.json) | Stun | debuff | Cannot act. |
 | [`weakened`](content/statuses/weakened.json) | Weakened | debuff | Deals 20% less damage. |
 | [`exposed`](content/statuses/exposed.json) | Exposed | debuff | Takes 15% more damage. |
+| [`assassins_mark`](content/statuses/assassins_mark.json) | Assassin's Mark | debuff | Records all damage taken. When it runs out, the recorded damage is dealt again. |
 | [`marked`](content/statuses/marked.json) | Hunter's Mark | debuff | Takes 10% more damage. |
 | [`sundered`](content/statuses/sundered.json) | Sundered | debuff | Defense reduced by 30%. |
 | [`necrotic`](content/statuses/necrotic.json) | Necrotic Wound | debuff | Healing received reduced by 8% per stack. |
@@ -414,7 +416,7 @@ Target selectors (`target.selector`):
 
 Item / affix / gem stats: `str`, `int`, `dex`, `vit`, `hp`, `defense`, `physPower`, `magPower`, `healPower`, `critChance`, `critDamage`, `attackSpeed`
 
-Skill tree & set bonus stats: `str`, `int`, `dex`, `vit`, `strPct`, `intPct`, `dexPct`, `vitPct`, `allPct`, `physPowerPct`, `magPowerPct`, `healPowerPct`, `defensePct`, `hpPct`, `critChance`, `critDamage`, `attackSpeed`, `damagePct`, `healingPct`, `damageTakenPct`, `minionDamagePct`, `minionHpPct`, `minionDurationPct`, `minionMax`, `dotDamagePct`, `dotDurationPct`, `rank` ({ abilityId: +ranks })
+Skill tree & set bonus stats: `str`, `int`, `dex`, `vit`, `strPct`, `intPct`, `dexPct`, `vitPct`, `allPct`, `physPowerPct`, `magPowerPct`, `healPowerPct`, `defensePct`, `hpPct`, `critChance`, `critDamage`, `attackSpeed`, `damagePct`, `healingPct`, `damageTakenPct`, `minionDamagePct`, `minionHpPct`, `minionDurationPct`, `minionMax`, `dotDamagePct`, `dotDurationPct`, `poisonSpread`, `rank` ({ abilityId: +ranks })
 
 ## Item slots and bases
 

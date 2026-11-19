@@ -1,0 +1,8 @@
+{
+  "name": "Assassin's Mark",
+  "type": "debuff",
+  "recordDamage": true,
+  "explodePct": 1,
+  "description": "Records all damage taken. When it runs out, the recorded damage is dealt again.",
+  "order": 75
+}

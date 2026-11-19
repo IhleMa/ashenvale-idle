@@ -7,16 +7,15 @@
       "abilities": { "1": "poison_blade", "5": "rupture" },
       "notables": {
         "4": { "name": "Toxicology", "stats": { "damagePct": 0.06, "physPowerPct": 0.04 } },
-        "8": { "name": "Plaguebringer", "stats": { "damagePct": 0.12 } }
+        "8": { "name": "Plaguebringer", "stats": { "damagePct": 0.12, "poisonSpread": 1 } }
       }
     },
     {
       "name": "Assassination",
       "attrs": ["dex", "str"],
-      "abilities": { "3": "execute", "7": "shadow_flurry" },
+      "abilities": { "3": "execute", "7": "shadow_flurry", "8": "assassins_mark" },
       "notables": {
-        "4": { "name": "Deadly Aim", "stats": { "critChance": 0.05 } },
-        "8": { "name": "Assassin's Mark", "stats": { "critDamage": 0.35 } }
+        "4": { "name": "Deadly Aim", "stats": { "critChance": 0.05 } }
       }
     },
     {

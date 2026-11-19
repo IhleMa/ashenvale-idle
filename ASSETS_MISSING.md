@@ -1,17 +1,17 @@
 # Missing assets
 
-**568 of 568** images still missing (480 recommended, 88 optional).
+**570 of 570** images still missing (482 recommended, 88 optional).
 Only the missing files are listed; see [ASSETS.md](ASSETS.md) for everything, sizes and naming rules. Drop files into `public/assets/<folder>/`
 (any of .png, .webp, .jpg, .jpeg, .gif, .svg, .avif).
 
 | Section | Missing |
 |---|---|
 | [Class icons](#class-icons) | 13 |
-| [Abilities](#abilities) | 171 |
+| [Abilities](#abilities) | 172 |
 | [Minions (Summoner)](#minions-summoner) | 6 |
 | [Item bases](#item-bases) | 26 |
 | [Enemies & bosses](#enemies--bosses) | 53 |
-| [Status effects](#status-effects) | 100 |
+| [Status effects](#status-effects) | 101 |
 | [Zone backgrounds](#zone-backgrounds) | 13 |
 | [Co-op encounter art](#co-op-encounter-art) | 4 |
 | [Achievements](#achievements) | 16 |
@@ -128,6 +128,7 @@ Only the missing files are listed; see [ASSETS.md](ASSETS.md) for everything, si
 - [ ] `abilities/regrowth.png` — Regrowth (Druid)
 - [ ] `abilities/natures_cure.png` — Nature's Cure (Druid)
 - [ ] `abilities/shadow_flurry.png` — Shadow Flurry (Rogue)
+- [ ] `abilities/assassins_mark.png` — Assassin's Mark (Rogue)
 - [ ] `abilities/heal.png` — Heal (Cleric)
 - [ ] `abilities/smite.png` — Smite (Cleric)
 - [ ] `abilities/holy_nova.png` — Holy Nova (Cleric)
@@ -323,6 +324,7 @@ Only the missing files are listed; see [ASSETS.md](ASSETS.md) for everything, si
 - [ ] `statuses/stun.png` — Stun (debuff)
 - [ ] `statuses/weakened.png` — Weakened (debuff)
 - [ ] `statuses/exposed.png` — Exposed (debuff)
+- [ ] `statuses/assassins_mark.png` — Assassin's Mark (debuff)
 - [ ] `statuses/marked.png` — Hunter's Mark (debuff)
 - [ ] `statuses/sundered.png` — Sundered (debuff)
 - [ ] `statuses/necrotic.png` — Necrotic Wound (debuff)

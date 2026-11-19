@@ -83,6 +83,7 @@ export function computeStats(ch) {
     // damage-over-time bonuses (warlock skill tree)
     dotDamagePct: bonus.dotDamagePct || 0,
     dotDurationPct: bonus.dotDurationPct || 0,
+    poisonSpread: bonus.poisonSpread || 0, // Plaguebringer (rogue keystone)
   };
   // Spellblade: the lower of physical/magic power gains part of the higher one, so split gear isn't wasted
   if (cls.powerBlend) {

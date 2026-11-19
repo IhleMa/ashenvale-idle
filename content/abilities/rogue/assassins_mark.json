@@ -1,0 +1,20 @@
+{
+  "name": "Assassin's Mark",
+  "classId": "rogue",
+  "unlockLevel": 28,
+  "type": "debuff",
+  "description": "Mark an enemy for 6 seconds. All damage it takes in that time, from anyone, is recorded — when the mark runs out it explodes and deals the recorded damage again.",
+  "cost": 35,
+  "cooldown": 24,
+  "target": "enemy",
+  "effects": [{ "kind": "status", "status": "assassins_mark", "duration": 6 }],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [{ "type": "always" }],
+    "target": { "selector": "enemy_highest_hp" },
+    "targetConditions": [{ "type": "target_missing_status", "status": "assassins_mark" }]
+  },
+  "priority": 85,
+  "order": 215
+}

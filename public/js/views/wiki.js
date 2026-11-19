@@ -60,6 +60,7 @@ function statusFacts(id) {
   if (s.volatile) f.push('the next element flask lands on every enemy');
   if (s.jumpOnDeath) f.push('jumps to another enemy when its target dies');
   if (s.tickOnApply) f.push('first tick right away');
+  if (s.recordDamage) f.push(`records all damage taken; deals ${pct(s.explodePct ?? 1)} of it again when it expires`);
   return f;
 }
 

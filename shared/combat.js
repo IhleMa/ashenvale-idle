@@ -40,6 +40,7 @@ export function makeCharacterUnit(ch, { ownerId, ownerName, position, bonuses = 
       allStatsPct: bonuses.allStatsPct || 0,
       dotDamagePct: s.dotDamagePct || 0,
       dotDurationPct: s.dotDurationPct || 0,
+      poisonSpread: s.poisonSpread || 0, // Plaguebringer
     },
     actionTimer: 0.3 + position * 0.25,
     danger: 0,
@@ -362,7 +363,10 @@ function applyEffect(b, src, tgt, eff, abilityId) {
       // Volatile Mixture: the next element flask lands on every enemy
       const volatile = STATUSES[eff.status]?.element && src.statuses.find(s => STATUSES[s.id]?.volatile);
       if (volatile) src.statuses = src.statuses.filter(s => s !== volatile);
-      for (const t of volatile ? enemiesOf(b, src) : [target])
+      // Plaguebringer (Rogue keystone): poisoning a bleeding enemy spreads the poison to every enemy
+      const plague = eff.status === 'poison' && src.bonuses?.poisonSpread && target.statuses.some(s => s.id === 'bleed');
+      if (plague) emit(b, { type: 'proc', src: src.uid, tgt: target.uid, name: 'Plaguebringer' });
+      for (const t of volatile || plague ? enemiesOf(b, src) : [target])
         for (let i = 0; i < (STATUSES[eff.status]?.stacking === 'independent' ? eff.stacks || 1 : 1); i++) applyStatus(b, src, t, eff.status, dur, v, eff.stacks || 1);
       break;
     }
@@ -615,18 +619,28 @@ function tickStatuses(b, u) {
     }
   }
   const before = u.statuses.length;
+  const exploding = u.statuses.filter(s => s.remaining <= 0 && STATUSES[s.id].recordDamage && s.recorded > 0);
   u.statuses = u.statuses.filter(s => s.remaining > 0 && !(STATUSES[s.id].absorb && s.value <= 0));
   if (u.statuses.length !== before) emit(b, { type: 'status_end', tgt: u.uid });
+  // Assassin's Mark: when the mark runs out, the damage it recorded is dealt again
+  for (const s of exploding) {
+    if (!u.alive) break;
+    const src = b.units.find(x => x.uid === s.src) || u;
+    dealDamage(b, src, u, s.recorded * (STATUSES[s.id].explodePct ?? 1), { school: 'physical', ability: null, exact: true, proc: STATUSES[s.id].name });
+  }
 }
 
-function dealDamage(b, src, tgt, raw, { school, ability, bonusCrit = 0, dot = null, ignoreArmor = false, noCrit = false, proc = null }) {
+function dealDamage(b, src, tgt, raw, { school, ability, bonusCrit = 0, dot = null, ignoreArmor = false, noCrit = false, proc = null, exact = false }) {
   if (!tgt.alive) return 0;
   if (mod(tgt, 'invulnerable') > 0) return 0; // Stasis
-  if (!dot && school === 'physical' && mod(tgt, 'dodge') > 0 && b.rng() < mod(tgt, 'dodge')) {
+  if (!dot && !exact && school === 'physical' && mod(tgt, 'dodge') > 0 && b.rng() < mod(tgt, 'dodge')) {
     emit(b, { type: 'miss', src: src.uid, tgt: tgt.uid, ability });
     return 0;
   }
-  let amount = raw * (1 + src.bonuses.damagePct + mod(src, 'damagePct'));
+  // exact: an already-final amount (Assassin's Mark replaying recorded damage) — only shields and the arena factor apply
+  let amount = exact ? raw : raw * (1 + src.bonuses.damagePct + mod(src, 'damagePct'));
+  let crit = false;
+  if (!exact) {
   if (src.passives) {
     if (src.passives.damageVsBossPct && tgt.boss) amount *= 1 + src.passives.damageVsBossPct;
     if (src.passives.damageVsHighHpPct && hpPct(tgt) > 80) amount *= 1 + src.passives.damageVsHighHpPct;
@@ -634,7 +648,6 @@ function dealDamage(b, src, tgt, raw, { school, ability, bonusCrit = 0, dot = nu
   if (src.vsEnemy && tgt.defId in src.vsEnemy) amount *= 1 + src.vsEnemy[tgt.defId];
   if (b.hooks?.damageMult) amount *= b.hooks.damageMult(src, tgt, school);
   if (b.pvp && src.side !== tgt.side) amount *= b.pvp.damageMult ?? 1; // Arena: players hit each other softer
-  let crit = false;
   if (!noCrit && b.rng() < Math.min(C.critCap, src.stats.critChance + bonusCrit + mod(src, 'critChance'))) { crit = true; amount *= src.stats.critDamage; }
   if (!ignoreArmor) {
     const def = effDefense(tgt) * (school === 'magical' ? C.magicArmorFactor : 1);
@@ -643,6 +656,7 @@ function dealDamage(b, src, tgt, raw, { school, ability, bonusCrit = 0, dot = nu
   }
   amount *= Math.max(0.1, 1 + mod(tgt, 'damageTakenPct') + tgt.bonuses.damageTakenPct + (dot ? mod(tgt, 'dotTakenPct') : 0));
   amount *= 0.92 + b.rng() * 0.16;
+  } else if (b.pvp && src.side !== tgt.side) amount *= b.pvp.damageMult ?? 1;
   amount = Math.max(1, Math.round(amount));
 
   // barrier absorbs
@@ -653,6 +667,8 @@ function dealDamage(b, src, tgt, raw, { school, ability, bonusCrit = 0, dot = nu
     barrier.value -= absorbed;
     amount -= absorbed;
   }
+  // a mark records everything that lands on its target (its own explosion excluded)
+  if (!exact) for (const s of tgt.statuses) if (STATUSES[s.id].recordDamage) s.recorded = (s.recorded || 0) + amount + absorbed;
   tgt.hp = Math.max(0, tgt.hp - amount);
   if (tgt.hp <= 0 && (tgt.undying || mod(tgt, 'undying') > 0)) tgt.hp = 1; // Borrowed Time, Fortress, the first tutorial fights
   if (src.stat && src.side !== tgt.side) src.stat.dmg += amount;
