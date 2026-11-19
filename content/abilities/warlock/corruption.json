@@ -1,7 +1,7 @@
 {
   "name": "Corruption",
   "classId": "warlock",
-  "unlockLevel": 1,
+  "unlockLevel": 2,
   "type": "debuff",
   "description": "Afflicts the target with a stacking shadow curse: each stack deals 25% magic power per second for 8 seconds, with its own timer.",
   "cost": 6,

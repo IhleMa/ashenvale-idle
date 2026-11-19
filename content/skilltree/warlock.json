@@ -1,5 +1,5 @@
 {
-  "start": "corruption",
+  "start": "drain_life",
   "branches": [
     {
       "name": "Affliction",
@@ -72,7 +72,7 @@
         "int"
       ],
       "abilities": {
-        "1": "drain_life",
+        "1": "corruption",
         "7": "pact_of_shadows"
       },
       "notables": {

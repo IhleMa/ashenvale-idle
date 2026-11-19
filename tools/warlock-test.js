@@ -163,7 +163,7 @@ ok('Warlock: 7 base abilities, 4-branch tree, 3 subclasses');
   const others = foes.slice(1).map(f => f.hp);
   cast(b, wu, 'reap', foes[0], reap);
   assert.ok(foes.slice(1).every((f, i) => f.hp < others[i]), 'splash hit the others');
-  ok('Reap AI waits for 2 different own debuffs; the Plaguelord mutator adds splash damage');
+  ok('the own-debuff condition counts different debuffs, not stacks; the Plaguelord mutator adds splash damage');
 }
 
 console.log(`Warlock: all ${n} checks passed.`);

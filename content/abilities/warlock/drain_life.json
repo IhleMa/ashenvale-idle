@@ -1,7 +1,7 @@
 {
   "name": "Drain Life",
   "classId": "warlock",
-  "unlockLevel": 8,
+  "unlockLevel": 1,
   "type": "damage",
   "description": "160% magic damage; heals the Warlock for 20% of the damage, +10% for each of its own different debuffs on the target.",
   "cost": 15,
@@ -22,8 +22,7 @@
     "mode": "all",
     "conditions": [
       {
-        "type": "self_hp_below",
-        "value": 75
+        "type": "always"
       }
     ],
     "target": {
