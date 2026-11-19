@@ -35,6 +35,15 @@ const TRUST_PROXY = process.env.TRUST_PROXY === 'true';
 const log = (...a) => console.log(new Date().toISOString(), ...a);
 let store;
 try { store = new Store(DATA_DIR, { log }); } catch (e) { log('Could not open the database:', e.message); process.exit(1); }
+// a wipe scheduled with the console command "wipe" happens now, before anything is loaded (with a backup first)
+{
+  const mode = store.pendingWipe();
+  if (mode === 'progress' || mode === 'accounts') {
+    const backup = store.backup();
+    store.wipe(mode);
+    log(`WIPE done (${mode === 'accounts' ? 'all accounts and progress' : 'all progress; accounts kept'}). Settings, admins, announcements, bots and content overrides were kept. Backup of the old database: ${backup}`);
+  }
+}
 const assets = new AssetIndex(ASSETS_DIR);
 const settings = new Settings(store, { registrationOpen: ALLOW_REGISTRATION });
 const admins = new AdminManager(store, process.env.ADMIN_USERS || '');
@@ -324,7 +333,7 @@ async function runUpdate() {
 }
 
 const COMMANDS = {
-  help: () => log('Commands: update | reload-clients | players | say <message> | assets [list|<section>] | admin add|remove|list <name> | bots [add <n> [type] | remove <name|all> | on | off] | content [reload] | tls [renew] | backup | db | stop'),
+  help: () => log('Commands: update | reload-clients | players | say <message> | assets [list|<section>] | admin add|remove|list <name> | bots [add <n> [type] | remove <name|all> | on | off] | content [reload] | tls [renew] | backup | db | wipe | stop'),
   content: async args => {
     // "content" checks the files on disk; "content reload" also switches the running server to them
     try {
@@ -386,6 +395,23 @@ const COMMANDS = {
       if (st.mode !== 'auto') return log('Only TLS_MODE=auto certificates can be renewed from here (for files: replace the files, they are picked up within 12 h, or restart).');
       try { await tls.obtain(); } catch (e) { log(`Renewal failed: ${e.message}`); }
     } else if (st.mode === 'auto') log('  "tls renew" gets a fresh certificate now (Let\'s Encrypt allows 5 per week for the same domain).');
+  },
+  wipe: args => {
+    const [mode, confirm] = args.trim().split(/\s+/);
+    if (mode === 'cancel') { store.scheduleWipe(''); return log('Wipe cancelled.'); }
+    if (!['progress', 'accounts'].includes(mode) || confirm !== 'confirm') {
+      const pending = store.pendingWipe();
+      log('Reset all players, keeping every setting (admin settings, admins, announcements, bots, content overrides such as the XP curve, artwork):');
+      log('  wipe progress confirm  — everyone keeps their login but starts over with a new hero; the auction house is emptied');
+      log('  wipe accounts confirm  — all accounts are deleted too (everyone registers again)');
+      log('  wipe cancel            — cancel a scheduled wipe');
+      log('The wipe happens on the next start (a backup is made first): run the command, then restart the server.');
+      if (pending) log(`Currently scheduled: wipe ${pending}`);
+      return;
+    }
+    store.scheduleWipe(mode);
+    log(`Wipe (${mode}) scheduled. Restart the server now (type "stop" and start it again, or use Restart in the panel). "wipe cancel" undoes this. Tip: warn players first with "say".`);
+    if (mode === 'accounts') log(`Note: the admin list (${admins.list().join(', ') || 'none'}) is kept by username — register those names again right after the restart.`);
   },
   stop: () => shutdown('stop'),
   update: () => runUpdate(),

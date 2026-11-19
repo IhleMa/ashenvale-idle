@@ -166,6 +166,28 @@ export class Store {
     return target;
   }
 
+  // ---- wipe (console "wipe"): scheduled now, carried out on the next start before anything is loaded
+  scheduleWipe(mode) { this.q.setMeta.run('wipe', mode || ''); }
+  pendingWipe() { return this.q.getMeta.get('wipe')?.value || null; }
+  // progress: every player's progress, the auction house, groups and balance statistics go; accounts (logins),
+  //           admins, settings, announcements, bots and content overrides stay. Players create a new hero on login.
+  // accounts: the same, and all accounts (and the bot list) go too.
+  wipe(mode) {
+    this.flush();
+    this.transaction(() => {
+      this.db.exec("DELETE FROM players; DELETE FROM docs WHERE key IN ('auction', 'groups') OR key LIKE 'balance:%';");
+      if (mode === 'accounts') {
+        this.db.exec('DELETE FROM accounts;');
+        const bots = this.q.getDoc.get('bots');
+        if (bots) this.q.putDoc.run('bots', JSON.stringify({ ...JSON.parse(bots.data), bots: [] }), Date.now());
+      }
+      this.q.setMeta.run('wipe', '');
+    });
+    this.players.clear(); this.dirty.clear(); this.dirtyDocs.clear();
+    if (mode === 'accounts') { this.accounts = {}; this.dirtyAccounts.clear(); }
+    try { this.db.exec('VACUUM'); } catch { /* ignore */ }
+  }
+
   stats() { return { ...this.q.counts.get(), driver: this.driver, sizeMb: Math.round(fs.statSync(this.file).size / 1048576 * 10) / 10 }; }
 
   close() { this.flush(); try { this.db.exec('PRAGMA wal_checkpoint(TRUNCATE)'); } catch { /* ignore */ } this.db.close(); }
