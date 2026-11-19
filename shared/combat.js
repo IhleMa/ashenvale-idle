@@ -806,6 +806,7 @@ export function dynamicUnit(u) {
   return {
     uid: u.uid, hp: Math.round(u.hp), maxHp: u.maxHp, alive: u.alive,
     resource: Math.round(u.resource || 0),
+    sh: Math.round(u.statuses.reduce((n, s) => n + (STATUSES[s.id]?.absorb ? Math.max(0, s.value) : 0), 0)), // shields left
     cd: cds,
     st: statusView(u),
     ...(u.hadNotes ? { notes: [...u.notes] } : {}), // Bard: the notes waiting for the Finale

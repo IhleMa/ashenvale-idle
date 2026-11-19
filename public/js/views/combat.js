@@ -216,7 +216,7 @@ function minionCard(m) {
   return `<div class="unit minion ally" data-uid="${m.uid}" ${tipAttr(`<b>${esc(m.name)}</b> · ${esc(m.summonerName || '')}'s minion<br>${esc(MINIONS[m.defId]?.description || '')}`)}>
     <div class="unit-art">${minionArt(m.defId, 'xs')}<div class="floaters"></div></div>
     <div class="unit-info"><div class="minion-name">${esc(m.name)} <span class="minion-exp"></span></div>
-      <div class="bar hp"><div class="fill"></div><span class="bar-label"></span></div>
+      <div class="bar hp"><div class="fill"></div><div class="shield"></div><span class="bar-label"></span></div>
       <div class="unit-statuses"></div></div>
   </div>`;
 }
@@ -232,7 +232,7 @@ function unitCard(u, k, minions = []) {
     <div class="unit-art">${art}<div class="floaters"></div></div>
     <div class="unit-info">
       <div class="unit-name">${u.isMain ? '<span class="hero-star">★</span>' : ''}${esc(u.name)} <span class="muted">Lv ${u.level}${u.syncedFrom ? `<span class="sync-tag" ${tipAttr(`Level sync: fights at level ${u.level} (really ${u.syncedFrom}) while the ascended hero levels up again`)}>⇩${u.syncedFrom}</span>` : ''}${cls ? ' ' + esc(classLabel(u.classId, u.subclass)) : ''}</span> ${tags}${owner}</div>
-      <div class="bar hp"><div class="fill"></div><span class="bar-label"></span></div>
+      <div class="bar hp"><div class="fill"></div><div class="shield"></div><span class="bar-label"></span></div>
       ${res}
       ${u.classId && Object.values(ABILITIES).some(a => a.classId === u.classId && a.note) ? '<div class="unit-notes" title="Notes for the next Finale"></div>' : ''}
       <div class="unit-statuses"></div>
@@ -334,7 +334,14 @@ function update() {
     const hp = el.querySelector('.bar.hp');
     hp.querySelector('.fill').style.width = hpP + '%';
     hp.classList.toggle('low', hpP < 30);
-    hp.querySelector('.bar-label').textContent = `${fmt(u.hp)} / ${fmt(u.maxHp)}`;
+    // shield: a bright segment after the health; if health + shield is more than the bar, it covers the end of the health
+    const shP = u.maxHp ? Math.min(100, ((u.sh || 0) / u.maxHp) * 100) : 0;
+    const sh = hp.querySelector('.shield');
+    sh.style.left = Math.max(0, Math.min(hpP, 100 - shP)) + '%';
+    sh.style.width = shP + '%';
+    hp.classList.toggle('shielded', shP > 0);
+    hp.classList.toggle('overshield', hpP + shP > 100);
+    hp.querySelector('.bar-label').textContent = `${fmt(u.hp)} / ${fmt(u.maxHp)}${u.sh ? `  +${fmt(u.sh)}` : ''}`;
     const res = el.querySelector('.bar.res .fill');
     if (res) res.style.width = (u.resourceMax ? (u.resource / u.resourceMax) * 100 : 0) + '%';
     const notesEl = el.querySelector('.unit-notes');
