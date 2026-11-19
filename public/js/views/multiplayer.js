@@ -13,7 +13,7 @@ import { ENEMIES } from '/shared/data/enemies.js';
 import { CLASSES } from '/shared/data/classes.js';
 
 let unsub = null;
-const MAX_PICKS = (CONFIG.coop.partySize || 4) - 1;
+const MAX_PICKS = CONFIG.coop.recruitsPerPlayer ?? 1;
 const ROLE_LABEL = r => CONFIG.roles[r]?.label || r;
 
 export const multiplayerView = {
@@ -77,18 +77,18 @@ export const multiplayerView = {
 
           <section class="panel">
             <div class="panel-head"><h3>Your group</h3>${g ? `<button class="btn small ghost danger" data-leave>Leave group</button>` : `<button class="btn small primary" data-create>Create group</button>`}</div>
-            ${g ? groupHtml(g, me, isLeader) : `<p class="muted">Create a group and invite other players to take on dungeons, elite hunts and world bosses together. Up to ${CONFIG.coop.partySize} characters fight: every player's hero, and recruits fill the free places. You can also tackle encounters alone with your hero and ${MAX_PICKS} recruits.</p>`}
+            ${g ? groupHtml(g, me, isLeader) : `<p class="muted">Create a group and invite other players to take on dungeons, elite hunts and world bosses together. Up to ${CONFIG.coop.partySize} characters fight: every player's hero plus ${MAX_PICKS === 1 ? 'one recruit' : `${MAX_PICKS} recruits`} each while places are left. Going alone is possible, but the encounters are made for groups.</p>`}
           </section>
 
           <section class="panel">
-            <div class="panel-head"><h3>Your co-op recruits</h3><span class="muted small">Hero + up to ${MAX_PICKS}, in order</span></div>
-            <p class="muted small">Alone, all of them come along. In a group only ${CONFIG.coop.partySize} characters fight: every hero, then the free places go first to a recruit that fills a missing role (${(CONFIG.coop.fillRoles || []).map(ROLE_LABEL).join(', then ')}), the rest in turn — one recruit per player.</p>
+            <div class="panel-head"><h3>Your co-op recruit</h3><span class="muted small">Hero + ${MAX_PICKS}</span></div>
+            <p class="muted small">Pick ${MAX_PICKS === 1 ? 'the recruit' : 'the recruits'} you take along. Only ${CONFIG.coop.partySize} characters fight: with 4 players only the heroes; with 3 players one recruit comes — first one that fills a missing role (${(CONFIG.coop.fillRoles || []).map(ROLE_LABEL).join(', then ')}), otherwise in turn.</p>
             <div class="coop-team">${chars().map(c => {
               const picks = p.coopChars.length ? p.coopChars : p.parties[p.activeParty].members.filter(id => id !== p.heroId).slice(0, MAX_PICKS);
               const busy = busyWith(p, c.id);
               const on = !busy && (c.isMain || picks.includes(c.id));
               const nr = picks.indexOf(c.id) + 1;
-              return `<button class="coop-pick ${on ? 'on' : ''}" ${c.isMain || busy ? 'disabled' : `data-coop-toggle="${c.id}"`} ${busy ? `title="${busy.type === 'work' ? 'Working in town' : 'On an expedition'}"` : ''}>${portrait(c, 'sm')}<span><b>${esc(c.name)}</b><small>Lv ${c.level} ${esc(classLabel(c.classId, c.subclass))} · ${esc(ROLE_LABEL(CLASSES[c.classId]?.role))}</small></span>${on ? `<span class="check">${c.isMain ? '★' : nr}</span>` : ''}</button>`;
+              return `<button class="coop-pick ${on ? 'on' : ''}" ${c.isMain || busy ? 'disabled' : `data-coop-toggle="${c.id}"`} ${busy ? `title="${busy.type === 'work' ? 'Working in town' : 'On an expedition'}"` : ''}>${portrait(c, 'sm')}<span><b>${esc(c.name)}</b><small>Lv ${c.level} ${esc(classLabel(c.classId, c.subclass))} · ${esc(ROLE_LABEL(CLASSES[c.classId]?.role))}</small></span>${on ? `<span class="check">${c.isMain ? '★' : MAX_PICKS > 1 ? nr : '✓'}</span>` : ''}</button>`;
             }).join('')}</div>
           </section>
 
@@ -104,7 +104,7 @@ export const multiplayerView = {
                 <button class="btn ${can ? 'primary' : ''}" data-start="${enc.id}" ${can && !g?.inBattle ? '' : 'disabled'} ${tipAttr(g ? (isLeader ? 'Start with your group' : 'Only the leader can start') : 'Start alone (creates a group of one)')}>${g?.inBattle ? 'In progress' : g ? 'Start' : 'Go alone'}</button>
               </div>`;
             }).join('')}</div>
-            <p class="muted small">Enemies gain +${Math.round(CONFIG.coop.hpScalePerExtraPlayer * 100)}% health and +${Math.round(CONFIG.coop.damageScalePerExtraPlayer * 100)}% damage per additional player. Every participant receives their own loot.</p>
+            <p class="muted small">Enemies gain +${Math.round(CONFIG.coop.hpScalePerExtraCharacter * 100)}% health and +${Math.round(CONFIG.coop.damageScalePerExtraCharacter * 100)}% damage for every character beyond 2 in the fight. Every participant receives their own loot.</p>
           </section>
         </div>
 

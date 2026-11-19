@@ -48,9 +48,10 @@
   "coop": {
     "maxPlayers": 4,
     "partySize": 4,
+    "recruitsPerPlayer": 1,
     "fillRoles": ["healer", "tank"],
-    "hpScalePerExtraPlayer": 0.1,
-    "damageScalePerExtraPlayer": 0.03,
+    "hpScalePerExtraCharacter": 0.2,
+    "damageScalePerExtraCharacter": 0.04,
     "inviteTimeoutSeconds": 300
   },
   "rarities": [

@@ -12,9 +12,9 @@ const sizes = l => Object.values(l.byPlayer).map(x => x.length);
 const recruits = (l, pid) => l.byPlayer[pid].slice(1).map(c => c.classId);
 
 {
-  const l = coopLineup([player('a', 'summoner', 'warrior', 'cleric', 'mage', 'rogue')]);
-  assert.deepEqual(recruits(l, 'a'), ['warrior', 'cleric', 'mage']);
-  ok('alone: the hero and the first 3 recruits');
+  const l = coopLineup([player('a', 'summoner', 'warrior', 'cleric', 'mage')]);
+  assert.deepEqual(recruits(l, 'a'), ['warrior']);
+  ok('alone: only the hero and one recruit (co-op is made for groups)');
 }
 {
   const l = coopLineup([player('a', 'warrior', 'mage', 'rogue'), player('b', 'cleric', 'ranger', 'mage')]);
@@ -22,12 +22,7 @@ const recruits = (l, pid) => l.byPlayer[pid].slice(1).map(c => c.classId);
   ok('2 players: one recruit each (4 characters)');
 }
 {
-  const l = coopLineup([player('a', 'mage', 'rogue', 'warrior'), player('b', 'cleric', 'ranger')]);
-  assert.deepEqual(recruits(l, 'a'), ['warrior'], 'no tank among the heroes: A brings its tank instead of its first pick');
-  ok('2 players: a missing tank is filled from the picks before the order');
-}
-{
-  const l = coopLineup([player('a', 'warrior', 'mage'), player('b', 'mage', 'rogue', 'druid'), player('c', 'rogue', 'ranger')]);
+  const l = coopLineup([player('a', 'warrior', 'mage'), player('b', 'mage', 'druid'), player('c', 'rogue', 'ranger')]);
   assert.deepEqual(sizes(l), [1, 2, 1]);
   assert.deepEqual(recruits(l, 'b'), ['druid']);
   assert.equal(l.reasons[l.byPlayer.b[1].id], 'role:healer');

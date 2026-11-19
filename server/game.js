@@ -841,7 +841,7 @@ export class Game {
     }
     const groupLevel = Math.round(players.reduce((sum, p) => sum + L.hero(p).level, 0) / players.length);
     g.battle = createBattle({
-      seed: randomSeed(), allies, waves: coopWaves(enc.id, groupLevel), scale: coopScale(players.length),
+      seed: randomSeed(), allies, waves: coopWaves(enc.id, groupLevel), scale: coopScale(allChars.length),
       meta: { kind: 'coop', encounterId: enc.id, title: enc.name, level: Math.max(enc.minLevel, groupLevel), players: players.length },
     });
     drainEvents(g.battle);

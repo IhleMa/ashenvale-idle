@@ -36,9 +36,10 @@ export function coopWaves(encounterId, groupLevel) {
   return enc.waves.map(w => w.map(enemyId => ({ enemyId, level: lvl })));
 }
 
-export function coopScale(players) {
-  const extra = Math.max(0, players - 1);
-  return { hp: 1 + extra * CONFIG.coop.hpScalePerExtraPlayer, damage: 1 + extra * CONFIG.coop.damageScalePerExtraPlayer };
+// enemies scale with the characters in the fight beyond a lone hero + recruit (2)
+export function coopScale(characters) {
+  const extra = Math.max(0, characters - 2);
+  return { hp: 1 + extra * (CONFIG.coop.hpScalePerExtraCharacter ?? 0), damage: 1 + extra * (CONFIG.coop.damageScalePerExtraCharacter ?? 0) };
 }
 
 export function killXp(kill) {
