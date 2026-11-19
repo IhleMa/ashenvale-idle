@@ -12,7 +12,7 @@ import { ITEM_BASES, SLOTS, STAT_LABELS } from '/shared/data/items.js';
 import { CLASSES } from '/shared/data/classes.js';
 import * as T from '/shared/town.js';
 
-const ui = { selected: 'town_hall', salvageSel: new Set(), craftBase: null, craftLevel: null, craftQuality: 'standard', enchantItem: '', enchantStat: 'str' };
+const ui = { selected: 'town_hall', salvageSel: new Set(), craftBase: null, craftLevel: null, craftQuality: 'standard', enchantChar: null, enchantStat: 'str' };
 let timer = null;
 const now = () => Date.now() + (state.timeOffset || 0);
 
@@ -147,6 +147,41 @@ function reforgeHtml(p, id, def, cap, w) {
     ${picker}<div class="reforge-list">${body}</div>`;
 }
 
+// Enchanting: pick the enchantment, then a character (or the inventory) and enchant its gear slot by slot
+function enchantHtml(p, b) {
+  const w = T.worker(p, 'enchanter');
+  const stats = ENCHANT_STATS_BY_LEVEL(b.level);
+  if (!stats.includes(ui.enchantStat)) ui.enchantStat = stats[0];
+  const st = ui.enchantStat;
+  const valueFor = it => T.enchantValue(st, it.level, b.level, w?.profession.level || 0);
+  const chars = Object.values(p.characters).sort((a, c) => (c.isMain ? 1 : 0) - (a.isMain ? 1 : 0) || c.level - a.level);
+  const unenchanted = ch => Object.values(ch.equipment).filter(it => it && !it.enchant).length;
+  const invItems = [...p.inventory].sort((a, c) => c.level - a.level);
+  if (!ui.enchantChar || (ui.enchantChar !== 'inv' && !p.characters[ui.enchantChar])) ui.enchantChar = chars[0]?.id || 'inv';
+  const chip = (key, art, name, n) => `<button class="reforge-chip ${ui.enchantChar === key ? 'active' : ''}" data-enchant-pick="${key}" ${n ? `title="${n} without an enchantment"` : ''}>${art}<span>${name}</span>${n ? `<b class="count">${n}</b>` : ''}</button>`;
+  const statPicker = `<div class="enchant-stats">${stats.map(x => `<button class="enchant-stat ${x === st ? 'active' : ''}" data-enchant-stat-pick="${x}">${esc(STAT_LABELS[x])}</button>`).join('')}</div>`;
+  const picker = `<div class="reforge-picker">${chars.map(c => chip(c.id, portrait(c, 'xs'), `${c.isMain ? '★ ' : ''}${esc(c.name)} <small class="muted">Lv ${c.level}</small>`, unenchanted(c))).join('')}
+    ${chip('inv', '🎒', 'Inventory', 0)}</div>`;
+  const row = (it, charId, slotLabel) => {
+    const base = `<span class="reforge-slot">${esc(slotLabel)}</span>`;
+    if (!it) return `<div class="reforge-row empty">${base}<span class="muted small grow">Empty</span></div>`;
+    const name = `<span class="grow" ${tipAttr(itemTooltipHtml(it))}>${itemIcon(it, 'xs')} <span class="rarity-text rarity-${it.rarity}">${esc(it.name)}</span> <span class="muted small">ilvl ${it.level}</span></span>`;
+    const now = it.enchant ? `<span class="small enchant-now">✨ ${esc(STAT_LABELS[it.enchant.stat])} ${statValue(it.enchant.stat, it.enchant.value)}</span>` : '<span class="small muted">no enchantment</span>';
+    const v = valueFor(it);
+    const same = it.enchant?.stat === st && it.enchant.value >= v;
+    return `<div class="reforge-row enchant-row ${same ? 'done' : ''}"><div class="er-line">${base}${name}</div>
+      <div class="er-line"><span class="reforge-slot"></span>${now}<span class="small up">→ ${esc(STAT_LABELS[st])} ${statValue(st, v)}</span><span class="grow"></span>${costHtml(p, T.enchantCost(it.level, it.rarity))}<button class="btn tiny primary" data-enchant-uid="${it.uid}" data-char="${charId}" ${w ? '' : 'disabled'} ${same ? 'title="Already has this enchantment at this strength"' : ''}>${it.enchant ? 'Replace' : 'Enchant'}</button></div></div>`;
+  };
+  let body;
+  if (ui.enchantChar === 'inv') body = invItems.length ? invItems.map(it => row(it, '', SLOTS[it.slot]?.label || '')).join('') : '<p class="muted small">Your inventory is empty.</p>';
+  else { const ch = p.characters[ui.enchantChar]; body = Object.keys(SLOTS).map(slot => row(ch.equipment[slot], ch.id, SLOTS[slot].label)).join(''); }
+  return `<h4>Enchant</h4>
+    ${w ? '' : '<div class="notice small">Assign a worker with Enchanting first.</div>'}
+    <p class="muted small">Adds one permanent bonus stat to an item; enchanting again replaces it. The strength depends on the item's level, this building's level and your enchanter's skill. Choose the enchantment:</p>
+    ${statPicker}
+    ${picker}<div class="reforge-list">${body}</div>`;
+}
+
 function specificHtml(p, id) {
   const def = BUILDINGS[id];
   const b = p.town.buildings[id];
@@ -200,25 +235,7 @@ function specificHtml(p, id) {
       </div>
       ${reforgeHtml(p, id, def, cap, w)}`;
   }
-  if (id === 'enchanter') {
-    const w = T.worker(p, id);
-    const items = itemsOfType(p, null).sort((a, c) => (c.charId ? 1 : 0) - (a.charId ? 1 : 0) || c.item.level - a.item.level);
-    const key = x => `${x.charId}|${x.item.uid}`;
-    if (!items.some(x => key(x) === ui.enchantItem)) ui.enchantItem = items[0] ? key(items[0]) : '';
-    const stats = ENCHANT_STATS_BY_LEVEL(b.level);
-    if (!stats.includes(ui.enchantStat)) ui.enchantStat = stats[0];
-    const chosen = items.find(x => key(x) === ui.enchantItem);
-    const value = chosen ? T.enchantValue(ui.enchantStat, chosen.item.level, b.level, w?.profession.level || 0) : 0;
-    return `<h4>Enchant an item</h4>
-      ${w ? '' : '<div class="notice small">Assign a worker with Enchanting first.</div>'}
-      <p class="muted small">Adds one permanent bonus stat. Enchanting again replaces the previous enchantment. Equipped items can be enchanted directly.</p>
-      ${items.length ? `<label class="inline small">Item <select data-enchant-item>${items.map(x => `<option value="${esc(key(x))}" ${key(x) === ui.enchantItem ? 'selected' : ''}>${esc(x.item.name)} (ilvl ${x.item.level}${x.owner ? `, ${esc(x.owner)}` : ''})${x.item.enchant ? ' ✨' : ''}</option>`).join('')}</select></label>
-      <label class="inline small">Enchantment <select data-enchant-stat>${stats.map(st => `<option value="${st}" ${st === ui.enchantStat ? 'selected' : ''}>${esc(STAT_LABELS[st])}</option>`).join('')}</select></label>
-      ${chosen ? `<div class="enchant-preview">${itemIcon(chosen.item, 'sm')}<div><div class="rarity-text rarity-${chosen.item.rarity}">${esc(chosen.item.name)}</div>
-        <div class="small">${chosen.item.enchant ? `Current: ${esc(STAT_LABELS[chosen.item.enchant.stat])} ${statValue(chosen.item.enchant.stat, chosen.item.enchant.value)} → ` : ''}<b class="up">${esc(STAT_LABELS[ui.enchantStat])} ${statValue(ui.enchantStat, value)}</b></div></div></div>
-        <div class="row between wrap gap">${costHtml(p, T.enchantCost(chosen.item.level, chosen.item.rarity))}<button class="btn primary" data-enchant ${w ? '' : 'disabled'}>Enchant</button></div>` : ''}`
-      : '<p class="muted">No items to enchant.</p>'}`;
-  }
+  if (id === 'enchanter') return enchantHtml(p, b);
   if (id === 'alchemy_lab') {
     const w = T.worker(p, id);
     const mins = T.elixirMinutes(b.level, w?.profession.level || 0);
@@ -311,9 +328,10 @@ export const townView = {
         return;
       }
       if (d.reforge) { const r = await run(act('reforge_item', { buildingId: ui.selected, itemUid: d.reforge, charId: d.char || null })); if (r) toast(`${r.item.name} reforged to item level ${r.item.level}.`, 'success'); return; }
-      if ('enchant' in d) {
-        const [charId, uid] = ui.enchantItem.split('|');
-        const r = await run(act('enchant_item', { itemUid: uid, charId: charId || null, stat: ui.enchantStat }));
+      if (d.enchantPick) { ui.enchantChar = d.enchantPick; rerender(); return; }
+      if (d.enchantStatPick) { ui.enchantStat = d.enchantStatPick; rerender(); return; }
+      if (d.enchantUid) {
+        const r = await run(act('enchant_item', { itemUid: d.enchantUid, charId: d.char || null, stat: ui.enchantStat }));
         if (r) toast(`${r.item.name} enchanted: +${STAT_LABELS[r.item.enchant.stat]}`, 'success');
         return;
       }
@@ -323,8 +341,6 @@ export const townView = {
       const t = e.target;
       if (t.matches('[data-craft-level]')) { ui.craftLevel = Number(t.value) || null; rerender(); }
       else if (t.matches('[data-craft-quality]')) { ui.craftQuality = t.value; rerender(); }
-      else if (t.matches('[data-enchant-item]')) { ui.enchantItem = t.value; rerender(); }
-      else if (t.matches('[data-enchant-stat]')) { ui.enchantStat = t.value; rerender(); }
       else if (t.matches('[data-autoloot]')) await run(act('set_settings', { autoLootAction: t.value }), 'Auto-loot updated.');
     });
     // live countdowns and progress bars

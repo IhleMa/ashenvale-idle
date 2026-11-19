@@ -1238,3 +1238,10 @@ html.standalone body { padding-bottom: env(safe-area-inset-bottom); padding-left
 .arena-log-row.won .arena-log-icon { color: #6fcf6f; } .arena-log-row.lost .arena-log-icon { color: #e0604a; }
 .arena-delta { font-weight: 700; } .arena-delta.up { color: #6fcf6f; } .arena-delta.down { color: #e0604a; }
 @media (max-width: 900px) { .arena-layout { grid-template-columns: 1fr; } .arena-head { flex-direction: column; align-items: flex-start; gap: 8px; } }
+
+.enchant-stats { display: flex; flex-wrap: wrap; gap: 5px; margin: 6px 0 4px; }
+.enchant-stat { padding: 4px 10px; border-radius: 6px; border: 1px solid var(--line2); background: #140f0d; color: var(--muted); cursor: pointer; font: 12px var(--font); }
+.enchant-stat.active { border-color: #9a7bff; color: #e6dcff; background: #221a36; }
+.enchant-now { color: #c8b6ff; }
+.reforge-row.enchant-row { flex-direction: column; align-items: stretch; gap: 3px; }
+.er-line { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; min-width: 0; }
