@@ -3,6 +3,6 @@
   "type": "debuff",
   "recordDamage": true,
   "explodePct": 1,
-  "description": "Records all damage taken. When it runs out, the recorded damage is dealt again.",
+  "description": "Records the damage its caster deals. When it runs out, the recorded damage is dealt again.",
   "order": 75
 }

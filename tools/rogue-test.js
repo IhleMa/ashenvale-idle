@@ -40,6 +40,8 @@ const has = (u, id) => u.statuses.some(s => s.id === id);
   const lost = 1e7 - foes[0].hp;
   const mark = foes[0].statuses.find(s => s.id === 'assassins_mark');
   assert.equal(mark.recorded, lost);
+  C.__test.applyEffect(b, foes[1], foes[0], { kind: 'damage', stat: 'physPower', power: 3, school: 'physical' }, null); // someone else's hit
+  assert.equal(mark.recorded, lost, 'only the caster\'s damage is recorded');
   C.drainEvents(b);
   for (let i = 0; i < 80 && has(foes[0], "assassins_mark"); i++) C.stepBattle(b);
   assert.ok(!has(foes[0], 'assassins_mark'));

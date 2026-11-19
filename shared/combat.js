@@ -667,8 +667,8 @@ function dealDamage(b, src, tgt, raw, { school, ability, bonusCrit = 0, dot = nu
     barrier.value -= absorbed;
     amount -= absorbed;
   }
-  // a mark records everything that lands on its target (its own explosion excluded)
-  if (!exact) for (const s of tgt.statuses) if (STATUSES[s.id].recordDamage) s.recorded = (s.recorded || 0) + amount + absorbed;
+  // a mark records the damage its caster deals to the target (its own explosion excluded)
+  if (!exact) for (const s of tgt.statuses) if (STATUSES[s.id].recordDamage && s.src === src.uid) s.recorded = (s.recorded || 0) + amount + absorbed;
   tgt.hp = Math.max(0, tgt.hp - amount);
   if (tgt.hp <= 0 && (tgt.undying || mod(tgt, 'undying') > 0)) tgt.hp = 1; // Borrowed Time, Fortress, the first tutorial fights
   if (src.stat && src.side !== tgt.side) src.stat.dmg += amount;
