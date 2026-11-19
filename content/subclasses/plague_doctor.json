@@ -1,0 +1,67 @@
+{
+  "name": "Plague Doctor",
+  "classId": "alchemist",
+  "glyph": "☤",
+  "color": "#5fae6a",
+  "title": "Plague Doctor",
+  "description": "Poisons the enemy and patches up the party.",
+  "bonus": {
+    "dotDamagePct": 0.1,
+    "healingPct": 0.1
+  },
+  "branches": [
+    {
+      "name": "Plague Doctor",
+      "attrs": [
+        "int",
+        "vit"
+      ],
+      "abilities": {
+        "2": "remedy",
+        "5": "miasma"
+      },
+      "notables": {
+        "4": {
+          "name": "Bedside Manner",
+          "stats": {
+            "healingPct": 0.12
+          }
+        },
+        "8": {
+          "name": "Pandemic Expert",
+          "stats": {
+            "dotDamagePct": 0.2,
+            "dotDurationPct": 0.1
+          }
+        }
+      },
+      "mutators": {
+        "3": {
+          "name": "Slow Poison",
+          "ability": "poison_flask",
+          "description": "Poison Flask lasts 4 seconds longer.",
+          "changes": {
+            "duration": 4
+          }
+        },
+        "6": {
+          "name": "Potent Poison",
+          "ability": "poison_flask",
+          "description": "Poison Flask deals 40% more damage.",
+          "changes": {
+            "power": 0.4
+          }
+        },
+        "7": {
+          "name": "Cheap Catalyst",
+          "ability": "catalyst",
+          "description": "Catalyst costs 10 less.",
+          "changes": {
+            "cost": -10
+          }
+        }
+      }
+    }
+  ],
+  "order": 241
+}

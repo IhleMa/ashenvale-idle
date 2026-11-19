@@ -1,0 +1,66 @@
+{
+  "name": "Pyrochemist",
+  "classId": "alchemist",
+  "glyph": "✹",
+  "color": "#ff5a1f",
+  "title": "Master of Flame",
+  "description": "Fire and chain reactions: burns that keep exploding.",
+  "bonus": {
+    "magPowerPct": 0.08
+  },
+  "branches": [
+    {
+      "name": "Pyrochemist",
+      "attrs": [
+        "int",
+        "dex"
+      ],
+      "abilities": {
+        "2": "napalm",
+        "5": "chain_reaction"
+      },
+      "notables": {
+        "4": {
+          "name": "Hot Hands",
+          "stats": {
+            "magPowerPct": 0.1
+          }
+        },
+        "8": {
+          "name": "Inferno",
+          "stats": {
+            "damagePct": 0.12,
+            "critDamage": 0.2
+          }
+        }
+      },
+      "mutators": {
+        "3": {
+          "name": "Hotter Flask",
+          "ability": "fire_flask",
+          "description": "Fire Flask deals 30% more damage.",
+          "changes": {
+            "power": 0.3
+          }
+        },
+        "6": {
+          "name": "Flash Freeze",
+          "ability": "frost_flask",
+          "description": "Frost Flask deals 30% more damage.",
+          "changes": {
+            "power": 0.3
+          }
+        },
+        "7": {
+          "name": "Strong Acid",
+          "ability": "acid_flask",
+          "description": "Acid Flask deals 30% more damage.",
+          "changes": {
+            "power": 0.3
+          }
+        }
+      }
+    }
+  ],
+  "order": 240
+}

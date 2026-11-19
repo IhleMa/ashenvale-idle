@@ -1,0 +1,35 @@
+{
+  "name": "Collapse",
+  "classId": "chronomancer",
+  "subclass": "paradox",
+  "unlockLevel": 1,
+  "type": "damage",
+  "description": "Deals 35% of all the health the target lost in the last 4 seconds again.",
+  "cost": 30,
+  "cooldown": 12,
+  "target": "enemy",
+  "effects": [
+    {
+      "kind": "echo",
+      "seconds": 4,
+      "power": 0.35,
+      "school": "magical"
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "combat_time_above",
+        "value": 4
+      }
+    ],
+    "target": {
+      "selector": "enemy_current"
+    },
+    "targetConditions": []
+  },
+  "priority": 70,
+  "order": 100
+}

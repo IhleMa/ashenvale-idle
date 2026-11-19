@@ -1,0 +1,67 @@
+{
+  "name": "Shieldwarden",
+  "classId": "sentinel",
+  "glyph": "⛉",
+  "color": "#7fb3e0",
+  "title": "Shield of the Realm",
+  "description": "Lives to protect: shields and damage reduction for the whole party.",
+  "bonus": {
+    "hpPct": 0.1
+  },
+  "branches": [
+    {
+      "name": "Shieldwarden",
+      "attrs": [
+        "vit",
+        "str"
+      ],
+      "abilities": {
+        "2": "guardians_oath",
+        "5": "unbroken_line"
+      },
+      "notables": {
+        "4": {
+          "name": "Stalwart",
+          "stats": {
+            "hpPct": 0.08,
+            "defensePct": 0.08
+          }
+        },
+        "8": {
+          "name": "Living Wall",
+          "stats": {
+            "damageTakenPct": -0.08,
+            "healingPct": 0.15
+          }
+        }
+      },
+      "mutators": {
+        "3": {
+          "name": "Light Aegis",
+          "ability": "aegis",
+          "description": "Aegis costs 15 less Retribution.",
+          "changes": {
+            "cost": -15
+          }
+        },
+        "6": {
+          "name": "Long Watch",
+          "ability": "bulwark",
+          "description": "Bulwark lasts 4 seconds longer.",
+          "changes": {
+            "duration": 4
+          }
+        },
+        "7": {
+          "name": "Second Wind",
+          "ability": "last_stand",
+          "description": "Last Stand recharges 30 seconds faster.",
+          "changes": {
+            "cooldown": -30
+          }
+        }
+      }
+    }
+  ],
+  "order": 210
+}

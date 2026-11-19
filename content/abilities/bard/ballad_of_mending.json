@@ -1,0 +1,36 @@
+{
+  "name": "Ballad of Mending",
+  "classId": "bard",
+  "subclass": "minstrel",
+  "unlockLevel": 1,
+  "type": "heal",
+  "description": "Heals every ally for 100% healing power.",
+  "cost": 40,
+  "cooldown": 18,
+  "target": "ally",
+  "area": true,
+  "effects": [
+    {
+      "kind": "heal",
+      "stat": "healPower",
+      "power": 1
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "allies_below_hp",
+        "value": 60,
+        "count": 2
+      }
+    ],
+    "target": {
+      "selector": "all_allies"
+    },
+    "targetConditions": []
+  },
+  "priority": 85,
+  "order": 110
+}

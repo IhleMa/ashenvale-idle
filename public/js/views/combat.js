@@ -234,6 +234,7 @@ function unitCard(u, k, minions = []) {
       <div class="unit-name">${u.isMain ? '<span class="hero-star">★</span>' : ''}${esc(u.name)} <span class="muted">Lv ${u.level}${u.syncedFrom ? `<span class="sync-tag" ${tipAttr(`Level sync: fights at level ${u.level} (really ${u.syncedFrom}) while the ascended hero levels up again`)}>⇩${u.syncedFrom}</span>` : ''}${cls ? ' ' + esc(classLabel(u.classId, u.subclass)) : ''}</span> ${tags}${owner}</div>
       <div class="bar hp"><div class="fill"></div><span class="bar-label"></span></div>
       ${res}
+      ${u.classId && Object.values(ABILITIES).some(a => a.classId === u.classId && a.note) ? '<div class="unit-notes" title="Notes for the next Finale"></div>' : ''}
       <div class="unit-statuses"></div>
       ${abilities}
     </div>
@@ -336,6 +337,8 @@ function update() {
     hp.querySelector('.bar-label').textContent = `${fmt(u.hp)} / ${fmt(u.maxHp)}`;
     const res = el.querySelector('.bar.res .fill');
     if (res) res.style.width = (u.resourceMax ? (u.resource / u.resourceMax) * 100 : 0) + '%';
+    const notesEl = el.querySelector('.unit-notes');
+    if (notesEl) { const t = (u.notes || []).map(n => `<span class="note-${n}">♪${n === 'low' ? 'Low' : n === 'mid' ? 'Mid' : 'High'}</span>`).join(' '); if (notesEl.innerHTML !== t) notesEl.innerHTML = t; }
     const sig = (u.st || []).map(s => s[0] + s[2]).join(',');
     const stEl = el.querySelector('.unit-statuses');
     if (stEl.dataset.sig !== sig) {

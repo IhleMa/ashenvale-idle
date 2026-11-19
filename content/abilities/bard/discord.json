@@ -1,0 +1,44 @@
+{
+  "name": "Discord",
+  "classId": "bard",
+  "unlockLevel": 14,
+  "type": "debuff",
+  "description": "Every enemy deals 15% less damage for 8 seconds.",
+  "cost": 20,
+  "cooldown": 15,
+  "target": "enemy",
+  "area": true,
+  "effects": [
+    {
+      "kind": "status",
+      "status": "discord",
+      "duration": 8
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "group",
+        "mode": "any",
+        "conditions": [
+          {
+            "type": "enemies_alive",
+            "cmp": ">=",
+            "value": 2
+          },
+          {
+            "type": "boss_present"
+          }
+        ]
+      }
+    ],
+    "target": {
+      "selector": "all_enemies"
+    },
+    "targetConditions": []
+  },
+  "priority": 40,
+  "order": 70
+}

@@ -1,0 +1,35 @@
+{
+  "name": "Mid Note",
+  "classId": "bard",
+  "unlockLevel": 2,
+  "type": "heal",
+  "description": "Plays a Mid note: heals every ally for 30% healing power.",
+  "cost": 10,
+  "cooldown": 3,
+  "target": "ally",
+  "area": true,
+  "note": "mid",
+  "effects": [
+    {
+      "kind": "heal",
+      "stat": "healPower",
+      "power": 0.3
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "last_note",
+        "note": "low"
+      }
+    ],
+    "target": {
+      "selector": "all_allies"
+    },
+    "targetConditions": []
+  },
+  "priority": 55,
+  "order": 20
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Slowed Time",
+  "type": "debuff",
+  "mods": {
+    "attackSpeedPct": -0.15
+  },
+  "description": "Attacks 15% slower.",
+  "order": 905
+}

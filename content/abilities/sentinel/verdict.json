@@ -1,0 +1,43 @@
+{
+  "name": "Verdict",
+  "classId": "sentinel",
+  "subclass": "avenger",
+  "unlockLevel": 1,
+  "type": "damage",
+  "description": "Spends all Retribution (at least 30): 2% physical power per point to every enemy.",
+  "cost": 30,
+  "cooldown": 14,
+  "target": "enemy",
+  "area": true,
+  "spendAll": true,
+  "effects": [
+    {
+      "kind": "damage",
+      "stat": "physPower",
+      "power": 0.02,
+      "perSpent": true,
+      "school": "physical"
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "resource_above",
+        "value": 60
+      },
+      {
+        "type": "enemies_alive",
+        "cmp": ">=",
+        "value": 2
+      }
+    ],
+    "target": {
+      "selector": "all_enemies"
+    },
+    "targetConditions": []
+  },
+  "priority": 72,
+  "order": 100
+}

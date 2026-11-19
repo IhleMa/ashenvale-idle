@@ -1,0 +1,37 @@
+{
+  "name": "Frenzied Regeneration",
+  "classId": "druid",
+  "subclass": "ursine_guardian",
+  "unlockLevel": 1,
+  "type": "heal",
+  "description": "Bear form only: restores 5% of maximum health every second for 6 seconds.",
+  "cost": 20,
+  "cooldown": 20,
+  "target": "self",
+  "requiresStatus": "bear_form",
+  "effects": [
+    {
+      "kind": "status",
+      "status": "frenzied_regen",
+      "duration": 6,
+      "stat": "maxHp",
+      "power": 0.05
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "self_hp_below",
+        "value": 60
+      }
+    ],
+    "target": {
+      "selector": "self"
+    },
+    "targetConditions": []
+  },
+  "priority": 85,
+  "order": 110
+}

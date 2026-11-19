@@ -1,0 +1,35 @@
+{
+  "name": "Spark",
+  "classId": "spellblade",
+  "unlockLevel": 2,
+  "type": "damage",
+  "description": "Spell: 180% magic damage. Leaves an Arcana charge.",
+  "cost": 8,
+  "cooldown": 2,
+  "target": "enemy",
+  "blade": "spell",
+  "effects": [
+    {
+      "kind": "damage",
+      "stat": "magPower",
+      "power": 1.8,
+      "school": "magical"
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "self_has_status",
+        "status": "edge_charge"
+      }
+    ],
+    "target": {
+      "selector": "enemy_current"
+    },
+    "targetConditions": []
+  },
+  "priority": 58,
+  "order": 20
+}

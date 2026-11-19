@@ -1,0 +1,7 @@
+{
+  "name": "Stone Heart",
+  "type": "buff",
+  "tick": "heal",
+  "description": "Restores health every second.",
+  "order": 940
+}

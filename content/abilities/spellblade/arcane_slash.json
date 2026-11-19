@@ -1,0 +1,34 @@
+{
+  "name": "Arcane Slash",
+  "classId": "spellblade",
+  "unlockLevel": 1,
+  "type": "damage",
+  "description": "Weapon: 180% physical damage. Leaves an Edge charge.",
+  "cost": 8,
+  "cooldown": 2,
+  "target": "enemy",
+  "blade": "weapon",
+  "effects": [
+    {
+      "kind": "damage",
+      "stat": "physPower",
+      "power": 1.8,
+      "school": "physical"
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "always"
+      }
+    ],
+    "target": {
+      "selector": "enemy_current"
+    },
+    "targetConditions": []
+  },
+  "priority": 40,
+  "order": 10
+}

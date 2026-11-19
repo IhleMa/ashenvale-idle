@@ -1,0 +1,44 @@
+{
+  "name": "Transmute",
+  "classId": "alchemist",
+  "subclass": "transmuter",
+  "unlockLevel": 1,
+  "type": "damage",
+  "description": "150% magic damage, then a Fire and a Frost Mark at once: an instant Shatter.",
+  "cost": 30,
+  "cooldown": 15,
+  "target": "enemy",
+  "effects": [
+    {
+      "kind": "damage",
+      "stat": "magPower",
+      "power": 1.5,
+      "school": "magical"
+    },
+    {
+      "kind": "status",
+      "status": "fire_mark",
+      "duration": 6
+    },
+    {
+      "kind": "status",
+      "status": "frost_mark",
+      "duration": 6
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "always"
+      }
+    ],
+    "target": {
+      "selector": "enemy_current"
+    },
+    "targetConditions": []
+  },
+  "priority": 70,
+  "order": 120
+}

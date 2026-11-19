@@ -1,0 +1,40 @@
+{
+  "name": "Guardian's Oath",
+  "classId": "sentinel",
+  "subclass": "shieldwarden",
+  "unlockLevel": 1,
+  "type": "shield",
+  "description": "Shields the most wounded ally for 30% of the Sentinel's maximum health and taunts enemies for 3 seconds.",
+  "cost": 30,
+  "cooldown": 18,
+  "target": "ally",
+  "effects": [
+    {
+      "kind": "shield",
+      "stat": "maxHp",
+      "power": 0.3,
+      "duration": 6
+    },
+    {
+      "kind": "taunt",
+      "duration": 3,
+      "once": true
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "ally_hp_below",
+        "value": 50
+      }
+    ],
+    "target": {
+      "selector": "ally_lowest_hp_pct"
+    },
+    "targetConditions": []
+  },
+  "priority": 85,
+  "order": 80
+}

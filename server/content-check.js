@@ -6,7 +6,7 @@ import { MUTATOR_CHANGES } from '../shared/mutators.js';
 import { CONDITIONS, TARGET_CONDITIONS, SELECTORS } from '../shared/rules.js';
 import { VIEW_IDS as TUTORIAL_VIEWS, METRIC_NAMES as TUTORIAL_METRICS } from '../shared/tutorialDefs.js';
 
-const EFFECT_KINDS = ['damage', 'heal', 'status', 'shield', 'taunt', 'cleanse', 'resource', 'summon', 'sacrifice', 'extend', 'consume_dots', 'spread_dots', 'self_damage'];
+const EFFECT_KINDS = ['damage', 'heal', 'status', 'shield', 'taunt', 'cleanse', 'resource', 'summon', 'sacrifice', 'extend', 'consume_dots', 'spread_dots', 'self_damage', 'revive', 'rewind', 'echo', 'reduce_cooldowns', 'prolong', 'finale'];
 const PROC_EFFECT_KINDS = [...EFFECT_KINDS, 'reflect', 'healPct', 'shieldPct', 'cooldowns'];
 const PROC_TRIGGERS = ['hit', 'crit', 'struck', 'heal', 'kill', 'cast', 'lowHp'];
 const PROC_TARGETS = ['self', 'target', 'source', 'randomEnemy', 'lowestAlly', 'allAllies'];
@@ -89,9 +89,9 @@ export function validateContent(C) {
     if (e.kind === 'summon') {
       if (e.minion !== undefined) { ref(`${w}.minion`, e.minion, minions, 'minion'); num(`${w}.max`, e.max, { min: 1, max: 10, optional: true }); }
       else ref(`${w}.enemyId`, e.enemyId, enemies, 'enemy');
-      num(`${w}.count`, e.count, { min: 1, max: 10, optional: true }); if (e.all !== undefined && typeof e.all !== 'boolean') err(`${w}.all`, 'must be true or false');
+      num(`${w}.count`, e.count, { min: 1, max: 10, optional: true });
     }
-    if (e.kind === 'sacrifice') { num(`${w}.power`, e.power, { min: 0 }); num(`${w}.count`, e.count, { min: 1, max: 10, optional: true }); if (e.school && !['physical', 'magical'].includes(e.school)) err(`${w}.school`, 'must be "physical" or "magical"'); }
+    if (e.kind === 'sacrifice') { num(`${w}.power`, e.power, { min: 0 }); num(`${w}.count`, e.count, { min: 1, max: 10, optional: true }); if (e.all !== undefined && typeof e.all !== 'boolean') err(`${w}.all`, 'must be true or false'); if (e.school && !['physical', 'magical'].includes(e.school)) err(`${w}.school`, 'must be "physical" or "magical"'); }
     if (e.kind === 'extend') num(`${w}.seconds`, e.seconds, { min: 0 });
     if (e.kind === 'damage') { num(`${w}.lifesteal`, e.lifesteal, { min: 0, max: 5, optional: true }); num(`${w}.lifestealPerDebuff`, e.lifestealPerDebuff, { min: 0, max: 2, optional: true }); }
     if (e.kind === 'consume_dots') {
@@ -101,10 +101,23 @@ export function validateContent(C) {
       for (const k of ['markMult', 'markExecute', 'splash', 'refundPerStack']) num(`${w}.${k}`, e[k], { min: 0, optional: true });
     }
     if (e.kind === 'self_damage') num(`${w}.pct`, e.pct, { min: 0, max: 0.9 });
+    if (e.kind === 'revive') num(`${w}.pct`, e.pct, { min: 0.01, max: 1 });
+    if (['rewind', 'echo', 'reduce_cooldowns', 'prolong'].includes(e.kind)) num(`${w}.seconds`, e.seconds, { min: 0, max: 30 });
+    if (e.kind === 'echo') num(`${w}.power`, e.power, { min: 0 });
+    if (e.kind === 'finale') {
+      if (!e.finales || typeof e.finales !== 'object') err(`${w}.finales`, 'needs { "low,mid,high": { name, target, effects }, ..., "dissonance": {...} }');
+      else for (const [k, f] of Object.entries(e.finales)) {
+        if (k !== 'dissonance' && !/^(low|mid|high),(low|mid|high),(low|mid|high)$/.test(k)) err(`${w}.finales.${k}`, 'key must be three notes like "low,mid,high", or "dissonance"');
+        str(`${w}.finales.${k}.name`, f.name);
+        if (!['party', 'enemies', 'target', 'self'].includes(f.target)) err(`${w}.finales.${k}.target`, 'must be party, enemies, target or self');
+        (f.effects || []).forEach((x, i) => checkEffect(`${w}.finales.${k}.effects[${i}]`, x));
+      }
+    }
   };
   const checkRule = (w, r) => {
     if (!r) return;
-    for (const [i, c] of (r.conditions || []).entries()) if (!(c.type in CONDITIONS)) err(`${w}.conditions[${i}]`, `unknown condition "${c.type}"`);
+    const checkConds = (path, list) => { for (const [i, c] of (list || []).entries()) { if (c.type === 'group') checkConds(`${path}[${i}].conditions`, c.conditions); else if (!(c.type in CONDITIONS)) err(`${path}[${i}]`, `unknown condition "${c.type}"`); } };
+    checkConds(`${w}.conditions`, r.conditions);
     for (const [i, c] of (r.targetConditions || []).entries()) if (!(c.type in TARGET_CONDITIONS)) err(`${w}.targetConditions[${i}]`, `unknown target condition "${c.type}"`);
     if (r.target?.selector && !(r.target.selector in SELECTORS)) err(`${w}.target.selector`, `unknown target "${r.target.selector}"`);
   };
@@ -121,6 +134,24 @@ export function validateContent(C) {
     if (!Array.isArray(a.effects) || !a.effects.length) err(`${w}.effects`, 'needs at least one effect');
     (a.effects || []).forEach((e, i) => checkEffect(`${w}.effects[${i}]`, e));
     checkRule(`${w}.defaultRule`, a.defaultRule);
+    if (a.requiresStatus) ref(`${w}.requiresStatus`, a.requiresStatus, statuses, 'status');
+    if (a.note && !['low', 'mid', 'high'].includes(a.note)) err(`${w}.note`, 'must be low, mid or high');
+    if (a.blade && !['weapon', 'spell'].includes(a.blade)) err(`${w}.blade`, 'must be weapon or spell');
+  }
+
+  // ---- status extras: element reactions, groups, charges
+  for (const [id, s] of Object.entries(statuses)) {
+    const w = `statuses.statuses.${id}`;
+    if (s.reactions) {
+      if (!s.element) err(`${w}.reactions`, 'only element marks (with "element") can have reactions');
+      for (const [el, r] of Object.entries(s.reactions)) {
+        if (!Object.values(statuses).some(x => x.element === el)) err(`${w}.reactions.${el}`, `no status has element "${el}"`);
+        str(`${w}.reactions.${el}.name`, r.name);
+        (r.effects || []).forEach((x, i) => checkEffect(`${w}.reactions.${el}.effects[${i}]`, x));
+      }
+    }
+    if (s.charge && !['edge', 'arcana', 'both'].includes(s.charge)) err(`${w}.charge`, 'must be edge, arcana or both');
+    if (s.control && s.control !== 'stun') err(`${w}.control`, 'must be "stun"');
   }
 
   // ---- minions (summoned by players)

@@ -1,0 +1,111 @@
+{
+  "start": "shield_slam",
+  "branches": [
+    {
+      "name": "Bastion",
+      "attrs": [
+        "vit",
+        "str"
+      ],
+      "abilities": {
+        "1": "bulwark",
+        "5": "last_stand"
+      },
+      "notables": {
+        "4": {
+          "name": "Iron Will",
+          "stats": {
+            "hpPct": 0.08,
+            "defensePct": 0.08
+          }
+        },
+        "8": {
+          "name": "Immovable",
+          "stats": {
+            "damageTakenPct": -0.12,
+            "damagePct": -0.1
+          }
+        }
+      }
+    },
+    {
+      "name": "Retribution",
+      "attrs": [
+        "str",
+        "vit"
+      ],
+      "abilities": {
+        "2": "retaliate",
+        "6": "thorns_aura"
+      },
+      "notables": {
+        "4": {
+          "name": "Vengeful",
+          "stats": {
+            "physPowerPct": 0.1
+          }
+        },
+        "7": {
+          "name": "Payback",
+          "stats": {
+            "critDamage": 0.2
+          }
+        },
+        "8": {
+          "name": "Wrathful",
+          "stats": {
+            "damagePct": 0.15,
+            "damageTakenPct": 0.05
+          }
+        }
+      }
+    },
+    {
+      "name": "Guardian",
+      "attrs": [
+        "vit",
+        "int"
+      ],
+      "abilities": {
+        "3": "aegis",
+        "7": "challenging_shout"
+      },
+      "notables": {
+        "4": {
+          "name": "Protector",
+          "stats": {
+            "healingPct": 0.12
+          }
+        },
+        "8": {
+          "name": "Shield of Many",
+          "stats": {
+            "hpPct": 0.12
+          }
+        }
+      }
+    },
+    {
+      "name": "Discipline",
+      "attrs": [
+        "dex",
+        "str"
+      ],
+      "abilities": {},
+      "notables": {
+        "4": {
+          "name": "Steady",
+          "stats": {
+            "attackSpeed": 0.06
+          }
+        },
+        "8": {
+          "name": "Tempered",
+          "stats": {
+            "defensePct": 0.15
+          }
+        }
+      }
+    }
+  ]
+}

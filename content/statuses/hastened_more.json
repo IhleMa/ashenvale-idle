@@ -1,0 +1,9 @@
+{
+  "name": "Greater Haste",
+  "type": "buff",
+  "mods": {
+    "attackSpeedPct": 0.15
+  },
+  "description": "Attacks and casts another 15% faster.",
+  "order": 935
+}

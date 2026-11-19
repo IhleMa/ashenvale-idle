@@ -1,0 +1,66 @@
+{
+  "name": "Battlemage",
+  "classId": "spellblade",
+  "glyph": "☄",
+  "color": "#6f8cff",
+  "title": "Battlemage",
+  "description": "Leans into spells: big area magic between sword strikes.",
+  "bonus": {
+    "magPowerPct": 0.08
+  },
+  "branches": [
+    {
+      "name": "Battlemage",
+      "attrs": [
+        "int",
+        "str"
+      ],
+      "abilities": {
+        "2": "meteor_blade",
+        "5": "mana_edge"
+      },
+      "notables": {
+        "4": {
+          "name": "Mana Surge",
+          "stats": {
+            "magPowerPct": 0.1
+          }
+        },
+        "8": {
+          "name": "Archmage Blade",
+          "stats": {
+            "damagePct": 0.12,
+            "critChance": 0.03
+          }
+        }
+      },
+      "mutators": {
+        "3": {
+          "name": "Searing Lash",
+          "ability": "flame_lash",
+          "description": "Flame Lash deals 50% more damage.",
+          "changes": {
+            "power": 0.5
+          }
+        },
+        "6": {
+          "name": "Bright Spark",
+          "ability": "spark",
+          "description": "Spark deals 60% more damage.",
+          "changes": {
+            "power": 0.6
+          }
+        },
+        "7": {
+          "name": "Thick Ward",
+          "ability": "spell_ward",
+          "description": "Spell Ward absorbs a third more.",
+          "changes": {
+            "power": 0.33
+          }
+        }
+      }
+    }
+  ],
+  "order": 260
+}

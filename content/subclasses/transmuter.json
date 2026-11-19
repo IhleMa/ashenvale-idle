@@ -1,0 +1,67 @@
+{
+  "name": "Transmuter",
+  "classId": "alchemist",
+  "glyph": "⚛",
+  "color": "#c9c24f",
+  "title": "Grand Transmuter",
+  "description": "Combos on demand: instant reactions and stronger catalysts.",
+  "bonus": {
+    "damagePct": 0.06,
+    "critChance": 0.03
+  },
+  "branches": [
+    {
+      "name": "Transmuter",
+      "attrs": [
+        "int",
+        "dex"
+      ],
+      "abilities": {
+        "2": "transmute",
+        "5": "elixir_of_haste"
+      },
+      "notables": {
+        "4": {
+          "name": "Equivalent Exchange",
+          "stats": {
+            "magPowerPct": 0.1
+          }
+        },
+        "8": {
+          "name": "Great Work",
+          "stats": {
+            "damagePct": 0.12,
+            "attackSpeed": 0.05
+          }
+        }
+      },
+      "mutators": {
+        "3": {
+          "name": "Lasting Catalyst",
+          "ability": "catalyst",
+          "description": "Catalyst lasts 10 seconds longer.",
+          "changes": {
+            "duration": 10
+          }
+        },
+        "6": {
+          "name": "Unstable Brew",
+          "ability": "volatile_mixture",
+          "description": "Volatile Mixture costs 15 less.",
+          "changes": {
+            "cost": -15
+          }
+        },
+        "7": {
+          "name": "Bottomless Flask",
+          "ability": "philosophers_draught",
+          "description": "Philosopher's Draught recharges 20 seconds faster.",
+          "changes": {
+            "cooldown": -20
+          }
+        }
+      }
+    }
+  ],
+  "order": 242
+}

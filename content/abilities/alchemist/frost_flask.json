@@ -1,0 +1,43 @@
+{
+  "name": "Frost Flask",
+  "classId": "alchemist",
+  "unlockLevel": 4,
+  "type": "damage",
+  "description": "100% magic damage and a Frost Mark for 6 seconds (attacks 20% slower). On a Fire Mark: Shatter, 300% magic damage.",
+  "cost": 12,
+  "cooldown": 4,
+  "target": "enemy",
+  "effects": [
+    {
+      "kind": "damage",
+      "stat": "magPower",
+      "power": 1,
+      "school": "magical"
+    },
+    {
+      "kind": "status",
+      "status": "frost_mark",
+      "duration": 6
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "always"
+      }
+    ],
+    "target": {
+      "selector": "enemy_current"
+    },
+    "targetConditions": [
+      {
+        "type": "target_has_status",
+        "status": "fire_mark"
+      }
+    ]
+  },
+  "priority": 75,
+  "order": 20
+}

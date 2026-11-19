@@ -1,0 +1,38 @@
+{
+  "name": "Elixir of Haste",
+  "classId": "alchemist",
+  "subclass": "transmuter",
+  "unlockLevel": 1,
+  "type": "buff",
+  "description": "An ally attacks and casts 25% faster for 8 seconds.",
+  "cost": 15,
+  "cooldown": 15,
+  "target": "ally",
+  "effects": [
+    {
+      "kind": "status",
+      "status": "hastened",
+      "duration": 8
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "always"
+      }
+    ],
+    "target": {
+      "selector": "ally_random"
+    },
+    "targetConditions": [
+      {
+        "type": "target_missing_status",
+        "status": "hastened"
+      }
+    ]
+  },
+  "priority": 58,
+  "order": 130
+}

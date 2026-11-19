@@ -1,7 +1,7 @@
 {
   "name": "Leather Boots",
   "slot": "feet",
-  "classes": ["rogue", "ranger", "warrior"],
+  "classes": ["rogue", "ranger", "warrior", "druid", "alchemist", "bard", "spellblade"],
   "stats": { "defense": [1, 0.5], "attackSpeed": [0.01, 0.0003] },
   "material": "leather",
   "order": 200

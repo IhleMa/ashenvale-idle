@@ -1,0 +1,10 @@
+{
+  "name": "Time Dilation",
+  "type": "buff",
+  "mods": {
+    "attackSpeedPct": 0.2,
+    "cooldownRatePct": 1
+  },
+  "description": "Attacks 20% faster and cooldowns run twice as fast.",
+  "order": 910
+}

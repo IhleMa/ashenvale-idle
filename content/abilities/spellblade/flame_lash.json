@@ -1,0 +1,36 @@
+{
+  "name": "Flame Lash",
+  "classId": "spellblade",
+  "unlockLevel": 8,
+  "type": "damage",
+  "description": "Spell: 280% magic damage to the target, and 25% of that to every other enemy.",
+  "cost": 22,
+  "cooldown": 8,
+  "target": "enemy",
+  "blade": "spell",
+  "effects": [
+    {
+      "kind": "damage",
+      "stat": "magPower",
+      "power": 2.8,
+      "school": "magical",
+      "splash": 0.25
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "self_has_status",
+        "status": "edge_charge"
+      }
+    ],
+    "target": {
+      "selector": "enemy_current"
+    },
+    "targetConditions": []
+  },
+  "priority": 65,
+  "order": 40
+}

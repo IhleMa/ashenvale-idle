@@ -1,0 +1,34 @@
+{
+  "name": "Mana Edge",
+  "classId": "spellblade",
+  "subclass": "battlemage",
+  "unlockLevel": 1,
+  "type": "buff",
+  "description": "Deals 15% more damage for 10 seconds.",
+  "cost": 20,
+  "cooldown": 20,
+  "target": "self",
+  "effects": [
+    {
+      "kind": "status",
+      "status": "mana_edge",
+      "duration": 10
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "self_missing_status",
+        "status": "mana_edge"
+      }
+    ],
+    "target": {
+      "selector": "self"
+    },
+    "targetConditions": []
+  },
+  "priority": 62,
+  "order": 90
+}

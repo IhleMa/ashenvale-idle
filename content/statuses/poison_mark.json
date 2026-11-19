@@ -1,0 +1,11 @@
+{
+  "name": "Poison Mark",
+  "type": "debuff",
+  "element": "poison",
+  "tick": "damage",
+  "school": "magical",
+  "ignoreArmor": true,
+  "canCrit": true,
+  "description": "Poison element, deals damage every second: reacts with Fire (Toxic Blast), Frost (Numbing Venom) or Acid (Corrode).",
+  "order": 925
+}

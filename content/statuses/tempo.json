@@ -1,0 +1,10 @@
+{
+  "name": "Tempo",
+  "type": "buff",
+  "mods": {
+    "attackSpeedPct": 0.2,
+    "cooldownRatePct": 0.3
+  },
+  "description": "Attacks 20% faster, cooldowns run 30% faster.",
+  "order": 950
+}

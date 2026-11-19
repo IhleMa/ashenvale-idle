@@ -1,0 +1,9 @@
+{
+  "name": "Chain Reaction",
+  "type": "buff",
+  "mods": {
+    "chainReaction": 1
+  },
+  "description": "Reactions happen again on another enemy at half strength.",
+  "order": 965
+}

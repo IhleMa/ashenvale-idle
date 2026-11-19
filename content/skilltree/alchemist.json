@@ -1,0 +1,103 @@
+{
+  "start": "fire_flask",
+  "branches": [
+    {
+      "name": "Pyrotechnics",
+      "attrs": [
+        "int",
+        "dex"
+      ],
+      "abilities": {
+        "1": "frost_flask",
+        "5": "catalyst"
+      },
+      "notables": {
+        "4": {
+          "name": "Combustion",
+          "stats": {
+            "magPowerPct": 0.1
+          }
+        },
+        "8": {
+          "name": "Volatile Mind",
+          "stats": {
+            "damagePct": 0.12
+          }
+        }
+      }
+    },
+    {
+      "name": "Toxicology",
+      "attrs": [
+        "int",
+        "vit"
+      ],
+      "abilities": {
+        "2": "poison_flask",
+        "6": "volatile_mixture"
+      },
+      "notables": {
+        "4": {
+          "name": "Virulent",
+          "stats": {
+            "dotDamagePct": 0.15
+          }
+        },
+        "8": {
+          "name": "Lingering Fumes",
+          "stats": {
+            "dotDurationPct": 0.2
+          }
+        }
+      }
+    },
+    {
+      "name": "Corrosives",
+      "attrs": [
+        "dex",
+        "int"
+      ],
+      "abilities": {
+        "3": "acid_flask",
+        "7": "philosophers_draught"
+      },
+      "notables": {
+        "4": {
+          "name": "Precise Measures",
+          "stats": {
+            "critChance": 0.05
+          }
+        },
+        "8": {
+          "name": "Caustic",
+          "stats": {
+            "critDamage": 0.25
+          }
+        }
+      }
+    },
+    {
+      "name": "Fieldcraft",
+      "attrs": [
+        "vit",
+        "dex"
+      ],
+      "abilities": {},
+      "notables": {
+        "4": {
+          "name": "Steady Hands",
+          "stats": {
+            "attackSpeed": 0.06
+          }
+        },
+        "8": {
+          "name": "Thick Apron",
+          "stats": {
+            "hpPct": 0.1,
+            "defensePct": 0.08
+          }
+        }
+      }
+    }
+  ]
+}

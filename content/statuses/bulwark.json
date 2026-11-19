@@ -1,0 +1,9 @@
+{
+  "name": "Bulwark",
+  "type": "buff",
+  "mods": {
+    "damageTakenPct": -0.3
+  },
+  "description": "Takes 30% less damage.",
+  "order": 905
+}

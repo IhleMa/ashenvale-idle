@@ -1,0 +1,32 @@
+{
+  "name": "Frost Mark",
+  "type": "debuff",
+  "element": "frost",
+  "mods": {
+    "attackSpeedPct": -0.2
+  },
+  "reactions": {
+    "acid": {
+      "name": "Brittle",
+      "effects": [
+        {
+          "kind": "status",
+          "status": "brittle",
+          "duration": 6
+        }
+      ]
+    },
+    "poison": {
+      "name": "Numbing Venom",
+      "effects": [
+        {
+          "kind": "status",
+          "status": "numbed",
+          "duration": 6
+        }
+      ]
+    }
+  },
+  "description": "Frost element, attacks 20% slower: reacts with Fire (Shatter), Acid (Brittle) or Poison (Numbing Venom).",
+  "order": 915
+}

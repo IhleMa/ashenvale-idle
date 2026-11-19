@@ -1,0 +1,104 @@
+{
+  "start": "temporal_bolt",
+  "branches": [
+    {
+      "name": "Timeline",
+      "attrs": [
+        "int",
+        "vit"
+      ],
+      "abilities": {
+        "1": "rewind",
+        "5": "prolong"
+      },
+      "notables": {
+        "4": {
+          "name": "Second Chances",
+          "stats": {
+            "healingPct": 0.12
+          }
+        },
+        "8": {
+          "name": "Eternity",
+          "stats": {
+            "hpPct": 0.1,
+            "healPowerPct": 0.1
+          }
+        }
+      }
+    },
+    {
+      "name": "Velocity",
+      "attrs": [
+        "dex",
+        "int"
+      ],
+      "abilities": {
+        "2": "haste",
+        "6": "time_dilation"
+      },
+      "notables": {
+        "4": {
+          "name": "Quickening",
+          "stats": {
+            "attackSpeed": 0.06
+          }
+        },
+        "8": {
+          "name": "Momentum",
+          "stats": {
+            "attackSpeed": 0.08,
+            "critChance": 0.03
+          }
+        }
+      }
+    },
+    {
+      "name": "Entropy",
+      "attrs": [
+        "int",
+        "dex"
+      ],
+      "abilities": {
+        "3": "accelerate",
+        "6": "stasis"
+      },
+      "notables": {
+        "4": {
+          "name": "Decay",
+          "stats": {
+            "magPowerPct": 0.1
+          }
+        },
+        "8": {
+          "name": "Unraveling",
+          "stats": {
+            "damagePct": 0.12
+          }
+        }
+      }
+    },
+    {
+      "name": "Constancy",
+      "attrs": [
+        "vit",
+        "int"
+      ],
+      "abilities": {},
+      "notables": {
+        "4": {
+          "name": "Anchor",
+          "stats": {
+            "defensePct": 0.12
+          }
+        },
+        "8": {
+          "name": "Timeless",
+          "stats": {
+            "hpPct": 0.1
+          }
+        }
+      }
+    }
+  ]
+}

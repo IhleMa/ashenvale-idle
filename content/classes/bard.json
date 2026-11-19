@@ -1,0 +1,99 @@
+{
+  "name": "Bard",
+  "role": "support",
+  "color": "#d94f8c",
+  "glyph": "♫",
+  "description": "Plays three notes and a Finale: the order of the notes decides which of six Finales it plays, from party-wide damage to a healing Hymn. Songs buff the whole party.",
+  "strengths": [
+    "Buffs and heals the whole party",
+    "Six different Finales for any situation",
+    "Weakens every enemy"
+  ],
+  "weaknesses": [
+    "Little damage of its own",
+    "A repeated note wastes the Finale"
+  ],
+  "resource": {
+    "id": "inspiration",
+    "name": "Inspiration",
+    "color": "#ff7eb6",
+    "max": 100,
+    "start": 80,
+    "regen": 6
+  },
+  "baseAttributes": {
+    "str": 5,
+    "int": 14,
+    "dex": 12,
+    "vit": 10
+  },
+  "growth": {
+    "str": 0.6,
+    "int": 2,
+    "dex": 2,
+    "vit": 1.7
+  },
+  "scaling": {
+    "hp": {
+      "vit": 11
+    },
+    "physPower": {
+      "str": 1,
+      "dex": 0.8
+    },
+    "magPower": {
+      "int": 2,
+      "dex": 0.8
+    },
+    "healPower": {
+      "int": 1.6
+    },
+    "defense": {
+      "str": 0.25,
+      "vit": 0.4
+    },
+    "critChance": {
+      "dex": 0.001
+    },
+    "attackSpeed": {
+      "dex": 0.0015
+    }
+  },
+  "basicAttack": {
+    "name": "Lute Strike",
+    "stat": "magPower",
+    "power": 1,
+    "school": "magical"
+  },
+  "threatMult": 0.8,
+  "tiers": [
+    {
+      "level": 1,
+      "title": "Busker"
+    },
+    {
+      "level": 10,
+      "title": "Bard",
+      "bonus": {
+        "dexPct": 0.05
+      }
+    },
+    {
+      "level": 25,
+      "title": "Loremaster",
+      "bonus": {
+        "dexPct": 0.04,
+        "intPct": 0.04
+      }
+    },
+    {
+      "level": 40,
+      "title": "Legend of Song",
+      "mainOnly": true,
+      "bonus": {
+        "allPct": 0.06
+      }
+    }
+  ],
+  "order": 120
+}

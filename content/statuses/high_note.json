@@ -1,0 +1,9 @@
+{
+  "name": "High Note",
+  "type": "buff",
+  "mods": {
+    "damagePct": 0.1
+  },
+  "description": "Deals 10% more damage.",
+  "order": 925
+}

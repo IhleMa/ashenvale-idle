@@ -1,0 +1,11 @@
+{
+  "name": "Stasis",
+  "type": "debuff",
+  "control": "stun",
+  "bossDurationMult": 0.5,
+  "mods": {
+    "invulnerable": 1
+  },
+  "description": "Frozen in time: cannot act and takes no damage. Half as long on bosses.",
+  "order": 915
+}

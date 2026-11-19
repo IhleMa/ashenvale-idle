@@ -1,0 +1,34 @@
+{
+  "name": "Borrowed Time",
+  "classId": "chronomancer",
+  "subclass": "timekeeper",
+  "unlockLevel": 1,
+  "type": "buff",
+  "description": "An ally cannot drop below 1 health for 3 seconds.",
+  "cost": 30,
+  "cooldown": 45,
+  "target": "ally",
+  "effects": [
+    {
+      "kind": "status",
+      "status": "borrowed_time",
+      "duration": 3
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "ally_hp_below",
+        "value": 20
+      }
+    ],
+    "target": {
+      "selector": "ally_lowest_hp_pct"
+    },
+    "targetConditions": []
+  },
+  "priority": 110,
+  "order": 90
+}

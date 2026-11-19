@@ -1,0 +1,35 @@
+{
+  "name": "Echo of Life",
+  "classId": "chronomancer",
+  "subclass": "timekeeper",
+  "unlockLevel": 1,
+  "type": "heal",
+  "description": "Rewinds every ally's health to what it was 4 seconds ago.",
+  "cost": 50,
+  "cooldown": 40,
+  "target": "ally",
+  "area": true,
+  "effects": [
+    {
+      "kind": "rewind",
+      "seconds": 4
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "allies_below_hp",
+        "value": 60,
+        "count": 2
+      }
+    ],
+    "target": {
+      "selector": "all_allies"
+    },
+    "targetConditions": []
+  },
+  "priority": 95,
+  "order": 80
+}

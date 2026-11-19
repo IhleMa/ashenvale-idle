@@ -1,0 +1,46 @@
+{
+  "name": "Napalm",
+  "type": "debuff",
+  "element": "fire",
+  "tick": "damage",
+  "school": "magical",
+  "ignoreArmor": true,
+  "canCrit": true,
+  "reactions": {
+    "frost": {
+      "name": "Shatter",
+      "effects": [
+        {
+          "kind": "damage",
+          "stat": "magPower",
+          "power": 3,
+          "school": "magical"
+        }
+      ]
+    },
+    "poison": {
+      "name": "Toxic Blast",
+      "area": true,
+      "effects": [
+        {
+          "kind": "damage",
+          "stat": "magPower",
+          "power": 2,
+          "school": "magical"
+        }
+      ]
+    },
+    "acid": {
+      "name": "Meltdown",
+      "effects": [
+        {
+          "kind": "status",
+          "status": "meltdown",
+          "duration": 8
+        }
+      ]
+    }
+  },
+  "description": "Burning fire element: reacts like a Fire Mark.",
+  "order": 910
+}

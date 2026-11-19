@@ -1,0 +1,35 @@
+{
+  "name": "Spell Ward",
+  "classId": "spellblade",
+  "unlockLevel": 10,
+  "type": "shield",
+  "description": "Spell: a shield of 15% maximum health for 8 seconds.",
+  "cost": 20,
+  "cooldown": 15,
+  "target": "self",
+  "blade": "spell",
+  "effects": [
+    {
+      "kind": "shield",
+      "stat": "maxHp",
+      "power": 0.15,
+      "duration": 8
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "self_hp_below",
+        "value": 70
+      }
+    ],
+    "target": {
+      "selector": "self"
+    },
+    "targetConditions": []
+  },
+  "priority": 45,
+  "order": 50
+}

@@ -1,0 +1,121 @@
+{
+  "name": "Finale",
+  "classId": "bard",
+  "unlockLevel": 6,
+  "type": "buff",
+  "description": "Plays back the last three notes. Low-Mid-High: Triumph (party +30% damage). High-Mid-Low: Requiem (300% magic damage to every enemy). Mid-Low-High: Hymn (party heal). Mid-High-Low: Chorus of Steel (party shield). Low-High-Mid: Dirge (enemies weaker and slower). High-Low-Mid: Tempo (party faster). A repeated note: Dissonance.",
+  "cost": 20,
+  "cooldown": 15,
+  "target": "self",
+  "effects": [
+    {
+      "kind": "finale",
+      "finales": {
+        "low,mid,high": {
+          "name": "Triumph",
+          "target": "party",
+          "effects": [
+            {
+              "kind": "status",
+              "status": "triumph",
+              "duration": 10
+            }
+          ]
+        },
+        "high,mid,low": {
+          "name": "Requiem",
+          "target": "enemies",
+          "effects": [
+            {
+              "kind": "damage",
+              "stat": "magPower",
+              "power": 3,
+              "school": "magical"
+            }
+          ]
+        },
+        "mid,low,high": {
+          "name": "Hymn",
+          "target": "party",
+          "effects": [
+            {
+              "kind": "heal",
+              "stat": "healPower",
+              "power": 0.6
+            },
+            {
+              "kind": "status",
+              "status": "hymn",
+              "duration": 6,
+              "stat": "healPower",
+              "power": 0.25
+            }
+          ]
+        },
+        "mid,high,low": {
+          "name": "Chorus of Steel",
+          "target": "party",
+          "effects": [
+            {
+              "kind": "shield",
+              "stat": "maxHp",
+              "power": 0.12,
+              "duration": 8
+            }
+          ]
+        },
+        "low,high,mid": {
+          "name": "Dirge",
+          "target": "enemies",
+          "effects": [
+            {
+              "kind": "status",
+              "status": "dirge",
+              "duration": 6
+            }
+          ]
+        },
+        "high,low,mid": {
+          "name": "Tempo",
+          "target": "party",
+          "effects": [
+            {
+              "kind": "status",
+              "status": "tempo",
+              "duration": 8
+            }
+          ]
+        },
+        "dissonance": {
+          "name": "Dissonance",
+          "target": "target",
+          "effects": [
+            {
+              "kind": "damage",
+              "stat": "magPower",
+              "power": 1,
+              "school": "magical"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "own_notes",
+        "cmp": ">=",
+        "value": 3
+      }
+    ],
+    "target": {
+      "selector": "self"
+    },
+    "targetConditions": []
+  },
+  "priority": 90,
+  "order": 40
+}

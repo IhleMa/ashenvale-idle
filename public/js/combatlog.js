@@ -71,6 +71,7 @@ export function makeEntry(units, ev, time) {
     case 'phase': return { ...base, cat: 'event', html: `<span class="log-phase">⚠ ${esc(ev.message)}</span>` };
     case 'spawn': return { ...base, cat: 'event', html: ev.unit.kind === 'minion' ? `${nameOf(units, ev.src)} summons <span class="log-name ally">${esc(ev.unit.name)}</span>.` : `${esc(ev.unit.name)} joins the fight!` };
     case 'expire': return { ...base, cat: 'event', html: ev.reason === 'sacrifice' ? `<span class="log-phase">💥 ${nameOf(units, ev.tgt)} explodes!</span>` : `<span class="muted">${nameOf(units, ev.tgt)} fades away.</span>` };
+    case 'revive': return { ...base, cat: 'event', html: `<span class="log-heal">✚ ${nameOf(units, ev.src)} brings ${nameOf(units, ev.tgt)} back to life!</span>` };
     case 'renew': return { ...base, cat: 'event', html: `${nameOf(units, ev.src)} renews ${nameOf(units, ev.tgt)}.` };
     case 'wave': return ev.total > 1 ? { ...base, cat: 'event', html: `<span class="log-phase">Wave ${ev.wave} of ${ev.total}</span>` } : null;
     default: return null;

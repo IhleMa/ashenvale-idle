@@ -1,7 +1,7 @@
 {
   "name": "Plate Armor",
   "slot": "chest",
-  "classes": ["warrior", "cleric"],
+  "classes": ["warrior", "cleric", "sentinel", "spellblade"],
   "stats": { "defense": [5, 1.6], "vit": [2, 0.5] },
   "material": "metal",
   "order": 140

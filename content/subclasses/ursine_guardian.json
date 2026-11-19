@@ -1,0 +1,79 @@
+{
+  "name": "Ursine Guardian",
+  "classId": "druid",
+  "glyph": "◆",
+  "color": "#8b5a2b",
+  "title": "Elder Bear",
+  "description": "Spends most fights in Bear form as a real tank.",
+  "bonus": {
+    "hpPct": 0.1
+  },
+  "branches": [
+    {
+      "name": "Ursine Guardian",
+      "attrs": [
+        "vit",
+        "str"
+      ],
+      "abilities": {
+        "2": "frenzied_regen",
+        "5": "thick_hide"
+      },
+      "notables": {
+        "4": {
+          "name": "Shaggy Coat",
+          "stats": {
+            "defensePct": 0.12
+          }
+        },
+        "8": {
+          "name": "Great Bear",
+          "stats": {
+            "hpPct": 0.12,
+            "damageTakenPct": -0.06
+          }
+        }
+      },
+      "mutators": {
+        "3": {
+          "name": "Menacing Maul",
+          "ability": "maul",
+          "description": "Maul also taunts enemies for 3 seconds.",
+          "changes": {
+            "effects": [
+              {
+                "kind": "taunt",
+                "duration": 3
+              }
+            ]
+          }
+        },
+        "6": {
+          "name": "Armored Shift",
+          "ability": "bear_form",
+          "description": "Shifting into Bear form gives a shield of 15% maximum health.",
+          "changes": {
+            "effects": [
+              {
+                "kind": "shield",
+                "stat": "maxHp",
+                "power": 0.15,
+                "duration": 8,
+                "self": true
+              }
+            ]
+          }
+        },
+        "7": {
+          "name": "Savage Maul",
+          "ability": "maul",
+          "description": "Maul deals 40% more damage.",
+          "changes": {
+            "power": 0.4
+          }
+        }
+      }
+    }
+  ],
+  "order": 221
+}

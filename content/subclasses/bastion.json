@@ -1,0 +1,79 @@
+{
+  "name": "Bastion",
+  "classId": "sentinel",
+  "glyph": "⛫",
+  "color": "#8a8f98",
+  "title": "Living Fortress",
+  "description": "Practically unkillable: cheats death and heals itself.",
+  "bonus": {
+    "defensePct": 0.1,
+    "hpPct": 0.05
+  },
+  "branches": [
+    {
+      "name": "Bastion",
+      "attrs": [
+        "vit",
+        "dex"
+      ],
+      "abilities": {
+        "2": "fortress",
+        "5": "stone_heart"
+      },
+      "notables": {
+        "4": {
+          "name": "Granite Skin",
+          "stats": {
+            "defensePct": 0.12
+          }
+        },
+        "8": {
+          "name": "Mountain",
+          "stats": {
+            "hpPct": 0.15,
+            "damageTakenPct": -0.05
+          }
+        }
+      },
+      "mutators": {
+        "3": {
+          "name": "Unyielding",
+          "ability": "bulwark",
+          "description": "Bulwark blocks 45% of damage instead of 30%.",
+          "changes": {
+            "effects": [
+              {
+                "kind": "status",
+                "status": "bulwark_greater",
+                "duration": 6
+              }
+            ]
+          }
+        },
+        "6": {
+          "name": "Deep Reserves",
+          "ability": "last_stand",
+          "description": "Last Stand heals 50% more.",
+          "changes": {
+            "power": 0.5
+          }
+        },
+        "7": {
+          "name": "Rallying Cry",
+          "ability": "challenging_shout",
+          "description": "Challenging Shout also gives 20 Retribution.",
+          "changes": {
+            "effects": [
+              {
+                "kind": "resource",
+                "amount": 20,
+                "self": true
+              }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "order": 212
+}

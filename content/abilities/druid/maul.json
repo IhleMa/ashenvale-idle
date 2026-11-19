@@ -1,0 +1,34 @@
+{
+  "name": "Maul",
+  "classId": "druid",
+  "unlockLevel": 10,
+  "type": "damage",
+  "description": "Bear form only: 150% physical damage.",
+  "cost": 15,
+  "cooldown": 4,
+  "target": "enemy",
+  "requiresStatus": "bear_form",
+  "effects": [
+    {
+      "kind": "damage",
+      "stat": "physPower",
+      "power": 1.5,
+      "school": "physical"
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "always"
+      }
+    ],
+    "target": {
+      "selector": "enemy_current"
+    },
+    "targetConditions": []
+  },
+  "priority": 15,
+  "order": 60
+}

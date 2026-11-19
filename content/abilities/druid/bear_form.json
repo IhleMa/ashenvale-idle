@@ -1,0 +1,42 @@
+{
+  "name": "Bear Form",
+  "classId": "druid",
+  "unlockLevel": 6,
+  "type": "buff",
+  "description": "Shift into Bear form: +60% defense, 20% less damage taken, twice the threat. Taunts on entering.",
+  "cost": 0,
+  "cooldown": 6,
+  "target": "self",
+  "effects": [
+    {
+      "kind": "status",
+      "status": "bear_form",
+      "duration": 999
+    },
+    {
+      "kind": "taunt",
+      "duration": 3
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "self_missing_status",
+        "status": "bear_form"
+      },
+      {
+        "type": "allies_alive",
+        "cmp": "<=",
+        "value": 1
+      }
+    ],
+    "target": {
+      "selector": "self"
+    },
+    "targetConditions": []
+  },
+  "priority": 21,
+  "order": 30
+}

@@ -1,0 +1,37 @@
+{
+  "name": "Wild Growth",
+  "classId": "druid",
+  "unlockLevel": 8,
+  "type": "heal",
+  "description": "Heals every ally for 20% healing power every second for 6 seconds (any form).",
+  "cost": 30,
+  "cooldown": 12,
+  "target": "ally",
+  "area": true,
+  "effects": [
+    {
+      "kind": "status",
+      "status": "wild_growth",
+      "duration": 6,
+      "stat": "healPower",
+      "power": 0.2
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "allies_below_hp",
+        "value": 80,
+        "count": 2
+      }
+    ],
+    "target": {
+      "selector": "all_allies"
+    },
+    "targetConditions": []
+  },
+  "priority": 70,
+  "order": 50
+}

@@ -1,0 +1,39 @@
+{
+  "name": "Thick Hide",
+  "classId": "druid",
+  "subclass": "ursine_guardian",
+  "unlockLevel": 1,
+  "type": "buff",
+  "description": "Bear form only: takes 20% less damage for 10 seconds.",
+  "cost": 15,
+  "cooldown": 20,
+  "target": "self",
+  "requiresStatus": "bear_form",
+  "effects": [
+    {
+      "kind": "status",
+      "status": "thick_hide",
+      "duration": 10
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "self_missing_status",
+        "status": "thick_hide"
+      },
+      {
+        "type": "self_hp_below",
+        "value": 85
+      }
+    ],
+    "target": {
+      "selector": "self"
+    },
+    "targetConditions": []
+  },
+  "priority": 80,
+  "order": 120
+}

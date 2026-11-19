@@ -1,0 +1,37 @@
+{
+  "name": "Song of Respite",
+  "classId": "bard",
+  "unlockLevel": 10,
+  "type": "heal",
+  "description": "Song: every ally heals 25% healing power every second for 15 seconds. One song at a time.",
+  "cost": 25,
+  "cooldown": 20,
+  "target": "ally",
+  "area": true,
+  "effects": [
+    {
+      "kind": "status",
+      "status": "song_of_respite",
+      "duration": 15,
+      "stat": "healPower",
+      "power": 0.25
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "allies_below_hp",
+        "value": 70,
+        "count": 2
+      }
+    ],
+    "target": {
+      "selector": "all_allies"
+    },
+    "targetConditions": []
+  },
+  "priority": 46,
+  "order": 60
+}

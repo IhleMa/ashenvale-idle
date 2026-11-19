@@ -1,0 +1,9 @@
+{
+  "name": "Triumph",
+  "type": "buff",
+  "mods": {
+    "damagePct": 0.3
+  },
+  "description": "Deals 30% more damage.",
+  "order": 935
+}

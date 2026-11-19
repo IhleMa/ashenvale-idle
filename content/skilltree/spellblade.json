@@ -1,0 +1,103 @@
+{
+  "start": "arcane_slash",
+  "branches": [
+    {
+      "name": "Sorcery",
+      "attrs": [
+        "int",
+        "dex"
+      ],
+      "abilities": {
+        "1": "spark",
+        "5": "flame_lash"
+      },
+      "notables": {
+        "4": {
+          "name": "Arcane Edge",
+          "stats": {
+            "magPowerPct": 0.1
+          }
+        },
+        "8": {
+          "name": "Spellstorm",
+          "stats": {
+            "damagePct": 0.1,
+            "critChance": 0.03
+          }
+        }
+      }
+    },
+    {
+      "name": "Steel",
+      "attrs": [
+        "str",
+        "dex"
+      ],
+      "abilities": {
+        "2": "runic_strike",
+        "6": "blink_strike"
+      },
+      "notables": {
+        "4": {
+          "name": "Honed",
+          "stats": {
+            "physPowerPct": 0.1
+          }
+        },
+        "8": {
+          "name": "Bladestorm",
+          "stats": {
+            "critDamage": 0.25
+          }
+        }
+      }
+    },
+    {
+      "name": "Warding",
+      "attrs": [
+        "vit",
+        "int"
+      ],
+      "abilities": {
+        "3": "spell_ward",
+        "7": "arcane_infusion"
+      },
+      "notables": {
+        "4": {
+          "name": "Runed Armor",
+          "stats": {
+            "defensePct": 0.12
+          }
+        },
+        "8": {
+          "name": "Spellguard",
+          "stats": {
+            "hpPct": 0.1
+          }
+        }
+      }
+    },
+    {
+      "name": "Flow",
+      "attrs": [
+        "dex",
+        "str"
+      ],
+      "abilities": {},
+      "notables": {
+        "4": {
+          "name": "Rhythm of Blades",
+          "stats": {
+            "attackSpeed": 0.06
+          }
+        },
+        "8": {
+          "name": "Duality",
+          "stats": {
+            "allPct": 0.04
+          }
+        }
+      }
+    }
+  ]
+}

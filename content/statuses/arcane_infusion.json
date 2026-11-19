@@ -1,0 +1,7 @@
+{
+  "name": "Arcane Infusion",
+  "type": "buff",
+  "charge": "both",
+  "description": "Every ability gets the Edge or Arcana bonus.",
+  "order": 915
+}

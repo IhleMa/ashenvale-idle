@@ -1,7 +1,7 @@
 {
   "name": "Leather Jerkin",
   "slot": "chest",
-  "classes": ["rogue", "ranger", "warrior"],
+  "classes": ["rogue", "ranger", "warrior", "druid", "alchemist", "bard", "spellblade"],
   "stats": { "defense": [3, 1.1], "dex": [2, 0.5] },
   "material": "leather",
   "order": 180

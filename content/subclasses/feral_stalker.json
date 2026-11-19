@@ -1,0 +1,66 @@
+{
+  "name": "Feral Stalker",
+  "classId": "druid",
+  "glyph": "✶",
+  "color": "#c8a23c",
+  "title": "Shadow of the Wild",
+  "description": "Lives in Cat form: bleeds and brutal finishers.",
+  "bonus": {
+    "critDamage": 0.2
+  },
+  "branches": [
+    {
+      "name": "Feral Stalker",
+      "attrs": [
+        "dex",
+        "str"
+      ],
+      "abilities": {
+        "2": "ferocious_bite",
+        "5": "pounce"
+      },
+      "notables": {
+        "4": {
+          "name": "Sharp Claws",
+          "stats": {
+            "physPowerPct": 0.1
+          }
+        },
+        "8": {
+          "name": "Apex Predator",
+          "stats": {
+            "critChance": 0.06,
+            "damagePct": 0.1
+          }
+        }
+      },
+      "mutators": {
+        "3": {
+          "name": "Deep Wounds",
+          "ability": "rake",
+          "description": "Rake bleeds 4 seconds longer.",
+          "changes": {
+            "duration": 4
+          }
+        },
+        "6": {
+          "name": "Rending Rake",
+          "ability": "rake",
+          "description": "Rake deals 40% more damage.",
+          "changes": {
+            "power": 0.4
+          }
+        },
+        "7": {
+          "name": "Double Rake",
+          "ability": "rake",
+          "description": "Rake hits twice.",
+          "changes": {
+            "hits": 1
+          }
+        }
+      }
+    }
+  ],
+  "order": 222
+}

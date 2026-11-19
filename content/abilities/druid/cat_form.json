@@ -1,0 +1,42 @@
+{
+  "name": "Cat Form",
+  "classId": "druid",
+  "unlockLevel": 6,
+  "type": "buff",
+  "description": "Shift into Cat form: attacks 25% faster with +10% critical chance.",
+  "cost": 0,
+  "cooldown": 6,
+  "target": "self",
+  "effects": [
+    {
+      "kind": "status",
+      "status": "cat_form",
+      "duration": 999
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "self_missing_status",
+        "status": "cat_form"
+      },
+      {
+        "type": "ally_hp_below",
+        "value": 90,
+        "negate": true
+      },
+      {
+        "type": "combat_time_above",
+        "value": 3
+      }
+    ],
+    "target": {
+      "selector": "self"
+    },
+    "targetConditions": []
+  },
+  "priority": 20,
+  "order": 40
+}

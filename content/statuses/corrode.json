@@ -1,0 +1,10 @@
+{
+  "name": "Corrode",
+  "type": "debuff",
+  "tick": "damage",
+  "school": "magical",
+  "ignoreArmor": true,
+  "canCrit": true,
+  "description": "Dissolves the target every second.",
+  "order": 945
+}

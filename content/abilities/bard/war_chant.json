@@ -1,0 +1,35 @@
+{
+  "name": "War Chant",
+  "classId": "bard",
+  "subclass": "skald",
+  "unlockLevel": 1,
+  "type": "buff",
+  "description": "The party gets +10% critical chance for 10 seconds.",
+  "cost": 25,
+  "cooldown": 25,
+  "target": "ally",
+  "area": true,
+  "effects": [
+    {
+      "kind": "status",
+      "status": "war_chant",
+      "duration": 10
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "combat_time_above",
+        "value": 2
+      }
+    ],
+    "target": {
+      "selector": "all_allies"
+    },
+    "targetConditions": []
+  },
+  "priority": 68,
+  "order": 80
+}

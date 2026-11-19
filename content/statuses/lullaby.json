@@ -1,0 +1,9 @@
+{
+  "name": "Lullaby",
+  "type": "debuff",
+  "mods": {
+    "attackSpeedPct": -0.3
+  },
+  "description": "Attacks 30% slower.",
+  "order": 965
+}

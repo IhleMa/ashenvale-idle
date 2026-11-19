@@ -1,0 +1,32 @@
+{
+  "name": "Accelerate",
+  "classId": "chronomancer",
+  "unlockLevel": 8,
+  "type": "buff",
+  "description": "Cuts every cooldown of an ally by 4 seconds.",
+  "cost": 25,
+  "cooldown": 15,
+  "target": "ally",
+  "effects": [
+    {
+      "kind": "reduce_cooldowns",
+      "seconds": 4
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "combat_time_above",
+        "value": 5
+      }
+    ],
+    "target": {
+      "selector": "ally_random"
+    },
+    "targetConditions": []
+  },
+  "priority": 60,
+  "order": 40
+}

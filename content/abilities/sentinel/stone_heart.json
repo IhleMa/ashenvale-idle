@@ -1,0 +1,40 @@
+{
+  "name": "Stone Heart",
+  "classId": "sentinel",
+  "subclass": "bastion",
+  "unlockLevel": 1,
+  "type": "heal",
+  "description": "Restores 2% of maximum health every second for 10 seconds.",
+  "cost": 20,
+  "cooldown": 20,
+  "target": "self",
+  "effects": [
+    {
+      "kind": "status",
+      "status": "stone_heart",
+      "duration": 10,
+      "stat": "maxHp",
+      "power": 0.02
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "self_hp_below",
+        "value": 60
+      },
+      {
+        "type": "self_missing_status",
+        "status": "stone_heart"
+      }
+    ],
+    "target": {
+      "selector": "self"
+    },
+    "targetConditions": []
+  },
+  "priority": 70,
+  "order": 130
+}

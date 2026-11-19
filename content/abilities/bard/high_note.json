@@ -1,0 +1,35 @@
+{
+  "name": "High Note",
+  "classId": "bard",
+  "unlockLevel": 4,
+  "type": "buff",
+  "description": "Plays a High note: the party deals 10% more damage for 6 seconds.",
+  "cost": 10,
+  "cooldown": 3,
+  "target": "ally",
+  "area": true,
+  "note": "high",
+  "effects": [
+    {
+      "kind": "status",
+      "status": "high_note",
+      "duration": 6
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "last_note",
+        "note": "mid"
+      }
+    ],
+    "target": {
+      "selector": "all_allies"
+    },
+    "targetConditions": []
+  },
+  "priority": 60,
+  "order": 30
+}

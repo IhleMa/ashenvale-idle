@@ -1,0 +1,78 @@
+{
+  "name": "Skald",
+  "classId": "bard",
+  "glyph": "⚑",
+  "color": "#e06a3a",
+  "title": "Battle Skald",
+  "description": "War songs: more damage and crits for the whole party.",
+  "bonus": {
+    "damagePct": 0.05
+  },
+  "branches": [
+    {
+      "name": "Skald",
+      "attrs": [
+        "dex",
+        "str"
+      ],
+      "abilities": {
+        "2": "war_chant",
+        "5": "anthem"
+      },
+      "notables": {
+        "4": {
+          "name": "Drums of War",
+          "stats": {
+            "damagePct": 0.08
+          }
+        },
+        "8": {
+          "name": "Saga",
+          "stats": {
+            "critChance": 0.05,
+            "critDamage": 0.2
+          }
+        }
+      },
+      "mutators": {
+        "3": {
+          "name": "Battle Hymn",
+          "ability": "song_of_valor",
+          "description": "Song of Valor gives 25% more damage instead of 15%.",
+          "changes": {
+            "effects": [
+              {
+                "kind": "status",
+                "status": "valor_plus",
+                "duration": 15
+              }
+            ]
+          }
+        },
+        "6": {
+          "name": "Soaring Note",
+          "ability": "high_note",
+          "description": "High Note gives 15% more damage instead of 10%.",
+          "changes": {
+            "effects": [
+              {
+                "kind": "status",
+                "status": "high_note_plus",
+                "duration": 6
+              }
+            ]
+          }
+        },
+        "7": {
+          "name": "Quick Finale",
+          "ability": "finale",
+          "description": "Finale recharges 5 seconds faster.",
+          "changes": {
+            "cooldown": -5
+          }
+        }
+      }
+    }
+  ],
+  "order": 250
+}

@@ -1,0 +1,33 @@
+{
+  "name": "Improvise",
+  "classId": "bard",
+  "subclass": "virtuoso",
+  "unlockLevel": 1,
+  "type": "buff",
+  "description": "Cuts every one of the Bard's cooldowns by 6 seconds.",
+  "cost": 15,
+  "cooldown": 25,
+  "target": "self",
+  "effects": [
+    {
+      "kind": "reduce_cooldowns",
+      "seconds": 6
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "combat_time_above",
+        "value": 5
+      }
+    ],
+    "target": {
+      "selector": "self"
+    },
+    "targetConditions": []
+  },
+  "priority": 80,
+  "order": 120
+}

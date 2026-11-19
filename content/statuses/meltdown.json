@@ -1,0 +1,9 @@
+{
+  "name": "Meltdown",
+  "type": "debuff",
+  "mods": {
+    "defensePct": -0.4
+  },
+  "description": "40% less defense.",
+  "order": 930
+}

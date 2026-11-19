@@ -1,0 +1,33 @@
+{
+  "name": "Philosopher's Draught",
+  "classId": "alchemist",
+  "unlockLevel": 18,
+  "type": "buff",
+  "description": "40% more damage and Reagents regenerate twice as fast for 10 seconds.",
+  "cost": 0,
+  "cooldown": 60,
+  "target": "self",
+  "effects": [
+    {
+      "kind": "status",
+      "status": "draught",
+      "duration": 10
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "combat_time_above",
+        "value": 3
+      }
+    ],
+    "target": {
+      "selector": "self"
+    },
+    "targetConditions": []
+  },
+  "priority": 80,
+  "order": 70
+}

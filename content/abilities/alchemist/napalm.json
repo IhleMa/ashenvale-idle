@@ -1,0 +1,44 @@
+{
+  "name": "Napalm",
+  "classId": "alchemist",
+  "subclass": "pyrochemist",
+  "unlockLevel": 1,
+  "type": "damage",
+  "description": "A burning Fire Mark: 60% magic power every second for 6 seconds, and it reacts like any Fire Mark.",
+  "cost": 18,
+  "cooldown": 6,
+  "target": "enemy",
+  "effects": [
+    {
+      "kind": "status",
+      "status": "napalm_mark",
+      "duration": 6,
+      "stat": "magPower",
+      "power": 0.6
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "always"
+      }
+    ],
+    "target": {
+      "selector": "enemy_current"
+    },
+    "targetConditions": [
+      {
+        "type": "target_missing_status",
+        "status": "fire_mark"
+      },
+      {
+        "type": "target_missing_status",
+        "status": "napalm_mark"
+      }
+    ]
+  },
+  "priority": 45,
+  "order": 80
+}

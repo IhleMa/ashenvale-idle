@@ -1,0 +1,7 @@
+{
+  "name": "Edge",
+  "type": "buff",
+  "charge": "edge",
+  "description": "The next spell deals 30% more damage.",
+  "order": 905
+}

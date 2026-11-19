@@ -1,0 +1,37 @@
+{
+  "name": "Bulwark",
+  "classId": "sentinel",
+  "unlockLevel": 4,
+  "type": "buff",
+  "description": "Takes 30% less damage for 6 seconds.",
+  "cost": 20,
+  "cooldown": 15,
+  "target": "self",
+  "effects": [
+    {
+      "kind": "status",
+      "status": "bulwark",
+      "duration": 6
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "self_hp_below",
+        "value": 70
+      },
+      {
+        "type": "self_missing_status",
+        "status": "bulwark"
+      }
+    ],
+    "target": {
+      "selector": "self"
+    },
+    "targetConditions": []
+  },
+  "priority": 90,
+  "order": 20
+}

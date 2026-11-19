@@ -1,0 +1,40 @@
+{
+  "name": "Stasis",
+  "classId": "chronomancer",
+  "unlockLevel": 12,
+  "type": "debuff",
+  "description": "Freezes an enemy for 3 seconds (1.5 on bosses): it cannot act and takes no damage.",
+  "cost": 30,
+  "cooldown": 25,
+  "target": "enemy",
+  "effects": [
+    {
+      "kind": "status",
+      "status": "stasis",
+      "duration": 3
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "enemies_alive",
+        "cmp": ">=",
+        "value": 3
+      }
+    ],
+    "target": {
+      "selector": "enemy_highest_threat"
+    },
+    "targetConditions": [
+      {
+        "type": "target_is_type",
+        "param": "boss",
+        "negate": true
+      }
+    ]
+  },
+  "priority": 65,
+  "order": 60
+}

@@ -1,0 +1,38 @@
+{
+  "name": "Temporal Bolt",
+  "classId": "chronomancer",
+  "unlockLevel": 1,
+  "type": "damage",
+  "description": "160% magic damage; the target attacks 15% slower for 4 seconds.",
+  "cost": 8,
+  "cooldown": 2,
+  "target": "enemy",
+  "effects": [
+    {
+      "kind": "damage",
+      "stat": "magPower",
+      "power": 1.6,
+      "school": "magical"
+    },
+    {
+      "kind": "status",
+      "status": "slowed_time",
+      "duration": 4
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "always"
+      }
+    ],
+    "target": {
+      "selector": "enemy_current"
+    },
+    "targetConditions": []
+  },
+  "priority": 40,
+  "order": 10
+}

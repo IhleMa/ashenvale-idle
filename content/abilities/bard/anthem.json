@@ -1,0 +1,45 @@
+{
+  "name": "Anthem of Ages",
+  "classId": "bard",
+  "subclass": "skald",
+  "unlockLevel": 1,
+  "type": "buff",
+  "description": "The party deals 10% more damage and takes 10% less for 12 seconds. Plays alongside a song.",
+  "cost": 30,
+  "cooldown": 30,
+  "target": "ally",
+  "area": true,
+  "effects": [
+    {
+      "kind": "status",
+      "status": "anthem",
+      "duration": 12
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "group",
+        "mode": "any",
+        "conditions": [
+          {
+            "type": "boss_present"
+          },
+          {
+            "type": "enemies_alive",
+            "cmp": ">=",
+            "value": 3
+          }
+        ]
+      }
+    ],
+    "target": {
+      "selector": "all_allies"
+    },
+    "targetConditions": []
+  },
+  "priority": 74,
+  "order": 90
+}

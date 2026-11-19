@@ -1,0 +1,7 @@
+{
+  "name": "Moment of Clarity",
+  "type": "buff",
+  "freeCast": true,
+  "description": "The next ability costs nothing.",
+  "order": 930
+}

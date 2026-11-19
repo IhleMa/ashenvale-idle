@@ -1,0 +1,34 @@
+{
+  "name": "Wrath",
+  "classId": "sentinel",
+  "subclass": "avenger",
+  "unlockLevel": 1,
+  "type": "buff",
+  "description": "Deals 40% more damage for 8 seconds.",
+  "cost": 20,
+  "cooldown": 20,
+  "target": "self",
+  "effects": [
+    {
+      "kind": "status",
+      "status": "wrath",
+      "duration": 8
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "resource_above",
+        "value": 40
+      }
+    ],
+    "target": {
+      "selector": "self"
+    },
+    "targetConditions": []
+  },
+  "priority": 65,
+  "order": 110
+}

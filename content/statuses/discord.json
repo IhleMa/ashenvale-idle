@@ -1,0 +1,9 @@
+{
+  "name": "Discord",
+  "type": "debuff",
+  "mods": {
+    "damagePct": -0.15
+  },
+  "description": "Deals 15% less damage.",
+  "order": 920
+}

@@ -1,0 +1,34 @@
+{
+  "name": "Rapid Recall",
+  "classId": "chronomancer",
+  "subclass": "hourglass",
+  "unlockLevel": 1,
+  "type": "buff",
+  "description": "Cuts every cooldown of the whole party by 3 seconds.",
+  "cost": 45,
+  "cooldown": 40,
+  "target": "ally",
+  "area": true,
+  "effects": [
+    {
+      "kind": "reduce_cooldowns",
+      "seconds": 3
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "combat_time_above",
+        "value": 10
+      }
+    ],
+    "target": {
+      "selector": "all_allies"
+    },
+    "targetConditions": []
+  },
+  "priority": 75,
+  "order": 130
+}

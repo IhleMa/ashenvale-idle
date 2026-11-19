@@ -1,0 +1,7 @@
+{
+  "name": "Volatile Mixture",
+  "type": "buff",
+  "volatile": true,
+  "description": "The next element flask lands on every enemy.",
+  "order": 950
+}

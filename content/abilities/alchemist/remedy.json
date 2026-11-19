@@ -1,0 +1,34 @@
+{
+  "name": "Remedy",
+  "classId": "alchemist",
+  "subclass": "plague_doctor",
+  "unlockLevel": 1,
+  "type": "heal",
+  "description": "Heals an ally for 120% magic power.",
+  "cost": 20,
+  "cooldown": 8,
+  "target": "ally",
+  "effects": [
+    {
+      "kind": "heal",
+      "stat": "magPower",
+      "power": 1.2
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "ally_hp_below",
+        "value": 60
+      }
+    ],
+    "target": {
+      "selector": "ally_lowest_hp_pct"
+    },
+    "targetConditions": []
+  },
+  "priority": 85,
+  "order": 100
+}

@@ -1,0 +1,41 @@
+{
+  "name": "Fracture",
+  "classId": "chronomancer",
+  "subclass": "paradox",
+  "unlockLevel": 1,
+  "type": "damage",
+  "description": "140% magic damage, and the target takes 40% magic power again every second for 2 seconds.",
+  "cost": 20,
+  "cooldown": 6,
+  "target": "enemy",
+  "effects": [
+    {
+      "kind": "damage",
+      "stat": "magPower",
+      "power": 1.4,
+      "school": "magical"
+    },
+    {
+      "kind": "status",
+      "status": "fractured",
+      "duration": 2,
+      "stat": "magPower",
+      "power": 0.4
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "always"
+      }
+    ],
+    "target": {
+      "selector": "enemy_current"
+    },
+    "targetConditions": []
+  },
+  "priority": 60,
+  "order": 110
+}

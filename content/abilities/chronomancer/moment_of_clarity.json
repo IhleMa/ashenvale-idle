@@ -1,0 +1,38 @@
+{
+  "name": "Moment of Clarity",
+  "classId": "chronomancer",
+  "subclass": "hourglass",
+  "unlockLevel": 1,
+  "type": "buff",
+  "description": "An ally's next ability costs nothing (lasts 15 seconds).",
+  "cost": 20,
+  "cooldown": 20,
+  "target": "ally",
+  "effects": [
+    {
+      "kind": "status",
+      "status": "clarity",
+      "duration": 15
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "always"
+      }
+    ],
+    "target": {
+      "selector": "ally_random"
+    },
+    "targetConditions": [
+      {
+        "type": "target_missing_status",
+        "status": "clarity"
+      }
+    ]
+  },
+  "priority": 62,
+  "order": 120
+}

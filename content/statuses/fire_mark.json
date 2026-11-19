@@ -1,0 +1,42 @@
+{
+  "name": "Fire Mark",
+  "type": "debuff",
+  "element": "fire",
+  "reactions": {
+    "frost": {
+      "name": "Shatter",
+      "effects": [
+        {
+          "kind": "damage",
+          "stat": "magPower",
+          "power": 3,
+          "school": "magical"
+        }
+      ]
+    },
+    "poison": {
+      "name": "Toxic Blast",
+      "area": true,
+      "effects": [
+        {
+          "kind": "damage",
+          "stat": "magPower",
+          "power": 2,
+          "school": "magical"
+        }
+      ]
+    },
+    "acid": {
+      "name": "Meltdown",
+      "effects": [
+        {
+          "kind": "status",
+          "status": "meltdown",
+          "duration": 8
+        }
+      ]
+    }
+  },
+  "description": "Fire element: reacts with Frost (Shatter), Poison (Toxic Blast) or Acid (Meltdown).",
+  "order": 905
+}

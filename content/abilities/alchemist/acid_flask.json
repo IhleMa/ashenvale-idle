@@ -1,0 +1,47 @@
+{
+  "name": "Acid Flask",
+  "classId": "alchemist",
+  "unlockLevel": 8,
+  "type": "damage",
+  "description": "100% magic damage and an Acid Mark for 6 seconds. On a Fire Mark: Meltdown, 40% less defense for 8 seconds.",
+  "cost": 12,
+  "cooldown": 5,
+  "target": "enemy",
+  "effects": [
+    {
+      "kind": "damage",
+      "stat": "magPower",
+      "power": 1,
+      "school": "magical"
+    },
+    {
+      "kind": "status",
+      "status": "acid_mark",
+      "duration": 6
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "boss_present"
+      }
+    ],
+    "target": {
+      "selector": "enemy_current"
+    },
+    "targetConditions": [
+      {
+        "type": "target_has_status",
+        "status": "fire_mark"
+      },
+      {
+        "type": "target_missing_status",
+        "status": "meltdown"
+      }
+    ]
+  },
+  "priority": 50,
+  "order": 40
+}

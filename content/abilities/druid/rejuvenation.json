@@ -1,0 +1,44 @@
+{
+  "name": "Rejuvenation",
+  "classId": "druid",
+  "unlockLevel": 1,
+  "type": "heal",
+  "description": "Heals an ally for 50% healing power every second for 8 seconds (any form).",
+  "cost": 12,
+  "cooldown": 2,
+  "target": "ally",
+  "effects": [
+    {
+      "kind": "status",
+      "status": "rejuvenation",
+      "duration": 8,
+      "stat": "healPower",
+      "power": 0.5
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "ally_hp_below",
+        "value": 95
+      }
+    ],
+    "target": {
+      "selector": "ally_lowest_hp_pct"
+    },
+    "targetConditions": [
+      {
+        "type": "target_missing_status",
+        "status": "rejuvenation"
+      },
+      {
+        "type": "target_hp_below",
+        "value": 95
+      }
+    ]
+  },
+  "priority": 60,
+  "order": 10
+}

@@ -1,0 +1,41 @@
+{
+  "name": "Poison Flask",
+  "classId": "alchemist",
+  "unlockLevel": 6,
+  "type": "debuff",
+  "description": "A Poison Mark that deals 45% magic power every second for 6 seconds. On a Fire Mark: Toxic Blast, 200% magic damage to every enemy.",
+  "cost": 12,
+  "cooldown": 5,
+  "target": "enemy",
+  "effects": [
+    {
+      "kind": "status",
+      "status": "poison_mark",
+      "duration": 6,
+      "stat": "magPower",
+      "power": 0.45
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "enemies_alive",
+        "cmp": ">=",
+        "value": 3
+      }
+    ],
+    "target": {
+      "selector": "enemy_current"
+    },
+    "targetConditions": [
+      {
+        "type": "target_has_status",
+        "status": "fire_mark"
+      }
+    ]
+  },
+  "priority": 70,
+  "order": 30
+}

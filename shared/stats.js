@@ -84,6 +84,12 @@ export function computeStats(ch) {
     dotDamagePct: bonus.dotDamagePct || 0,
     dotDurationPct: bonus.dotDurationPct || 0,
   };
+  // Spellblade: the lower of physical/magic power gains part of the higher one, so split gear isn't wasted
+  if (cls.powerBlend) {
+    const hi = Math.max(s.physPower, s.magPower), add = Math.round(hi * cls.powerBlend);
+    if (s.physPower < s.magPower) s.physPower += add; else s.magPower += add;
+  }
+
   return s;
 }
 

@@ -1,0 +1,10 @@
+{
+  "name": "Anthem of Ages",
+  "type": "buff",
+  "mods": {
+    "damagePct": 0.1,
+    "damageTakenPct": -0.1
+  },
+  "description": "Deals 10% more damage and takes 10% less.",
+  "order": 960
+}

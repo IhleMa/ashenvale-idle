@@ -1,0 +1,66 @@
+{
+  "name": "Blademaster",
+  "classId": "spellblade",
+  "glyph": "✦",
+  "color": "#b0b8c8",
+  "title": "Blademaster",
+  "description": "Leans into steel: sweeping strikes and counterattacks.",
+  "bonus": {
+    "physPowerPct": 0.08
+  },
+  "branches": [
+    {
+      "name": "Blademaster",
+      "attrs": [
+        "str",
+        "dex"
+      ],
+      "abilities": {
+        "2": "whirlwind",
+        "5": "riposte"
+      },
+      "notables": {
+        "4": {
+          "name": "Keen Edge",
+          "stats": {
+            "physPowerPct": 0.1
+          }
+        },
+        "8": {
+          "name": "Thousand Cuts",
+          "stats": {
+            "critDamage": 0.25,
+            "attackSpeed": 0.05
+          }
+        }
+      },
+      "mutators": {
+        "3": {
+          "name": "Heavy Runes",
+          "ability": "runic_strike",
+          "description": "Runic Strike deals 60% more damage.",
+          "changes": {
+            "power": 0.6
+          }
+        },
+        "6": {
+          "name": "Quick Blink",
+          "ability": "blink_strike",
+          "description": "Blink Strike recharges 4 seconds faster.",
+          "changes": {
+            "cooldown": -4
+          }
+        },
+        "7": {
+          "name": "Sharp Slash",
+          "ability": "arcane_slash",
+          "description": "Arcane Slash deals 40% more damage.",
+          "changes": {
+            "power": 0.4
+          }
+        }
+      }
+    }
+  ],
+  "order": 261
+}

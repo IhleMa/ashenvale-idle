@@ -1,0 +1,9 @@
+{
+  "name": "Rune of Warding",
+  "type": "buff",
+  "mods": {
+    "damageTakenPct": -0.1
+  },
+  "description": "Takes 10% less damage.",
+  "order": 930
+}

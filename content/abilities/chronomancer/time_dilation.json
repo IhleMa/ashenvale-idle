@@ -1,0 +1,44 @@
+{
+  "name": "Time Dilation",
+  "classId": "chronomancer",
+  "unlockLevel": 18,
+  "type": "buff",
+  "description": "The whole party attacks 20% faster and its cooldowns run twice as fast for 10 seconds.",
+  "cost": 60,
+  "cooldown": 120,
+  "target": "ally",
+  "area": true,
+  "effects": [
+    {
+      "kind": "status",
+      "status": "time_dilation",
+      "duration": 10
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "group",
+        "mode": "any",
+        "conditions": [
+          {
+            "type": "boss_present"
+          },
+          {
+            "type": "enemies_alive",
+            "cmp": ">=",
+            "value": 3
+          }
+        ]
+      }
+    ],
+    "target": {
+      "selector": "all_allies"
+    },
+    "targetConditions": []
+  },
+  "priority": 100,
+  "order": 70
+}

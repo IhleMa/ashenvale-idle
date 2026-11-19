@@ -28,7 +28,7 @@ export function makeCharacterUnit(ch, { ownerId, ownerName, position, bonuses = 
     level: ch.level, ...(ch.syncedFrom ? { syncedFrom: ch.syncedFrom } : {}), role: ch.role, tags: ['hero'], position,
     stats: s, maxHp: s.maxHp, hp: s.maxHp,
     resource: cls.resource.start, resourceMax: cls.resource.max, resourceDef: cls.resource,
-    cooldowns: {}, statuses: [], alive: true,
+    cooldowns: {}, statuses: [], alive: true, notes: [], hpHist: [], usedOnce: {},
     loadout: [...ch.loadout], ranks: { ...ch.abilities }, abilityDefs: mutatedAbilities(ch) /* subclass mutators */, rules: JSON.parse(JSON.stringify(ch.rules)),
     basicAttack: cls.basicAttack,
     threatMult: (cls.threatMult || 1) * (role.threatMult || 1),
@@ -188,8 +188,11 @@ export function stepBattle(b) {
 
   for (const u of living) {
     // resource regen
-    if (u.resourceDef) u.resource = Math.min(u.resourceMax, u.resource + u.resourceDef.regen * DT);
-    for (const k in u.cooldowns) if (u.cooldowns[k] > 0) u.cooldowns[k] = Math.max(0, u.cooldowns[k] - DT);
+    if (u.resourceDef) u.resource = Math.min(u.resourceMax, u.resource + u.resourceDef.regen * DT * Math.max(0, 1 + mod(u, 'resourceRegenPct')));
+    const cdRate = DT * Math.max(0, 1 + mod(u, 'cooldownRatePct')); // Time Warp: cooldowns run faster
+    for (const k in u.cooldowns) if (u.cooldowns[k] > 0) u.cooldowns[k] = Math.max(0, u.cooldowns[k] - cdRate);
+    // health history (Rewind, Collapse): one sample every half second, the last 8 seconds
+    if (b.ticks % 5 === 0) { (u.hpHist ||= []).push(u.hp); if (u.hpHist.length > 17) u.hpHist.shift(); }
     tickStatuses(b, u);
     if (u.boss && u.enrageAfter && b.phaseTime >= u.enrageAfter && !u.enraged) {
       u.enraged = true;
@@ -202,7 +205,7 @@ export function stepBattle(b) {
     if (!u.alive) continue;
     u.actionTimer -= DT;
     if (u.actionTimer > 0) continue;
-    if (hasStatus(u, 'stun')) { u.actionTimer = 0.1; continue; }
+    if (u.statuses.some(s => STATUSES[s.id]?.control === 'stun')) { u.actionTimer = 0.1; continue; }
     act(b, u);
     if (checkEnd(b)) return;
   }
@@ -236,8 +239,11 @@ function act(b, u) {
   for (const abilityId of u.loadout) {
     const ab = u.abilityDefs?.[abilityId] || ABILITIES[abilityId];
     if (!ab || (u.cooldowns[abilityId] || 0) > 0) continue;
+    if (ab.requiresStatus && !hasStatus(u, ab.requiresStatus)) continue; // form abilities (Druid)
+    if (ab.oncePerFight && u.usedOnce?.[abilityId]) continue;
     const rule = u.rules[abilityId];
-    const cost = Math.ceil(ab.cost * Math.max(0, 1 + (u.passives?.costPct || 0)));
+    const free = u.statuses.find(s => STATUSES[s.id]?.freeCast);
+    const cost = free ? 0 : Math.ceil(ab.cost * Math.max(0, 1 + (u.passives?.costPct || 0)));
     if (u.resourceDef) {
       if (u.resource < cost) {
         if (rule?.reserve !== false && cost > reserved && resolveRule(rule, ab, b, u)) reserved = cost;
@@ -248,10 +254,18 @@ function act(b, u) {
     const targets = resolveRule(rule, ab, b, u);
     if (!targets) continue;
     if (u.resourceDef) u.resource -= cost;
+    if (free) u.statuses = u.statuses.filter(s => s !== free);
+    // spendAll: the ability also eats whatever resource is left; effects with perSpent scale with the total
+    u.spent = cost;
+    if (ab.spendAll && u.resourceDef) { u.spent += u.resource; u.resource = 0; }
+    u.castMult = bladeCharge(b, u, ab);
+    if (ab.oncePerFight) u.usedOnce[abilityId] = true;
     u.cooldowns[abilityId] = ab.cooldown;
     emit(b, { type: 'ability', src: u.uid, ability: abilityId, tgts: targets.map(t => t.uid) });
     if (u.stat && u.kind === 'character') u.stat.casts[abilityId] = (u.stat.casts[abilityId] || 0) + 1;
     targets.forEach((t, i) => { for (const eff of ab.effects) if (!(eff.once && i > 0)) applyEffect(b, u, t, eff, abilityId); });
+    u.castMult = 1; u.spent = 0;
+    if (ab.note) { u.notes.push(ab.note); if (u.notes.length > 3) u.notes.shift(); u.hadNotes = true; } // Bard: the last three notes
     fireProcs(b, u, 'cast', { ability: abilityId, area: !!ab.area, target: targets[0] });
     u.actionTimer = gcd;
     return;
@@ -278,8 +292,27 @@ function basicTarget(b, u) {
   return foes.reduce((a, f) => (f.position < a.position ? f : a), foes[0]);
 }
 
+// Spellblade: a weapon ability leaves an Edge charge that empowers the next spell, a spell leaves Arcana that
+// empowers the next weapon ability. Returns the damage multiplier for this cast.
+function bladeCharge(b, u, ab) {
+  if (!ab.blade) return 1;
+  const want = ab.blade === 'weapon' ? 'arcana' : 'edge';
+  let mult = 1;
+  const charge = u.statuses.find(s => STATUSES[s.id]?.charge === want);
+  const infused = u.statuses.some(s => STATUSES[s.id]?.charge === 'both');
+  if (charge || infused) {
+    mult += STATUSES[charge?.id]?.value ?? 0.3;
+    if (charge) u.statuses = u.statuses.filter(s => s !== charge);
+    if (charge && u.resourceDef?.onAlternate) u.resource = Math.min(u.resourceMax, u.resource + u.resourceDef.onAlternate);
+  }
+  mult += mod(u, ab.blade === 'weapon' ? 'arcanaPct' : 'edgePct');
+  const give = Object.entries(STATUSES).find(([, d]) => d.charge === (ab.blade === 'weapon' ? 'edge' : 'arcana'));
+  if (give) applyStatus(b, u, u, give[0], 8, 0, 1);
+  return mult;
+}
+
 function applyEffect(b, src, tgt, eff, abilityId) {
-  const rm = rankMult(src, abilityId);
+  const rm = rankMult(src, abilityId) * (src.castMult || 1) * (eff.perSpent ? src.spent || 0 : 1);
   switch (eff.kind) {
     case 'damage': {
       if (!tgt.alive) return;
@@ -292,6 +325,8 @@ function applyEffect(b, src, tgt, eff, abilityId) {
         // life drain: heal the caster for part of the damage (more for each of its own different debuffs on the target)
         if (dealt > 0 && (eff.lifesteal || eff.lifestealPerDebuff) && src.alive) healUnit(b, src, src, dealt * ((eff.lifesteal || 0) + (eff.lifestealPerDebuff || 0) * ownDebuffs), abilityId);
       }
+      // splash: a share of the power also hits every other enemy (Flame Lash)
+      if (eff.splash) for (const e of enemiesOf(b, src)) if (e !== tgt) dealDamage(b, src, e, effPower(src, eff.stat) * eff.power * eff.splash * rm, { school: eff.school, ability: abilityId, noCrit: true });
       break;
     }
     case 'heal': {
@@ -309,7 +344,12 @@ function applyEffect(b, src, tgt, eff, abilityId) {
       let v = value;
       if (STATUSES[eff.status]?.type === 'buff') dur *= 1 + (src.bonuses.buffDurationPct || 0);
       if (STATUSES[eff.status]?.tick === 'damage') { dur *= 1 + (src.bonuses.dotDurationPct || 0); v *= 1 + (src.bonuses.dotDamagePct || 0); }
-      for (let i = 0; i < (STATUSES[eff.status]?.stacking === 'independent' ? eff.stacks || 1 : 1); i++) applyStatus(b, src, target, eff.status, dur, v, eff.stacks || 1);
+      if (STATUSES[eff.status]?.control && target.boss) dur *= STATUSES[eff.status].bossDurationMult ?? 1;
+      // Volatile Mixture: the next element flask lands on every enemy
+      const volatile = STATUSES[eff.status]?.element && src.statuses.find(s => STATUSES[s.id]?.volatile);
+      if (volatile) src.statuses = src.statuses.filter(s => s !== volatile);
+      for (const t of volatile ? enemiesOf(b, src) : [target])
+        for (let i = 0; i < (STATUSES[eff.status]?.stacking === 'independent' ? eff.stacks || 1 : 1); i++) applyStatus(b, src, t, eff.status, dur, v, eff.stacks || 1);
       break;
     }
     case 'shield': {
@@ -342,6 +382,41 @@ function applyEffect(b, src, tgt, eff, abilityId) {
       break;
     }
     case 'sacrifice': sacrificeMinions(b, src, eff, abilityId); break;
+    case 'revive': {
+      // bring a fallen party member back (the "Fallen ally" target)
+      if (tgt.alive || tgt.kind !== 'character') return;
+      tgt.alive = true; tgt.hp = Math.max(1, Math.round(tgt.maxHp * (eff.pct || 0.3))); tgt.statuses = []; tgt.actionTimer = 1;
+      for (const e of enemiesOf(b, src)) if (e.threatTable) e.threatTable[tgt.uid] = 0;
+      emit(b, { type: 'revive', src: src.uid, tgt: tgt.uid });
+      break;
+    }
+    case 'rewind': {
+      // set health back to what it was `seconds` ago (only if that was more)
+      if (!tgt.alive) return;
+      const past = hpAgo(tgt, eff.seconds || 4);
+      if (past > tgt.hp) healUnit(b, src, tgt, (past - tgt.hp) / ((1 + src.bonuses.healingPct) * Math.max(0.01, 1 + mod(tgt, 'healingTakenPct')) * (1 + mod(src, 'healingDonePct'))), abilityId, 'rewind');
+      break;
+    }
+    case 'echo': {
+      // Collapse: deal again part of the health the target lost in the last `seconds`
+      if (!tgt.alive) return;
+      const lost = Math.max(0, hpAgo(tgt, eff.seconds || 4) - tgt.hp);
+      if (lost > 0) dealDamage(b, src, tgt, lost * (eff.power || 0.3) * rm, { school: eff.school || 'magical', ability: abilityId, ignoreArmor: true });
+      break;
+    }
+    case 'reduce_cooldowns': {
+      if (eff.self) tgt = src;
+      for (const k in tgt.cooldowns) tgt.cooldowns[k] = Math.max(0, tgt.cooldowns[k] - (eff.seconds || 0));
+      break;
+    }
+    case 'prolong': {
+      // buffs on the party and the party's damage over time on enemies last longer
+      for (const a of alliesOf(b, src)) for (const s of a.statuses) if (STATUSES[s.id]?.type === 'buff' && !STATUSES[s.id].group && s.remaining < 900) { s.remaining += eff.seconds; s.duration = Math.max(s.duration, s.remaining); }
+      const party = new Set(b.units.filter(u => u.side === src.side).map(u => u.uid));
+      for (const e of enemiesOf(b, src)) for (const s of e.statuses) if (STATUSES[s.id]?.type === 'debuff' && party.has(s.src)) { s.remaining += eff.seconds; s.duration = Math.max(s.duration, s.remaining); }
+      break;
+    }
+    case 'finale': playFinale(b, src, tgt, eff, abilityId); break;
     case 'consume_dots': consumeDots(b, src, tgt, eff, abilityId, rm); break;
     case 'spread_dots': {
       // copy the caster's own damage-over-time effects from the target onto every other enemy
@@ -378,6 +453,54 @@ function applyEffect(b, src, tgt, eff, abilityId) {
       break;
     }
   }
+}
+
+// health `seconds` ago from the half-second history (current health if there's no history yet)
+function hpAgo(u, seconds) {
+  const h = u.hpHist || [];
+  const i = h.length - 1 - Math.round(seconds * 2);
+  return h.length ? h[Math.max(0, i)] : u.hp;
+}
+
+// ---------------------------------------------------------------- Bard: Finale plays back the last three notes
+// eff.finales: { "low,mid,high": { name, target: "party"|"enemies"|"target", effects: [...] }, ..., "dissonance": {...} }
+function playFinale(b, src, tgt, eff, abilityId) {
+  const notes = src.notes || [];
+  if (notes.length < 3) return;
+  const key = new Set(notes).size === 3 ? notes.join(',') : 'dissonance';
+  const f = eff.finales?.[key] || eff.finales?.dissonance;
+  src.notes = [];
+  if (!f) return;
+  emit(b, { type: 'phase', src: src.uid, message: `${src.name} plays ${f.name}!` });
+  const targets = f.target === 'party' ? alliesOf(b, src) : f.target === 'enemies' ? enemiesOf(b, src) : f.target === 'self' ? [src] : [tgt.alive ? tgt : enemiesOf(b, src)[0]].filter(Boolean);
+  for (const t of targets) for (const e of f.effects) applyEffect(b, src, t, e, abilityId);
+}
+
+// ---------------------------------------------------------------- Alchemist: element reactions
+// A status with "element" is a mark. When a different element lands on a target that carries a mark, both
+// marks are used up and the reaction runs (defined on either status: "reactions": { "<other element>": {...} }).
+function tryReaction(b, src, tgt, id) {
+  const def = STATUSES[id];
+  const other = tgt.statuses.find(s => STATUSES[s.id]?.element && STATUSES[s.id].element !== def.element);
+  if (!other) return false;
+  const odef = STATUSES[other.id];
+  const r = def.reactions?.[odef.element] || odef.reactions?.[def.element];
+  if (!r) return false;
+  tgt.statuses = tgt.statuses.filter(s => s !== other);
+  const catalyst = tgt.statuses.find(s => STATUSES[s.id]?.mods?.reactionPct);
+  const boost = 1 + mod(tgt, 'reactionPct') + mod(src, 'reactionPct');
+  if (catalyst) tgt.statuses = tgt.statuses.filter(s => s !== catalyst);
+  emit(b, { type: 'phase', src: src.uid, message: `${r.name}!` });
+  const targets = r.area ? enemiesOf(b, src) : [tgt];
+  const prev = src.castMult; src.castMult = (prev || 1) * boost;
+  for (const t of targets) for (const e of r.effects) applyEffect(b, src, t, e, r.ability || null);
+  src.castMult = prev;
+  // Chain Reaction (Pyrochemist): the reaction happens once more on another enemy
+  if (mod(src, 'chainReaction') > 0 && !b.chaining) {
+    const next = enemiesOf(b, src).find(e => e !== tgt);
+    if (next) { b.chaining = true; src.castMult = (prev || 1) * boost * 0.5; for (const e of r.effects) applyEffect(b, src, next, e, r.ability || null); src.castMult = prev; b.chaining = false; }
+  }
+  return true;
 }
 
 // ---------------------------------------------------------------- consuming damage over time (Reap)
@@ -442,6 +565,9 @@ function sacrificeMinions(b, src, eff, abilityId) {
 function applyStatus(b, src, tgt, id, duration, value, stacks) {
   const def = STATUSES[id];
   if (!def) return;
+  if (def.element && tryReaction(b, src, tgt, id)) return; // the new mark reacted instead of landing
+  // one status per group from the same caster (Druid forms, Bard songs)
+  if (def.group) tgt.statuses = tgt.statuses.filter(s => s.id === id || STATUSES[s.id]?.group !== def.group || s.src !== src.uid);
   // "independent" stacks: every application is its own instance with its own timer (no cap)
   const existing = def.stacking === 'independent' ? null : tgt.statuses.find(s => s.id === id);
   if (existing) {
@@ -481,6 +607,7 @@ function tickStatuses(b, u) {
 
 function dealDamage(b, src, tgt, raw, { school, ability, bonusCrit = 0, dot = null, ignoreArmor = false, noCrit = false, proc = null }) {
   if (!tgt.alive) return 0;
+  if (mod(tgt, 'invulnerable') > 0) return 0; // Stasis
   if (!dot && school === 'physical' && mod(tgt, 'dodge') > 0 && b.rng() < mod(tgt, 'dodge')) {
     emit(b, { type: 'miss', src: src.uid, tgt: tgt.uid, ability });
     return 0;
@@ -493,7 +620,7 @@ function dealDamage(b, src, tgt, raw, { school, ability, bonusCrit = 0, dot = nu
   if (src.vsEnemy && tgt.defId in src.vsEnemy) amount *= 1 + src.vsEnemy[tgt.defId];
   if (b.hooks?.damageMult) amount *= b.hooks.damageMult(src, tgt, school);
   let crit = false;
-  if (!noCrit && b.rng() < Math.min(C.critCap, src.stats.critChance + bonusCrit)) { crit = true; amount *= src.stats.critDamage; }
+  if (!noCrit && b.rng() < Math.min(C.critCap, src.stats.critChance + bonusCrit + mod(src, 'critChance'))) { crit = true; amount *= src.stats.critDamage; }
   if (!ignoreArmor) {
     const def = effDefense(tgt) * (school === 'magical' ? C.magicArmorFactor : 1);
     const red = Math.min(C.armorCap, def / (def + C.armorK + 12 * src.level));
@@ -512,12 +639,18 @@ function dealDamage(b, src, tgt, raw, { school, ability, bonusCrit = 0, dot = nu
     amount -= absorbed;
   }
   tgt.hp = Math.max(0, tgt.hp - amount);
+  if (tgt.hp <= 0 && mod(tgt, 'undying') > 0) tgt.hp = 1; // Borrowed Time, Fortress
   if (src.stat && src.side !== tgt.side) src.stat.dmg += amount;
   if (tgt.stat && tgt.kind === 'character') tgt.stat.taken += amount + absorbed;
   emit(b, { type: 'damage', src: src.uid, tgt: tgt.uid, amount, absorbed, crit, ability, dot, school, ...(proc ? { proc } : {}) });
 
-  if (tgt.threatTable && src.side !== tgt.side) tgt.threatTable[src.uid] = (tgt.threatTable[src.uid] || 0) + (amount + absorbed) * src.threatMult;
+  if (tgt.threatTable && src.side !== tgt.side) tgt.threatTable[src.uid] = (tgt.threatTable[src.uid] || 0) + (amount + absorbed) * src.threatMult * Math.max(0.1, 1 + mod(src, 'threatPct'));
   if (tgt.resourceDef?.onDamaged) tgt.resource = Math.min(tgt.resourceMax, tgt.resource + tgt.resourceDef.onDamaged);
+  // Retribution (Sentinel): fills with damage taken, shields included — fromDamage points per 1% of max health
+  if (tgt.resourceDef?.fromDamage && src.side !== tgt.side) tgt.resource = Math.min(tgt.resourceMax, tgt.resource + ((amount + absorbed) / tgt.maxHp) * 100 * tgt.resourceDef.fromDamage * (1 + mod(tgt, 'retributionPct')));
+  // Thorns: part of a direct hit goes back to the attacker
+  const thorns = !dot && !proc && src !== tgt && src.alive ? mod(tgt, 'thornsPct') : 0;
+  if (thorns > 0) dealDamage(b, tgt, src, (amount + absorbed) * thorns, { school: 'physical', ability: null, ignoreArmor: true, noCrit: true, proc: 'Thorns' });
 
   if (tgt.hp <= 0) kill(b, src, tgt);
   else {
@@ -584,7 +717,7 @@ function applyProcEffect(b, u, t, p, ctx) {
 
 function healUnit(b, src, tgt, raw, ability, hot = null, proc = null) {
   if (!tgt.alive) return 0;
-  let amount = raw * (1 + src.bonuses.healingPct) * Math.max(0, 1 + mod(tgt, 'healingTakenPct'));
+  let amount = raw * (1 + src.bonuses.healingPct) * Math.max(0, 1 + mod(tgt, 'healingTakenPct')) * Math.max(0, 1 + mod(src, 'healingDonePct'));
   let crit = false;
   if (!hot && b.rng() < src.stats.critChance * 0.5) { crit = true; amount *= 1.5; }
   amount = Math.round(amount);
@@ -674,6 +807,7 @@ export function dynamicUnit(u) {
     resource: Math.round(u.resource || 0),
     cd: cds,
     st: statusView(u),
+    ...(u.hadNotes ? { notes: [...u.notes] } : {}), // Bard: the notes waiting for the Finale
     ...(u.expiresAt != null ? { exp: Math.round(u.expiresAt * 10) / 10 } : {}), // battle time when a minion fades
   };
 }

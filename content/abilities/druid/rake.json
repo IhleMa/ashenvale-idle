@@ -1,0 +1,41 @@
+{
+  "name": "Rake",
+  "classId": "druid",
+  "unlockLevel": 10,
+  "type": "damage",
+  "description": "Cat form only: 60% physical damage and a bleed of 50% physical power every second for 6 seconds.",
+  "cost": 15,
+  "cooldown": 4,
+  "target": "enemy",
+  "requiresStatus": "cat_form",
+  "effects": [
+    {
+      "kind": "damage",
+      "stat": "physPower",
+      "power": 0.6,
+      "school": "physical"
+    },
+    {
+      "kind": "status",
+      "status": "rake_bleed",
+      "duration": 6,
+      "stat": "physPower",
+      "power": 0.5
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "always"
+      }
+    ],
+    "target": {
+      "selector": "enemy_current"
+    },
+    "targetConditions": []
+  },
+  "priority": 15,
+  "order": 70
+}

@@ -1,0 +1,100 @@
+{
+  "name": "Chronomancer",
+  "role": "support",
+  "color": "#3fb6c9",
+  "glyph": "⧗",
+  "description": "Bends time for the party: speeds allies up, cuts their cooldowns, stretches buffs and damage over time, and rewinds an ally's health to where it was moments ago.",
+  "strengths": [
+    "Makes every other class stronger",
+    "Rewind undoes burst damage",
+    "Freezes dangerous enemies"
+  ],
+  "weaknesses": [
+    "Little healing of its own",
+    "Weak damage",
+    "Its value depends on the party"
+  ],
+  "resource": {
+    "id": "sand",
+    "name": "Sand",
+    "color": "#e8c872",
+    "max": 100,
+    "start": 80,
+    "regen": 6
+  },
+  "baseAttributes": {
+    "str": 3,
+    "int": 14,
+    "dex": 9,
+    "vit": 9
+  },
+  "growth": {
+    "str": 0.3,
+    "int": 2.8,
+    "dex": 1.4,
+    "vit": 1.8
+  },
+  "scaling": {
+    "hp": {
+      "vit": 10
+    },
+    "physPower": {
+      "str": 1,
+      "dex": 0.3
+    },
+    "magPower": {
+      "int": 2.4
+    },
+    "healPower": {
+      "int": 1.4
+    },
+    "defense": {
+      "str": 0.2,
+      "vit": 0.4
+    },
+    "critChance": {
+      "dex": 0.0008,
+      "int": 0.0002
+    },
+    "attackSpeed": {
+      "dex": 0.0014
+    }
+  },
+  "basicAttack": {
+    "name": "Chrono Bolt",
+    "stat": "magPower",
+    "power": 0.8,
+    "school": "magical"
+  },
+  "threatMult": 0.8,
+  "tiers": [
+    {
+      "level": 1,
+      "title": "Apprentice of Hours"
+    },
+    {
+      "level": 10,
+      "title": "Chronomancer",
+      "bonus": {
+        "intPct": 0.05
+      }
+    },
+    {
+      "level": 25,
+      "title": "Timeweaver",
+      "bonus": {
+        "intPct": 0.04,
+        "dexPct": 0.04
+      }
+    },
+    {
+      "level": 40,
+      "title": "Lord of Eternity",
+      "mainOnly": true,
+      "bonus": {
+        "allPct": 0.06
+      }
+    }
+  ],
+  "order": 100
+}

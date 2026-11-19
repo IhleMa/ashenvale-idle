@@ -1,0 +1,9 @@
+{
+  "name": "Barbed Aura",
+  "type": "buff",
+  "mods": {
+    "thornsPct": 0.3
+  },
+  "description": "Attackers take another 30% of their hit back.",
+  "order": 920
+}

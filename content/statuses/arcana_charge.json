@@ -1,0 +1,7 @@
+{
+  "name": "Arcana",
+  "type": "buff",
+  "charge": "arcana",
+  "description": "The next weapon ability deals 30% more damage.",
+  "order": 910
+}

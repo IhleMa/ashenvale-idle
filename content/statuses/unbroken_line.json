@@ -1,0 +1,9 @@
+{
+  "name": "Unbroken Line",
+  "type": "buff",
+  "mods": {
+    "damageTakenPct": -0.15
+  },
+  "description": "Takes 15% less damage.",
+  "order": 925
+}

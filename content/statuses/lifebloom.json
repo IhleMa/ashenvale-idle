@@ -1,0 +1,7 @@
+{
+  "name": "Lifebloom",
+  "type": "buff",
+  "tick": "heal",
+  "description": "Restores health every second.",
+  "order": 935
+}

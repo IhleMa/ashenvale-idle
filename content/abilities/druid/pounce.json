@@ -1,0 +1,36 @@
+{
+  "name": "Pounce",
+  "classId": "druid",
+  "subclass": "feral_stalker",
+  "unlockLevel": 1,
+  "type": "damage",
+  "description": "Cat form only: 180% physical damage with +50% critical chance.",
+  "cost": 20,
+  "cooldown": 12,
+  "target": "enemy",
+  "requiresStatus": "cat_form",
+  "effects": [
+    {
+      "kind": "damage",
+      "stat": "physPower",
+      "power": 1.8,
+      "school": "physical",
+      "bonusCrit": 0.5
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "always"
+      }
+    ],
+    "target": {
+      "selector": "enemy_current"
+    },
+    "targetConditions": []
+  },
+  "priority": 60,
+  "order": 140
+}

@@ -1,0 +1,70 @@
+{
+  "name": "Grove Keeper",
+  "classId": "druid",
+  "glyph": "❀",
+  "color": "#7cc96b",
+  "title": "Heart of the Grove",
+  "description": "The best healer of the Druids: blooming heals and party-wide recovery.",
+  "bonus": {
+    "healingPct": 0.1
+  },
+  "branches": [
+    {
+      "name": "Grove Keeper",
+      "attrs": [
+        "int",
+        "vit"
+      ],
+      "abilities": {
+        "2": "lifebloom",
+        "5": "tranquility"
+      },
+      "notables": {
+        "4": {
+          "name": "Blossom",
+          "stats": {
+            "healPowerPct": 0.1
+          }
+        },
+        "8": {
+          "name": "Ancient Roots",
+          "stats": {
+            "healingPct": 0.15,
+            "hpPct": 0.05
+          }
+        }
+      },
+      "mutators": {
+        "3": {
+          "name": "Lasting Growth",
+          "ability": "rejuvenation",
+          "description": "Rejuvenation lasts 4 seconds longer.",
+          "changes": {
+            "duration": 4
+          }
+        },
+        "6": {
+          "name": "Abundance",
+          "ability": "wild_growth",
+          "description": "Wild Growth costs 10 less Sap.",
+          "changes": {
+            "cost": -10
+          }
+        },
+        "7": {
+          "name": "Full Bloom",
+          "ability": "rebirth",
+          "description": "Rebirth brings the ally back with 80% health.",
+          "changes": {
+            "set": {
+              "revive": {
+                "pct": 0.8
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "order": 220
+}

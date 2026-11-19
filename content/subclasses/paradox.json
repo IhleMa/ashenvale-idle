@@ -1,0 +1,78 @@
+{
+  "name": "Paradox",
+  "classId": "chronomancer",
+  "glyph": "∞",
+  "color": "#b05fe0",
+  "title": "Breaker of Time",
+  "description": "Turns time into a weapon: damage that repeats and echoes.",
+  "bonus": {
+    "magPowerPct": 0.08
+  },
+  "branches": [
+    {
+      "name": "Paradox",
+      "attrs": [
+        "int",
+        "dex"
+      ],
+      "abilities": {
+        "2": "collapse",
+        "5": "fracture"
+      },
+      "notables": {
+        "4": {
+          "name": "Splintered Hours",
+          "stats": {
+            "magPowerPct": 0.1
+          }
+        },
+        "8": {
+          "name": "Event Horizon",
+          "stats": {
+            "damagePct": 0.12,
+            "critChance": 0.04
+          }
+        }
+      },
+      "mutators": {
+        "3": {
+          "name": "Double Bolt",
+          "ability": "temporal_bolt",
+          "description": "Temporal Bolt hits twice.",
+          "changes": {
+            "hits": 1
+          }
+        },
+        "6": {
+          "name": "Shattered Stasis",
+          "ability": "stasis",
+          "description": "An enemy leaving Stasis takes more damage for 3 seconds.",
+          "changes": {
+            "effects": [
+              {
+                "kind": "status",
+                "status": "exposed",
+                "duration": 6
+              }
+            ]
+          }
+        },
+        "7": {
+          "name": "Self-Acceleration",
+          "ability": "accelerate",
+          "description": "Accelerate also cuts the Chronomancer's own cooldowns by 2 seconds.",
+          "changes": {
+            "effects": [
+              {
+                "kind": "reduce_cooldowns",
+                "seconds": 2,
+                "self": true
+              }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "order": 231
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Wrath",
+  "type": "buff",
+  "mods": {
+    "damagePct": 0.4
+  },
+  "description": "Deals 40% more damage.",
+  "order": 930
+}

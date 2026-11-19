@@ -1,0 +1,9 @@
+{
+  "name": "Brittle",
+  "type": "debuff",
+  "mods": {
+    "damageTakenPct": 0.25
+  },
+  "description": "Takes 25% more damage.",
+  "order": 935
+}

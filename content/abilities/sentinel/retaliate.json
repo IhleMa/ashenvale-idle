@@ -1,0 +1,36 @@
+{
+  "name": "Retaliate",
+  "classId": "sentinel",
+  "unlockLevel": 6,
+  "type": "damage",
+  "description": "Spends all Retribution (at least 30): 5% physical power per point to the target.",
+  "cost": 30,
+  "cooldown": 10,
+  "target": "enemy",
+  "spendAll": true,
+  "effects": [
+    {
+      "kind": "damage",
+      "stat": "physPower",
+      "power": 0.05,
+      "perSpent": true,
+      "school": "physical"
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "resource_above",
+        "value": 50
+      }
+    ],
+    "target": {
+      "selector": "enemy_current"
+    },
+    "targetConditions": []
+  },
+  "priority": 85,
+  "order": 30
+}

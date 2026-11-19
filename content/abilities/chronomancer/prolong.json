@@ -1,0 +1,32 @@
+{
+  "name": "Prolong",
+  "classId": "chronomancer",
+  "unlockLevel": 10,
+  "type": "buff",
+  "description": "Every buff on the party and every one of the party's debuffs on enemies lasts 5 seconds longer.",
+  "cost": 30,
+  "cooldown": 18,
+  "target": "self",
+  "effects": [
+    {
+      "kind": "prolong",
+      "seconds": 5
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "combat_time_above",
+        "value": 8
+      }
+    ],
+    "target": {
+      "selector": "self"
+    },
+    "targetConditions": []
+  },
+  "priority": 55,
+  "order": 50
+}

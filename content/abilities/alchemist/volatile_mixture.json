@@ -1,0 +1,38 @@
+{
+  "name": "Volatile Mixture",
+  "classId": "alchemist",
+  "unlockLevel": 12,
+  "type": "buff",
+  "description": "The next element flask lands on every enemy.",
+  "cost": 25,
+  "cooldown": 15,
+  "target": "self",
+  "effects": [
+    {
+      "kind": "status",
+      "status": "volatile",
+      "duration": 10
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "enemies_alive",
+        "cmp": ">=",
+        "value": 3
+      },
+      {
+        "type": "self_missing_status",
+        "status": "volatile"
+      }
+    ],
+    "target": {
+      "selector": "self"
+    },
+    "targetConditions": []
+  },
+  "priority": 55,
+  "order": 50
+}

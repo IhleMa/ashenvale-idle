@@ -1,0 +1,21 @@
+{
+  "name": "Acid Mark",
+  "type": "debuff",
+  "element": "acid",
+  "reactions": {
+    "poison": {
+      "name": "Corrode",
+      "effects": [
+        {
+          "kind": "status",
+          "status": "corrode",
+          "duration": 8,
+          "stat": "magPower",
+          "power": 0.9
+        }
+      ]
+    }
+  },
+  "description": "Acid element: reacts with Fire (Meltdown), Frost (Brittle) or Poison (Corrode).",
+  "order": 920
+}

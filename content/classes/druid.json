@@ -1,0 +1,100 @@
+{
+  "name": "Druid",
+  "role": "healer",
+  "color": "#3f8f3a",
+  "glyph": "☘",
+  "description": "A shapeshifting healer: Tree form to heal, Bear form to tank, Cat form to fight. Its rules decide when to shift.",
+  "strengths": [
+    "Can heal, tank or deal damage in one fight",
+    "Strong healing over time",
+    "Revives a fallen ally once per fight"
+  ],
+  "weaknesses": [
+    "Weaker than a dedicated healer, tank or damage dealer in any one role",
+    "Shifting has a cooldown"
+  ],
+  "resource": {
+    "id": "sap",
+    "name": "Sap",
+    "color": "#7fc34a",
+    "max": 100,
+    "start": 60,
+    "regen": 7
+  },
+  "baseAttributes": {
+    "str": 7,
+    "int": 13,
+    "dex": 7,
+    "vit": 12
+  },
+  "growth": {
+    "str": 1,
+    "int": 2.4,
+    "dex": 1,
+    "vit": 2.3
+  },
+  "scaling": {
+    "hp": {
+      "vit": 12
+    },
+    "physPower": {
+      "str": 1.2,
+      "int": 1
+    },
+    "magPower": {
+      "int": 1.6
+    },
+    "healPower": {
+      "int": 2.2,
+      "vit": 0.3
+    },
+    "defense": {
+      "str": 0.35,
+      "vit": 0.6
+    },
+    "critChance": {
+      "dex": 0.0008,
+      "int": 0.0002
+    },
+    "attackSpeed": {
+      "dex": 0.0012
+    }
+  },
+  "basicAttack": {
+    "name": "Thorn Bolt",
+    "stat": "magPower",
+    "power": 0.7,
+    "school": "magical"
+  },
+  "threatMult": 1,
+  "tiers": [
+    {
+      "level": 1,
+      "title": "Initiate of the Grove"
+    },
+    {
+      "level": 10,
+      "title": "Druid",
+      "bonus": {
+        "intPct": 0.05
+      }
+    },
+    {
+      "level": 25,
+      "title": "Archdruid",
+      "bonus": {
+        "intPct": 0.04,
+        "vitPct": 0.04
+      }
+    },
+    {
+      "level": 40,
+      "title": "Voice of the Wild",
+      "mainOnly": true,
+      "bonus": {
+        "allPct": 0.06
+      }
+    }
+  ],
+  "order": 90
+}

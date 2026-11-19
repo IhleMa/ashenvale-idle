@@ -1,0 +1,38 @@
+{
+  "name": "Whirlwind",
+  "classId": "spellblade",
+  "subclass": "blademaster",
+  "unlockLevel": 1,
+  "type": "damage",
+  "description": "Weapon: 180% physical damage to every enemy.",
+  "cost": 30,
+  "cooldown": 12,
+  "target": "enemy",
+  "area": true,
+  "blade": "weapon",
+  "effects": [
+    {
+      "kind": "damage",
+      "stat": "physPower",
+      "power": 1.8,
+      "school": "physical"
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "enemies_alive",
+        "cmp": ">=",
+        "value": 2
+      }
+    ],
+    "target": {
+      "selector": "all_enemies"
+    },
+    "targetConditions": []
+  },
+  "priority": 64,
+  "order": 100
+}

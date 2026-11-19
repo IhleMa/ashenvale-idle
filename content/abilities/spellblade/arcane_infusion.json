@@ -1,0 +1,43 @@
+{
+  "name": "Arcane Infusion",
+  "classId": "spellblade",
+  "unlockLevel": 18,
+  "type": "buff",
+  "description": "For 8 seconds every ability gets the Edge or Arcana bonus.",
+  "cost": 40,
+  "cooldown": 45,
+  "target": "self",
+  "effects": [
+    {
+      "kind": "status",
+      "status": "arcane_infusion",
+      "duration": 8
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "group",
+        "mode": "any",
+        "conditions": [
+          {
+            "type": "boss_present"
+          },
+          {
+            "type": "enemies_alive",
+            "cmp": ">=",
+            "value": 3
+          }
+        ]
+      }
+    ],
+    "target": {
+      "selector": "self"
+    },
+    "targetConditions": []
+  },
+  "priority": 57,
+  "order": 70
+}

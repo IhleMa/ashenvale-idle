@@ -1,0 +1,36 @@
+{
+  "name": "Rune of Warding",
+  "classId": "spellblade",
+  "subclass": "runeknight",
+  "unlockLevel": 1,
+  "type": "buff",
+  "description": "The party takes 10% less damage for 10 seconds.",
+  "cost": 30,
+  "cooldown": 25,
+  "target": "ally",
+  "area": true,
+  "effects": [
+    {
+      "kind": "status",
+      "status": "rune_of_warding",
+      "duration": 10
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "allies_below_hp",
+        "value": 80,
+        "count": 2
+      }
+    ],
+    "target": {
+      "selector": "all_allies"
+    },
+    "targetConditions": []
+  },
+  "priority": 70,
+  "order": 120
+}

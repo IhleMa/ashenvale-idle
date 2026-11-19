@@ -1,0 +1,101 @@
+{
+  "name": "Spellblade",
+  "role": "damage",
+  "color": "#5b6ee1",
+  "glyph": "⚔",
+  "description": "Mixes steel and spells: every weapon ability charges its next spell with Edge, every spell charges its next weapon ability with Arcana. Strongest when it alternates.",
+  "strengths": [
+    "Steady damage from alternating",
+    "Can shield itself",
+    "Uses physical and magic power"
+  ],
+  "weaknesses": [
+    "Gear is split between two kinds of power",
+    "Repeating the same kind of ability wastes charges"
+  ],
+  "resource": {
+    "id": "focus_blade",
+    "name": "Focus",
+    "color": "#8fa0ff",
+    "max": 100,
+    "start": 70,
+    "regen": 5,
+    "onAlternate": 5
+  },
+  "powerBlend": 0.3,
+  "baseAttributes": {
+    "str": 11,
+    "int": 11,
+    "dex": 8,
+    "vit": 10
+  },
+  "growth": {
+    "str": 2.4,
+    "int": 2.4,
+    "dex": 1.1,
+    "vit": 1.9
+  },
+  "scaling": {
+    "hp": {
+      "vit": 12
+    },
+    "physPower": {
+      "str": 1.8,
+      "dex": 0.3
+    },
+    "magPower": {
+      "int": 1.8
+    },
+    "healPower": {
+      "int": 0.5
+    },
+    "defense": {
+      "str": 0.35,
+      "vit": 0.5
+    },
+    "critChance": {
+      "dex": 0.0009
+    },
+    "attackSpeed": {
+      "dex": 0.0014
+    }
+  },
+  "basicAttack": {
+    "name": "Blade Strike",
+    "stat": "physPower",
+    "power": 1,
+    "school": "physical"
+  },
+  "threatMult": 1.1,
+  "tiers": [
+    {
+      "level": 1,
+      "title": "Initiate"
+    },
+    {
+      "level": 10,
+      "title": "Spellblade",
+      "bonus": {
+        "strPct": 0.03,
+        "intPct": 0.03
+      }
+    },
+    {
+      "level": 25,
+      "title": "Arcane Duelist",
+      "bonus": {
+        "strPct": 0.04,
+        "intPct": 0.04
+      }
+    },
+    {
+      "level": 40,
+      "title": "Blade of the Arcane",
+      "mainOnly": true,
+      "bonus": {
+        "allPct": 0.06
+      }
+    }
+  ],
+  "order": 130
+}

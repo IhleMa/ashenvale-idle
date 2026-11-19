@@ -1,0 +1,66 @@
+{
+  "name": "Minstrel",
+  "classId": "bard",
+  "glyph": "♪",
+  "color": "#f0a3c4",
+  "title": "Sweet Minstrel",
+  "description": "A healing Bard: soothing songs that keep the party standing.",
+  "bonus": {
+    "healingPct": 0.12
+  },
+  "branches": [
+    {
+      "name": "Minstrel",
+      "attrs": [
+        "int",
+        "vit"
+      ],
+      "abilities": {
+        "2": "lullaby",
+        "5": "ballad_of_mending"
+      },
+      "notables": {
+        "4": {
+          "name": "Gentle Voice",
+          "stats": {
+            "healPowerPct": 0.1
+          }
+        },
+        "8": {
+          "name": "Song of Life",
+          "stats": {
+            "healingPct": 0.15,
+            "hpPct": 0.05
+          }
+        }
+      },
+      "mutators": {
+        "3": {
+          "name": "Healing Chord",
+          "ability": "mid_note",
+          "description": "Mid Note heals twice as much.",
+          "changes": {
+            "power": 1
+          }
+        },
+        "6": {
+          "name": "Deep Respite",
+          "ability": "song_of_respite",
+          "description": "Song of Respite heals 60% more.",
+          "changes": {
+            "power": 0.6
+          }
+        },
+        "7": {
+          "name": "Long Discord",
+          "ability": "discord",
+          "description": "Discord lasts 4 seconds longer.",
+          "changes": {
+            "duration": 4
+          }
+        }
+      }
+    }
+  ],
+  "order": 251
+}

@@ -1,0 +1,102 @@
+{
+  "start": "low_note",
+  "branches": [
+    {
+      "name": "Harmony",
+      "attrs": [
+        "int",
+        "vit"
+      ],
+      "abilities": {
+        "1": "mid_note",
+        "5": "song_of_respite"
+      },
+      "notables": {
+        "4": {
+          "name": "Soothing Voice",
+          "stats": {
+            "healingPct": 0.1
+          }
+        },
+        "8": {
+          "name": "Perfect Pitch",
+          "stats": {
+            "healPowerPct": 0.12
+          }
+        }
+      }
+    },
+    {
+      "name": "Rhythm",
+      "attrs": [
+        "dex",
+        "int"
+      ],
+      "abilities": {
+        "2": "high_note",
+        "3": "finale"
+      },
+      "notables": {
+        "4": {
+          "name": "Cadence",
+          "stats": {
+            "attackSpeed": 0.06
+          }
+        },
+        "8": {
+          "name": "Showstopper",
+          "stats": {
+            "damagePct": 0.12
+          }
+        }
+      }
+    },
+    {
+      "name": "Valor",
+      "attrs": [
+        "dex",
+        "str"
+      ],
+      "abilities": {
+        "3": "song_of_valor",
+        "6": "discord"
+      },
+      "notables": {
+        "4": {
+          "name": "Rousing",
+          "stats": {
+            "magPowerPct": 0.08
+          }
+        },
+        "8": {
+          "name": "Standing Ovation",
+          "stats": {
+            "critDamage": 0.2
+          }
+        }
+      }
+    },
+    {
+      "name": "Stagecraft",
+      "attrs": [
+        "vit",
+        "dex"
+      ],
+      "abilities": {},
+      "notables": {
+        "4": {
+          "name": "Thick Skin",
+          "stats": {
+            "hpPct": 0.08
+          }
+        },
+        "8": {
+          "name": "Crowd Favorite",
+          "stats": {
+            "allPct": 0.04
+          }
+        }
+      }
+    }
+  ]
+}

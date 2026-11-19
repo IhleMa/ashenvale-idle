@@ -1,0 +1,100 @@
+{
+  "name": "Alchemist",
+  "role": "damage",
+  "color": "#e07b20",
+  "glyph": "⚗",
+  "description": "Throws elemental flasks. Two different elements on one target react into something stronger: Shatter, Toxic Blast, Meltdown and more.",
+  "strengths": [
+    "Huge reactions when set up",
+    "Area damage with Toxic Blast",
+    "Weakens tough enemies"
+  ],
+  "weaknesses": [
+    "Needs two flasks before real damage",
+    "Wastes its setup on enemies that die fast"
+  ],
+  "resource": {
+    "id": "reagents",
+    "name": "Reagents",
+    "color": "#f0a040",
+    "max": 100,
+    "start": 100,
+    "regen": 8
+  },
+  "baseAttributes": {
+    "str": 4,
+    "int": 14,
+    "dex": 11,
+    "vit": 9
+  },
+  "growth": {
+    "str": 0.4,
+    "int": 2.9,
+    "dex": 1.6,
+    "vit": 1.7
+  },
+  "scaling": {
+    "hp": {
+      "vit": 10
+    },
+    "physPower": {
+      "str": 1,
+      "dex": 0.5
+    },
+    "magPower": {
+      "int": 2.4,
+      "dex": 0.3
+    },
+    "healPower": {
+      "int": 0.8
+    },
+    "defense": {
+      "str": 0.2,
+      "vit": 0.4,
+      "dex": 0.1
+    },
+    "critChance": {
+      "dex": 0.001
+    },
+    "attackSpeed": {
+      "dex": 0.0014
+    }
+  },
+  "basicAttack": {
+    "name": "Flask Toss",
+    "stat": "magPower",
+    "power": 0.75,
+    "school": "magical"
+  },
+  "threatMult": 0.85,
+  "tiers": [
+    {
+      "level": 1,
+      "title": "Apprentice"
+    },
+    {
+      "level": 10,
+      "title": "Alchemist",
+      "bonus": {
+        "intPct": 0.05
+      }
+    },
+    {
+      "level": 25,
+      "title": "Master Alchemist",
+      "bonus": {
+        "intPct": 0.04,
+        "dexPct": 0.04
+      }
+    },
+    {
+      "level": 40,
+      "title": "Philosopher",
+      "mainOnly": true,
+      "bonus": {
+        "allPct": 0.06
+      }
+    }
+  ],
+  "order": 110
+}

@@ -1,0 +1,46 @@
+{
+  "name": "Lifebloom",
+  "classId": "druid",
+  "subclass": "grove_keeper",
+  "unlockLevel": 1,
+  "type": "heal",
+  "description": "Heals an ally for 60% healing power at once, then 30% every second for 6 seconds.",
+  "cost": 18,
+  "cooldown": 6,
+  "target": "ally",
+  "effects": [
+    {
+      "kind": "heal",
+      "stat": "healPower",
+      "power": 0.6
+    },
+    {
+      "kind": "status",
+      "status": "lifebloom",
+      "duration": 6,
+      "stat": "healPower",
+      "power": 0.3
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "ally_hp_below",
+        "value": 70
+      }
+    ],
+    "target": {
+      "selector": "ally_lowest_hp_pct"
+    },
+    "targetConditions": [
+      {
+        "type": "target_missing_status",
+        "status": "lifebloom"
+      }
+    ]
+  },
+  "priority": 75,
+  "order": 90
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Battle Hymn",
+  "type": "buff",
+  "mods": {
+    "damagePct": 0.1
+  },
+  "description": "Deals another 10% more damage.",
+  "order": 910
+}

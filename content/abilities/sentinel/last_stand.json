@@ -1,0 +1,38 @@
+{
+  "name": "Last Stand",
+  "classId": "sentinel",
+  "unlockLevel": 16,
+  "type": "heal",
+  "description": "Below 25% health: heals 30% of maximum health and fills Retribution.",
+  "cost": 0,
+  "cooldown": 90,
+  "target": "self",
+  "effects": [
+    {
+      "kind": "heal",
+      "stat": "maxHp",
+      "power": 0.3
+    },
+    {
+      "kind": "resource",
+      "amount": 100,
+      "self": true
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "self_hp_below",
+        "value": 25
+      }
+    ],
+    "target": {
+      "selector": "self"
+    },
+    "targetConditions": []
+  },
+  "priority": 75,
+  "order": 70
+}

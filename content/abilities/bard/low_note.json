@@ -1,0 +1,36 @@
+{
+  "name": "Low Note",
+  "classId": "bard",
+  "unlockLevel": 1,
+  "type": "damage",
+  "description": "Plays a Low note: 200% magic damage to the target.",
+  "cost": 6,
+  "cooldown": 2,
+  "target": "enemy",
+  "note": "low",
+  "effects": [
+    {
+      "kind": "damage",
+      "stat": "magPower",
+      "power": 2,
+      "school": "magical"
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "last_note",
+        "note": "low",
+        "negate": true
+      }
+    ],
+    "target": {
+      "selector": "enemy_current"
+    },
+    "targetConditions": []
+  },
+  "priority": 50,
+  "order": 10
+}

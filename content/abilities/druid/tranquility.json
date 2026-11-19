@@ -1,0 +1,38 @@
+{
+  "name": "Tranquility",
+  "classId": "druid",
+  "subclass": "grove_keeper",
+  "unlockLevel": 1,
+  "type": "heal",
+  "description": "Heals every ally for 50% healing power every second for 5 seconds.",
+  "cost": 50,
+  "cooldown": 45,
+  "target": "ally",
+  "area": true,
+  "effects": [
+    {
+      "kind": "status",
+      "status": "tranquility",
+      "duration": 5,
+      "stat": "healPower",
+      "power": 0.5
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "allies_below_hp",
+        "value": 60,
+        "count": 3
+      }
+    ],
+    "target": {
+      "selector": "all_allies"
+    },
+    "targetConditions": []
+  },
+  "priority": 90,
+  "order": 100
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Thorns Aura",
+  "type": "buff",
+  "mods": {
+    "thornsPct": 0.3
+  },
+  "description": "Attackers take 30% of their hit back.",
+  "order": 915
+}

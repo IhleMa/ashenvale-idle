@@ -1,17 +1,17 @@
 # Missing assets
 
-**418 of 418** images still missing (336 recommended, 82 optional).
+**566 of 566** images still missing (478 recommended, 88 optional).
 Only the missing files are listed; see [ASSETS.md](ASSETS.md) for everything, sizes and naming rules. Drop files into `public/assets/<folder>/`
 (any of .png, .webp, .jpg, .jpeg, .gif, .svg, .avif).
 
 | Section | Missing |
 |---|---|
-| [Class icons](#class-icons) | 7 |
-| [Abilities](#abilities) | 91 |
+| [Class icons](#class-icons) | 13 |
+| [Abilities](#abilities) | 170 |
 | [Minions (Summoner)](#minions-summoner) | 6 |
 | [Item bases](#item-bases) | 26 |
 | [Enemies & bosses](#enemies--bosses) | 53 |
-| [Status effects](#status-effects) | 42 |
+| [Status effects](#status-effects) | 99 |
 | [Zone backgrounds](#zone-backgrounds) | 13 |
 | [Co-op encounter art](#co-op-encounter-art) | 4 |
 | [Achievements](#achievements) | 16 |
@@ -22,7 +22,7 @@ Only the missing files are listed; see [ASSETS.md](ASSETS.md) for everything, si
 | [Elixirs](#elixirs) | 5 |
 | [Expedition destinations](#expedition-destinations) | 7 |
 | [Interface](#interface) | 2 |
-| [Default portraits (optional)](#default-portraits-optional) | 7 |
+| [Default portraits (optional)](#default-portraits-optional) | 13 |
 | [Minion abilities (optional)](#minion-abilities-optional) | 3 |
 | [Enemy abilities (optional)](#enemy-abilities-optional) | 21 |
 | [Unique items (optional)](#unique-items-optional) | 19 |
@@ -39,31 +39,80 @@ Only the missing files are listed; see [ASSETS.md](ASSETS.md) for everything, si
 - [ ] `classes/ranger.png` — Ranger class icon (also the fallback portrait)
 - [ ] `classes/summoner.png` — Summoner class icon (also the fallback portrait)
 - [ ] `classes/warlock.png` — Warlock class icon (also the fallback portrait)
+- [ ] `classes/sentinel.png` — Sentinel class icon (also the fallback portrait)
+- [ ] `classes/druid.png` — Druid class icon (also the fallback portrait)
+- [ ] `classes/chronomancer.png` — Chronomancer class icon (also the fallback portrait)
+- [ ] `classes/alchemist.png` — Alchemist class icon (also the fallback portrait)
+- [ ] `classes/bard.png` — Bard class icon (also the fallback portrait)
+- [ ] `classes/spellblade.png` — Spellblade class icon (also the fallback portrait)
 
 ## Abilities
 
+- [ ] `abilities/arcane_slash.png` — Arcane Slash (Spellblade)
 - [ ] `abilities/corruption.png` — Corruption (Warlock)
+- [ ] `abilities/fire_flask.png` — Fire Flask (Alchemist)
 - [ ] `abilities/heroic_strike.png` — Heroic Strike (Warrior)
+- [ ] `abilities/low_note.png` — Low Note (Bard)
 - [ ] `abilities/raise_skeleton.png` — Raise Skeleton (Summoner)
+- [ ] `abilities/rejuvenation.png` — Rejuvenation (Druid)
+- [ ] `abilities/shield_slam.png` — Shield Slam (Sentinel)
+- [ ] `abilities/temporal_bolt.png` — Temporal Bolt (Chronomancer)
 - [ ] `abilities/blight.png` — Blight (Warlock)
+- [ ] `abilities/bulwark.png` — Bulwark (Sentinel)
+- [ ] `abilities/frost_flask.png` — Frost Flask (Alchemist)
+- [ ] `abilities/haste.png` — Haste (Chronomancer)
+- [ ] `abilities/mid_note.png` — Mid Note (Bard)
+- [ ] `abilities/spark.png` — Spark (Spellblade)
 - [ ] `abilities/summon_imp.png` — Summon Imps (Summoner)
 - [ ] `abilities/taunt.png` — Taunt (Warrior)
+- [ ] `abilities/tree_form.png` — Tree Form (Druid)
 - [ ] `abilities/agony.png` — Agony (Warlock)
+- [ ] `abilities/bear_form.png` — Bear Form (Druid)
 - [ ] `abilities/bone_golem.png` — Bone Golem (Summoner)
+- [ ] `abilities/high_note.png` — High Note (Bard)
+- [ ] `abilities/poison_flask.png` — Poison Flask (Alchemist)
+- [ ] `abilities/retaliate.png` — Retaliate (Sentinel)
+- [ ] `abilities/rewind.png` — Rewind (Chronomancer)
+- [ ] `abilities/runic_strike.png` — Runic Strike (Spellblade)
 - [ ] `abilities/shield_wall.png` — Shield Wall (Warrior)
+- [ ] `abilities/accelerate.png` — Accelerate (Chronomancer)
+- [ ] `abilities/acid_flask.png` — Acid Flask (Alchemist)
+- [ ] `abilities/aegis.png` — Aegis (Sentinel)
+- [ ] `abilities/cat_form.png` — Cat Form (Druid)
 - [ ] `abilities/cleave.png` — Cleave (Warrior)
+- [ ] `abilities/finale.png` — Finale (Bard)
+- [ ] `abilities/flame_lash.png` — Flame Lash (Spellblade)
 - [ ] `abilities/reap.png` — Reap (Warlock)
 - [ ] `abilities/spirit_wisp.png` — Spirit Wisp (Summoner)
+- [ ] `abilities/challenging_shout.png` — Challenging Shout (Sentinel)
 - [ ] `abilities/curse_of_ruin.png` — Curse of Ruin (Warlock)
 - [ ] `abilities/dark_pact.png` — Dark Pact (Summoner)
+- [ ] `abilities/prolong.png` — Prolong (Chronomancer)
 - [ ] `abilities/shield_bash.png` — Shield Bash (Warrior)
+- [ ] `abilities/song_of_valor.png` — Song of Valor (Bard)
+- [ ] `abilities/spell_ward.png` — Spell Ward (Spellblade)
+- [ ] `abilities/volatile_mixture.png` — Volatile Mixture (Alchemist)
+- [ ] `abilities/wild_growth.png` — Wild Growth (Druid)
 - [ ] `abilities/battle_cry.png` — Battle Cry (Warrior)
+- [ ] `abilities/blink_strike.png` — Blink Strike (Spellblade)
+- [ ] `abilities/catalyst.png` — Catalyst (Alchemist)
 - [ ] `abilities/corpse_explosion.png` — Corpse Explosion (Summoner)
 - [ ] `abilities/drain_life.png` — Drain Life (Warlock)
+- [ ] `abilities/maul.png` — Maul (Druid)
+- [ ] `abilities/song_of_respite.png` — Song of Respite (Bard)
+- [ ] `abilities/stasis.png` — Stasis (Chronomancer)
+- [ ] `abilities/thorns_aura.png` — Thorns Aura (Sentinel)
+- [ ] `abilities/arcane_infusion.png` — Arcane Infusion (Spellblade)
+- [ ] `abilities/discord.png` — Discord (Bard)
+- [ ] `abilities/last_stand.png` — Last Stand (Sentinel)
 - [ ] `abilities/pact_of_shadows.png` — Dark Pact (Warlock)
+- [ ] `abilities/philosophers_draught.png` — Philosopher's Draught (Alchemist)
+- [ ] `abilities/rake.png` — Rake (Druid)
 - [ ] `abilities/soul_link.png` — Soul Link (Summoner)
 - [ ] `abilities/sunder_armor.png` — Sunder Armor (Warrior)
+- [ ] `abilities/time_dilation.png` — Time Dilation (Chronomancer)
 - [ ] `abilities/fireball.png` — Fireball (Mage)
+- [ ] `abilities/rebirth.png` — Rebirth (Druid)
 - [ ] `abilities/frost_bolt.png` — Frost Bolt (Mage)
 - [ ] `abilities/arcane_missiles.png` — Arcane Missiles (Mage)
 - [ ] `abilities/flame_wave.png` — Flame Wave (Mage)
@@ -91,6 +140,42 @@ Only the missing files are listed; see [ASSETS.md](ASSETS.md) for everything, si
 - [ ] `abilities/rapid_fire.png` — Rapid Fire (Ranger)
 - [ ] `abilities/volley.png` — Volley (Ranger)
 - [ ] `abilities/kill_shot.png` — Kill Shot (Ranger)
+- [ ] `abilities/echo_of_life.png` — Echo of Life (Timekeeper — Chronomancer subclass)
+- [ ] `abilities/guardians_oath.png` — Guardian's Oath (Shieldwarden — Sentinel subclass)
+- [ ] `abilities/meteor_blade.png` — Meteor Blade (Battlemage — Spellblade subclass)
+- [ ] `abilities/napalm.png` — Napalm (Pyrochemist — Alchemist subclass)
+- [ ] `abilities/war_chant.png` — War Chant (Skald — Bard subclass)
+- [ ] `abilities/anthem.png` — Anthem of Ages (Skald — Bard subclass)
+- [ ] `abilities/borrowed_time.png` — Borrowed Time (Timekeeper — Chronomancer subclass)
+- [ ] `abilities/chain_reaction.png` — Chain Reaction (Pyrochemist — Alchemist subclass)
+- [ ] `abilities/lifebloom.png` — Lifebloom (Grove Keeper — Druid subclass)
+- [ ] `abilities/mana_edge.png` — Mana Edge (Battlemage — Spellblade subclass)
+- [ ] `abilities/unbroken_line.png` — Unbroken Line (Shieldwarden — Sentinel subclass)
+- [ ] `abilities/collapse.png` — Collapse (Paradox — Chronomancer subclass)
+- [ ] `abilities/lullaby.png` — Lullaby (Minstrel — Bard subclass)
+- [ ] `abilities/remedy.png` — Remedy (Plague Doctor — Alchemist subclass)
+- [ ] `abilities/tranquility.png` — Tranquility (Grove Keeper — Druid subclass)
+- [ ] `abilities/verdict.png` — Verdict (Avenger — Sentinel subclass)
+- [ ] `abilities/whirlwind.png` — Whirlwind (Blademaster — Spellblade subclass)
+- [ ] `abilities/ballad_of_mending.png` — Ballad of Mending (Minstrel — Bard subclass)
+- [ ] `abilities/fracture.png` — Fracture (Paradox — Chronomancer subclass)
+- [ ] `abilities/frenzied_regen.png` — Frenzied Regeneration (Ursine Guardian — Druid subclass)
+- [ ] `abilities/miasma.png` — Miasma (Plague Doctor — Alchemist subclass)
+- [ ] `abilities/riposte.png` — Riposte (Blademaster — Spellblade subclass)
+- [ ] `abilities/wrath.png` — Wrath (Avenger — Sentinel subclass)
+- [ ] `abilities/fortress.png` — Fortress (Bastion — Sentinel subclass)
+- [ ] `abilities/improvise.png` — Improvise (Virtuoso — Bard subclass)
+- [ ] `abilities/moment_of_clarity.png` — Moment of Clarity (Hourglass — Chronomancer subclass)
+- [ ] `abilities/rune_of_warding.png` — Rune of Warding (Runeknight — Spellblade subclass)
+- [ ] `abilities/thick_hide.png` — Thick Hide (Ursine Guardian — Druid subclass)
+- [ ] `abilities/transmute.png` — Transmute (Transmuter — Alchemist subclass)
+- [ ] `abilities/elixir_of_haste.png` — Elixir of Haste (Transmuter — Alchemist subclass)
+- [ ] `abilities/ferocious_bite.png` — Ferocious Bite (Feral Stalker — Druid subclass)
+- [ ] `abilities/grace_note.png` — Grace Note (Virtuoso — Bard subclass)
+- [ ] `abilities/rapid_recall.png` — Rapid Recall (Hourglass — Chronomancer subclass)
+- [ ] `abilities/runic_bulwark.png` — Runic Bulwark (Runeknight — Spellblade subclass)
+- [ ] `abilities/stone_heart.png` — Stone Heart (Bastion — Sentinel subclass)
+- [ ] `abilities/pounce.png` — Pounce (Feral Stalker — Druid subclass)
 - [ ] `abilities/iron_bulwark.png` — Iron Bulwark (Juggernaut — Warrior subclass)
 - [ ] `abilities/seismic_slam.png` — Seismic Slam (Juggernaut — Warrior subclass)
 - [ ] `abilities/rampage.png` — Rampage (Berserker — Warrior subclass)
@@ -272,6 +357,63 @@ Only the missing files are listed; see [ASSETS.md](ASSETS.md) for everything, si
 - [ ] `statuses/shadow_pact.png` — Dark Pact (buff)
 - [ ] `statuses/plague_swarm.png` — Plague Swarm (debuff)
 - [ ] `statuses/deaths_door.png` — Death's Door (debuff)
+- [ ] `statuses/bulwark.png` — Bulwark (buff)
+- [ ] `statuses/edge_charge.png` — Edge (buff)
+- [ ] `statuses/fire_mark.png` — Fire Mark (debuff)
+- [ ] `statuses/slowed_time.png` — Slowed Time (debuff)
+- [ ] `statuses/song_of_valor.png` — Song of Valor (buff)
+- [ ] `statuses/tree_form.png` — Tree Form (buff)
+- [ ] `statuses/arcana_charge.png` — Arcana (buff)
+- [ ] `statuses/bear_form.png` — Bear Form (buff)
+- [ ] `statuses/bulwark_greater.png` — Unyielding Bulwark (buff)
+- [ ] `statuses/napalm_mark.png` — Napalm (debuff)
+- [ ] `statuses/time_dilation.png` — Time Dilation (buff)
+- [ ] `statuses/valor_plus.png` — Battle Hymn (buff)
+- [ ] `statuses/arcane_infusion.png` — Arcane Infusion (buff)
+- [ ] `statuses/cat_form.png` — Cat Form (buff)
+- [ ] `statuses/frost_mark.png` — Frost Mark (debuff)
+- [ ] `statuses/song_of_respite.png` — Song of Respite (buff)
+- [ ] `statuses/stasis.png` — Stasis (debuff)
+- [ ] `statuses/thorns_aura.png` — Thorns Aura (buff)
+- [ ] `statuses/acid_mark.png` — Acid Mark (debuff)
+- [ ] `statuses/borrowed_time.png` — Borrowed Time (buff)
+- [ ] `statuses/discord.png` — Discord (debuff)
+- [ ] `statuses/mana_edge.png` — Mana Edge (buff)
+- [ ] `statuses/rejuvenation.png` — Rejuvenation (buff)
+- [ ] `statuses/thorns_aura_greater.png` — Barbed Aura (buff)
+- [ ] `statuses/fractured.png` — Fractured (debuff)
+- [ ] `statuses/high_note.png` — High Note (buff)
+- [ ] `statuses/poison_mark.png` — Poison Mark (debuff)
+- [ ] `statuses/riposte.png` — Riposte (buff)
+- [ ] `statuses/unbroken_line.png` — Unbroken Line (buff)
+- [ ] `statuses/wild_growth.png` — Wild Growth (buff)
+- [ ] `statuses/clarity.png` — Moment of Clarity (buff)
+- [ ] `statuses/high_note_plus.png` — Soaring Note (buff)
+- [ ] `statuses/meltdown.png` — Meltdown (debuff)
+- [ ] `statuses/rake_bleed.png` — Rake (debuff)
+- [ ] `statuses/rune_of_warding.png` — Rune of Warding (buff)
+- [ ] `statuses/wrath.png` — Wrath (buff)
+- [ ] `statuses/brittle.png` — Brittle (debuff)
+- [ ] `statuses/fortress.png` — Fortress (buff)
+- [ ] `statuses/hastened_more.png` — Greater Haste (buff)
+- [ ] `statuses/lifebloom.png` — Lifebloom (buff)
+- [ ] `statuses/triumph.png` — Triumph (buff)
+- [ ] `statuses/hymn.png` — Hymn (buff)
+- [ ] `statuses/numbed.png` — Numbing Venom (debuff)
+- [ ] `statuses/stone_heart.png` — Stone Heart (buff)
+- [ ] `statuses/tranquility.png` — Tranquility (buff)
+- [ ] `statuses/corrode.png` — Corrode (debuff)
+- [ ] `statuses/dirge.png` — Dirge (debuff)
+- [ ] `statuses/frenzied_regen.png` — Frenzied Regeneration (buff)
+- [ ] `statuses/tempo.png` — Tempo (buff)
+- [ ] `statuses/thick_hide.png` — Thick Hide (buff)
+- [ ] `statuses/volatile.png` — Volatile Mixture (buff)
+- [ ] `statuses/catalyst.png` — Catalyst (debuff)
+- [ ] `statuses/war_chant.png` — War Chant (buff)
+- [ ] `statuses/anthem.png` — Anthem of Ages (buff)
+- [ ] `statuses/draught.png` — Philosopher's Draught (buff)
+- [ ] `statuses/chain_reaction.png` — Chain Reaction (buff)
+- [ ] `statuses/lullaby.png` — Lullaby (debuff)
 
 ## Zone backgrounds
 
@@ -423,6 +565,12 @@ Only the missing files are listed; see [ASSETS.md](ASSETS.md) for everything, si
 - [ ] `portraits/ranger.png` — Default Ranger portrait
 - [ ] `portraits/summoner.png` — Default Summoner portrait
 - [ ] `portraits/warlock.png` — Default Warlock portrait
+- [ ] `portraits/sentinel.png` — Default Sentinel portrait
+- [ ] `portraits/druid.png` — Default Druid portrait
+- [ ] `portraits/chronomancer.png` — Default Chronomancer portrait
+- [ ] `portraits/alchemist.png` — Default Alchemist portrait
+- [ ] `portraits/bard.png` — Default Bard portrait
+- [ ] `portraits/spellblade.png` — Default Spellblade portrait
 
 ## Minion abilities (optional)
 

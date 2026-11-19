@@ -1,0 +1,10 @@
+{
+  "name": "Dirge",
+  "type": "debuff",
+  "mods": {
+    "damagePct": -0.2,
+    "attackSpeedPct": -0.2
+  },
+  "description": "Deals 20% less damage and attacks 20% slower.",
+  "order": 945
+}

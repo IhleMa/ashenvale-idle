@@ -1,0 +1,37 @@
+{
+  "name": "Rewind",
+  "classId": "chronomancer",
+  "unlockLevel": 6,
+  "type": "heal",
+  "description": "Sets an ally's health back to what it was 4 seconds ago (only if that was more).",
+  "cost": 35,
+  "cooldown": 20,
+  "target": "ally",
+  "effects": [
+    {
+      "kind": "rewind",
+      "seconds": 4
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "ally_hp_below",
+        "value": 60
+      }
+    ],
+    "target": {
+      "selector": "ally_lowest_hp_pct"
+    },
+    "targetConditions": [
+      {
+        "type": "target_hp_lost_recent",
+        "value": 20
+      }
+    ]
+  },
+  "priority": 90,
+  "order": 30
+}

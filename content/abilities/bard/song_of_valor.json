@@ -1,0 +1,40 @@
+{
+  "name": "Song of Valor",
+  "classId": "bard",
+  "unlockLevel": 8,
+  "type": "buff",
+  "description": "Song: the party deals 15% more damage for 15 seconds. One song at a time.",
+  "cost": 25,
+  "cooldown": 20,
+  "target": "ally",
+  "area": true,
+  "effects": [
+    {
+      "kind": "status",
+      "status": "song_of_valor",
+      "duration": 15
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "ally_hp_below",
+        "value": 60,
+        "negate": true
+      }
+    ],
+    "target": {
+      "selector": "all_allies"
+    },
+    "targetConditions": [
+      {
+        "type": "target_missing_status",
+        "status": "song_of_valor"
+      }
+    ]
+  },
+  "priority": 45,
+  "order": 50
+}

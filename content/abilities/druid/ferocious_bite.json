@@ -1,0 +1,42 @@
+{
+  "name": "Ferocious Bite",
+  "classId": "druid",
+  "subclass": "feral_stalker",
+  "unlockLevel": 1,
+  "type": "damage",
+  "description": "Cat form only: tears open its own bleeds on the target, 40% physical power for each second they had left.",
+  "cost": 25,
+  "cooldown": 10,
+  "target": "enemy",
+  "requiresStatus": "cat_form",
+  "effects": [
+    {
+      "kind": "consume_dots",
+      "stat": "physPower",
+      "power": 0.4,
+      "school": "physical",
+      "own": true
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "always"
+      }
+    ],
+    "target": {
+      "selector": "enemy_current"
+    },
+    "targetConditions": [
+      {
+        "type": "target_own_debuffs",
+        "cmp": ">=",
+        "value": 1
+      }
+    ]
+  },
+  "priority": 65,
+  "order": 130
+}

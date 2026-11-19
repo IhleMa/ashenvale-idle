@@ -1,0 +1,76 @@
+{
+  "name": "Timekeeper",
+  "classId": "chronomancer",
+  "glyph": "⌛",
+  "color": "#7fe0d2",
+  "title": "Keeper of Moments",
+  "description": "Undoes damage: rewinds the whole party and holds allies back from death.",
+  "bonus": {
+    "healingPct": 0.1
+  },
+  "branches": [
+    {
+      "name": "Timekeeper",
+      "attrs": [
+        "int",
+        "vit"
+      ],
+      "abilities": {
+        "2": "echo_of_life",
+        "5": "borrowed_time"
+      },
+      "notables": {
+        "4": {
+          "name": "Patience",
+          "stats": {
+            "healPowerPct": 0.1
+          }
+        },
+        "8": {
+          "name": "Undying Moment",
+          "stats": {
+            "healingPct": 0.15,
+            "hpPct": 0.05
+          }
+        }
+      },
+      "mutators": {
+        "3": {
+          "name": "Deep Rewind",
+          "ability": "rewind",
+          "description": "Rewind looks back 6 seconds instead of 4.",
+          "changes": {
+            "set": {
+              "rewind": {
+                "seconds": 6
+              }
+            }
+          }
+        },
+        "6": {
+          "name": "Cheap Rewind",
+          "ability": "rewind",
+          "description": "Rewind costs 10 less Sand.",
+          "changes": {
+            "cost": -10
+          }
+        },
+        "7": {
+          "name": "Healing Haste",
+          "ability": "haste",
+          "description": "Haste also heals the ally for 80% healing power.",
+          "changes": {
+            "effects": [
+              {
+                "kind": "heal",
+                "stat": "healPower",
+                "power": 0.8
+              }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "order": 230
+}

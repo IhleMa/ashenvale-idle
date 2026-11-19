@@ -1,0 +1,39 @@
+{
+  "name": "Runic Bulwark",
+  "classId": "spellblade",
+  "subclass": "runeknight",
+  "unlockLevel": 1,
+  "type": "shield",
+  "description": "A shield of 25% maximum health for 6 seconds, and taunts enemies for 3 seconds.",
+  "cost": 25,
+  "cooldown": 20,
+  "target": "self",
+  "effects": [
+    {
+      "kind": "shield",
+      "stat": "maxHp",
+      "power": 0.25,
+      "duration": 6
+    },
+    {
+      "kind": "taunt",
+      "duration": 3
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "self_hp_below",
+        "value": 60
+      }
+    ],
+    "target": {
+      "selector": "self"
+    },
+    "targetConditions": []
+  },
+  "priority": 75,
+  "order": 130
+}

@@ -1,0 +1,36 @@
+{
+  "name": "Lullaby",
+  "classId": "bard",
+  "subclass": "minstrel",
+  "unlockLevel": 1,
+  "type": "debuff",
+  "description": "Every enemy attacks 30% slower for 6 seconds.",
+  "cost": 25,
+  "cooldown": 20,
+  "target": "enemy",
+  "area": true,
+  "effects": [
+    {
+      "kind": "status",
+      "status": "lullaby",
+      "duration": 6
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "enemies_alive",
+        "cmp": ">=",
+        "value": 2
+      }
+    ],
+    "target": {
+      "selector": "all_enemies"
+    },
+    "targetConditions": []
+  },
+  "priority": 66,
+  "order": 100
+}

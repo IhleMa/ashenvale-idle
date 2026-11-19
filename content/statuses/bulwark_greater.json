@@ -1,0 +1,9 @@
+{
+  "name": "Unyielding Bulwark",
+  "type": "buff",
+  "mods": {
+    "damageTakenPct": -0.15
+  },
+  "description": "Takes another 15% less damage.",
+  "order": 910
+}

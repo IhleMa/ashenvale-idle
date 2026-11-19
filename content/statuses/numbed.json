@@ -1,0 +1,9 @@
+{
+  "name": "Numbing Venom",
+  "type": "debuff",
+  "mods": {
+    "damagePct": -0.3
+  },
+  "description": "Deals 30% less damage.",
+  "order": 940
+}

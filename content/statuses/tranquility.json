@@ -1,0 +1,7 @@
+{
+  "name": "Tranquility",
+  "type": "buff",
+  "tick": "heal",
+  "description": "Restores a lot of health every second.",
+  "order": 940
+}

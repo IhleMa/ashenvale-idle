@@ -1,0 +1,9 @@
+{
+  "name": "Thick Hide",
+  "type": "buff",
+  "mods": {
+    "damageTakenPct": -0.2
+  },
+  "description": "Takes 20% less damage.",
+  "order": 950
+}

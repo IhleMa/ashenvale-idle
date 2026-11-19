@@ -1,0 +1,10 @@
+{
+  "name": "Philosopher's Draught",
+  "type": "buff",
+  "mods": {
+    "damagePct": 0.4,
+    "resourceRegenPct": 1
+  },
+  "description": "40% more damage, Reagents regenerate twice as fast.",
+  "order": 960
+}

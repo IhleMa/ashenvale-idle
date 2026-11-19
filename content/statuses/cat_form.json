@@ -1,0 +1,11 @@
+{
+  "name": "Cat Form",
+  "type": "buff",
+  "group": "form",
+  "mods": {
+    "attackSpeedPct": 0.25,
+    "critChance": 0.1
+  },
+  "description": "Attacks 25% faster with +10% critical chance.",
+  "order": 915
+}

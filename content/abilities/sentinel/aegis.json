@@ -1,0 +1,36 @@
+{
+  "name": "Aegis",
+  "classId": "sentinel",
+  "unlockLevel": 8,
+  "type": "shield",
+  "description": "Shields every ally for 12% of the Sentinel's maximum health for 8 seconds.",
+  "cost": 40,
+  "cooldown": 20,
+  "target": "ally",
+  "area": true,
+  "effects": [
+    {
+      "kind": "shield",
+      "stat": "maxHp",
+      "power": 0.12,
+      "duration": 8
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "allies_below_hp",
+        "value": 80,
+        "count": 2
+      }
+    ],
+    "target": {
+      "selector": "all_allies"
+    },
+    "targetConditions": []
+  },
+  "priority": 80,
+  "order": 40
+}

@@ -1,0 +1,72 @@
+{
+  "name": "Avenger",
+  "classId": "sentinel",
+  "glyph": "✠",
+  "color": "#d4542a",
+  "title": "Hand of Vengeance",
+  "description": "A tank that hits back: Retribution becomes devastating damage.",
+  "bonus": {
+    "physPowerPct": 0.08
+  },
+  "branches": [
+    {
+      "name": "Avenger",
+      "attrs": [
+        "str",
+        "vit"
+      ],
+      "abilities": {
+        "2": "verdict",
+        "5": "wrath"
+      },
+      "notables": {
+        "4": {
+          "name": "Righteous Fury",
+          "stats": {
+            "physPowerPct": 0.1
+          }
+        },
+        "8": {
+          "name": "Avenging Wrath",
+          "stats": {
+            "damagePct": 0.15,
+            "critChance": 0.04
+          }
+        }
+      },
+      "mutators": {
+        "3": {
+          "name": "Crushing Retaliation",
+          "ability": "retaliate",
+          "description": "Retaliate deals 30% more damage.",
+          "changes": {
+            "power": 0.3
+          }
+        },
+        "6": {
+          "name": "Heavy Slam",
+          "ability": "shield_slam",
+          "description": "Shield Slam deals 60% more damage.",
+          "changes": {
+            "power": 0.6
+          }
+        },
+        "7": {
+          "name": "Barbed Aura",
+          "ability": "thorns_aura",
+          "description": "Thorns Aura returns 60% of each hit instead of 30%.",
+          "changes": {
+            "effects": [
+              {
+                "kind": "status",
+                "status": "thorns_aura_greater",
+                "duration": 10
+              }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "order": 211
+}

@@ -1,7 +1,7 @@
 {
   "name": "Leather Hood",
   "slot": "head",
-  "classes": ["rogue", "ranger", "warrior"],
+  "classes": ["rogue", "ranger", "warrior", "druid", "alchemist", "bard", "spellblade"],
   "stats": { "defense": [2, 0.6], "dex": [1, 0.35] },
   "material": "leather",
   "order": 170

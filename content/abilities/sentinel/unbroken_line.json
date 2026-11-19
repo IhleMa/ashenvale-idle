@@ -1,0 +1,36 @@
+{
+  "name": "Unbroken Line",
+  "classId": "sentinel",
+  "subclass": "shieldwarden",
+  "unlockLevel": 1,
+  "type": "buff",
+  "description": "The whole party takes 15% less damage for 8 seconds.",
+  "cost": 30,
+  "cooldown": 30,
+  "target": "ally",
+  "area": true,
+  "effects": [
+    {
+      "kind": "status",
+      "status": "unbroken_line",
+      "duration": 8
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "allies_below_hp",
+        "value": 70,
+        "count": 2
+      }
+    ],
+    "target": {
+      "selector": "all_allies"
+    },
+    "targetConditions": []
+  },
+  "priority": 75,
+  "order": 90
+}

@@ -1,0 +1,36 @@
+{
+  "name": "Grace Note",
+  "classId": "bard",
+  "subclass": "virtuoso",
+  "unlockLevel": 1,
+  "type": "damage",
+  "description": "Plays a High note: 140% magic damage to the target.",
+  "cost": 8,
+  "cooldown": 4,
+  "target": "enemy",
+  "note": "high",
+  "effects": [
+    {
+      "kind": "damage",
+      "stat": "magPower",
+      "power": 1.4,
+      "school": "magical"
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "last_note",
+        "note": "mid"
+      }
+    ],
+    "target": {
+      "selector": "enemy_current"
+    },
+    "targetConditions": []
+  },
+  "priority": 58,
+  "order": 130
+}

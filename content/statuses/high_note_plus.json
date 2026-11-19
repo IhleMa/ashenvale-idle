@@ -1,0 +1,9 @@
+{
+  "name": "Soaring Note",
+  "type": "buff",
+  "mods": {
+    "damagePct": 0.05
+  },
+  "description": "Deals another 5% more damage.",
+  "order": 930
+}

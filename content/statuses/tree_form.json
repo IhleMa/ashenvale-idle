@@ -1,0 +1,11 @@
+{
+  "name": "Tree Form",
+  "type": "buff",
+  "group": "form",
+  "mods": {
+    "healingDonePct": 0.3,
+    "threatPct": -0.4
+  },
+  "description": "Heals 30% more and draws less threat.",
+  "order": 905
+}

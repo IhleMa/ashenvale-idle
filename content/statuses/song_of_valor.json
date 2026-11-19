@@ -1,0 +1,10 @@
+{
+  "name": "Song of Valor",
+  "type": "buff",
+  "group": "song",
+  "mods": {
+    "damagePct": 0.15
+  },
+  "description": "Deals 15% more damage. One song per Bard.",
+  "order": 905
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Rake",
+  "type": "debuff",
+  "tick": "damage",
+  "school": "physical",
+  "ignoreArmor": true,
+  "description": "Bleeds every second.",
+  "order": 930
+}

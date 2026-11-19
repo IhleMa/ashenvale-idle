@@ -1,0 +1,9 @@
+{
+  "name": "Catalyst",
+  "type": "debuff",
+  "mods": {
+    "reactionPct": 0.5
+  },
+  "description": "The next reaction on this target is 50% stronger.",
+  "order": 955
+}

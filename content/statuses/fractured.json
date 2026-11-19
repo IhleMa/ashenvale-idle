@@ -1,0 +1,9 @@
+{
+  "name": "Fractured",
+  "type": "debuff",
+  "tick": "damage",
+  "school": "magical",
+  "ignoreArmor": true,
+  "description": "The hit repeats itself.",
+  "order": 925
+}

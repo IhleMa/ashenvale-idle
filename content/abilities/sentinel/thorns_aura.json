@@ -1,0 +1,33 @@
+{
+  "name": "Thorns Aura",
+  "classId": "sentinel",
+  "unlockLevel": 14,
+  "type": "buff",
+  "description": "For 10 seconds, enemies that hit the Sentinel take 30% of the damage back.",
+  "cost": 25,
+  "cooldown": 25,
+  "target": "self",
+  "effects": [
+    {
+      "kind": "status",
+      "status": "thorns_aura",
+      "duration": 10
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "self_missing_status",
+        "status": "thorns_aura"
+      }
+    ],
+    "target": {
+      "selector": "self"
+    },
+    "targetConditions": []
+  },
+  "priority": 40,
+  "order": 60
+}

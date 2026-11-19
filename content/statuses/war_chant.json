@@ -1,0 +1,9 @@
+{
+  "name": "War Chant",
+  "type": "buff",
+  "mods": {
+    "critChance": 0.1
+  },
+  "description": "+10% critical chance.",
+  "order": 955
+}

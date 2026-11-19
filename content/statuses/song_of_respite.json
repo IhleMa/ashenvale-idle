@@ -1,0 +1,8 @@
+{
+  "name": "Song of Respite",
+  "type": "buff",
+  "group": "song",
+  "tick": "heal",
+  "description": "Restores health every second. One song per Bard.",
+  "order": 915
+}

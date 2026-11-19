@@ -18,6 +18,7 @@ export const hasDebuff = u => u.statuses.some(s => STATUSES[s.id]?.type === 'deb
 // "allies below X%" ignores them); minion-specific conditions and targets use ownMinions().
 export const alliesOf = (battle, u) => battle.units.filter(x => x.side === u.side && x.alive && x.kind !== 'minion');
 export const ownMinions = (battle, u, type = '') => battle.units.filter(x => x.kind === 'minion' && x.alive && x.ownerUid === u.uid && (!type || x.defId === type));
+export const fallenAllies = (battle, u) => battle.units.filter(x => x.side === u.side && !x.alive && x.kind === 'character');
 export const enemiesOf = (battle, u) => battle.units.filter(x => x.side !== u.side && x.alive);
 const cmp = (a, op, b) => (op === '<=' ? a <= b : op === '==' ? a === b : op === '<' ? a < b : op === '>' ? a > b : a >= b);
 
@@ -30,6 +31,7 @@ const P = {
   role: () => ({ key: 'role', type: 'select', options: [['tank', 'Tank'], ['healer', 'Healer'], ['damage', 'Damage'], ['support', 'Support']], default: 'tank' }),
   tag: () => ({ key: 'param', type: 'enemyTag', default: 'boss' }),
   minion: () => ({ key: 'minion', type: 'minion', default: '' }),
+  note: (def = 'low') => ({ key: 'note', type: 'select', options: [['low', 'Low'], ['mid', 'Mid'], ['high', 'High'], ['none', 'no note yet']], default: def }),
 };
 
 // ---------- Activation conditions ----------
@@ -50,6 +52,9 @@ export const CONDITIONS = {
   resource_below:     { label: 'Resource below', params: [P.pct('value', 50)], test: (c, b, u) => (u.resourceMax ? (u.resource / u.resourceMax) * 100 : 100) < c.value },
   boss_present:       { label: 'A boss is present', params: [], test: (c, b, u) => enemiesOf(b, u).some(e => e.tags?.includes('boss')) },
   combat_time_above:  { label: 'Fight has lasted longer than', params: [P.seconds(10)], test: (c, b) => b.time > c.value },
+  allies_fallen:      { label: 'Number of fallen allies', params: [P.cmp(), P.count('value', 1)], test: (c, b, u) => cmp(fallenAllies(b, u).length, c.cmp, c.value) },
+  own_notes:          { label: 'Number of notes played (Bard, up to 3)', params: [P.cmp(), P.count('value', 3)], test: (c, b, u) => cmp((u.notes || []).length, c.cmp, c.value), format: c => `notes played: ${c.cmp === '<=' ? 'at most' : c.cmp === '==' ? 'exactly' : 'at least'} ${c.value}` },
+  last_note:          { label: 'My last note was (Bard)', params: [P.note()], test: (c, b, u) => (u.notes?.length ? u.notes[u.notes.length - 1] : 'none') === c.note, format: c => `last note: ${c.note === 'none' ? 'none yet' : c.note}` },
   own_minions:        { label: 'Number of my minions', params: [P.minion(), P.cmp(), P.count('value', 2)], test: (c, b, u) => cmp(ownMinions(b, u, c.minion).length, c.cmp, c.value), format: c => `my ${c.minion ? MINIONS[c.minion]?.name || c.minion : 'minions'}: ${c.cmp === '<=' ? 'at most' : c.cmp === '==' ? 'exactly' : 'at least'} ${c.value}` },
 };
 
@@ -59,6 +64,7 @@ export const TARGET_CONDITIONS = {
   target_missing_status: { label: 'Target must NOT have', params: [P.status('renew')], test: (c, t) => !hasStatus(t, c.status) },
   target_has_status:     { label: 'Target must have', params: [P.status('poison')], test: (c, t) => hasStatus(t, c.status) },
   target_has_debuff:     { label: 'Target has any debuff', params: [], test: (c, t) => hasDebuff(t) },
+  target_hp_lost_recent: { label: 'Target lost health in the last 4 seconds (% of max)', params: [P.pct('value', 20)], test: (c, t) => { const h = t.hpHist || []; const past = h.length ? h[Math.max(0, h.length - 9)] : t.hp; return ((past - t.hp) / t.maxHp) * 100 >= c.value; }, format: c => `target lost ≥${c.value}% health in 4 s` },
   target_hp_below:       { label: 'Target health below', params: [P.pct('value', 50)], test: (c, t) => hpPct(t) < c.value },
   target_hp_above:       { label: 'Target health above', params: [P.pct('value', 50)], test: (c, t) => hpPct(t) > c.value },
   target_role:           { label: 'Target has role', params: [P.role()], test: (c, t) => t.role === c.role },
@@ -79,6 +85,7 @@ export const SELECTORS = {
   ally_highest_hp_pct: { label: 'Ally with highest health %', side: 'ally', pick: pool => one(maxBy(pool, hpPct)) },
   ally_random:         { label: 'Random living ally', side: 'ally', pick: (pool, b) => one(pool[Math.floor(b.rng() * pool.length)]) },
   ally_tank:           { label: 'Ally tank (fallback: lowest health %)', side: 'ally', pick: pool => one(pool.find(a => a.role === 'tank') || minBy(pool, hpPct)) },
+  ally_fallen:         { label: 'Fallen ally', side: 'ally', dead: true, pick: pool => one(pool[0]) },
   all_allies:          { label: 'All allies', side: 'ally', area: true, pick: pool => pool },
   own_minions:         { label: 'All my minions', side: 'ally', area: true, minions: true, pick: pool => pool },
   own_minion_lowest_hp:{ label: 'My minion with lowest health %', side: 'ally', minions: true, pick: pool => one(minBy(pool, hpPct)) },
@@ -106,7 +113,9 @@ function threatOf(target, viewer) {
 export function selectorsForAbility(ability) {
   if (ability.target === 'self') return ['self'];
   const side = ability.target;
+  const revive = ability.effects?.some(e => e.kind === 'revive'); // only revives target the fallen
   return Object.entries(SELECTORS)
+    .filter(([, s]) => !!s.dead === !!revive)
     .filter(([, s]) => (side === 'ally' ? s.side === 'ally' || s.side === 'self' : s.side === 'enemy'))
     .filter(([, s]) => (ability.area ? s.area : !s.area))
     .map(([id]) => id);
@@ -136,7 +145,7 @@ export function resolveRule(rule, ability, battle, unit) {
   const allowed = selectorsForAbility(ability);
   if (!allowed.includes(selectorId)) selectorId = allowed[0];
   const sel = SELECTORS[selectorId];
-  let pool = sel.side === 'enemy' ? enemiesOf(battle, unit) : sel.minions ? ownMinions(battle, unit) : alliesOf(battle, unit);
+  let pool = sel.side === 'enemy' ? enemiesOf(battle, unit) : sel.dead ? fallenAllies(battle, unit) : sel.minions ? ownMinions(battle, unit) : alliesOf(battle, unit);
   if (selectorId === 'self') pool = [unit];
   // Enemies being taunted must target the taunter with single-target attacks
   if (sel.side === 'enemy' && !sel.area && unit.threatTable) {

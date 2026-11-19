@@ -1,0 +1,34 @@
+{
+  "name": "Rebirth",
+  "classId": "druid",
+  "unlockLevel": 18,
+  "type": "heal",
+  "description": "Brings a fallen ally back with 40% health. Once per fight.",
+  "cost": 50,
+  "cooldown": 120,
+  "target": "ally",
+  "oncePerFight": true,
+  "effects": [
+    {
+      "kind": "revive",
+      "pct": 0.4
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "allies_fallen",
+        "cmp": ">=",
+        "value": 1
+      }
+    ],
+    "target": {
+      "selector": "ally_fallen"
+    },
+    "targetConditions": []
+  },
+  "priority": 100,
+  "order": 80
+}

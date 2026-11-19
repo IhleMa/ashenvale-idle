@@ -1,0 +1,76 @@
+{
+  "name": "Hourglass",
+  "classId": "chronomancer",
+  "glyph": "⧖",
+  "color": "#e0c27f",
+  "title": "Master of Tempo",
+  "description": "Makes the party faster: more Haste, more Time Dilation, more abilities.",
+  "bonus": {
+    "attackSpeed": 0.05
+  },
+  "branches": [
+    {
+      "name": "Hourglass",
+      "attrs": [
+        "dex",
+        "int"
+      ],
+      "abilities": {
+        "2": "moment_of_clarity",
+        "5": "rapid_recall"
+      },
+      "notables": {
+        "4": {
+          "name": "Quick Sand",
+          "stats": {
+            "attackSpeed": 0.06
+          }
+        },
+        "8": {
+          "name": "Perpetual Motion",
+          "stats": {
+            "attackSpeed": 0.08,
+            "damagePct": 0.08
+          }
+        }
+      },
+      "mutators": {
+        "3": {
+          "name": "Greater Haste",
+          "ability": "haste",
+          "description": "Haste gives 40% speed instead of 25%.",
+          "changes": {
+            "effects": [
+              {
+                "kind": "status",
+                "status": "hastened_more",
+                "duration": 8
+              }
+            ]
+          }
+        },
+        "6": {
+          "name": "Frequent Dilation",
+          "ability": "time_dilation",
+          "description": "Time Dilation recharges 40 seconds faster.",
+          "changes": {
+            "cooldown": -40
+          }
+        },
+        "7": {
+          "name": "Long Prolong",
+          "ability": "prolong",
+          "description": "Prolong adds 8 seconds instead of 5.",
+          "changes": {
+            "set": {
+              "prolong": {
+                "seconds": 8
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "order": 232
+}

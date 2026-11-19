@@ -1,0 +1,105 @@
+{
+  "start": "rejuvenation",
+  "branches": [
+    {
+      "name": "Grove",
+      "attrs": [
+        "int",
+        "vit"
+      ],
+      "abilities": {
+        "1": "tree_form",
+        "3": "wild_growth",
+        "6": "rebirth"
+      },
+      "notables": {
+        "4": {
+          "name": "Verdant",
+          "stats": {
+            "healingPct": 0.1
+          }
+        },
+        "8": {
+          "name": "Evergreen",
+          "stats": {
+            "healPowerPct": 0.15
+          }
+        }
+      }
+    },
+    {
+      "name": "Claw",
+      "attrs": [
+        "dex",
+        "str"
+      ],
+      "abilities": {
+        "2": "cat_form",
+        "5": "rake"
+      },
+      "notables": {
+        "4": {
+          "name": "Feral Instinct",
+          "stats": {
+            "critChance": 0.04
+          }
+        },
+        "8": {
+          "name": "Predator",
+          "stats": {
+            "physPowerPct": 0.12,
+            "attackSpeed": 0.05
+          }
+        }
+      }
+    },
+    {
+      "name": "Hide",
+      "attrs": [
+        "vit",
+        "str"
+      ],
+      "abilities": {
+        "2": "bear_form",
+        "5": "maul"
+      },
+      "notables": {
+        "4": {
+          "name": "Thick Fur",
+          "stats": {
+            "hpPct": 0.1
+          }
+        },
+        "8": {
+          "name": "Ursine",
+          "stats": {
+            "defensePct": 0.15,
+            "damageTakenPct": -0.05
+          }
+        }
+      }
+    },
+    {
+      "name": "Wild",
+      "attrs": [
+        "int",
+        "dex"
+      ],
+      "abilities": {},
+      "notables": {
+        "4": {
+          "name": "Nature's Pulse",
+          "stats": {
+            "magPowerPct": 0.08
+          }
+        },
+        "8": {
+          "name": "Wild Heart",
+          "stats": {
+            "allPct": 0.04
+          }
+        }
+      }
+    }
+  ]
+}

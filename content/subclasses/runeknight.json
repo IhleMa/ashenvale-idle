@@ -1,0 +1,81 @@
+{
+  "name": "Runeknight",
+  "classId": "spellblade",
+  "glyph": "⚜",
+  "color": "#7a9a6a",
+  "title": "Runeknight",
+  "description": "A defensive Spellblade that can hold the front line.",
+  "bonus": {
+    "defensePct": 0.1,
+    "hpPct": 0.05
+  },
+  "branches": [
+    {
+      "name": "Runeknight",
+      "attrs": [
+        "vit",
+        "str"
+      ],
+      "abilities": {
+        "2": "rune_of_warding",
+        "5": "runic_bulwark"
+      },
+      "notables": {
+        "4": {
+          "name": "Rune-Etched Plate",
+          "stats": {
+            "defensePct": 0.12
+          }
+        },
+        "8": {
+          "name": "Unbreakable Rune",
+          "stats": {
+            "hpPct": 0.12,
+            "damageTakenPct": -0.06
+          }
+        }
+      },
+      "mutators": {
+        "3": {
+          "name": "Great Ward",
+          "ability": "spell_ward",
+          "description": "Spell Ward absorbs two thirds more.",
+          "changes": {
+            "power": 0.66
+          }
+        },
+        "6": {
+          "name": "Taunting Strike",
+          "ability": "runic_strike",
+          "description": "Runic Strike also taunts enemies for 3 seconds.",
+          "changes": {
+            "effects": [
+              {
+                "kind": "taunt",
+                "duration": 3
+              }
+            ]
+          }
+        },
+        "7": {
+          "name": "Warding Lash",
+          "ability": "flame_lash",
+          "description": "Flame Lash also shields the Spellblade for 8% of maximum health.",
+          "changes": {
+            "effects": [
+              {
+                "kind": "shield",
+                "stat": "maxHp",
+                "power": 0.08,
+                "duration": 8,
+                "self": true,
+                "once": true
+              }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "order": 262
+}

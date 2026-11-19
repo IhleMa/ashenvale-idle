@@ -1,0 +1,67 @@
+{
+  "name": "Virtuoso",
+  "classId": "bard",
+  "glyph": "✧",
+  "color": "#c77dff",
+  "title": "Virtuoso",
+  "description": "Plays faster and harder: more Finales and damaging notes.",
+  "bonus": {
+    "attackSpeed": 0.05,
+    "critChance": 0.03
+  },
+  "branches": [
+    {
+      "name": "Virtuoso",
+      "attrs": [
+        "dex",
+        "int"
+      ],
+      "abilities": {
+        "2": "improvise",
+        "5": "grace_note"
+      },
+      "notables": {
+        "4": {
+          "name": "Nimble Fingers",
+          "stats": {
+            "attackSpeed": 0.06
+          }
+        },
+        "8": {
+          "name": "Masterpiece",
+          "stats": {
+            "damagePct": 0.12,
+            "magPowerPct": 0.06
+          }
+        }
+      },
+      "mutators": {
+        "3": {
+          "name": "Booming Low",
+          "ability": "low_note",
+          "description": "Low Note deals 60% more damage.",
+          "changes": {
+            "power": 0.6
+          }
+        },
+        "6": {
+          "name": "Light Mid",
+          "ability": "mid_note",
+          "description": "Mid Note costs 5 less.",
+          "changes": {
+            "cost": -5
+          }
+        },
+        "7": {
+          "name": "Light High",
+          "ability": "high_note",
+          "description": "High Note costs 5 less.",
+          "changes": {
+            "cost": -5
+          }
+        }
+      }
+    }
+  ],
+  "order": 252
+}

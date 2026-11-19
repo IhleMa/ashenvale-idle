@@ -1,0 +1,9 @@
+{
+  "name": "Riposte",
+  "type": "buff",
+  "mods": {
+    "thornsPct": 0.5
+  },
+  "description": "Attackers take 50% of their hit back.",
+  "order": 925
+}

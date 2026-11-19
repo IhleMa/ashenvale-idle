@@ -14,6 +14,12 @@ See [CONTENT.md](CONTENT.md) for how the files work.
 | [`ranger`](content/classes/ranger.json) | Ranger | damage | Focus |
 | [`summoner`](content/classes/summoner.json) | Summoner | damage | Soul Energy |
 | [`warlock`](content/classes/warlock.json) | Warlock | damage | Malice |
+| [`sentinel`](content/classes/sentinel.json) | Sentinel | tank | Retribution |
+| [`druid`](content/classes/druid.json) | Druid | healer | Sap |
+| [`chronomancer`](content/classes/chronomancer.json) | Chronomancer | support | Sand |
+| [`alchemist`](content/classes/alchemist.json) | Alchemist | damage | Reagents |
+| [`bard`](content/classes/bard.json) | Bard | support | Inspiration |
+| [`spellblade`](content/classes/spellblade.json) | Spellblade | damage | Focus |
 
 Roles (config.json → roles): `tank`, `healer`, `damage`, `support`
 
@@ -21,34 +27,113 @@ Roles (config.json → roles): `tank`, `healer`, `damage`, `support`
 
 | id | name | class | type | cooldown | target |
 | --- | --- | --- | --- | --- | --- |
+| [`arcane_slash`](content/abilities/spellblade/arcane_slash.json) | Arcane Slash | spellblade | damage | 2 | enemy |
 | [`corruption`](content/abilities/warlock/corruption.json) | Corruption | warlock | debuff | 1.5 | enemy |
+| [`fire_flask`](content/abilities/alchemist/fire_flask.json) | Fire Flask | alchemist | damage | 2 | enemy |
 | [`heroic_strike`](content/abilities/warrior/heroic_strike.json) | Heroic Strike | warrior | damage | 3 | enemy |
+| [`low_note`](content/abilities/bard/low_note.json) | Low Note | bard | damage | 2 | enemy |
 | [`raise_skeleton`](content/abilities/summoner/raise_skeleton.json) | Raise Skeleton | summoner | summon | 5 | self |
+| [`rejuvenation`](content/abilities/druid/rejuvenation.json) | Rejuvenation | druid | heal | 2 | ally |
+| [`shield_slam`](content/abilities/sentinel/shield_slam.json) | Shield Slam | sentinel | damage | 6 | enemy |
+| [`temporal_bolt`](content/abilities/chronomancer/temporal_bolt.json) | Temporal Bolt | chronomancer | damage | 2 | enemy |
 | [`blight`](content/abilities/warlock/blight.json) | Blight | warlock | debuff | 8 | enemy |
+| [`bulwark`](content/abilities/sentinel/bulwark.json) | Bulwark | sentinel | buff | 15 | self |
+| [`frost_flask`](content/abilities/alchemist/frost_flask.json) | Frost Flask | alchemist | damage | 4 | enemy |
+| [`haste`](content/abilities/chronomancer/haste.json) | Haste | chronomancer | buff | 10 | ally |
+| [`mid_note`](content/abilities/bard/mid_note.json) | Mid Note | bard | heal | 3 | ally |
+| [`spark`](content/abilities/spellblade/spark.json) | Spark | spellblade | damage | 2 | enemy |
 | [`summon_imp`](content/abilities/summoner/summon_imp.json) | Summon Imps | summoner | summon | 10 | self |
 | [`taunt`](content/abilities/warrior/taunt.json) | Taunt | warrior | control | 10 | self |
+| [`tree_form`](content/abilities/druid/tree_form.json) | Tree Form | druid | buff | 6 | self |
 | [`agony`](content/abilities/warlock/agony.json) | Agony | warlock | debuff | 4 | enemy |
+| [`bear_form`](content/abilities/druid/bear_form.json) | Bear Form | druid | buff | 6 | self |
 | [`bone_golem`](content/abilities/summoner/bone_golem.json) | Bone Golem | summoner | summon | 40 | self |
+| [`high_note`](content/abilities/bard/high_note.json) | High Note | bard | buff | 3 | ally |
+| [`poison_flask`](content/abilities/alchemist/poison_flask.json) | Poison Flask | alchemist | debuff | 5 | enemy |
+| [`retaliate`](content/abilities/sentinel/retaliate.json) | Retaliate | sentinel | damage | 10 | enemy |
+| [`rewind`](content/abilities/chronomancer/rewind.json) | Rewind | chronomancer | heal | 20 | ally |
+| [`runic_strike`](content/abilities/spellblade/runic_strike.json) | Runic Strike | spellblade | damage | 6 | enemy |
 | [`shield_wall`](content/abilities/warrior/shield_wall.json) | Shield Wall | warrior | buff | 25 | self |
+| [`accelerate`](content/abilities/chronomancer/accelerate.json) | Accelerate | chronomancer | buff | 15 | ally |
+| [`acid_flask`](content/abilities/alchemist/acid_flask.json) | Acid Flask | alchemist | damage | 5 | enemy |
+| [`aegis`](content/abilities/sentinel/aegis.json) | Aegis | sentinel | shield | 20 | ally |
+| [`cat_form`](content/abilities/druid/cat_form.json) | Cat Form | druid | buff | 6 | self |
 | [`cleave`](content/abilities/warrior/cleave.json) | Cleave | warrior | damage | 6 | enemy |
+| [`finale`](content/abilities/bard/finale.json) | Finale | bard | buff | 15 | self |
+| [`flame_lash`](content/abilities/spellblade/flame_lash.json) | Flame Lash | spellblade | damage | 8 | enemy |
 | [`reap`](content/abilities/warlock/reap.json) | Reap | warlock | damage | 12 | enemy |
 | [`spirit_wisp`](content/abilities/summoner/spirit_wisp.json) | Spirit Wisp | summoner | summon | 25 | self |
+| [`challenging_shout`](content/abilities/sentinel/challenging_shout.json) | Challenging Shout | sentinel | buff | 18 | self |
 | [`curse_of_ruin`](content/abilities/warlock/curse_of_ruin.json) | Curse of Ruin | warlock | debuff | 10 | enemy |
 | [`dark_pact`](content/abilities/summoner/dark_pact.json) | Dark Pact | summoner | buff | 20 | ally |
+| [`prolong`](content/abilities/chronomancer/prolong.json) | Prolong | chronomancer | buff | 18 | self |
 | [`shield_bash`](content/abilities/warrior/shield_bash.json) | Shield Bash | warrior | control | 14 | enemy |
+| [`song_of_valor`](content/abilities/bard/song_of_valor.json) | Song of Valor | bard | buff | 20 | ally |
+| [`spell_ward`](content/abilities/spellblade/spell_ward.json) | Spell Ward | spellblade | shield | 15 | self |
+| [`volatile_mixture`](content/abilities/alchemist/volatile_mixture.json) | Volatile Mixture | alchemist | buff | 15 | self |
+| [`wild_growth`](content/abilities/druid/wild_growth.json) | Wild Growth | druid | heal | 12 | ally |
 | [`battle_cry`](content/abilities/warrior/battle_cry.json) | Battle Cry | warrior | buff | 30 | ally |
+| [`blink_strike`](content/abilities/spellblade/blink_strike.json) | Blink Strike | spellblade | damage | 10 | enemy |
+| [`catalyst`](content/abilities/alchemist/catalyst.json) | Catalyst | alchemist | debuff | 12 | enemy |
 | [`corpse_explosion`](content/abilities/summoner/corpse_explosion.json) | Corpse Explosion | summoner | damage | 12 | self |
 | [`drain_life`](content/abilities/warlock/drain_life.json) | Drain Life | warlock | damage | 4 | enemy |
+| [`maul`](content/abilities/druid/maul.json) | Maul | druid | damage | 4 | enemy |
+| [`song_of_respite`](content/abilities/bard/song_of_respite.json) | Song of Respite | bard | heal | 20 | ally |
+| [`stasis`](content/abilities/chronomancer/stasis.json) | Stasis | chronomancer | debuff | 25 | enemy |
+| [`thorns_aura`](content/abilities/sentinel/thorns_aura.json) | Thorns Aura | sentinel | buff | 25 | self |
+| [`arcane_infusion`](content/abilities/spellblade/arcane_infusion.json) | Arcane Infusion | spellblade | buff | 45 | self |
+| [`discord`](content/abilities/bard/discord.json) | Discord | bard | debuff | 15 | enemy |
+| [`last_stand`](content/abilities/sentinel/last_stand.json) | Last Stand | sentinel | heal | 90 | self |
 | [`pact_of_shadows`](content/abilities/warlock/pact_of_shadows.json) | Dark Pact | warlock | buff | 40 | self |
+| [`philosophers_draught`](content/abilities/alchemist/philosophers_draught.json) | Philosopher's Draught | alchemist | buff | 60 | self |
+| [`rake`](content/abilities/druid/rake.json) | Rake | druid | damage | 4 | enemy |
 | [`soul_link`](content/abilities/summoner/soul_link.json) | Soul Link | summoner | buff | 25 | ally |
 | [`sunder_armor`](content/abilities/warrior/sunder_armor.json) | Sunder Armor | warrior | debuff | 8 | enemy |
+| [`time_dilation`](content/abilities/chronomancer/time_dilation.json) | Time Dilation | chronomancer | buff | 120 | ally |
+| [`echo_of_life`](content/abilities/chronomancer/echo_of_life.json) | Echo of Life | chronomancer | heal | 40 | ally |
 | [`fireball`](content/abilities/mage/fireball.json) | Fireball | mage | damage | 3 | enemy |
+| [`guardians_oath`](content/abilities/sentinel/guardians_oath.json) | Guardian's Oath | sentinel | shield | 18 | ally |
+| [`meteor_blade`](content/abilities/spellblade/meteor_blade.json) | Meteor Blade | spellblade | damage | 15 | enemy |
+| [`napalm`](content/abilities/alchemist/napalm.json) | Napalm | alchemist | damage | 6 | enemy |
+| [`rebirth`](content/abilities/druid/rebirth.json) | Rebirth | druid | heal | 120 | ally |
+| [`war_chant`](content/abilities/bard/war_chant.json) | War Chant | bard | buff | 25 | ally |
+| [`anthem`](content/abilities/bard/anthem.json) | Anthem of Ages | bard | buff | 30 | ally |
+| [`borrowed_time`](content/abilities/chronomancer/borrowed_time.json) | Borrowed Time | chronomancer | buff | 45 | ally |
+| [`chain_reaction`](content/abilities/alchemist/chain_reaction.json) | Chain Reaction | alchemist | buff | 30 | self |
 | [`frost_bolt`](content/abilities/mage/frost_bolt.json) | Frost Bolt | mage | debuff | 4 | enemy |
+| [`lifebloom`](content/abilities/druid/lifebloom.json) | Lifebloom | druid | heal | 6 | ally |
+| [`mana_edge`](content/abilities/spellblade/mana_edge.json) | Mana Edge | spellblade | buff | 20 | self |
+| [`unbroken_line`](content/abilities/sentinel/unbroken_line.json) | Unbroken Line | sentinel | buff | 30 | ally |
 | [`arcane_missiles`](content/abilities/mage/arcane_missiles.json) | Arcane Missiles | mage | damage | 7 | enemy |
+| [`collapse`](content/abilities/chronomancer/collapse.json) | Collapse | chronomancer | damage | 12 | enemy |
+| [`lullaby`](content/abilities/bard/lullaby.json) | Lullaby | bard | debuff | 20 | enemy |
+| [`remedy`](content/abilities/alchemist/remedy.json) | Remedy | alchemist | heal | 8 | ally |
+| [`tranquility`](content/abilities/druid/tranquility.json) | Tranquility | druid | heal | 45 | ally |
+| [`verdict`](content/abilities/sentinel/verdict.json) | Verdict | sentinel | damage | 14 | enemy |
+| [`whirlwind`](content/abilities/spellblade/whirlwind.json) | Whirlwind | spellblade | damage | 12 | enemy |
+| [`ballad_of_mending`](content/abilities/bard/ballad_of_mending.json) | Ballad of Mending | bard | heal | 18 | ally |
 | [`flame_wave`](content/abilities/mage/flame_wave.json) | Flame Wave | mage | damage | 9 | enemy |
+| [`fracture`](content/abilities/chronomancer/fracture.json) | Fracture | chronomancer | damage | 6 | enemy |
+| [`frenzied_regen`](content/abilities/druid/frenzied_regen.json) | Frenzied Regeneration | druid | heal | 20 | self |
+| [`miasma`](content/abilities/alchemist/miasma.json) | Miasma | alchemist | debuff | 15 | enemy |
+| [`riposte`](content/abilities/spellblade/riposte.json) | Riposte | spellblade | buff | 20 | self |
+| [`wrath`](content/abilities/sentinel/wrath.json) | Wrath | sentinel | buff | 20 | self |
+| [`fortress`](content/abilities/sentinel/fortress.json) | Fortress | sentinel | buff | 60 | self |
 | [`frost_nova`](content/abilities/mage/frost_nova.json) | Frost Nova | mage | control | 20 | enemy |
+| [`improvise`](content/abilities/bard/improvise.json) | Improvise | bard | buff | 25 | self |
+| [`moment_of_clarity`](content/abilities/chronomancer/moment_of_clarity.json) | Moment of Clarity | chronomancer | buff | 20 | ally |
+| [`rune_of_warding`](content/abilities/spellblade/rune_of_warding.json) | Rune of Warding | spellblade | buff | 25 | ally |
+| [`thick_hide`](content/abilities/druid/thick_hide.json) | Thick Hide | druid | buff | 20 | self |
+| [`transmute`](content/abilities/alchemist/transmute.json) | Transmute | alchemist | damage | 15 | enemy |
 | [`arcane_power`](content/abilities/mage/arcane_power.json) | Arcane Power | mage | buff | 35 | self |
+| [`elixir_of_haste`](content/abilities/alchemist/elixir_of_haste.json) | Elixir of Haste | alchemist | buff | 15 | ally |
+| [`ferocious_bite`](content/abilities/druid/ferocious_bite.json) | Ferocious Bite | druid | damage | 10 | enemy |
+| [`grace_note`](content/abilities/bard/grace_note.json) | Grace Note | bard | damage | 4 | enemy |
+| [`rapid_recall`](content/abilities/chronomancer/rapid_recall.json) | Rapid Recall | chronomancer | buff | 40 | ally |
+| [`runic_bulwark`](content/abilities/spellblade/runic_bulwark.json) | Runic Bulwark | spellblade | shield | 20 | self |
+| [`stone_heart`](content/abilities/sentinel/stone_heart.json) | Stone Heart | sentinel | heal | 20 | self |
 | [`meteor`](content/abilities/mage/meteor.json) | Meteor | mage | damage | 30 | enemy |
+| [`pounce`](content/abilities/druid/pounce.json) | Pounce | druid | damage | 12 | enemy |
 | [`backstab`](content/abilities/rogue/backstab.json) | Backstab | rogue | damage | 3 | enemy |
 | [`poison_blade`](content/abilities/rogue/poison_blade.json) | Poison Blade | rogue | debuff | 4 | enemy |
 | [`evasion`](content/abilities/rogue/evasion.json) | Evasion | rogue | buff | 25 | self |
@@ -174,6 +259,9 @@ Conditions (`conditions[].type`):
 | `resource_below` | Resource below |
 | `boss_present` | A boss is present |
 | `combat_time_above` | Fight has lasted longer than |
+| `allies_fallen` | Number of fallen allies |
+| `own_notes` | Number of notes played (Bard, up to 3) |
+| `last_note` | My last note was (Bard) |
 | `own_minions` | Number of my minions |
 
 Target conditions (`targetConditions[].type`):
@@ -184,6 +272,7 @@ Target conditions (`targetConditions[].type`):
 | `target_missing_status` | Target must NOT have |
 | `target_has_status` | Target must have |
 | `target_has_debuff` | Target has any debuff |
+| `target_hp_lost_recent` | Target lost health in the last 4 seconds (% of max) |
 | `target_hp_below` | Target health below |
 | `target_hp_above` | Target health above |
 | `target_role` | Target has role |
@@ -202,6 +291,7 @@ Target selectors (`target.selector`):
 | `ally_highest_hp_pct` | Ally with highest health % |
 | `ally_random` | Random living ally |
 | `ally_tank` | Ally tank (fallback: lowest health %) |
+| `ally_fallen` | Fallen ally |
 | `all_allies` | All allies |
 | `own_minions` | All my minions |
 | `own_minion_lowest_hp` | My minion with lowest health % |
@@ -260,6 +350,63 @@ Target selectors (`target.selector`):
 | [`shadow_pact`](content/statuses/shadow_pact.json) | Dark Pact | buff | This Warlock's damage over time ticks twice as fast. |
 | [`plague_swarm`](content/statuses/plague_swarm.json) | Plague Swarm | debuff | Takes damage every second; when the carrier dies, the swarm jumps to another enemy. |
 | [`deaths_door`](content/statuses/deaths_door.json) | Death's Door | debuff | Marked: the next Reap deals double damage, and kills a non-boss below 25% health. |
+| [`bulwark`](content/statuses/bulwark.json) | Bulwark | buff | Takes 30% less damage. |
+| [`edge_charge`](content/statuses/edge_charge.json) | Edge | buff | The next spell deals 30% more damage. |
+| [`fire_mark`](content/statuses/fire_mark.json) | Fire Mark | debuff | Fire element: reacts with Frost (Shatter), Poison (Toxic Blast) or Acid (Meltdown). |
+| [`slowed_time`](content/statuses/slowed_time.json) | Slowed Time | debuff | Attacks 15% slower. |
+| [`song_of_valor`](content/statuses/song_of_valor.json) | Song of Valor | buff | Deals 15% more damage. One song per Bard. |
+| [`tree_form`](content/statuses/tree_form.json) | Tree Form | buff | Heals 30% more and draws less threat. |
+| [`arcana_charge`](content/statuses/arcana_charge.json) | Arcana | buff | The next weapon ability deals 30% more damage. |
+| [`bear_form`](content/statuses/bear_form.json) | Bear Form | buff | +60% defense, takes 20% less damage, draws twice the threat. |
+| [`bulwark_greater`](content/statuses/bulwark_greater.json) | Unyielding Bulwark | buff | Takes another 15% less damage. |
+| [`napalm_mark`](content/statuses/napalm_mark.json) | Napalm | debuff | Burning fire element: reacts like a Fire Mark. |
+| [`time_dilation`](content/statuses/time_dilation.json) | Time Dilation | buff | Attacks 20% faster and cooldowns run twice as fast. |
+| [`valor_plus`](content/statuses/valor_plus.json) | Battle Hymn | buff | Deals another 10% more damage. |
+| [`arcane_infusion`](content/statuses/arcane_infusion.json) | Arcane Infusion | buff | Every ability gets the Edge or Arcana bonus. |
+| [`cat_form`](content/statuses/cat_form.json) | Cat Form | buff | Attacks 25% faster with +10% critical chance. |
+| [`frost_mark`](content/statuses/frost_mark.json) | Frost Mark | debuff | Frost element, attacks 20% slower: reacts with Fire (Shatter), Acid (Brittle) or Poison (Numbing Venom). |
+| [`song_of_respite`](content/statuses/song_of_respite.json) | Song of Respite | buff | Restores health every second. One song per Bard. |
+| [`stasis`](content/statuses/stasis.json) | Stasis | debuff | Frozen in time: cannot act and takes no damage. Half as long on bosses. |
+| [`thorns_aura`](content/statuses/thorns_aura.json) | Thorns Aura | buff | Attackers take 30% of their hit back. |
+| [`acid_mark`](content/statuses/acid_mark.json) | Acid Mark | debuff | Acid element: reacts with Fire (Meltdown), Frost (Brittle) or Poison (Corrode). |
+| [`borrowed_time`](content/statuses/borrowed_time.json) | Borrowed Time | buff | Cannot drop below 1 health. |
+| [`discord`](content/statuses/discord.json) | Discord | debuff | Deals 15% less damage. |
+| [`mana_edge`](content/statuses/mana_edge.json) | Mana Edge | buff | Deals 15% more damage. |
+| [`rejuvenation`](content/statuses/rejuvenation.json) | Rejuvenation | buff | Restores health every second. |
+| [`thorns_aura_greater`](content/statuses/thorns_aura_greater.json) | Barbed Aura | buff | Attackers take another 30% of their hit back. |
+| [`fractured`](content/statuses/fractured.json) | Fractured | debuff | The hit repeats itself. |
+| [`high_note`](content/statuses/high_note.json) | High Note | buff | Deals 10% more damage. |
+| [`poison_mark`](content/statuses/poison_mark.json) | Poison Mark | debuff | Poison element, deals damage every second: reacts with Fire (Toxic Blast), Frost (Numbing Venom) or Acid (Corrode). |
+| [`riposte`](content/statuses/riposte.json) | Riposte | buff | Attackers take 50% of their hit back. |
+| [`unbroken_line`](content/statuses/unbroken_line.json) | Unbroken Line | buff | Takes 15% less damage. |
+| [`wild_growth`](content/statuses/wild_growth.json) | Wild Growth | buff | Restores health every second. |
+| [`clarity`](content/statuses/clarity.json) | Moment of Clarity | buff | The next ability costs nothing. |
+| [`high_note_plus`](content/statuses/high_note_plus.json) | Soaring Note | buff | Deals another 5% more damage. |
+| [`meltdown`](content/statuses/meltdown.json) | Meltdown | debuff | 40% less defense. |
+| [`rake_bleed`](content/statuses/rake_bleed.json) | Rake | debuff | Bleeds every second. |
+| [`rune_of_warding`](content/statuses/rune_of_warding.json) | Rune of Warding | buff | Takes 10% less damage. |
+| [`wrath`](content/statuses/wrath.json) | Wrath | buff | Deals 40% more damage. |
+| [`brittle`](content/statuses/brittle.json) | Brittle | debuff | Takes 25% more damage. |
+| [`fortress`](content/statuses/fortress.json) | Fortress | buff | Cannot drop below 1 health. |
+| [`hastened_more`](content/statuses/hastened_more.json) | Greater Haste | buff | Attacks and casts another 15% faster. |
+| [`lifebloom`](content/statuses/lifebloom.json) | Lifebloom | buff | Restores health every second. |
+| [`triumph`](content/statuses/triumph.json) | Triumph | buff | Deals 30% more damage. |
+| [`hymn`](content/statuses/hymn.json) | Hymn | buff | Restores health every second. |
+| [`numbed`](content/statuses/numbed.json) | Numbing Venom | debuff | Deals 30% less damage. |
+| [`stone_heart`](content/statuses/stone_heart.json) | Stone Heart | buff | Restores health every second. |
+| [`tranquility`](content/statuses/tranquility.json) | Tranquility | buff | Restores a lot of health every second. |
+| [`corrode`](content/statuses/corrode.json) | Corrode | debuff | Dissolves the target every second. |
+| [`dirge`](content/statuses/dirge.json) | Dirge | debuff | Deals 20% less damage and attacks 20% slower. |
+| [`frenzied_regen`](content/statuses/frenzied_regen.json) | Frenzied Regeneration | buff | Restores health every second. |
+| [`tempo`](content/statuses/tempo.json) | Tempo | buff | Attacks 20% faster, cooldowns run 30% faster. |
+| [`thick_hide`](content/statuses/thick_hide.json) | Thick Hide | buff | Takes 20% less damage. |
+| [`volatile`](content/statuses/volatile.json) | Volatile Mixture | buff | The next element flask lands on every enemy. |
+| [`catalyst`](content/statuses/catalyst.json) | Catalyst | debuff | The next reaction on this target is 50% stronger. |
+| [`war_chant`](content/statuses/war_chant.json) | War Chant | buff | +10% critical chance. |
+| [`anthem`](content/statuses/anthem.json) | Anthem of Ages | buff | Deals 10% more damage and takes 10% less. |
+| [`draught`](content/statuses/draught.json) | Philosopher's Draught | buff | 40% more damage, Reagents regenerate twice as fast. |
+| [`chain_reaction`](content/statuses/chain_reaction.json) | Chain Reaction | buff | Reactions happen again on another enemy at half strength. |
+| [`lullaby`](content/statuses/lullaby.json) | Lullaby | debuff | Attacks 30% slower. |
 
 ## Stats
 
@@ -273,26 +420,26 @@ Slots: `weapon`, `offhand`, `head`, `chest`, `hands`, `feet`, `ring`, `amulet`
 
 | id | name | slot | material | classes |
 | --- | --- | --- | --- | --- |
-| [`sword`](content/items/weapon/sword.json) | Sword | weapon | metal | warrior, rogue |
-| [`axe`](content/items/weapon/axe.json) | Battleaxe | weapon | metal | warrior |
-| [`mace`](content/items/weapon/mace.json) | Mace | weapon | metal | warrior, cleric |
+| [`sword`](content/items/weapon/sword.json) | Sword | weapon | metal | warrior, rogue, sentinel, spellblade, bard |
+| [`axe`](content/items/weapon/axe.json) | Battleaxe | weapon | metal | warrior, sentinel |
+| [`mace`](content/items/weapon/mace.json) | Mace | weapon | metal | warrior, cleric, sentinel, druid |
 | [`dagger`](content/items/weapon/dagger.json) | Dagger | weapon | metal | rogue |
-| [`staff`](content/items/weapon/staff.json) | Staff | weapon | cloth | mage, cleric, summoner |
-| [`wand`](content/items/weapon/wand.json) | Wand | weapon | cloth | mage, cleric, summoner |
+| [`staff`](content/items/weapon/staff.json) | Staff | weapon | cloth | mage, cleric, summoner, warlock, druid, chronomancer |
+| [`wand`](content/items/weapon/wand.json) | Wand | weapon | cloth | mage, cleric, summoner, warlock, chronomancer, alchemist, bard, spellblade |
 | [`bow`](content/items/weapon/bow.json) | Longbow | weapon | leather | ranger |
 | [`crossbow`](content/items/weapon/crossbow.json) | Crossbow | weapon | metal | ranger |
-| [`shield`](content/items/offhand/shield.json) | Shield | offhand | metal | warrior, cleric |
-| [`tome`](content/items/offhand/tome.json) | Tome | offhand | cloth | mage, cleric, summoner |
+| [`shield`](content/items/offhand/shield.json) | Shield | offhand | metal | warrior, cleric, sentinel |
+| [`tome`](content/items/offhand/tome.json) | Tome | offhand | cloth | mage, cleric, summoner, warlock, druid, chronomancer, alchemist, bard, spellblade |
 | [`quiver`](content/items/offhand/quiver.json) | Quiver | offhand | leather | ranger |
 | [`parrying_dagger`](content/items/offhand/parrying_dagger.json) | Parrying Dagger | offhand | leather | rogue |
-| [`plate_helm`](content/items/head/plate_helm.json) | Plate Helm | head | metal | warrior, cleric |
-| [`plate_chest`](content/items/chest/plate_chest.json) | Plate Armor | chest | metal | warrior, cleric |
-| [`plate_gloves`](content/items/hands/plate_gloves.json) | Gauntlets | hands | metal | warrior, cleric |
-| [`plate_boots`](content/items/feet/plate_boots.json) | Sabatons | feet | metal | warrior, cleric |
-| [`leather_hood`](content/items/head/leather_hood.json) | Leather Hood | head | leather | rogue, ranger, warrior |
-| [`leather_chest`](content/items/chest/leather_chest.json) | Leather Jerkin | chest | leather | rogue, ranger, warrior |
-| [`leather_gloves`](content/items/hands/leather_gloves.json) | Leather Gloves | hands | leather | rogue, ranger, warrior |
-| [`leather_boots`](content/items/feet/leather_boots.json) | Leather Boots | feet | leather | rogue, ranger, warrior |
+| [`plate_helm`](content/items/head/plate_helm.json) | Plate Helm | head | metal | warrior, cleric, sentinel, spellblade |
+| [`plate_chest`](content/items/chest/plate_chest.json) | Plate Armor | chest | metal | warrior, cleric, sentinel, spellblade |
+| [`plate_gloves`](content/items/hands/plate_gloves.json) | Gauntlets | hands | metal | warrior, cleric, sentinel, spellblade |
+| [`plate_boots`](content/items/feet/plate_boots.json) | Sabatons | feet | metal | warrior, cleric, sentinel, spellblade |
+| [`leather_hood`](content/items/head/leather_hood.json) | Leather Hood | head | leather | rogue, ranger, warrior, druid, alchemist, bard, spellblade |
+| [`leather_chest`](content/items/chest/leather_chest.json) | Leather Jerkin | chest | leather | rogue, ranger, warrior, druid, alchemist, bard, spellblade |
+| [`leather_gloves`](content/items/hands/leather_gloves.json) | Leather Gloves | hands | leather | rogue, ranger, warrior, druid, alchemist, bard, spellblade |
+| [`leather_boots`](content/items/feet/leather_boots.json) | Leather Boots | feet | leather | rogue, ranger, warrior, druid, alchemist, bard, spellblade |
 | [`cloth_hat`](content/items/head/cloth_hat.json) | Cloth Hat | head | cloth | all |
 | [`robe`](content/items/chest/robe.json) | Robe | chest | cloth | all |
 | [`cloth_gloves`](content/items/hands/cloth_gloves.json) | Silk Gloves | hands | cloth | all |
