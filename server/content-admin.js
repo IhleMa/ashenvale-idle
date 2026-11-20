@@ -44,6 +44,7 @@ export const TYPE_INFO = {
   'cosmetics/name_colors': { label: 'Name colours', icon: '🎨', group: 'Cosmetics' },
   'cosmetics/titles': { label: 'Titles', icon: '🏷', group: 'Cosmetics' },
   'cosmetics/frames': { label: 'Portrait frames', icon: '🖼', group: 'Cosmetics' },
+  'cosmetics/borders': { label: 'Profile borders', icon: '🪟', group: 'Cosmetics' },
   bots: { label: 'Bot archetypes', icon: '🤖', group: 'Other' },
   settings: { label: 'Settings & tables', icon: '⚙', group: 'Other' },
 };

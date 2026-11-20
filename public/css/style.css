@@ -1440,3 +1440,59 @@ html.standalone body { padding-bottom: env(safe-area-inset-bottom); padding-left
 /* leave room around big framed portraits for the rings and particles */
 .cos-frame:has(.portrait.xl) { margin: 22px; }
 .cos-frame:has(.portrait.lg) { margin: 14px; }
+
+/* ---- profile borders (fx in content/cosmetics/borders): a host around the inspect window; its padding is the ring */
+.cos-border { position: relative; isolation: isolate; padding: 3px; border-radius: 17px; --ps: 1;
+  background: conic-gradient(from var(--cfa, 0deg), var(--cf-cols)); box-shadow: 0 0 14px var(--cf-glow); }
+.cos-border > * { position: relative; z-index: 1; }
+.cos-border::before, .cos-border::after { content: none; position: absolute; pointer-events: none; }
+.cos-border-modal { width: min(1106px, 100%); max-height: 92vh; display: flex; }
+.cos-border-modal > .modal { border: none; width: 100%; }
+.cos-border-inner { background: linear-gradient(180deg, var(--panel2), var(--panel)); border-radius: 14px; padding: 10px 14px; text-align: center; }
+.cos-border-mini { width: 150px; }
+.cos-border-mini .cos-border-inner { padding: 8px; font-size: .85em; }
+
+/* shine: a bright streak sweeps along the metal */
+.cos-bfx-shine { background: linear-gradient(115deg, transparent 40%, rgba(255, 255, 255, .95) 50%, transparent 60%) 0 0 / 300% 100% no-repeat, conic-gradient(from 0deg, var(--cf-cols)); animation: cf-shine 3.6s ease-in-out infinite; }
+
+/* runes: glowing ring with marching rune dashes around it */
+.cos-bfx-runes { animation: cf-spin 8s linear infinite, cf-glow 2.2s ease-in-out infinite alternate; }
+.cos-bfx-runes::before { content: ''; inset: -8px; border-radius: 22px; opacity: .9; filter: drop-shadow(0 0 3px var(--cf-glow));
+  background: linear-gradient(90deg, var(--cf-c1) 50%, transparent 0) top left / 18px 2px repeat-x, linear-gradient(90deg, var(--cf-c1) 50%, transparent 0) bottom left / 18px 2px repeat-x,
+    linear-gradient(0deg, var(--cf-c2) 50%, transparent 0) top left / 2px 18px repeat-y, linear-gradient(0deg, var(--cf-c2) 50%, transparent 0) top right / 2px 18px repeat-y;
+  animation: cb-march 1.4s linear infinite; }
+@keyframes cb-march { to { background-position: 18px 0, -18px 100%, 0 -18px, 100% 18px; } }
+
+/* embers: a flickering fire glow, sparks rising from the top edge */
+.cos-bfx-embers { animation: cf-spin 3s linear infinite, cb-flicker 1.1s steps(6) infinite; }
+@keyframes cb-flicker { 0%, 100% { box-shadow: 0 0 12px var(--cf-glow), 0 -6px 22px var(--cf-c2); } 33% { box-shadow: 0 0 20px var(--cf-glow), 0 -10px 30px var(--cf-c2); } 66% { box-shadow: 0 0 9px var(--cf-glow), 0 -4px 16px var(--cf-c3); } }
+.cos-bfx-embers::before, .cos-bfx-embers::after { content: ''; left: 2%; right: 2%; top: -48px; height: 54px; z-index: 2; filter: drop-shadow(0 0 3px var(--cf-glow));
+  background: radial-gradient(circle at 8% 100%, var(--cf-c1) 0 2px, transparent 3px), radial-gradient(circle at 23% 92%, var(--cf-glow) 0 2.5px, transparent 3.5px), radial-gradient(circle at 41% 100%, var(--cf-c2) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 57% 95%, var(--cf-c1) 0 2px, transparent 3px), radial-gradient(circle at 74% 100%, var(--cf-glow) 0 2px, transparent 3px), radial-gradient(circle at 92% 94%, var(--cf-c2) 0 1.5px, transparent 2.5px);
+  animation: cb-rise 2s ease-in infinite; }
+.cos-bfx-embers::after { animation-delay: -1s; transform: scaleX(-1); }
+@keyframes cb-rise { 0% { translate: 0 30px; opacity: 0; } 25% { opacity: 1; } 100% { translate: 0 -18px; opacity: 0; } }
+
+/* frost: icy glow, sparkles twinkling at the corners */
+.cos-bfx-frost { animation: cf-spin 6s linear infinite, cf-glow 1.8s ease-in-out infinite alternate; }
+.cos-bfx-frost::before, .cos-bfx-frost::after { content: ''; inset: -14px; z-index: 2; filter: drop-shadow(0 0 3px var(--cf-glow)); animation: cf-twinkle 2.6s ease-in-out infinite;
+  background: radial-gradient(circle at 2% 3%, #fff 0 2.5px, transparent 3.5px), radial-gradient(circle at 6% 0%, var(--cf-c2) 0 1.5px, transparent 2.5px), radial-gradient(circle at 98% 97%, #fff 0 2.5px, transparent 3.5px),
+    radial-gradient(circle at 94% 100%, var(--cf-c2) 0 1.5px, transparent 2.5px), radial-gradient(circle at 50% 0%, var(--cf-c1) 0 1.5px, transparent 2.5px), radial-gradient(circle at 0% 60%, #fff 0 1.5px, transparent 2.5px); }
+.cos-bfx-frost::after { animation-delay: -1.3s; transform: scale(-1, 1); }
+
+/* orbit: a comet of light races around the border over a breathing halo */
+.cos-bfx-orbit { background: conic-gradient(from var(--cfa, 0deg), transparent 0 72%, var(--cf-glow) 88%, #fff 93%, transparent 97%), conic-gradient(from 0deg, var(--cf-cols));
+  animation: cf-spin 2.6s linear infinite, cf-glow 2s ease-in-out infinite alternate; }
+.cos-bfx-orbit::before { content: ''; inset: -16px; border-radius: 26px; z-index: -1; background: radial-gradient(closest-side, var(--cf-glow), transparent); opacity: .35; filter: blur(10px); animation: cf-breathe 3s ease-in-out infinite; }
+
+/* void: the ring spins fast, a dark vortex churns around the window */
+.cos-bfx-void { animation: cf-spin 1.6s linear infinite, cb-void 1.4s ease-in-out infinite alternate; }
+@keyframes cb-void { from { box-shadow: 0 0 10px var(--cf-glow), 0 0 0 1px #000; } to { box-shadow: 0 0 28px var(--cf-glow), 0 0 50px var(--cf-c3); } }
+.cos-bfx-void::before { content: ''; inset: -12px; border-radius: 24px; z-index: -1; filter: blur(8px); opacity: .8;
+  background: conic-gradient(from var(--cfa, 0deg), transparent, var(--cf-c2), transparent 25%, var(--cf-c3), transparent 50%, var(--cf-c2), transparent 75%, var(--cf-c3), transparent);
+  animation: cf-spin 3s linear infinite reverse; }
+
+/* small preview cards: lighter effects */
+.cos-border-mini.cos-bfx-embers::before, .cos-border-mini.cos-bfx-embers::after, .cos-border-mini.cos-bfx-frost::before, .cos-border-mini.cos-bfx-frost::after { scale: .8; }
+.cos-border-mini.cos-bfx-runes::before { inset: -6px; border-radius: 20px; }
+@media (prefers-reduced-motion: reduce) { .cos-border, .cos-border::before, .cos-border::after { animation: none !important; } }

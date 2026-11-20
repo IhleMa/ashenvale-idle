@@ -1,0 +1,14 @@
+{
+  "name": "Hellfire",
+  "tier": "prestige",
+  "price": 500000,
+  "colors": [
+    "#ffd34d",
+    "#ff5a1f",
+    "#c4101f"
+  ],
+  "fx": "embers",
+  "order": 50,
+  "glow": "#ff6a2a",
+  "animated": true
+}

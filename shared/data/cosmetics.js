@@ -1,11 +1,12 @@
-// Cosmetics bought with gold (a gold sink with no power): name colours, titles and portrait frames.
-// Defined in content/cosmetics/{name_colors,titles,frames}/. A title with "achievement" is earned, not bought.
+// Cosmetics bought with gold (a gold sink with no power): name colours, titles, portrait frames and profile borders
+// (around the inspect window). Defined in content/cosmetics/{name_colors,titles,frames,borders}/. A title with "achievement" is earned, not bought.
 import { CONTENT, withIds, onContentReload } from '../content.js';
 
 export const COSMETIC_KINDS = {
   color: { key: 'nameColors', label: 'Name colour', plural: 'Name colours' },
   title: { key: 'titles', label: 'Title', plural: 'Titles' },
   frame: { key: 'frames', label: 'Portrait frame', plural: 'Portrait frames' },
+  border: { key: 'borders', label: 'Profile border', plural: 'Profile borders' },
 };
 export const COSMETIC_TIERS = { basic: 'Basic', fine: 'Fine', prestige: 'Prestige', legendary: 'Legendary', earned: 'Earned' };
 export const COSMETICS = {};

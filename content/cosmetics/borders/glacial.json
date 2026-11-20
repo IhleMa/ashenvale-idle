@@ -1,0 +1,14 @@
+{
+  "name": "Glacial",
+  "tier": "prestige",
+  "price": 1000000,
+  "colors": [
+    "#e8fbff",
+    "#7fe7ff",
+    "#3a8dff"
+  ],
+  "fx": "frost",
+  "order": 60,
+  "glow": "#9fe8ff",
+  "animated": true
+}

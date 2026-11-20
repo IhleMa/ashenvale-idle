@@ -1,0 +1,11 @@
+{
+  "name": "Silver Filigree",
+  "tier": "basic",
+  "price": 15000,
+  "colors": [
+    "#e9eef2",
+    "#8a97a3"
+  ],
+  "fx": "shine",
+  "order": 10
+}

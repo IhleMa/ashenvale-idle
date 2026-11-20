@@ -1,0 +1,13 @@
+{
+  "name": "Runebound",
+  "tier": "fine",
+  "price": 150000,
+  "colors": [
+    "#5fd3ff",
+    "#2a4dff"
+  ],
+  "fx": "runes",
+  "order": 30,
+  "glow": "#4cb6ff",
+  "animated": true
+}

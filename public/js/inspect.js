@@ -3,7 +3,7 @@ import { describeChanges } from '/shared/mutators.js';
 import { classLabel } from '/shared/data/subclasses.js';
 import { state } from './state.js';
 import { act } from './net.js';
-import { esc, fmt, pct, modal, run, tipAttr, itemTooltipHtml, duration, botTag, nameHtml, framed, heroNameHtml } from './ui.js';
+import { esc, fmt, pct, modal, run, tipAttr, itemTooltipHtml, duration, botTag, nameHtml, framed, heroNameHtml, borderStyle, borderOf } from './ui.js';
 import { portrait, classIcon, itemIcon, slotIcon, abilityIcon } from './assets.js';
 import { classBadge, roleBadge } from './components.js';
 import { CLASSES, TRAITS } from '/shared/data/classes.js';
@@ -23,6 +23,15 @@ export async function openInspect(name) {
   let prof;
   try { prof = await act('inspect_player', { name }); } catch (e) { m.el.innerHTML = `<button class="modal-x" data-close>✕</button><p class="error">${esc(e.message)}</p>`; return; }
   m.el.innerHTML = `<button class="modal-x" data-close aria-label="Close">✕</button>${profileHtml(prof)}`;
+  // profile border (cosmetic): a host around the window carries the ring and its effects
+  const bst = borderStyle(borderOf(prof.name));
+  if (bst) {
+    const host = document.createElement('div');
+    host.className = `${bst.cls} cos-border-modal`;
+    host.setAttribute('style', bst.style);
+    m.el.replaceWith(host);
+    host.appendChild(m.el);
+  }
   m.el.addEventListener('click', async e => {
     const t = e.target.closest('button');
     if (!t) return;

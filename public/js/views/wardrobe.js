@@ -2,7 +2,7 @@
 // Hovering a card tries it on in the preview; everything worn is shown to other players.
 import { state, hero } from '../state.js';
 import { act } from '../net.js';
-import { esc, fmt, run, toast, tipAttr, confirmBox, nameHtml, nameStyle, framed } from '../ui.js';
+import { esc, fmt, run, toast, tipAttr, confirmBox, nameHtml, nameStyle, framed, borderStyle } from '../ui.js';
 import { portrait } from '../assets.js';
 import { COSMETICS, COSMETIC_KINDS, COSMETIC_TIERS, ownsCosmetic } from '/shared/data/cosmetics.js';
 import { ACHIEVEMENTS } from '/shared/data/achievements.js';
@@ -13,15 +13,18 @@ const worn = () => state.player?.cosmetics?.equipped || {};
 
 function previewHtml(trial = {}) {
   const p = state.player, h = hero(), eq = { ...worn(), ...trial };
-  return `${h ? framed(portrait(h, 'xl'), p.name, eq.frame || null) : ''}
+  const inner = `${h ? framed(portrait(h, 'xl'), p.name, eq.frame || null) : ''}
     <div class="pv-name">${nameHtml(p.name, { colorId: eq.color || null, titleId: eq.title || null })}</div>
     <div class="muted small">${h ? `${esc(h.name)} · Lv ${h.level}` : ''}</div>`;
+  const bst = borderStyle(eq.border || null);
+  return bst ? `<div class="${bst.cls}" style="${bst.style}"><div class="cos-border-inner">${inner}</div></div>` : inner;
 }
 
 function sample(kind, c) {
   const p = state.player, h = hero();
   if (kind === 'color') { const st = nameStyle(c.id); return `<span class="pname ${st.cls}" style="${st.style}">${esc(p.name)}</span>`; }
   if (kind === 'title') return `<span>${esc(p.name)} <span class="ptitle">${esc(c.name)}</span></span>`;
+  if (kind === 'border') { const st = borderStyle(c.id); return `<div class="${st.cls} cos-border-mini" style="${st.style}"><div class="cos-border-inner"><b>${esc(p.name)}</b><div class="muted small">${h ? esc(h.name) : ''}</div></div></div>`; }
   return h ? framed(portrait(h, 'md'), p.name, c.id) : '';
 }
 
@@ -77,7 +80,7 @@ export const wardrobeView = {
       <section class="panel wardrobe-preview">
         <h3>👑 Wardrobe</h3>
         <div data-preview>${previewHtml(trying ? { [trying.kind]: trying.id } : {})}</div>
-        <p class="muted small">Hover a cosmetic to try it on. What you wear is shown to other players: in chat, rankings, groups, the arena and when they inspect you. Cosmetics give no power.</p>
+        <p class="muted small">Hover a cosmetic to try it on. What you wear is shown to other players: in chat, rankings, groups, the arena, combat and when they inspect you (the profile border goes around your inspect window). Cosmetics give no power.</p>
         ${p.stats?.cosmeticGold ? `<p class="small">Spent on cosmetics: <b>◉ ${fmt(p.stats.cosmeticGold)}</b></p>` : ''}
       </section>
       <section class="panel">

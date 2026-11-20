@@ -80,6 +80,14 @@ export function frameStyle(frameId) {
   return { cls: `cos-frame${f.animated ? ' cos-frame-anim' : ''}${f.style === 'double' ? ' cos-frame-double' : ''}${f.fx ? ` cos-fx-${f.fx}` : ''}`,
     style: `--cf-cols:${[...cols, cols[0]].join(',')};--cf-c1:${cols[0]};--cf-c2:${cols[1] || cols[0]};--cf-c3:${cols[2] || cols[1] || cols[0]};--cf-glow:${f.glow || cols[0]}` };
 }
+// profile border around the inspect window (and its preview in the Wardrobe)
+export function borderStyle(borderId) {
+  const f = cosmetic('border', borderId);
+  if (!f) return null;
+  const cols = f.colors || ['#888', '#444'];
+  return { cls: `cos-border cos-bfx-${f.fx || 'shine'}`, style: `--cf-cols:${[...cols, cols[0]].join(',')};--cf-c1:${cols[0]};--cf-c2:${cols[1] || cols[0]};--cf-c3:${cols[2] || cols[1] || cols[0]};--cf-glow:${f.glow || cols[0]}` };
+}
+export const borderOf = name => cosOf(name).border || null;
 // wrap a portrait in the owner's frame (if they wear one)
 export function framed(portraitHtml, name, frameId) {
   const st = frameStyle(frameId === undefined ? cosOf(name).frame : frameId);

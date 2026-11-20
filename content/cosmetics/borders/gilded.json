@@ -1,0 +1,12 @@
+{
+  "name": "Gilded",
+  "tier": "fine",
+  "price": 50000,
+  "colors": [
+    "#ffe27a",
+    "#c78a14"
+  ],
+  "fx": "shine",
+  "order": 20,
+  "glow": "#ffcc4d"
+}

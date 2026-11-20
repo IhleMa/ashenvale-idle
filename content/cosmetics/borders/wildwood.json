@@ -1,0 +1,13 @@
+{
+  "name": "Wildwood",
+  "tier": "fine",
+  "price": 150000,
+  "colors": [
+    "#8dff7a",
+    "#1e7a33"
+  ],
+  "fx": "runes",
+  "order": 40,
+  "glow": "#5cff8a",
+  "animated": true
+}

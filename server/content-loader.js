@@ -56,6 +56,7 @@ export const COLLECTIONS = [
   ['cosmetics', 'nameColors', 'cosmetics/name_colors'],
   ['cosmetics', 'titles', 'cosmetics/titles'],
   ['cosmetics', 'frames', 'cosmetics/frames'],
+  ['cosmetics', 'borders', 'cosmetics/borders'],
 ];
 export const SYSTEMS = [...new Set([...Object.keys(SETTINGS_FILES), ...COLLECTIONS.map(c => c[0])])];
 // kept for tools that list the systems

@@ -1,0 +1,15 @@
+{
+  "name": "Abyss",
+  "tier": "legendary",
+  "price": 5000000,
+  "colors": [
+    "#1a0033",
+    "#8b3cff",
+    "#ff4dd2",
+    "#8b3cff"
+  ],
+  "fx": "void",
+  "order": 80,
+  "glow": "#b44dff",
+  "animated": true
+}

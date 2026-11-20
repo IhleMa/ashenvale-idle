@@ -1,0 +1,14 @@
+{
+  "name": "Starlit",
+  "tier": "prestige",
+  "price": 2500000,
+  "colors": [
+    "#fff6c4",
+    "#b48cff",
+    "#5ec8ff"
+  ],
+  "fx": "orbit",
+  "order": 70,
+  "glow": "#d6b8ff",
+  "animated": true
+}

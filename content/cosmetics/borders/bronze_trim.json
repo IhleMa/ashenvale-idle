@@ -1,0 +1,11 @@
+{
+  "name": "Bronze Trim",
+  "tier": "basic",
+  "price": 5000,
+  "colors": [
+    "#cd8a4a",
+    "#7a4a1f"
+  ],
+  "fx": "shine",
+  "order": 0
+}
