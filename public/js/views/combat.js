@@ -68,7 +68,10 @@ bus.on('msg:bt', m => {
     if (ev.type === 'expire' || (ev.type === 'death' && b.units.get(ev.tgt)?.kind === 'minion')) { const u = b.units.get(ev.tgt); if (u) { u.alive = false; gone.push(ev.tgt); } }
     if (ev.type === 'spawn') { b.units.set(ev.unit.uid, ev.unit); structural = true; }
     if (ev.type === 'wave') {
-      for (const [uid, u] of b.units) if (u.side === 'B' && !u.alive) b.units.delete(uid);
+      // the wave lists every enemy still in the fight; the server already dropped the dead ones (often before
+      // their final update reached us), so anything else on the enemy side is gone
+      const keep = new Set(ev.units.map(u => u.uid));
+      for (const [uid, u] of b.units) if (u.side === 'B' && !keep.has(uid)) b.units.delete(uid);
       for (const u of ev.units) b.units.set(u.uid, u);
       structural = true;
     }

@@ -112,7 +112,8 @@
             "Fixed: an ending fight no longer refreshes the page while you have a dropdown open; the page updates once you've made your choice.",
             "Fixed: the combat page no longer jumps up and down when minions are summoned or die — party members and enemies stay in place.",
             "Pop-up messages now appear centered at the bottom of the screen instead of the bottom right.",
-            "Inventory highlight: type a name or stat (e.g. \"crit fire\") or add stat rows with a minimum value and affix tier, and every matching item lights up. Optionally show only the matches. Your highlight is remembered in this browser."
+            "Inventory highlight: type a name or stat (e.g. \"crit fire\") or add stat rows with a minimum value and affix tier, and every matching item lights up. Optionally show only the matches. Your highlight is remembered in this browser.",
+            "Fixed dead enemies staying on the battlefield after a new wave started."
           ]
         }
       ]
