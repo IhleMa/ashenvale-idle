@@ -61,7 +61,8 @@ export function effText(eff, classId, opts = {}) {
       const hits = eff.hits || 1;
       let t = `deals ${pw(eff.power * hits, eff.stat)}${eff.perSpent ? ` per point of ${resourceName(classId)} spent` : ''} as ${eff.school || 'physical'} damage${hits > 1 ? ` in ${hits} hits` : ''}`;
       if (eff.bonusCrit) t += ` (${signed(eff.bonusCrit)} critical chance)`;
-      if (eff.executeBelow) t += `, ×${eff.executeMult || 2} against targets below ${pct(eff.executeBelow)} health`;
+      const exB = (eff.executeBelowByRank ? eff.executeBelowByRank[Math.min(eff.executeBelowByRank.length, opts.rank || 1) - 1] : eff.executeBelow || 0) + (eff.executeBelowAdd || 0);
+      if (exB) t += eff.executeStacks ? `; against targets below ${pct(exB)} health +${pct(eff.executeStacks.perStack)} for every ${statusLink(eff.executeStacks.status)} stack on them` : `, ×${eff.executeMult || 2} against targets below ${pct(exB)} health`;
       if (eff.splash) t += `, and ${pct(eff.splash)} of that to every other enemy`;
       if (eff.critResource) t += `; a critical hit refunds ${eff.critResource} ${resourceName(classId)}`;
       if (eff.onHitIfStatus) t += `; every hit on a target with ${statusLink(eff.onHitIfStatus.status)} also ${(eff.onHitIfStatus.effects || []).map(e => effText(e, classId, { ...opts, withStatus: false }).replace(/^applies/, 'adds')).join(', ')}`;

@@ -3,16 +3,38 @@
   "classId": "rogue",
   "unlockLevel": 6,
   "type": "damage",
-  "description": "150% damage. Deals triple damage to enemies below 30% health.",
+  "description": "150% damage. Against an enemy below 15% health (30% at rank 2, 45% at rank 3) it deals 30% more for every Bleed stack on the target.",
   "cost": 30,
   "cooldown": 6,
   "target": "enemy",
-  "effects": [{ "kind": "damage", "stat": "physPower", "power": 1.5, "school": "physical", "executeBelow": 0.3, "executeMult": 3 }],
+  "effects": [
+    {
+      "kind": "damage",
+      "stat": "physPower",
+      "power": 1.5,
+      "school": "physical",
+      "executeBelowByRank": [
+        0.15,
+        0.3,
+        0.45
+      ],
+      "executeStacks": {
+        "status": "bleed",
+        "perStack": 0.3
+      }
+    }
+  ],
   "defaultRule": {
     "enabled": true,
     "mode": "all",
-    "conditions": [{ "type": "always" }],
-    "target": { "selector": "enemy_lowest_hp" },
+    "conditions": [
+      {
+        "type": "always"
+      }
+    ],
+    "target": {
+      "selector": "enemy_lowest_hp"
+    },
     "targetConditions": []
   },
   "priority": 50,

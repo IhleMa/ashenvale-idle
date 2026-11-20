@@ -393,7 +393,10 @@ function applyEffect(b, src, tgt, eff, abilityId) {
       const hits = eff.hits || 1;
       for (let i = 0; i < hits && tgt.alive; i++) {
         let amount = effPower(src, eff.stat) * eff.power * rm;
-        if (eff.executeBelow && hpPct(tgt) < eff.executeBelow * 100) amount *= eff.executeMult || 2;
+        // execute: below a health threshold (by rank, plus mutators) the hit is stronger — a fixed multiplier, or
+        // per stack of a status on the target (Rogue Execute: per Bleed stack)
+        const exBelow = (eff.executeBelowByRank ? eff.executeBelowByRank[Math.min(eff.executeBelowByRank.length, src.ranks?.[abilityId] || 1) - 1] : eff.executeBelow || 0) + (eff.executeBelowAdd || 0);
+        if (exBelow && hpPct(tgt) < exBelow * 100) amount *= eff.executeStacks ? 1 + eff.executeStacks.perStack * tgt.statuses.filter(s => s.id === eff.executeStacks.status).reduce((n, s) => n + (s.stacks || 1), 0) : eff.executeMult || 2;
         const ownDebuffs = eff.lifestealPerDebuff ? ownDebuffKinds(src, tgt) : 0; // count before the hit can kill
         const marked = eff.onHitIfStatus && tgt.statuses.some(s => s.id === eff.onHitIfStatus.status); // e.g. Shadow Flurry on a poisoned target
         src.lastHitCrit = false;

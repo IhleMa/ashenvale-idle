@@ -24,7 +24,7 @@ export function applyMutators(ability, changeSets) {
       if (e.kind === 'damage') {
         if (ch.hits) e.hits = (e.hits || 1) + ch.hits;
         if (ch.bonusCrit) e.bonusCrit = (e.bonusCrit || 0) + ch.bonusCrit;
-        if (ch.executeBelow) { e.executeBelow = ch.executeBelow; e.executeMult = e.executeMult || 2; }
+        if (ch.executeBelow) { e.executeBelow = ch.executeBelow; if (!e.executeStacks) e.executeMult = e.executeMult || 2; }
       }
       if (ch.duration && (e.kind === 'status' || e.kind === 'shield' || e.kind === 'taunt') && e.duration) e.duration += ch.duration;
     }
@@ -67,6 +67,8 @@ export function describeChanges(ch) {
     if (fields.splash) out.push(`also hits every other enemy for ${Math.round(fields.splash * 100)}% of the damage`);
     if (fields.refundPerStack) out.push(`refunds ${fields.refundPerStack} resource per effect consumed`);
     if (fields.lifesteal) out.push(`heals for ${Math.round(fields.lifesteal * 100)}% of the damage`);
+    if (fields.executeBelowAdd) out.push(`execute threshold +${Math.round(fields.executeBelowAdd * 100)}% health`);
+    if (fields.critResource) out.push(`a crit refunds ${fields.critResource} resource`);
   }
   for (const e of ch.effects || []) out.push(describeEffect(e));
   return out;

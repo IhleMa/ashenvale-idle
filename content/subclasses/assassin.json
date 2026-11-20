@@ -49,9 +49,9 @@
         "6": {
           "name": "Merciless Execute",
           "ability": "execute",
-          "description": "Execute triggers much earlier and recharges faster.",
+          "description": "Execute's health threshold is 15% higher and it recharges faster.",
           "changes": {
-            "executeBelow": 0.45,
+            "set": { "damage": { "executeBelowAdd": 0.15 } },
             "cooldown": -2
           }
         },

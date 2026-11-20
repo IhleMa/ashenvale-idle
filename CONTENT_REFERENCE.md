@@ -263,6 +263,10 @@ Conditions (`conditions[].type`):
 | `combat_time_above` | Fight has lasted longer than |
 | `allies_fallen` | Number of fallen allies |
 | `own_notes` | Number of notes played (Bard, up to 3) |
+| `has_aggro` | An enemy is attacking me (I have aggro) |
+| `enemy_not_on_me` | An enemy is attacking someone else (not me) |
+| `loose_count` | Number of enemies attacking someone else |
+| `aggro_count` | Number of enemies attacking me |
 | `last_note` | My last note was (Bard) |
 | `own_minions` | Number of my minions |
 
@@ -271,6 +275,8 @@ Target conditions (`targetConditions[].type`):
 | type | meaning |
 | --- | --- |
 | `alive` | Target must be alive |
+| `target_attacking_me` | Target is attacking me |
+| `target_not_attacking_me` | Target is attacking someone else |
 | `target_missing_status` | Target must NOT have |
 | `target_has_status` | Target must have |
 | `target_has_debuff` | Target has any debuff |
@@ -293,6 +299,10 @@ Target selectors (`target.selector`):
 | `ally_highest_hp_pct` | Ally with highest health % |
 | `ally_random` | Random living ally |
 | `ally_tank` | Ally tank (fallback: lowest health %) |
+| `party_1` | Party member 1 |
+| `party_2` | Party member 2 |
+| `party_3` | Party member 3 |
+| `party_4` | Party member 4 |
 | `ally_fallen` | Fallen ally |
 | `all_allies` | All allies |
 | `own_minions` | All my minions |

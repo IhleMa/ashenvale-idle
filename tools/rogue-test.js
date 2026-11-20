@@ -131,4 +131,24 @@ const has = (u, id) => u.statuses.some(s => s.id === id);
   assert.ok(Object.keys(SELECTORS).filter(k => k.startsWith('party_')).length === 4);
   ok('aggro: "an enemy is attacking me" and "target is attacking someone else" conditions; threat share for the display');
 }
+// Execute: below 15/30/45% health (by rank) +30% damage per Bleed stack
+{
+  const hit = (rank, hpFrac, bleeds, sub = null) => {
+    const r = createCharacter({ id: 'r', name: 'Sly', classId: 'rogue', level: 30, isMain: true, autoTree: false });
+    r.abilities = { ...r.abilities, execute: rank };
+    const b = C.createBattle({ seed: 2, allies: [C.makeCharacterUnit(r, { ownerId: 'p', ownerName: 'P', position: 0 })], waves: [[{ enemyId: 'swamp_troll', level: 30 }]] });
+    const me = b.units[0], foe = b.units.find(u => u.side === 'B');
+    foe.hp = foe.maxHp = 1e7; foe.hp = foe.maxHp * hpFrac; b.rng = () => 0.5;
+    for (let i = 0; i < bleeds; i++) foe.statuses.push({ id: 'bleed', remaining: 99, duration: 99, value: 0, stacks: 1, src: me.uid, tickTimer: 99 });
+    const before = foe.hp;
+    for (const eff of (sub || me.abilityDefs.execute || ABILITIES.execute).effects) C.__test.applyEffect(b, me, foe, eff, 'execute');
+    return before - foe.hp;
+  };
+  const base = hit(1, 0.9, 4);
+  assert.ok(Math.abs(hit(1, 0.1, 4) / base - 2.2) < 0.02, 'rank 1, 10% health, 4 bleeds: ×2.2');
+  assert.ok(Math.abs(hit(1, 0.2, 4) - base) < 2, 'rank 1: 20% health is above the threshold');
+  assert.ok(hit(2, 0.2, 4) / (base * 1.2) > 2.1, 'rank 2 works at 20%');
+  assert.ok(Math.abs(hit(3, 0.44, 0) / (base * 1.4) - 1) < 0.02, 'no bleed: no bonus');
+  ok('Execute: +30% per Bleed stack below 15% / 30% / 45% health (by rank)');
+}
 console.log(`rogue-test: ${n} checks passed`);
