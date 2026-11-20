@@ -1,7 +1,7 @@
 {
-  "name": "Arcane Infusion",
+  "name": "Spellstrike",
   "type": "buff",
-  "charge": "both",
-  "description": "Every ability gets the Edge or Arcana bonus.",
-  "order": 915
+  "description": "Every weapon ability also deals a magic hit for 40% of its damage, and every spell a physical hit for 40%.",
+  "order": 915,
+  "spellstrike": 0.4
 }

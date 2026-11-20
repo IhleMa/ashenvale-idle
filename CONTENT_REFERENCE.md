@@ -376,7 +376,7 @@ Target selectors (`target.selector`):
 | [`napalm_mark`](content/statuses/napalm_mark.json) | Napalm | debuff | Burning fire element: reacts like a Fire Mark. |
 | [`time_dilation`](content/statuses/time_dilation.json) | Time Dilation | buff | Attacks 20% faster and cooldowns run twice as fast. |
 | [`valor_plus`](content/statuses/valor_plus.json) | Battle Hymn | buff | Deals another 10% more damage. |
-| [`arcane_infusion`](content/statuses/arcane_infusion.json) | Arcane Infusion | buff | Every ability gets the Edge or Arcana bonus. |
+| [`arcane_infusion`](content/statuses/arcane_infusion.json) | Spellstrike | buff | Every weapon ability also deals a magic hit for 40% of its damage, and every spell a physical hit for 40%. |
 | [`cat_form`](content/statuses/cat_form.json) | Cat Form | buff | Attacks 25% faster with +10% critical chance. |
 | [`dilated`](content/statuses/dilated.json) | Dilated | debuff | Slowed by time: deals 10% less damage. |
 | [`frost_mark`](content/statuses/frost_mark.json) | Frost Mark | debuff | Frost element, attacks 20% slower: reacts with Fire (Shatter), Acid (Brittle) or Poison (Numbing Venom). |

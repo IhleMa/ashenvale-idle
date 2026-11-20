@@ -81,6 +81,12 @@
           ]
         },
         {
+          "heading": "Spellblade",
+          "items": [
+            "Arcane Infusion reworked into Spellstrike: for 8 seconds every weapon ability also deals a magic hit, and every spell a physical hit, for 40% of its damage."
+          ]
+        },
+        {
           "heading": "Rifts",
           "items": [
             "Every rift tier now has a fixed theme and enemy line-up, and the themes are balanced to be equally hard."

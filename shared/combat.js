@@ -377,11 +377,10 @@ function bladeCharge(b, u, ab) {
   const want = ab.blade === 'weapon' ? 'arcana' : 'edge';
   let mult = 1;
   const charge = u.statuses.find(s => STATUSES[s.id]?.charge === want);
-  const infused = u.statuses.some(s => STATUSES[s.id]?.charge === 'both');
-  if (charge || infused) {
-    mult += STATUSES[charge?.id]?.value ?? 0.3;
-    if (charge) u.statuses = u.statuses.filter(s => s !== charge);
-    if (charge && u.resourceDef?.onAlternate) u.resource = Math.min(u.resourceMax, u.resource + u.resourceDef.onAlternate);
+  if (charge) {
+    mult += STATUSES[charge.id]?.value ?? 0.3;
+    u.statuses = u.statuses.filter(s => s !== charge);
+    if (u.resourceDef?.onAlternate) u.resource = Math.min(u.resourceMax, u.resource + u.resourceDef.onAlternate);
   }
   mult += mod(u, ab.blade === 'weapon' ? 'arcanaPct' : 'edgePct');
   const give = Object.entries(STATUSES).find(([, d]) => d.charge === (ab.blade === 'weapon' ? 'edge' : 'arcana'));
@@ -406,6 +405,11 @@ function applyEffect(b, src, tgt, eff, abilityId) {
         src.lastHitCrit = false;
         const sure = eff.critIfStatus && tgt.statuses.some(s => s.id === eff.critIfStatus) ? 1 : 0; // Aimed Shot rank 3 on a marked target
         const dealt = dealDamage(b, src, tgt, amount, { school: eff.school, ability: abilityId, bonusCrit: eff.bonusCrit, proc: eff.proc, forceCrit: !!sure });
+        // Spellstrike (Arcane Infusion): blade abilities also hit with the other half — weapon → magic, spell → physical
+        if (tgt.alive && !eff.proc && ABILITIES[abilityId]?.blade) {
+          const ss = src.statuses.find(s => STATUSES[s.id]?.spellstrike);
+          if (ss) dealDamage(b, src, tgt, amount * STATUSES[ss.id].spellstrike, { school: ABILITIES[abilityId].blade === 'weapon' ? 'magical' : 'physical', ability: abilityId, noCrit: true, proc: 'Spellstrike' });
+        }
         // followUp: a second hit against a wounded target (Heroic Strike rank 3)
         if (eff.followUp && tgt.alive && hpPct(tgt) < eff.followUp.below * 100) dealDamage(b, src, tgt, amount * eff.followUp.mult, { school: eff.school, ability: abilityId, proc: eff.followUp.name || null });
         // killCooldownRefund: a kill gives back part of the cooldown, once per cast (Meteor rank 3)

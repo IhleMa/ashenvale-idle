@@ -161,7 +161,7 @@ export function validateContent(C) {
         (r.effects || []).forEach((x, i) => checkEffect(`${w}.reactions.${el}.effects[${i}]`, x));
       }
     }
-    if (s.charge && !['edge', 'arcana', 'both'].includes(s.charge)) err(`${w}.charge`, 'must be edge, arcana or both');
+    if (s.charge && !['edge', 'arcana'].includes(s.charge)) err(`${w}.charge`, 'must be edge or arcana');
     if (s.control && s.control !== 'stun') err(`${w}.control`, 'must be "stun"');
   }
 

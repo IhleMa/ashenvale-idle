@@ -146,4 +146,15 @@ const steps = (b, k) => { for (let i = 0; i < k; i++) C.stepBattle(b); };
   assert.equal(dodge(2), 15); assert.equal(dodge(1), 0);
   ok('Evasion 2: every dodged hit restores 5 Energy');
 }
+{ // Spellblade Arcane Infusion → Spellstrike: weapon abilities add a magic hit, spells a physical hit, for 40%
+  const ss = (ability, infused) => { const x = setup('spellblade', ability, 1, { foes: 1 }); x.me.statuses = [];
+    if (infused) C.__test.applyEffect(x.b, x.me, x.me, { kind: 'status', status: 'arcane_infusion', duration: 8 }, 'arcane_infusion');
+    const from = x.b.events.length; x.cast();
+    return x.b.events.slice(from).filter(e => e.type === 'damage' && e.proc === 'Spellstrike'); };
+  const w = ss('runic_strike', true), s = ss('flame_lash', true);
+  assert.ok(w.length >= 1 && w.every(e => e.school === 'magical'), 'weapon → magic');
+  assert.ok(s.length >= 1 && s.every(e => e.school === 'physical'), 'spell → physical');
+  assert.equal(ss('runic_strike', false).length, 0);
+  ok('Arcane Infusion: Spellstrike adds an other-school hit to every blade ability');
+}
 console.log(`rank-test: ${n} checks passed`);

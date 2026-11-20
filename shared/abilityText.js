@@ -44,6 +44,7 @@ export function statusFacts(id) {
   if (s.jumpOnDeath) f.push('jumps to another enemy when its target dies');
   if (s.tickOnApply) f.push('first tick right away');
   if (s.resourceVsStatus) f.push(`every direct hit on an enemy with ${STATUSES[s.resourceVsStatus]?.name || s.resourceVsStatus} restores ${s.resourceAmount} resource`);
+  if (s.spellstrike) f.push(`weapon abilities also deal a magic hit, spells a physical hit, for ${pct(s.spellstrike)} of their damage`);
   if (s.recordDamage) f.push(`records the caster's damage; deals ${pct(s.explodePct ?? 1)} of it again when it expires`);
   return f;
 }
