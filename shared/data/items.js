@@ -38,7 +38,10 @@ export function itemSellValue(item) {
 
 export function rollRarity(rng, boost = 0, minRarity = 'common') {
   const minIdx = rarityIndex(minRarity);
-  const list = CONFIG.rarities.map((r, i) => ({ r, w: i < minIdx ? 0 : r.weight * Math.pow(1 + boost, i) }));
+  // loot boosts make better rarities likelier, but only up to rarityBoostMaxStep: above it (legendary, mythic) the odds
+  // stay in proportion to that rarity, so big boosts (bosses, rifts) don't turn mythics into a common sight
+  const step = CONFIG.rarityBoostMaxStep ?? 3;
+  const list = CONFIG.rarities.map((r, i) => ({ r, w: i < minIdx ? 0 : r.weight * Math.pow(1 + boost, Math.min(i, step)) }));
   const total = list.reduce((s, x) => s + x.w, 0);
   let roll = rng() * total;
   for (const x of list) { if ((roll -= x.w) <= 0) return x.r; }

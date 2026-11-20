@@ -47,6 +47,12 @@ export function migrateTown(p) {
     for (const [k, v] of Object.entries(old.stored || {})) p.town.materials[k] = (p.town.materials[k] || 0) + Math.floor(v);
     delete p.town.buildings[id];
   }
+  // one socket per item: extra sockets go, their gems back into the pouch
+  if (!p.town.socketsV1) {
+    p.town.socketsV1 = true;
+    const items = [...(p.inventory || []), ...Object.values(p.characters || {}).flatMap(c => Object.values(c.equipment || {})), ...(p.mailbox || []).map(m => m.item)];
+    for (const it of items) for (const g of G.trimSockets(it)) p.town.gems[g] = (p.town.gems[g] || 0) + 1;
+  }
   for (const [id, def] of Object.entries(BUILDINGS)) {
     if (!p.town.buildings[id]) p.town.buildings[id] = { level: def.start, upgrade: null, worker: null };
   }

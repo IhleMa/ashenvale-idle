@@ -600,20 +600,15 @@
     "rarityFactor": 2
   },
   "sockets": {
-    "maxBySlot": {
-      "weapon": 3,
-      "chest": 3,
-      "offhand": 2,
-      "head": 2
-    },
+    "maxBySlot": {},
     "maxDefault": 1,
     "maxByRarity": [
       1,
       1,
-      2,
-      2,
-      3,
-      3
+      1,
+      1,
+      1,
+      1
     ],
     "chanceByRarity": [
       0.08,
@@ -623,7 +618,7 @@
       0.45,
       0.6
     ],
-    "extraSocketChanceMult": 0.6,
+    "extraSocketChanceMult": 0,
     "guaranteedFromRarity": "legendary"
   },
   "affixTiers": [

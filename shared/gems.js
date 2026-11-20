@@ -158,6 +158,14 @@ export function legacyGemRefund(key) {
   return t >= 1 ? list[Math.min(list.length, t) - 1] : 0;
 }
 
+// items from when they could hold several sockets: keep the allowed number (gems first), return the removed gems
+export function trimSockets(item) {
+  if (!item?.sockets || item.sockets.length <= maxSockets(item)) return [];
+  const gems = item.sockets.filter(Boolean);
+  const keep = gems.slice(0, maxSockets(item));
+  item.sockets = Array.from({ length: maxSockets(item) }, (_, i) => keep[i] || null);
+  return gems.slice(keep.length);
+}
 export const LEGACY_SHARDS_PER_FRAGMENT = G.legacyRefund?.shardsPerFragment || 10;
 
 export function slotLabel(slot) { return SLOTS[slot]?.label || slot; }

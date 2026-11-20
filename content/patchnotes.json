@@ -16,7 +16,8 @@
             "The best prefix and suffix now name the item, e.g. \"Brutal Steel Sword of the Fox\".",
             "All existing items were converted: they keep their base, level, rarity, sockets, gems and enchantment and got new tiered affixes.",
             "Gear scaled down by ascension is soulbound: it can't be sold on the Auction House until you reforge it back to its original item level.",
-            "Loot filter: new conditions for the best affix tier on an item (\"has a tier 2 or better affix\", \"no affix better than tier 5\")."
+            "Loot filter: new conditions for the best affix tier on an item (\"has a tier 2 or better affix\", \"no affix better than tier 5\").",
+            "Mythic items are much rarer: loot boosts from bosses, rifts and crafting no longer raise the chance for Legendary and Mythic beyond Epic's. A boss drop is now Mythic about 1% of the time instead of 9–18%."
           ]
         },
         {
@@ -25,6 +26,7 @@
             "Gems were reworked into 11 resonance gems. A socketed gem changes the affixes of its own item instead of adding a flat stat.",
             "Ladder, Keystone, Underdog, Harmony, Balance, Purity, Sacrifice and Mirror work all the time; Tide, Last Stand and Momentum change your item in combat.",
             "Every gem comes in 5 qualities (Chipped to Perfect); 3 gems fuse into the next quality at the Jeweler. One gem of each kind per item.",
+            "Every item now has at most one socket. Items with more lost the extra sockets; their gems went back into your pouch.",
             "Gems drop from enemies of level 18 and above (bosses and rifts most often, better qualities from higher-level enemies). The Jeweler can also cut a Chipped gem of your choice from Gem Fragments.",
             "Stat shards are gone. Your old gems and shards were turned into Gem Fragments.",
             "Item tooltips show what the gems do: changed tiers, bonuses (◆), sacrificed and mirrored affixes."

@@ -80,31 +80,6 @@
             "perItemLevels": 5
           }
         }
-      },
-      {
-        "jeweler": 3,
-        "goldMult": 2.5,
-        "mats": {
-          "gem_fragment": 12,
-          "arcane_dust": {
-            "base": 4,
-            "perItemLevels": 5
-          },
-          "prismatic_shard": 2
-        }
-      },
-      {
-        "jeweler": 5,
-        "goldMult": 4,
-        "mats": {
-          "gem_fragment": 18,
-          "arcane_dust": {
-            "base": 4,
-            "perItemLevels": 5
-          },
-          "prismatic_shard": 4,
-          "void_crystal": 1
-        }
       }
     ]
   },

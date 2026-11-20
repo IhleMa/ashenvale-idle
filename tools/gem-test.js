@@ -131,10 +131,14 @@ const planOf = it => Object.fromEntries(affixPlan(it).filter(a => !a.mirror).map
   const p = { inventory: [{ uid: 'x', sockets: ['str:2', 'ladder:1'] }], characters: {}, mailbox: [], gold: 0,
     town: { gems: { 'str:1': 2, 'ladder:3': 1 }, materials: { shard_str: 95 }, buildings: {} } };
   migrateTown(p);
-  assert.deepEqual(p.inventory[0].sockets, [null, 'ladder:1']);
+  assert.deepEqual(p.inventory[0].sockets, ['ladder:1']); // old stat gem refunded, then down to one socket
   assert.deepEqual(p.town.gems, { 'ladder:3': 1 });
   assert.ok(!('shard_str' in p.town.materials) && p.town.materials.gem_fragment === 2 * 10 + 30 + 9);
   assert.equal(GEM_IDS.length, 11);
-  ok('gem drops scale with enemy level; old stat gems and shards become Gem Fragments');
+  const q = { inventory: [{ uid: 'y', slot: 'weapon', rarity: 'mythic', sockets: [null, 'ladder:2', 'mirror:1'] }], characters: {}, mailbox: [], gold: 0, town: { gems: {}, materials: {}, buildings: {} } };
+  migrateTown(q);
+  assert.deepEqual(q.inventory[0].sockets, ['ladder:2']);
+  assert.deepEqual(q.town.gems, { 'mirror:1': 1 });
+  ok('gem drops scale with enemy level; old stat gems and shards become Gem Fragments; extra sockets are removed');
 }
 console.log(`gem-test: ${n} checks passed`);
