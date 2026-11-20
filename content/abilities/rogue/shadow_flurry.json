@@ -33,8 +33,8 @@
   "order": 210,
   "rankEffects": {
     "2": {
-      "name": "Venomous Flurry",
-      "description": "Every hit against a poisoned enemy adds another poison stack (25% Physical Power per second for 8 seconds).",
+      "name": "Serrated Flurry",
+      "description": "Every hit against a poisoned enemy also makes it bleed (15% Physical Power per second for 6 seconds, stacks up to 3).",
       "changes": {
         "set": {
           "damage": {
@@ -43,10 +43,10 @@
               "effects": [
                 {
                   "kind": "status",
-                  "status": "poison",
-                  "duration": 8,
+                  "status": "bleed",
+                  "duration": 6,
                   "stat": "physPower",
-                  "power": 0.25,
+                  "power": 0.15,
                   "stacks": 1
                 }
               ]

@@ -44,8 +44,11 @@ export function classBadge(classId, subclassId = null) {
 
 // ---------------------------------------------------------------- builds (saved skill tree + loadout + rules)
 const BUILD_SLOTS = 3;
+// the character still matches a saved build: same nodes, loadout, plan and rules of the abilities it has
+// (rules of abilities that aren't learned right now don't count — they stay around from other builds)
 const sameBuild = (ch, b) => b && b.allocated.length === ch.tree.allocated.length && b.allocated.every(n => ch.tree.allocated.includes(n))
-  && b.loadout.join() === ch.loadout.join() && JSON.stringify(b.rules || {}) === JSON.stringify(ch.rules || {}) && (b.plan || []).join() === (ch.tree.plan || []).join();
+  && b.loadout.join() === ch.loadout.join() && (b.plan || []).join() === (ch.tree.plan || []).join()
+  && Object.keys(ch.abilities || {}).every(a => !b.rules?.[a] || JSON.stringify(b.rules[a]) === JSON.stringify(ch.rules?.[a]));
 export function buildsBar(ch) {
   const builds = ch.builds || [];
   return `<div class="builds-bar"><span class="builds-label" ${tipAttr('Save the skill tree, ability loadout and ability rules, and switch between them for free.')}>Builds</span>${Array.from({ length: BUILD_SLOTS }, (_, i) => {
