@@ -752,6 +752,8 @@ function dealDamage(b, src, tgt, raw, { school, ability, bonusCrit = 0, dot = nu
   if (mod(tgt, 'invulnerable') > 0) return 0; // Stasis
   if (!dot && !exact && school === 'physical' && mod(tgt, 'dodge') > 0 && b.rng() < mod(tgt, 'dodge')) {
     emit(b, { type: 'miss', src: src.uid, tgt: tgt.uid, ability });
+    // dodgeResource (Evasion rank 2): every dodged hit restores resource
+    if (tgt.resourceDef) for (const s of tgt.statuses) if (s.dodgeResource) tgt.resource = Math.min(tgt.resourceMax, tgt.resource + s.dodgeResource);
     return 0;
   }
   // exact: an already-final amount (Assassin's Mark replaying recorded damage) — only shields and the arena factor apply

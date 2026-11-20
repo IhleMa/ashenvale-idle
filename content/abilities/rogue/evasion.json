@@ -7,14 +7,47 @@
   "cost": 20,
   "cooldown": 25,
   "target": "self",
-  "effects": [{ "kind": "status", "status": "evasion", "duration": 6 }],
+  "effects": [
+    {
+      "kind": "status",
+      "status": "evasion",
+      "duration": 6
+    }
+  ],
   "defaultRule": {
     "enabled": true,
     "mode": "all",
-    "conditions": [{ "type": "self_hp_below", "value": 50 }],
-    "target": { "selector": "self" },
-    "targetConditions": [{ "type": "target_missing_status", "status": "evasion" }]
+    "conditions": [
+      {
+        "type": "self_hp_below",
+        "value": 50
+      }
+    ],
+    "target": {
+      "selector": "self"
+    },
+    "targetConditions": [
+      {
+        "type": "target_missing_status",
+        "status": "evasion"
+      }
+    ]
   },
   "priority": 100,
-  "order": 170
+  "order": 170,
+  "rankEffects": {
+    "2": {
+      "name": "Slippery",
+      "description": "While Evasion is active, every dodged hit restores 5 Energy.",
+      "changes": {
+        "set": {
+          "status": {
+            "extra": {
+              "dodgeResource": 5
+            }
+          }
+        }
+      }
+    }
+  }
 }

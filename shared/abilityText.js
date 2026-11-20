@@ -79,7 +79,7 @@ export function effText(eff, classId, opts = {}) {
       let t = `${eff.chance ? `${pct(eff.chance)} chance to ` : ''}${eff.self ? 'gain' + (eff.chance ? '' : 's') : 'appl' + (eff.chance ? 'y' : 'ies')} ${statusLink(eff.status)}${eff.allEnemies ? ' on every enemy' : ''} ${dur}`;
       const x = eff.extra || {};
       const extras = [x.absorbShieldPct && `a shield worth ${pct(x.absorbShieldPct)} of the damage it prevented when it ends`, x.hitCooldown && `every hit lowers ${x.hitCooldown.ability.replace(/_/g, ' ')}'s cooldown by ${x.hitCooldown.seconds} s`,
-        x.spawnChance && `each tick has a ${pct(x.spawnChance)} chance to add a stack`, x.spreadOnDeath && 'spreads to another enemy when the target dies', x.linkHealPct && `you heal for ${pct(x.linkHealPct)} of the damage they take`, x.freeCooldown && 'the next ability after it has no cooldown'].filter(Boolean);
+        x.spawnChance && `each tick has a ${pct(x.spawnChance)} chance to add a stack`, x.spreadOnDeath && 'spreads to another enemy when the target dies', x.linkHealPct && `you heal for ${pct(x.linkHealPct)} of the damage they take`, x.freeCooldown && 'the next ability after it has no cooldown', x.dodgeResource && `every dodged hit restores ${x.dodgeResource} ${resourceName(classId)}`].filter(Boolean);
       if (s?.tick && eff.power) t += ` (${pw(eff.power, eff.stat, s.tick === 'damage' ? 1 + (st?.dotDamagePct || 0) : 1)} ${s.tick === 'heal' ? 'healing' : 'damage'} per second${s.maxStacks ? ' per stack' : ''})`;
       else if (opts.withStatus && s) { const facts = statusFacts(eff.status).filter(x => !/^stacks up to/.test(x)); if (facts.length) t += ` (${facts.join(', ')})`; }
       if (eff.stacks > 1) t += ` ×${eff.stacks}`;

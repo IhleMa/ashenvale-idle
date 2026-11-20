@@ -139,4 +139,11 @@ const steps = (b, k) => { for (let i = 0; i < k; i++) C.stepBattle(b); };
   assert.ok(used && x.me.cooldowns[used] <= 0.2 && !x.me.statuses.some(s => s.freeCooldown), `${used} ${x.me.cooldowns[used]}`);
   ok(`Haste 3 in a fight: ${used} was cast without a cooldown`);
 }
+{ // Evasion 2
+  const dodge = rank => { const x = setup('rogue', 'evasion', rank); x.cast(x.me); x.me.resource = 0; x.b.rng = () => 0.01;
+    for (let i = 0; i < 3; i++) C.__test.applyEffect(x.b, x.enemies[0], x.me, { kind: 'damage', stat: 'physPower', power: 1, school: 'physical' }, null);
+    return x.me.resource; };
+  assert.equal(dodge(2), 15); assert.equal(dodge(1), 0);
+  ok('Evasion 2: every dodged hit restores 5 Energy');
+}
 console.log(`rank-test: ${n} checks passed`);
