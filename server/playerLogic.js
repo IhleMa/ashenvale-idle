@@ -12,7 +12,7 @@ import { ACHIEVEMENTS } from '../shared/data/achievements.js';
 import { migrateLegacyItem } from '../shared/data/legendaries.js';
 import { SLOT_IDS, generateItem, canEquip, itemSellValue, ITEM_BASES } from '../shared/data/items.js';
 import { createCharacter, addXp, autoDevelop, autoLoadout, syncTree, abilitySlots, cloneRule, treeRefundCost, treeResetCost } from '../shared/character.js';
-import { allocateNode as treeAllocate, refundNode as treeRefund, resetTree as treeReset, availablePoints } from '../shared/skilltree.js';
+import { allocateNode as treeAllocate, refundNode as treeRefund, resetTree as treeReset, availablePoints, cleanPlan, followPlan } from '../shared/skilltree.js';
 import { sanitizeRule } from '../shared/rules.js';
 import { createRng, randomSeed } from '../shared/rng.js';
 import { migrateTown, rollProfession, autoSalvage, returnGems } from './townLogic.js';
@@ -161,6 +161,18 @@ export function refundNode(p, { charId, nodeId }) {
   return { cost };
 }
 
+// ---------------------------------------------------------------- planned build: points go to these nodes as they come
+export function setTreePlan(p, { charId, plan }) {
+  const ch = getChar(p, charId);
+  if (!Array.isArray(plan) || plan.length > 300) fail('Invalid plan');
+  const clean = cleanPlan(ch, plan.map(String));
+  if (clean.length !== plan.length) fail('Every planned node has to connect to the tree or an earlier planned node');
+  ch.tree.plan = clean;
+  const n = followPlan(ch);
+  syncTree(ch);
+  return { allocated: n, planned: ch.tree.plan.length };
+}
+
 // ---------------------------------------------------------------- builds: saved skill tree + ability loadout + rules
 // Each character has BUILD_SLOTS slots. Saving and switching are free; switching loads the saved tree (trimmed to
 // the points the character has and the nodes that exist in its current tree), the loadout and the ability rules.
@@ -172,7 +184,7 @@ export function saveBuild(p, { charId, slot, name }) {
   ch.builds ||= [];
   const old = ch.builds[i];
   const nm = String(name ?? old?.name ?? '').trim().slice(0, 24) || `Build ${i + 1}`;
-  ch.builds[i] = { name: nm, allocated: [...ch.tree.allocated], loadout: [...ch.loadout], rules: JSON.parse(JSON.stringify(ch.rules || {})), subclass: ch.subclass || null, level: ch.level, points: ch.tree.allocated.length - 1, savedAt: Date.now() };
+  ch.builds[i] = { name: nm, allocated: [...ch.tree.allocated], plan: [...(ch.tree.plan || [])], loadout: [...ch.loadout], rules: JSON.parse(JSON.stringify(ch.rules || {})), subclass: ch.subclass || null, level: ch.level, points: ch.tree.allocated.length - 1, savedAt: Date.now() };
   ch.activeBuild = i;
   return { slot: i, name: nm };
 }
@@ -182,6 +194,9 @@ export function loadBuild(p, { charId, slot }) {
   const b = ch.builds?.[i] || fail('That build slot is empty');
   ch.tree.allocated = [...b.allocated];
   syncTree(ch); // drops nodes that don't fit (other ascendancy, fewer points) and learns the abilities
+  // nodes that didn't fit go back to the front of the plan, so they come back with the next levels
+  const kept = new Set(ch.tree.allocated);
+  ch.tree.plan = cleanPlan(ch, [...b.allocated.filter(id => !kept.has(id)), ...(b.plan || [])]);
   ch.loadout = b.loadout.filter(a => ch.abilities[a] && !ABILITIES[a]?.passive).slice(0, abilitySlots(ch));
   for (const [a, r] of Object.entries(b.rules || {})) if (ch.abilities[a]) ch.rules[a] = JSON.parse(JSON.stringify(r));
   ch.activeBuild = i;
@@ -632,6 +647,7 @@ export function adminGrantXp(p, { target = 'hero', mode = 'xp', amount = 0 } = {
     } else { ch.level = amount; ch.xp = 0; }
     if (ch.level !== from) {
       ch.levelAt = now; // don't let the jump distort "time per level" statistics
+      if (ch.level > from) followPlan(ch);
       if (ch.level > from && ((ch.isMain && p.settings.autoDevelopHero) || (!ch.isMain && p.settings.autoDevelopRecruits))) autoDevelop(ch);
       else syncTree(ch); // a lower level drops skill points that are no longer covered
     }
@@ -655,6 +671,7 @@ export function applyRewards(p, chars, rewards) {
       // time spent per level (split evenly when several levels came at once)
       if (ch.levelAt) for (let l = ch.level - gained + 1; l <= ch.level; l++) for (const fn of levelHooks) fn(p, ch, l, (now - ch.levelAt) / 1000 / gained);
       ch.levelAt = now;
+      followPlan(ch); // a planned build gets the new points first
       if ((ch.isMain && p.settings.autoDevelopHero) || (!ch.isMain && p.settings.autoDevelopRecruits)) {
         autoDevelop(ch);
       } else {

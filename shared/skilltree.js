@@ -56,6 +56,45 @@ export function pathTo(ch, nodeId) {
   return [];
 }
 
+// Planned build: ch.tree.plan = node ids to take next, in order. pathTo for planning: from everything allocated or
+// planned so far.
+export function planPathTo(ch, nodeId, plan = ch.tree?.plan || []) {
+  const tree = getTree(ch.classId, ch.subclass);
+  const set = new Set([...allocatedSet(ch), ...plan]);
+  if (!tree.nodes[nodeId] || set.has(nodeId)) return [];
+  const prev = new Map(), queue = [...set], seen = new Set(set);
+  while (queue.length) {
+    const cur = queue.shift();
+    for (const l of tree.nodes[cur].links) {
+      if (seen.has(l)) continue;
+      seen.add(l); prev.set(l, cur);
+      if (l === nodeId) { const path = [l]; let p = cur; while (!set.has(p)) { path.unshift(p); p = prev.get(p); } return path; }
+      queue.push(l);
+    }
+  }
+  return [];
+}
+// a valid plan: known nodes, not allocated, no repeats, each connected to what comes before it
+export function cleanPlan(ch, plan) {
+  const tree = getTree(ch.classId, ch.subclass);
+  const set = new Set(allocatedSet(ch));
+  const out = [];
+  for (const id of plan || []) {
+    if (!tree.nodes[id] || set.has(id)) continue;
+    if (!tree.nodes[id].links.some(l => set.has(l))) break; // everything after a gap is dropped
+    out.push(id); set.add(id);
+  }
+  return out;
+}
+// spends free points on the plan, in order; returns how many nodes were allocated
+export function followPlan(ch) {
+  if (!ch.tree?.plan?.length) return 0;
+  ch.tree.plan = cleanPlan(ch, ch.tree.plan);
+  let n = 0;
+  while (availablePoints(ch) > 0 && ch.tree.plan.length) { ch.tree.allocated.push(ch.tree.plan.shift()); n++; }
+  return n;
+}
+
 function stillConnected(tree, set) {
   const seen = new Set(['start']);
   const stack = ['start'];

@@ -9,7 +9,7 @@ import { charPicker, bindPicker , buildsBar, bindBuilds } from '../components.js
 import { CLASSES } from '/shared/data/classes.js';
 import { ABILITIES } from '/shared/data/abilities.js';
 import { getTree, describeNodeStats, TREE_CONFIG } from '/shared/data/skilltree.js';
-import { availablePoints, totalSkillPoints, spentPoints, pathTo, canRefund, treeStats, allocatedSet } from '/shared/skilltree.js';
+import { availablePoints, totalSkillPoints, spentPoints, pathTo, planPathTo, canRefund, treeStats, allocatedSet } from '/shared/skilltree.js';
 import { treeRefundCost, treeResetCost } from '/shared/character.js';
 import { CONFIG } from '/shared/config.js';
 
@@ -18,6 +18,7 @@ const GLYPH = { keystone: '✹', notable: '◆', mutator: '✦', rank: '▲', sm
 let view = null;          // { x, y, w } current viewBox (h follows aspect ratio)
 let lastSig = null;
 let refundMode = false;
+let planMode = false; // clicks add nodes to the planned build instead of allocating them
 let search = '';
 let hoverPath = [];
 let focusNode = null;
@@ -29,7 +30,14 @@ export function focusTreeNode(charId, nodeId) {
   location.hash = '#/skilltree';
 }
 
-function treeSig(ch) { return `${ch.id}|${ch.level}|${ch.tree.allocated.join(',')}|${refundMode}`; }
+function treeSig(ch) { return `${ch.id}|${ch.level}|${ch.tree.allocated.join(',')}|${(ch.tree.plan || []).join(',')}|${refundMode}|${planMode}`; }
+const planOf = ch => ch.tree.plan || [];
+// the level at which the planned build is complete (null if the level cap doesn't give enough points)
+function planDoneLevel(ch) {
+  const need = spentPoints(ch) + planOf(ch).length;
+  for (let L = ch.level; L <= CONFIG.levelCap; L++) if (totalSkillPoints({ ...ch, level: L }) >= need) return L;
+  return null;
+}
 
 function applyViewBox(svg) {
   const r = svg.getBoundingClientRect();
@@ -58,6 +66,13 @@ function nodeTip(ch, n, set) {
   const reAb = n.type === 'rank' ? n.rankFor : n.type === 'ability' ? n.ability : null;
   for (const [r, re] of Object.entries(ABILITIES[reAb]?.rankEffects || {})) html += `<br><span class="${(ch.abilities[reAb] || 0) >= Number(r) ? 'up' : 'muted'}">▲ Rank ${r} — <b>${esc(re.name)}</b>: ${esc(re.description)}</span>`;
   if (n.type === 'rank' && !ch.abilities[n.rankFor]) html += `<br><i class="muted">Only has an effect once ${esc(ABILITIES[n.rankFor]?.name)} is learned.</i>`;
+  const pi = planOf(ch).indexOf(n.id);
+  if (planMode && !set.has(n.id)) {
+    if (pi >= 0) html += `<br><span class="plan-text">Plan step ${pi + 1}</span><br><span class="muted">Click to remove it and every step after it</span>`;
+    else { const k = planPathTo(ch, n.id).length; html += `<br><span class="plan-text">Click to add to the plan (+${k} node${k === 1 ? '' : 's'})</span>`; }
+    return html;
+  }
+  if (pi >= 0) html += `<br><span class="plan-text">Planned (step ${pi + 1})</span>`;
   if (set.has(n.id)) {
     if (n.id !== 'start') html += `<br><span class="muted">${refundMode ? 'Click' : 'Right-click'} to refund (${fmt(treeRefundCost(ch))} gold)</span>`;
   } else {
@@ -89,13 +104,16 @@ function nodeSvg(ch, n, set) {
     : `<circle class="shape" r="${r}"/>`;
   const label = (n.type === 'ability' || n.type === 'keystone' || n.type === 'notable' || n.type === 'mutator' || n.type === 'start') ? `<text class="label" y="${r + 13}">${esc(n.name)}</text>` : '';
   const match = search && (`${n.name} ${describeNodeStats(n.stats).join(' ')}`.toLowerCase().includes(search)) ? ' match' : '';
-  return `<g class="node t-${n.type} s-${st}${match}${focusNode === n.id ? ' focus' : ''}" data-node="${n.id}" transform="translate(${n.x} ${n.y})" style="--cc:${(n.subclass && SUBCLASSES[n.subclass]?.color) || cls.color}">
-    <circle class="halo" r="${r + 6}"/>${shape}${inner}${label}</g>`;
+  const pi = st === 'on' ? -1 : planOf(ch).indexOf(n.id);
+  const planTag = pi >= 0 && planMode ? `<text class="plan-num" y="${-r - 4}">${pi + 1}</text>` : '';
+  return `<g class="node t-${n.type} s-${st}${match}${focusNode === n.id ? ' focus' : ''}${pi >= 0 ? ' planned' : ''}" data-node="${n.id}" transform="translate(${n.x} ${n.y})" style="--cc:${(n.subclass && SUBCLASSES[n.subclass]?.color) || cls.color}">
+    <circle class="halo" r="${r + 6}"/>${shape}${inner}${label}${planTag}</g>`;
 }
 
 function svgHtml(ch) {
   const tree = getTree(ch.classId, ch.subclass);
   const set = allocatedSet(ch);
+  const planSet = new Set(planOf(ch));
   const seen = new Set();
   const lines = [];
   for (const n of Object.values(tree.nodes)) {
@@ -106,7 +124,8 @@ function svgHtml(ch) {
       const m = tree.nodes[l];
       const on = set.has(n.id) && set.has(l);
       const half = set.has(n.id) || set.has(l);
-      lines.push(`<line class="link ${on ? 'on' : half ? 'half' : ''}" data-a="${n.id}" data-b="${l}" x1="${n.x}" y1="${n.y}" x2="${m.x}" y2="${m.y}"/>`);
+      const pl = !on && (planSet.has(n.id) || set.has(n.id)) && (planSet.has(l) || set.has(l));
+      lines.push(`<line class="link ${on ? 'on' : half ? 'half' : ''}${pl ? ' planned' : ''}" data-a="${n.id}" data-b="${l}" x1="${n.x}" y1="${n.y}" x2="${m.x}" y2="${m.y}"/>`);
     }
   }
   const B = tree.branches.length;
@@ -142,6 +161,13 @@ function sidebarHtml(ch) {
       <button class="btn small ${avail ? 'primary' : ''}" data-auto ${avail ? '' : 'disabled'} ${tipAttr('Spend all available points automatically (prioritises abilities, then notables and your main attributes).')}>Auto-allocate</button>
       <button class="btn small ${refundMode ? 'danger' : ''}" data-refund-mode>${refundMode ? 'Refund mode: ON' : 'Refund mode'}</button>
       <button class="btn small ghost danger" data-reset>Reset tree (${fmt(treeResetCost(ch))}g)</button>
+    </div>
+    <div class="plan-box ${planMode ? 'on' : ''}">
+      <div class="row gap"><b>📝 Planned build</b><span class="grow"></span><button class="btn tiny ${planMode ? 'primary' : ''}" data-plan-mode>${planMode ? 'Done planning' : 'Plan nodes'}</button></div>
+      ${planOf(ch).length ? `<div class="small">${planOf(ch).length} node${planOf(ch).length === 1 ? '' : 's'} planned · ${planDoneLevel(ch) ? `complete at level ${planDoneLevel(ch)}` : `<span class="warn-text">needs more points than level ${CONFIG.levelCap} gives</span>`}</div>
+        <div class="row gap"><button class="btn tiny ghost" data-plan-undo>Undo last</button><button class="btn tiny ghost danger" data-plan-clear>Clear plan</button></div>`
+        : `<div class="small muted">${planMode ? 'Click nodes in the order you want them — the path to each node is added too.' : 'Plan your build up to level ' + CONFIG.levelCap + ': new skill points go to the planned nodes automatically, in order.'}</div>`}
+      ${planMode ? '<div class="small faint">Click a planned node to remove it and every step after it. Builds save the plan.</div>' : ''}
     </div>
     <input class="tree-search" placeholder="Search nodes… (e.g. crit, Vitality, Fireball)" value="${esc(search)}">
     <h4>Abilities</h4>
@@ -237,7 +263,7 @@ export const skilltreeView = {
       const set = allocatedSet(ch);
       const n = getTree(ch.classId, ch.subclass).nodes[g.dataset.node];
       g.dataset.tip = nodeTip(ch, n, set);
-      highlightPath(root, set.has(n.id) ? [] : pathTo(ch, n.id));
+      highlightPath(root, set.has(n.id) || (planMode && planOf(ch).includes(n.id)) ? [] : planMode ? planPathTo(ch, n.id) : pathTo(ch, n.id));
     });
 
     const doRefund = async (ch, nodeId) => {
@@ -261,6 +287,14 @@ export const skilltreeView = {
       if (g) {
         if (drag?.moved) return;
         const id = g.dataset.node;
+        if (planMode) {
+          if (allocatedSet(ch).has(id)) return;
+          const plan = planOf(ch), i = plan.indexOf(id);
+          const next = i >= 0 ? plan.slice(0, i) : [...plan, ...planPathTo(ch, id)];
+          const r = await run(act('tree_plan_set', { charId: ch.id, plan: next }));
+          if (r?.allocated) toast(`${r.allocated} free point${r.allocated === 1 ? '' : 's'} spent on the plan.`, 'success');
+          return;
+        }
         if (allocatedSet(ch).has(id)) { if (refundMode) await doRefund(ch, id); return; }
         const path = pathTo(ch, id);
         if (!path.length) return;
@@ -271,7 +305,10 @@ export const skilltreeView = {
       const b = t.closest('button');
       if (!b) return;
       if ('auto' in b.dataset) await run(act('auto_tree', { charId: ch.id }), 'Points allocated.');
-      if ('refundMode' in b.dataset) { refundMode = !refundMode; lastSig = null; this.render(root); }
+      if ('refundMode' in b.dataset) { refundMode = !refundMode; planMode = false; lastSig = null; this.render(root); }
+      if ('planMode' in b.dataset) { planMode = !planMode; refundMode = false; lastSig = null; this.render(root); }
+      if ('planUndo' in b.dataset) await run(act('tree_plan_set', { charId: ch.id, plan: planOf(ch).slice(0, -1) }));
+      if ('planClear' in b.dataset && await confirmBox('Clear the planned build? Nodes you already have stay.', 'Clear plan')) await run(act('tree_plan_set', { charId: ch.id, plan: [] }));
       if ('reset' in b.dataset && await confirmBox(`Reset ${ch.name}'s whole skill tree for ${fmt(treeResetCost(ch))} gold? All points are returned.`, 'Reset tree')) await run(act('reset_tree', { charId: ch.id }), 'Skill tree reset.');
       if (b.dataset.goto) {
         centerOn(b.dataset.goto, ch);
@@ -320,7 +357,7 @@ export const skilltreeView = {
     }
     root.querySelector('.tree-picker').innerHTML = charPicker(ch.id) + buildsBar(ch);
     const side = root.querySelector('.tree-side');
-    if (!side.contains(document.activeElement)) side.innerHTML = sidebarHtml(ch);
+    if (!(side.contains(document.activeElement) && document.activeElement.tagName === 'INPUT')) side.innerHTML = sidebarHtml(ch);
     if (sig !== lastSig) {
       lastSig = sig;
       const host = root.querySelector('.tree-svg-host');
