@@ -5,7 +5,7 @@ import { MATERIALS } from '/shared/data/town.js';
 import { classLabel } from '/shared/data/subclasses.js';
 import { bus, state } from '../state.js';
 import { act } from '../net.js';
-import { esc, fmt, run, tipAttr, nameHtml, heroNameHtml } from '../ui.js';
+import { esc, fmt, run, tipAttr, nameHtml, heroNameHtml, framed } from '../ui.js';
 import { portrait, enemyArt, minionArt, abilityIcon, statusIcon, backgroundStyle } from '../assets.js';
 import { ABILITIES } from '/shared/data/abilities.js';
 import { STATUSES } from '/shared/data/statuses.js';
@@ -233,7 +233,10 @@ function minionCard(m) {
 }
 
 function unitCard(u, k, minions = []) {
-  const art = u.kind === 'enemy' ? enemyArt(u.defId, 'md') : portrait({ name: u.name, classId: u.classId, portrait: u.portrait }, 'md');
+  // a player's hero wears its owner's portrait frame (cosmetic)
+  const heroOwner = u.isMain ? u.ownerName || (u.side === 'A' ? state.player?.name : null) : null;
+  const pic = u.kind === 'enemy' ? enemyArt(u.defId, 'md') : portrait({ name: u.name, classId: u.classId, portrait: u.portrait }, 'md');
+  const art = heroOwner ? framed(pic, heroOwner) : pic;
   const owner = k === 'coop' && u.ownerName ? `<small class="owner">${nameHtml(u.ownerName, { title: false })}</small>` : '';
   const tags = u.boss ? '<span class="tag boss">BOSS</span>' : u.tags?.includes('elite') ? '<span class="tag elite">ELITE</span>' : '';
   const abilities = u.side === 'A' ? `<div class="unit-abilities">${u.loadout.map(a => `<span class="cd-wrap" data-ab="${a}" ${tipAttr(`<b>${esc(ABILITIES[a]?.name)}</b><br>${esc(ABILITIES[a]?.description || '')}`)}>${abilityIcon(a, 'xs')}<span class="cd-overlay"></span><span class="cd-num"></span></span>`).join('')}</div>` : '';
@@ -244,7 +247,7 @@ function unitCard(u, k, minions = []) {
   return `<div class="unit ${u.side === 'A' ? 'ally' : 'foe'} ${u.boss ? 'boss' : ''} ${u.isMain ? 'main' : ''}" data-uid="${u.uid}" ${ck ? `data-ck="${esc(ck)}"` : ''}${keepH}>
     <div class="unit-art">${art}<div class="floaters"></div></div>
     <div class="unit-info">
-      <div class="unit-name">${u.isMain ? '<span class="hero-star">★</span>' : ''}${u.isMain && (u.ownerName || u.side === 'A') ? heroNameHtml(u.name, u.ownerName || state.player?.name) : esc(u.name)} <span class="muted">Lv ${u.level}${u.syncedFrom ? `<span class="sync-tag" ${tipAttr(`Level sync: fights at level ${u.level} (really ${u.syncedFrom}) while the ascended hero levels up again`)}>⇩${u.syncedFrom}</span>` : ''}${cls ? ' ' + esc(classLabel(u.classId, u.subclass)) : ''}</span> ${tags}${owner}</div>
+      <div class="unit-name">${u.isMain ? '<span class="hero-star">★</span>' : ''}${heroOwner ? heroNameHtml(u.name, heroOwner) : esc(u.name)} <span class="muted">Lv ${u.level}${u.syncedFrom ? `<span class="sync-tag" ${tipAttr(`Level sync: fights at level ${u.level} (really ${u.syncedFrom}) while the ascended hero levels up again`)}>⇩${u.syncedFrom}</span>` : ''}${cls ? ' ' + esc(classLabel(u.classId, u.subclass)) : ''}</span> ${tags}${owner}</div>
       <div class="bar hp"><div class="fill"></div><div class="shield"></div><span class="bar-label"></span></div>
       ${res}
       ${u.classId && Object.values(ABILITIES).some(a => a.classId === u.classId && a.note) ? '<div class="unit-notes" title="Notes for the next Finale"></div>' : ''}
