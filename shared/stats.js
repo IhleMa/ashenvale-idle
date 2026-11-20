@@ -25,6 +25,12 @@ function collectBonuses(ch) {
   return bonus;
 }
 
+// gear stats added straight onto the character's base values; every other gear stat is a bonus like the skill tree's
+const GEAR_FLAT = new Set(['str', 'int', 'dex', 'vit', 'hp', 'defense', 'physPower', 'magPower', 'healPower', 'critChance', 'critDamage', 'attackSpeed']);
+// affix stats that only matter in combat (they reach the combat unit as gear modifiers)
+export const GEAR_COMBAT = ['physDamagePct', 'magDamagePct', 'shieldPct', 'lifeSteal', 'thornsPct', 'blockChance', 'hpRegen', 'healingReceivedPct',
+  'cooldownPct', 'resourceRegenPct', 'buffDurationPct', 'threatPct', 'damageVsBossPct', 'executeDamagePct'];
+
 export function equipmentStats(ch) {
   const out = {};
   for (const item of Object.values(ch.equipment || {})) {
@@ -41,6 +47,8 @@ export function computeStats(ch) {
   const cls = CLASSES[ch.classId];
   const bonus = collectBonuses(ch);
   const gear = equipmentStats(ch);
+  // every gear stat besides the flat core stats works like the same skill-tree bonus (Damage %, Strength %, …)
+  for (const [k, v] of Object.entries(gear)) if (!GEAR_FLAT.has(k)) bonus[k] = (bonus[k] || 0) + v;
   const mainMult = ch.isMain ? 1 + CONFIG.mainCharacter.attributeBonus : 1;
   const allPct = bonus.allPct || 0;
 
@@ -68,13 +76,13 @@ export function computeStats(ch) {
     critChance: Math.min(CONFIG.combat.critCap, 0.05 + conv('critChance') + (gear.critChance || 0) + (bonus.critChance || 0)),
     critDamage: 1.5 + (cls.critDamageBonus || 0) + (gear.critDamage || 0) + (bonus.critDamage || 0),
     attackSpeed: Math.min(CONFIG.combat.attackSpeedCap, 1 + conv('attackSpeed') + (gear.attackSpeed || 0) + (bonus.attackSpeed || 0)),
-    dodge: 0,
+    dodge: bonus.dodge || 0,
     resourceMax: cls.resource.max,
     xpBonus: (bonus.xpPct || 0) + (ch.isMain ? CONFIG.mainCharacter.xpBonus : 0),
     // combat modifiers from the skill tree
     damagePct: bonus.damagePct || 0,
     healingPct: bonus.healingPct || 0,
-    damageTakenPct: bonus.damageTakenPct || 0,
+    damageTakenPct: (bonus.damageTakenPct || 0) - (bonus.damageReduction || 0),
     // minion bonuses (summoner skill tree)
     minionDamagePct: bonus.minionDamagePct || 0,
     minionHpPct: bonus.minionHpPct || 0,
@@ -84,6 +92,9 @@ export function computeStats(ch) {
     dotDamagePct: bonus.dotDamagePct || 0,
     dotDurationPct: bonus.dotDurationPct || 0,
     poisonSpread: bonus.poisonSpread || 0, // Plaguebringer (rogue keystone)
+    // item affixes (see content/items/_settings.json → affixes)
+    ...Object.fromEntries(GEAR_COMBAT.map(k => [k, bonus[k] || 0])),
+    damageReduction: bonus.damageReduction || 0,
   };
   // Spellblade: the lower of physical/magic power gains part of the higher one, so split gear isn't wasted
   if (cls.powerBlend) {
@@ -96,7 +107,13 @@ export function computeStats(ch) {
 
 // A rough power rating used for UI comparisons.
 export function powerRating(stats) {
-  const offense = Math.max(stats.physPower, stats.magPower, stats.healPower * 0.9) * (1 + stats.critChance * (stats.critDamage - 1)) * stats.attackSpeed;
-  const defense = stats.maxHp * (1 + stats.defense / 100);
+  const g = k => stats[k] || 0;
+  const heal = stats.healPower * 0.9 > Math.max(stats.physPower, stats.magPower);
+  const school = heal ? g('healingPct') + g('shieldPct') * 0.5 : stats.magPower > stats.physPower ? g('magDamagePct') : g('physDamagePct');
+  const mult = 1 + (heal ? 0 : g('damagePct')) + school + 0.5 * (g('dotDamagePct') + g('minionDamagePct')) + 0.25 * (g('damageVsBossPct') + g('executeDamagePct'))
+    + g('cooldownPct') + 0.3 * g('resourceRegenPct') + 0.2 * g('buffDurationPct');
+  const offense = Math.max(stats.physPower, stats.magPower, stats.healPower * 0.9) * (1 + stats.critChance * (stats.critDamage - 1)) * stats.attackSpeed * mult;
+  const defense = stats.maxHp * (1 + stats.defense / 100) / Math.max(0.25, 1 + g('damageTakenPct')) * (1 + g('dodge') + g('blockChance') * 0.5)
+    * (1 + 0.3 * g('healingReceivedPct') + 2 * g('lifeSteal')) + g('hpRegen') * 30;
   return Math.round(offense * 2 + defense * 0.25);
 }

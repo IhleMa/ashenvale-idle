@@ -36,7 +36,7 @@ export function makeCharacterUnit(ch, { ownerId, ownerName, position, bonuses = 
       damagePct: (role.damagePct || 0) + (bonuses.damagePct || 0) + s.damagePct,
       healingPct: (role.healingPct || 0) + (bonuses.healingPct || 0) + s.healingPct,
       damageTakenPct: (role.damageTakenPct || 0) + (bonuses.damageTakenPct || 0) + s.damageTakenPct,
-      buffDurationPct: role.buffDurationPct || 0,
+      buffDurationPct: (role.buffDurationPct || 0) + (s.buffDurationPct || 0),
       allStatsPct: bonuses.allStatsPct || 0,
       dotDamagePct: s.dotDamagePct || 0,
       dotDurationPct: s.dotDurationPct || 0,
@@ -46,6 +46,10 @@ export function makeCharacterUnit(ch, { ownerId, ownerName, position, bonuses = 
     danger: 0,
     vsEnemy, // bestiary mastery: { enemyId: damage bonus }
     stat: newStat(), // per-fight totals for the balance dashboard
+    // item affixes that act in combat; read through mod() like status modifiers
+    gearMods: { dodge: Math.min(C.dodgeCap ?? 0.4, s.dodge), thornsPct: s.thornsPct, cooldownRatePct: s.cooldownPct, resourceRegenPct: s.resourceRegenPct, threatPct: s.threatPct,
+      lifeSteal: s.lifeSteal, blockChance: s.blockChance, hpRegen: s.hpRegen, healingTakenPct: s.healingReceivedPct, shieldPct: s.shieldPct,
+      physDamagePct: s.physDamagePct, magDamagePct: s.magDamagePct, executeDamagePct: s.executeDamagePct, damageVsBossPct: s.damageVsBossPct },
     minionBonus: { damagePct: s.minionDamagePct || 0, hpPct: s.minionHpPct || 0, durationPct: s.minionDurationPct || 0, extraMax: s.minionMax || 0 },
   };
 }
@@ -159,7 +163,7 @@ export function drainEvents(b) { const e = b.events; b.events = []; return e; }
 
 // ---------------------------------------------------------------- stats with statuses
 function mod(u, key) {
-  let v = 0;
+  let v = u.gearMods?.[key] || 0;
   for (const s of u.statuses) {
     const m = STATUSES[s.id]?.mods?.[key];
     if (m) v += m * (STATUSES[s.id].maxStacks ? s.stacks : 1);
@@ -199,6 +203,8 @@ export function stepBattle(b) {
     // health history (Rewind, Collapse): one sample every half second, the last 8 seconds
     if (b.ticks % 5 === 0) { (u.hpHist ||= []).push(u.hp); if (u.hpHist.length > 17) u.hpHist.shift(); }
     tickStatuses(b, u);
+    // Health Regeneration (item affix)
+    if (u.alive && u.gearMods?.hpRegen && u.hp < u.maxHp) u.hp = Math.min(u.maxHp, u.hp + u.gearMods.hpRegen * DT * (b.pvp?.healingMult ?? 1));
     if (u.boss && u.enrageAfter && b.phaseTime >= u.enrageAfter && !u.enraged) {
       u.enraged = true;
       applyStatus(b, u, u, 'enrage', 999, 0, 1);
@@ -373,7 +379,7 @@ function applyEffect(b, src, tgt, eff, abilityId) {
     case 'shield': {
       if (eff.self) tgt = src;
       if (!tgt.alive) return;
-      const value = effPower(src, eff.stat) * eff.power * rm * (1 + src.bonuses.healingPct);
+      const value = effPower(src, eff.stat) * eff.power * rm * (1 + src.bonuses.healingPct + mod(src, 'shieldPct'));
       applyStatus(b, src, tgt, 'barrier', eff.duration, value, 1);
       break;
     }
@@ -638,8 +644,9 @@ function dealDamage(b, src, tgt, raw, { school, ability, bonusCrit = 0, dot = nu
     return 0;
   }
   // exact: an already-final amount (Assassin's Mark replaying recorded damage) — only shields and the arena factor apply
-  let amount = exact ? raw : raw * (1 + src.bonuses.damagePct + mod(src, 'damagePct'));
-  let crit = false;
+  let amount = exact ? raw : raw * (1 + src.bonuses.damagePct + mod(src, 'damagePct') + mod(src, school === 'magical' ? 'magDamagePct' : 'physDamagePct')
+    + (tgt.boss ? mod(src, 'damageVsBossPct') : 0) + (hpPct(tgt) < 35 ? mod(src, 'executeDamagePct') : 0));
+  let crit = false, blocked = false;
   if (!exact) {
   if (src.passives) {
     if (src.passives.damageVsBossPct && tgt.boss) amount *= 1 + src.passives.damageVsBossPct;
@@ -656,6 +663,8 @@ function dealDamage(b, src, tgt, raw, { school, ability, bonusCrit = 0, dot = nu
   }
   amount *= Math.max(0.1, 1 + mod(tgt, 'damageTakenPct') + tgt.bonuses.damageTakenPct + (dot ? mod(tgt, 'dotTakenPct') : 0));
   amount *= 0.92 + b.rng() * 0.16;
+  // Block (item affix): a direct hit is partly blocked
+  if (!dot && !proc && src.side !== tgt.side && mod(tgt, 'blockChance') > 0 && b.rng() < Math.min(C.blockCap ?? 0.5, mod(tgt, 'blockChance'))) { amount *= 1 - (C.blockReduction ?? 0.5); blocked = true; }
   } else if (b.pvp && src.side !== tgt.side) amount *= b.pvp.damageMult ?? 1;
   amount = Math.max(1, Math.round(amount));
 
@@ -673,7 +682,12 @@ function dealDamage(b, src, tgt, raw, { school, ability, bonusCrit = 0, dot = nu
   if (tgt.hp <= 0 && (tgt.undying || mod(tgt, 'undying') > 0)) tgt.hp = 1; // Borrowed Time, Fortress, the first tutorial fights
   if (src.stat && src.side !== tgt.side) src.stat.dmg += amount;
   if (tgt.stat && tgt.kind === 'character') tgt.stat.taken += amount + absorbed;
-  emit(b, { type: 'damage', src: src.uid, tgt: tgt.uid, amount, absorbed, crit, ability, dot, school, ...(proc ? { proc } : {}) });
+  emit(b, { type: 'damage', src: src.uid, tgt: tgt.uid, amount, absorbed, crit, ability, dot, school, ...(proc ? { proc } : {}), ...(blocked ? { blocked } : {}) });
+  // Life steal (item affix): part of direct damage heals the attacker
+  if (!dot && !proc && !exact && src !== tgt && src.alive && src.side !== tgt.side) {
+    const ls = mod(src, 'lifeSteal');
+    if (ls > 0 && src.hp < src.maxHp) { const h = Math.min(src.maxHp - src.hp, Math.round((amount + absorbed) * ls)); if (h > 0) { src.hp += h; if (src.stat) src.stat.heal += h; } }
+  }
 
   if (tgt.threatTable && src.side !== tgt.side) tgt.threatTable[src.uid] = (tgt.threatTable[src.uid] || 0) + (amount + absorbed) * src.threatMult * Math.max(0.1, 1 + mod(src, 'threatPct'));
   if (tgt.resourceDef?.onDamaged) tgt.resource = Math.min(tgt.resourceMax, tgt.resource + tgt.resourceDef.onDamaged);

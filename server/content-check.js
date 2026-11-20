@@ -197,9 +197,25 @@ export function validateContent(C) {
     for (const c of b.classes || []) ref(`${w}.classes`, c, classes, 'class');
     if (b.material && !(b.material in (town.materialOfType || {}))) err(`${w}.material`, `must be one of ${Object.keys(town.materialOfType || {}).join(', ')}`);
   }
-  for (const [k, a] of Object.entries(affixStats)) { str(`items.affixes.${k}.label`, a.label); num(`items.affixes.${k}.base`, a.base); num(`items.affixes.${k}.perLevel`, a.perLevel); }
+  for (const [k, a] of Object.entries(affixStats)) {
+    const w = `items.affixes.${k}`;
+    str(`${w}.label`, a.label); num(`${w}.base`, a.base); num(`${w}.perLevel`, a.perLevel);
+    if (a.type !== 'prefix' && a.type !== 'suffix') err(`${w}.type`, 'must be "prefix" or "suffix"');
+    num(`${w}.weight`, a.weight, { min: 0 }); str(`${w}.name`, a.name);
+    for (const sl of a.slots || []) if (!(items.slots || {})[sl]) err(`${w}.slots`, `unknown slot "${sl}"`);
+    if (!!a.pct !== (items.pctStats || []).includes(k)) err(`${w}.pct`, 'percentage stats must also be listed in pctStats (and only those)');
+  }
+  // affix tiers: tier 1 is the best — needs the highest item level, the lowest weight and the biggest values
+  const tiers = items.affixTiers || [];
+  if (!tiers.length) err('items.affixTiers', 'needs at least one tier');
+  tiers.forEach((t, i) => {
+    const w = `items.affixTiers[${i}]`;
+    num(`${w}.tier`, t.tier, { min: 1 }); num(`${w}.minLevel`, t.minLevel, { min: 1 }); num(`${w}.weight`, t.weight, { min: 0 }); num(`${w}.min`, t.min, { min: 0 }); num(`${w}.max`, t.max, { min: 0 });
+    if (t.max < t.min) err(`${w}.max`, 'must be at least min');
+  });
+  if (!tiers.some(t => t.minLevel <= 1)) err('items.affixTiers', 'one tier needs minLevel 1, or level-1 items get no affixes');
+  for (const k of ['prefix', 'suffix']) num(`items.affixLimits.${k}`, items.affixLimits?.[k], { min: 0 });
   for (const s of items.pctStats || []) if (!(s in affixStats)) err('items.pctStats', `unknown stat "${s}"`);
-  if (items.naming && !rarities.has(items.naming.suffixFromRarity)) err('items.naming.suffixFromRarity', 'unknown rarity');
   if (items.sockets && !rarities.has(items.sockets.guaranteedFromRarity)) err('items.sockets.guaranteedFromRarity', 'unknown rarity');
 
   // ---- enemies
@@ -370,7 +386,7 @@ export function validateContent(C) {
   for (const k of ['hpGrowth', 'damageGrowth']) num(`rifts.config.${k}`, C.rifts?.config?.[k], { min: 1, max: 3 });
 
   // ---- gems
-  for (const s of Object.keys(affixStats)) if (!C.gems?.kinds?.[s]) err('gems.kinds', `no gem for the stat "${s}"`);
+  for (const [s, a] of Object.entries(affixStats)) if (a.gem && !C.gems?.kinds?.[s]) err('gems.kinds', `no gem for the stat "${s}" (marked "gem": true)`);
   (C.gems?.tiers || []).forEach((t, i) => {
     if (i === 0 && !t.cutCost) err('gems.tiers[0]', 'the first tier needs a cutCost');
     if (i > 0 && !t.fuseCost) err(`gems.tiers[${i}]`, 'needs a fuseCost');

@@ -2,8 +2,8 @@
 import crypto from 'node:crypto';
 import { CONFIG, rarityIndex } from '../shared/config.js';
 import { MATERIALS } from '../shared/data/town.js';
-import { SLOTS, canEquip } from '../shared/data/items.js';
-import { UNIQUES, SETS } from '../shared/data/legendaries.js';
+import { SLOTS, canEquip, isSoulbound } from '../shared/data/items.js';
+import { UNIQUES, SETS, migrateLegacyItem } from '../shared/data/legendaries.js';
 import { GameError, sendMail } from './playerLogic.js';
 
 const fail = m => { throw new GameError(m); };
@@ -23,6 +23,7 @@ export class AuctionHouse {
     this.game = game;
     this.data = { listings: [], history: [], ...game.store.getDoc('auction', {}) };
     this.dirty = false;
+    for (const l of this.data.listings) if (l.item && migrateLegacyItem(l.item)) this.dirty = true; // tiered affixes
   }
 
   // queues the auction house for the next database flush (written together with the players involved)
@@ -95,6 +96,7 @@ export class AuctionHouse {
       const idx = p.inventory.findIndex(i => i.uid === itemUid);
       if (idx < 0) fail('Item not found in your inventory (unequip it first)');
       if (p.inventory[idx].locked) fail('Unlock the item first');
+      if (isSoulbound(p.inventory[idx])) fail('Soulbound: this item was scaled down by ascension. Reforge it back to its original item level to trade it again.');
       l.kind = 'item';
       l.item = p.inventory.splice(idx, 1)[0];
     } else {

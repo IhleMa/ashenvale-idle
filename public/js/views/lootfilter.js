@@ -4,7 +4,7 @@ import { act } from '../net.js';
 import { esc, fmt, run, toast, confirmBox, tipAttr } from '../ui.js';
 import { itemIcon } from '../assets.js';
 import { CONFIG } from '/shared/config.js';
-import { SLOTS, AFFIXES } from '/shared/data/items.js';
+import { SLOTS, AFFIXES, AFFIX_TIERS } from '/shared/data/items.js';
 import { MATERIALS } from '/shared/data/town.js';
 import { FILTER_ACTIONS, FILTER_STATS, PRESETS, MAX_RULES, newRule, describeRule, ruleMatches, evaluateItem, makeContext } from '/shared/lootfilter.js';
 
@@ -54,6 +54,10 @@ function ruleHtml(r, i, ctx) {
         <label class="inline">at most <input type="number" class="lf-num" data-r-num="maxLevel" min="1" max="${CONFIG.levelCap}" value="${r.maxLevel ?? ''}" placeholder="–"></label>
         <label class="inline">or <input type="number" class="lf-num" data-r-num="levelsBelowHero" min="0" max="${CONFIG.levelCap}" value="${r.levelsBelowHero ?? ''}" placeholder="–"> + levels below my hero</label></div></div>
       <div class="lf-cond"><span class="lf-label">Usable</span><label class="inline small"><input type="checkbox" data-r-unusable ${r.unusable ? 'checked' : ''}> only gear that <b>no class in my roster</b> can wear</label></div>
+      <div class="lf-cond"><span class="lf-label">Affix tier</span><div class="row gap wrap small">
+        <label class="inline">has a tier <input type="number" class="lf-num" data-r-num="bestTierMax" min="1" max="${AFFIX_TIERS.length}" value="${r.bestTierMax ?? ''}" placeholder="–"> or better affix</label>
+        <label class="inline">no affix better than tier <input type="number" class="lf-num" data-r-num="bestTierMin" min="1" max="${AFFIX_TIERS.length}" value="${r.bestTierMin ?? ''}" placeholder="–"></label>
+        <span class="faint">tier 1 is the best</span></div></div>
       <div class="lf-cond"><span class="lf-label">Has any of</span><div class="lf-chips">${FILTER_STATS.map(s => chip('r-any', s, r.anyStats.includes(s), esc(AFFIXES[s].label))).join('')}</div></div>
       <div class="lf-cond"><span class="lf-label">Has none of</span><div class="lf-chips">${FILTER_STATS.map(s => chip('r-none', s, r.noStats.includes(s), esc(AFFIXES[s].label))).join('')}</div></div>
     </div>` : ''}

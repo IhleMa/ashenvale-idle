@@ -414,7 +414,7 @@ Target selectors (`target.selector`):
 
 ## Stats
 
-Item / affix / gem stats: `str`, `int`, `dex`, `vit`, `hp`, `defense`, `physPower`, `magPower`, `healPower`, `critChance`, `critDamage`, `attackSpeed`
+Item / affix / gem stats: `physPower`, `magPower`, `healPower`, `hp`, `defense`, `hpPct`, `defensePct`, `damagePct`, `physDamagePct`, `magDamagePct`, `healingPct`, `shieldPct`, `dotDamagePct`, `minionDamagePct`, `lifeSteal`, `thornsPct`, `str`, `int`, `dex`, `vit`, `strPct`, `intPct`, `dexPct`, `vitPct`, `allPct`, `critChance`, `critDamage`, `attackSpeed`, `dodge`, `blockChance`, `damageReduction`, `hpRegen`, `healingReceivedPct`, `cooldownPct`, `resourceRegenPct`, `buffDurationPct`, `threatPct`, `damageVsBossPct`, `executeDamagePct`, `dotDurationPct`, `minionHpPct`
 
 Skill tree & set bonus stats: `str`, `int`, `dex`, `vit`, `strPct`, `intPct`, `dexPct`, `vitPct`, `allPct`, `physPowerPct`, `magPowerPct`, `healPowerPct`, `defensePct`, `hpPct`, `critChance`, `critDamage`, `attackSpeed`, `damagePct`, `healingPct`, `damageTakenPct`, `minionDamagePct`, `minionHpPct`, `minionDurationPct`, `minionMax`, `dotDamagePct`, `dotDurationPct`, `poisonSpread`, `rank` ({ abilityId: +ranks })
 

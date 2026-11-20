@@ -10,7 +10,7 @@ import { SUBCLASSES, subclassesOf } from '/shared/data/subclasses.js';
 import { TREE_SPECS, describeNodeStats } from '/shared/data/skilltree.js';
 import { MINIONS } from '/shared/data/minions.js';
 import { SELECTORS, CONDITIONS, TARGET_CONDITIONS, describeCondition } from '/shared/rules.js';
-import { SLOTS, SLOT_IDS, ITEM_BASES, AFFIXES } from '/shared/data/items.js';
+import { SLOTS, SLOT_IDS, ITEM_BASES, AFFIXES, AFFIX_TIERS, PCT_STATS, tierRange } from '/shared/data/items.js';
 import { UNIQUES, SETS } from '/shared/data/legendaries.js';
 import { BUILDINGS, MATERIALS, buildingEffects } from '/shared/data/town.js';
 import { EXPEDITIONS, EXPEDITION_DURATIONS } from '/shared/data/expeditions.js';
@@ -153,6 +153,7 @@ const MECH = {
   damage: ['Damage, defense & crits', () => `
     <p>Damage is <i>power × the ability's percentage</i>. Physical damage is reduced by the target's <b>defense</b>: reduction = defense ÷ (defense + ${CONFIG.combat.armorK} + 12 × attacker level), at most ${pct(CONFIG.combat.armorCap)}. Magic damage only counts ${pct(CONFIG.combat.magicArmorFactor)} of defense. Some effects ignore armor completely.</p>
     <p><b>Critical hits</b> deal ×${1.5} damage plus any critical-damage bonus. Critical chance is capped at ${pct(CONFIG.combat.critCap)}.</p>
+    <p><b>Block</b> (item affix) makes a direct hit deal ${pct(CONFIG.combat.blockReduction ?? 0.5)} less, capped at ${pct(CONFIG.combat.blockCap ?? 0.5)} chance. <b>Dodge</b> from items avoids physical hits, capped at ${pct(CONFIG.combat.dodgeCap ?? 0.4)} (Evasion and similar buffs come on top). <b>Life steal</b> heals for part of the direct damage you deal; <b>Health Regeneration</b> heals every second.</p>
     <p><b>Damage over time</b> ticks once per second. Whether a tick can crit depends on the effect (see Statuses); each tick rolls its own crit. <b>Shields</b> absorb damage before health.</p>
     <p>Abilities can be ranked up to rank ${CONFIG.maxAbilityRank} in the skill tree; each rank above 1 adds ${pct(CONFIG.abilityRankBonus)} to the ability's damage, healing, shields and damage or healing over time, and makes summoned minions ${pct(CONFIG.abilityRankBonus)} stronger (health and power). Costs, cooldowns, durations and fixed percentage buffs don't change.</p>`],
   roles: ['Roles & threat', () => `
@@ -237,7 +238,15 @@ function itemsPage() {
   return `<h3>Slots</h3><p>${SLOT_IDS.map(s => esc(SLOTS[s].label)).join(' · ')}</p>
     <h3>Rarities</h3><table class="wiki-table"><tr><th>Rarity</th><th>Stat multiplier</th><th>Extra affixes</th><th>Drop weight</th></tr>${CONFIG.rarities.map(r => `<tr><td style="color:${r.color}"><b>${esc(r.label)}</b></td><td>×${r.mult}</td><td>${r.affixes}</td><td>${r.weight}</td></tr>`).join('')}</table>
     <h3>Item types</h3><table class="wiki-table"><tr><th>Item</th><th>Slot</th><th>Classes</th></tr>${Object.entries(ITEM_BASES).map(([id, b]) => `<tr><td>${esc(b.name)}</td><td>${esc(SLOTS[b.slot]?.label || b.slot)}</td><td class="small">${(b.classes || CLASS_IDS).map(c => esc(CLASSES[c]?.name || c)).join(', ')}</td></tr>`).join('')}</table>
-    <h3>Affixes</h3><p class="small">${Object.values(AFFIXES).map(a => esc(a.label)).join(' · ')}</p>
+    <h3>Affixes</h3>
+    <p>Items roll random affixes: ${CONFIG.rarities.filter(r => r.affixes).map(r => `${esc(r.label)} ${r.affixes}`).join(', ')} (at most 3 <b>prefixes</b> and 3 <b>suffixes</b>, each stat once). Every affix has a <b>tier</b>: tier 1 is the best, needs a high item level and is the rarest. Values also grow with item level. The best prefix and suffix name the item ("Brutal Steel Sword of the Fox"). Gear scaled down by ascension is <b>soulbound</b> (can't be sold on the Auction House) until it is reforged back to its original item level.</p>
+    <table class="wiki-table"><tr><th>Tier</th><th>From item level</th><th>Chance weight</th><th>Value</th></tr>${AFFIX_TIERS.map(t => `<tr><td><span class="tier-tag t${t.tier}">T${t.tier}</span></td><td>${t.minLevel}</td><td>${t.weight}</td><td>×${t.min}–${t.max}</td></tr>`).join('')}</table>
+    <table class="wiki-table"><tr><th>Stat</th><th>Type</th><th>Name</th><th>How common</th><th>Slots</th><th>T7 at ilvl 1</th><th>T1 at ilvl 60</th></tr>${Object.entries(AFFIXES).sort((a, b) => (a[1].type > b[1].type ? 1 : a[1].type < b[1].type ? -1 : b[1].weight - a[1].weight)).map(([k, a]) => {
+      const f = v => (PCT_STATS.has(k) ? (v * 100).toFixed(1) + '%' : String(v));
+      const lo = tierRange(k, AFFIX_TIERS[AFFIX_TIERS.length - 1].tier, 1), hi = tierRange(k, AFFIX_TIERS[0].tier, CONFIG.levelCap);
+      const common = a.weight >= 800 ? 'very common' : a.weight >= 400 ? 'common' : a.weight >= 250 ? 'uncommon' : a.weight >= 150 ? 'rare' : 'very rare';
+      return `<tr><td><b>${esc(a.label)}</b>${a.description ? `<div class="muted small">${esc(a.description)}</div>` : ''}</td><td>${a.type}</td><td>${esc(a.name)}</td><td>${common} <span class="faint small">(${a.weight})</span></td><td class="small">${a.slots ? a.slots.map(x => esc(SLOTS[x]?.label || x)).join(', ') : 'all'}</td><td>${f(lo[0])}–${f(lo[1])}</td><td>${f(hi[0])}–${f(hi[1])}</td></tr>`;
+    }).join('')}</table>
     <h3>Uniques</h3><table class="wiki-table"><tr><th>Unique</th><th>Item</th><th>From level</th><th>Where</th><th>Effect</th></tr>${Object.values(UNIQUES).sort((a, b) => a.minLevel - b.minLevel).map(u => `<tr><td class="unique-name"><b>${esc(u.name)}</b></td><td>${esc(ITEM_BASES[u.baseId]?.name || u.baseId)}</td><td>${u.minLevel}</td><td class="small">${(u.zones || []).map(z => esc(ZONES[z]?.name || z)).join(', ') || 'anywhere'}</td><td class="small">${esc(u.description || '')}</td></tr>`).join('')}</table>
     <h3>Sets</h3>${Object.values(SETS).map(s => `<div class="wiki-sub" style="--sub-color:#3fbf6a"><h4 class="set-name">${esc(s.name)} <span class="muted small">from level ${s.minLevel}${s.zones?.length ? ` · ${s.zones.map(z => esc(ZONES[z]?.name || z)).join(', ')}` : ''}</span></h4><p class="small">${Object.values(s.pieces).map(esc).join(' · ')}</p><ul class="small">${Object.entries(s.bonuses).map(([n, b]) => `<li><b>${n} pieces:</b> ${esc(b.description)}</li>`).join('')}</ul></div>`).join('')}`;
 }

@@ -1,49 +1,655 @@
 {
-  "_about": "Item settings: slots, random affixes (stats), naming, sell value and socket rules. Item bases are the files in this folder (one per base, sorted into slot folders).",
+  "_about": "Item settings: slots, item stats (\"affixes\": every stat that can roll on an item, as a prefix or suffix, with its weight, slots and value per item level), affix tiers (minimum item level, weight and value range), naming, sell value and socket rules. Item bases are the files in this folder (one per base, sorted into slot folders).",
   "slots": {
-    "weapon": { "label": "Weapon" },
-    "offhand": { "label": "Off-hand" },
-    "head": { "label": "Helmet" },
-    "chest": { "label": "Armor" },
-    "hands": { "label": "Gloves" },
-    "feet": { "label": "Boots" },
-    "ring": { "label": "Ring" },
-    "amulet": { "label": "Amulet" }
+    "weapon": {
+      "label": "Weapon"
+    },
+    "offhand": {
+      "label": "Off-hand"
+    },
+    "head": {
+      "label": "Helmet"
+    },
+    "chest": {
+      "label": "Armor"
+    },
+    "hands": {
+      "label": "Gloves"
+    },
+    "feet": {
+      "label": "Boots"
+    },
+    "ring": {
+      "label": "Ring"
+    },
+    "amulet": {
+      "label": "Amulet"
+    }
   },
   "affixes": {
-    "str": { "label": "Strength", "base": 1, "perLevel": 0.55 },
-    "int": { "label": "Intelligence", "base": 1, "perLevel": 0.55 },
-    "dex": { "label": "Dexterity", "base": 1, "perLevel": 0.55 },
-    "vit": { "label": "Vitality", "base": 1, "perLevel": 0.55 },
-    "hp": { "label": "Health", "base": 8, "perLevel": 3.5 },
-    "defense": { "label": "Defense", "base": 1, "perLevel": 0.5 },
-    "physPower": { "label": "Physical Power", "base": 1, "perLevel": 0.6 },
-    "magPower": { "label": "Magic Power", "base": 1, "perLevel": 0.6 },
-    "healPower": { "label": "Healing Power", "base": 1, "perLevel": 0.6 },
-    "critChance": { "label": "Critical Chance", "base": 0.008, "perLevel": 0.0003, "pct": true },
-    "critDamage": { "label": "Critical Damage", "base": 0.04, "perLevel": 0.002, "pct": true },
-    "attackSpeed": { "label": "Attack Speed", "base": 0.015, "perLevel": 0.0005, "pct": true }
+    "physPower": {
+      "label": "Physical Power",
+      "base": 1,
+      "perLevel": 0.6,
+      "type": "prefix",
+      "weight": 800,
+      "name": "Brutal",
+      "gem": true
+    },
+    "magPower": {
+      "label": "Magic Power",
+      "base": 1,
+      "perLevel": 0.6,
+      "type": "prefix",
+      "weight": 800,
+      "name": "Arcane",
+      "gem": true
+    },
+    "healPower": {
+      "label": "Healing Power",
+      "base": 1,
+      "perLevel": 0.6,
+      "type": "prefix",
+      "weight": 700,
+      "name": "Blessed",
+      "gem": true
+    },
+    "hp": {
+      "label": "Health",
+      "base": 8,
+      "perLevel": 3.5,
+      "type": "prefix",
+      "weight": 1000,
+      "name": "Hale",
+      "gem": true
+    },
+    "defense": {
+      "label": "Defense",
+      "base": 1,
+      "perLevel": 0.5,
+      "type": "prefix",
+      "weight": 1000,
+      "name": "Sturdy",
+      "gem": true
+    },
+    "hpPct": {
+      "label": "Maximum Health",
+      "base": 0.02,
+      "perLevel": 0.0007,
+      "pct": true,
+      "type": "prefix",
+      "weight": 300,
+      "name": "Vigorous"
+    },
+    "defensePct": {
+      "label": "Defense",
+      "base": 0.03,
+      "perLevel": 0.0012,
+      "pct": true,
+      "type": "prefix",
+      "weight": 350,
+      "name": "Fortified",
+      "description": "increased Defense"
+    },
+    "damagePct": {
+      "label": "Damage",
+      "base": 0.02,
+      "perLevel": 0.0008,
+      "pct": true,
+      "type": "prefix",
+      "weight": 150,
+      "name": "Tyrannical",
+      "slots": [
+        "weapon",
+        "offhand",
+        "ring",
+        "amulet"
+      ],
+      "description": "increased damage dealt"
+    },
+    "physDamagePct": {
+      "label": "Physical Damage",
+      "base": 0.03,
+      "perLevel": 0.0012,
+      "pct": true,
+      "type": "prefix",
+      "weight": 350,
+      "name": "Savage",
+      "slots": [
+        "weapon",
+        "offhand",
+        "ring",
+        "amulet",
+        "hands"
+      ],
+      "description": "increased physical damage"
+    },
+    "magDamagePct": {
+      "label": "Magic Damage",
+      "base": 0.03,
+      "perLevel": 0.0012,
+      "pct": true,
+      "type": "prefix",
+      "weight": 350,
+      "name": "Mystic",
+      "slots": [
+        "weapon",
+        "offhand",
+        "ring",
+        "amulet",
+        "head"
+      ],
+      "description": "increased magic damage"
+    },
+    "healingPct": {
+      "label": "Healing Done",
+      "base": 0.03,
+      "perLevel": 0.0012,
+      "pct": true,
+      "type": "prefix",
+      "weight": 350,
+      "name": "Merciful",
+      "slots": [
+        "weapon",
+        "offhand",
+        "ring",
+        "amulet",
+        "head",
+        "chest"
+      ],
+      "description": "increased healing done"
+    },
+    "shieldPct": {
+      "label": "Shield Strength",
+      "base": 0.04,
+      "perLevel": 0.0015,
+      "pct": true,
+      "type": "prefix",
+      "weight": 300,
+      "name": "Warding",
+      "description": "stronger shields you cast"
+    },
+    "dotDamagePct": {
+      "label": "Damage over Time",
+      "base": 0.04,
+      "perLevel": 0.0015,
+      "pct": true,
+      "type": "prefix",
+      "weight": 300,
+      "name": "Festering",
+      "description": "increased damage over time"
+    },
+    "minionDamagePct": {
+      "label": "Minion Damage",
+      "base": 0.04,
+      "perLevel": 0.0015,
+      "pct": true,
+      "type": "prefix",
+      "weight": 300,
+      "name": "Commanding",
+      "description": "increased minion damage"
+    },
+    "lifeSteal": {
+      "label": "Life Steal",
+      "base": 0.005,
+      "perLevel": 0.0002,
+      "pct": true,
+      "type": "prefix",
+      "weight": 120,
+      "name": "Vampiric",
+      "slots": [
+        "weapon",
+        "ring",
+        "amulet",
+        "hands"
+      ],
+      "description": "of direct damage dealt is healed"
+    },
+    "thornsPct": {
+      "label": "Thorns",
+      "base": 0.04,
+      "perLevel": 0.0015,
+      "pct": true,
+      "type": "prefix",
+      "weight": 250,
+      "name": "Spiked",
+      "slots": [
+        "offhand",
+        "chest",
+        "head",
+        "hands"
+      ],
+      "description": "of direct damage taken is dealt back"
+    },
+    "str": {
+      "label": "Strength",
+      "base": 1,
+      "perLevel": 0.55,
+      "type": "suffix",
+      "weight": 1000,
+      "name": "of the Bear",
+      "gem": true
+    },
+    "int": {
+      "label": "Intelligence",
+      "base": 1,
+      "perLevel": 0.55,
+      "type": "suffix",
+      "weight": 1000,
+      "name": "of the Owl",
+      "gem": true
+    },
+    "dex": {
+      "label": "Dexterity",
+      "base": 1,
+      "perLevel": 0.55,
+      "type": "suffix",
+      "weight": 1000,
+      "name": "of the Fox",
+      "gem": true
+    },
+    "vit": {
+      "label": "Vitality",
+      "base": 1,
+      "perLevel": 0.55,
+      "type": "suffix",
+      "weight": 1000,
+      "name": "of the Whale",
+      "gem": true
+    },
+    "strPct": {
+      "label": "Strength",
+      "base": 0.02,
+      "perLevel": 0.0007,
+      "pct": true,
+      "type": "suffix",
+      "weight": 250,
+      "name": "of the Titan",
+      "description": "increased Strength"
+    },
+    "intPct": {
+      "label": "Intelligence",
+      "base": 0.02,
+      "perLevel": 0.0007,
+      "pct": true,
+      "type": "suffix",
+      "weight": 250,
+      "name": "of the Sage",
+      "description": "increased Intelligence"
+    },
+    "dexPct": {
+      "label": "Dexterity",
+      "base": 0.02,
+      "perLevel": 0.0007,
+      "pct": true,
+      "type": "suffix",
+      "weight": 250,
+      "name": "of the Wind",
+      "description": "increased Dexterity"
+    },
+    "vitPct": {
+      "label": "Vitality",
+      "base": 0.02,
+      "perLevel": 0.0007,
+      "pct": true,
+      "type": "suffix",
+      "weight": 250,
+      "name": "of the Mountain",
+      "description": "increased Vitality"
+    },
+    "allPct": {
+      "label": "All Attributes",
+      "base": 0.01,
+      "perLevel": 0.0004,
+      "pct": true,
+      "type": "suffix",
+      "weight": 80,
+      "name": "of the Ancients",
+      "slots": [
+        "ring",
+        "amulet"
+      ],
+      "description": "increased Strength, Intelligence, Dexterity, Vitality and Health"
+    },
+    "critChance": {
+      "label": "Critical Chance",
+      "base": 0.008,
+      "perLevel": 0.0003,
+      "pct": true,
+      "type": "suffix",
+      "weight": 400,
+      "name": "of Precision",
+      "gem": true
+    },
+    "critDamage": {
+      "label": "Critical Damage",
+      "base": 0.04,
+      "perLevel": 0.002,
+      "pct": true,
+      "type": "suffix",
+      "weight": 400,
+      "name": "of Ruin",
+      "gem": true
+    },
+    "attackSpeed": {
+      "label": "Attack Speed",
+      "base": 0.015,
+      "perLevel": 0.0005,
+      "pct": true,
+      "type": "suffix",
+      "weight": 300,
+      "name": "of Haste",
+      "gem": true
+    },
+    "dodge": {
+      "label": "Dodge",
+      "base": 0.005,
+      "perLevel": 0.0002,
+      "pct": true,
+      "type": "suffix",
+      "weight": 250,
+      "name": "of Evasion",
+      "slots": [
+        "feet",
+        "hands",
+        "head",
+        "chest"
+      ],
+      "description": "chance to avoid physical hits"
+    },
+    "blockChance": {
+      "label": "Block",
+      "base": 0.01,
+      "perLevel": 0.0005,
+      "pct": true,
+      "type": "suffix",
+      "weight": 250,
+      "name": "of the Bulwark",
+      "slots": [
+        "offhand",
+        "chest",
+        "head",
+        "feet"
+      ],
+      "description": "chance to take half damage from a direct hit"
+    },
+    "damageReduction": {
+      "label": "Damage Reduction",
+      "base": 0.01,
+      "perLevel": 0.0003,
+      "pct": true,
+      "type": "suffix",
+      "weight": 150,
+      "name": "of the Fortress",
+      "description": "less damage taken"
+    },
+    "hpRegen": {
+      "label": "Health Regeneration",
+      "base": 0.5,
+      "perLevel": 0.25,
+      "type": "suffix",
+      "weight": 500,
+      "name": "of Renewal",
+      "description": "health per second"
+    },
+    "healingReceivedPct": {
+      "label": "Healing Received",
+      "base": 0.03,
+      "perLevel": 0.001,
+      "pct": true,
+      "type": "suffix",
+      "weight": 350,
+      "name": "of the Faithful",
+      "description": "increased healing received"
+    },
+    "cooldownPct": {
+      "label": "Cooldown Recovery",
+      "base": 0.015,
+      "perLevel": 0.0005,
+      "pct": true,
+      "type": "suffix",
+      "weight": 150,
+      "name": "of Alacrity",
+      "slots": [
+        "head",
+        "hands",
+        "ring",
+        "amulet",
+        "weapon"
+      ],
+      "description": "faster cooldowns"
+    },
+    "resourceRegenPct": {
+      "label": "Resource Regeneration",
+      "base": 0.04,
+      "perLevel": 0.0015,
+      "pct": true,
+      "type": "suffix",
+      "weight": 350,
+      "name": "of Focus",
+      "description": "faster resource regeneration"
+    },
+    "buffDurationPct": {
+      "label": "Buff Duration",
+      "base": 0.04,
+      "perLevel": 0.0015,
+      "pct": true,
+      "type": "suffix",
+      "weight": 300,
+      "name": "of Endurance",
+      "description": "longer buffs you cast"
+    },
+    "threatPct": {
+      "label": "Threat",
+      "base": 0.06,
+      "perLevel": 0.002,
+      "pct": true,
+      "type": "suffix",
+      "weight": 300,
+      "name": "of Provocation",
+      "slots": [
+        "offhand",
+        "chest",
+        "head",
+        "weapon"
+      ],
+      "description": "more threat generated"
+    },
+    "damageVsBossPct": {
+      "label": "Damage vs Bosses",
+      "base": 0.03,
+      "perLevel": 0.0012,
+      "pct": true,
+      "type": "suffix",
+      "weight": 250,
+      "name": "of the Slayer",
+      "description": "increased damage against bosses"
+    },
+    "executeDamagePct": {
+      "label": "Damage vs Wounded",
+      "base": 0.04,
+      "perLevel": 0.0015,
+      "pct": true,
+      "type": "suffix",
+      "weight": 250,
+      "name": "of the Executioner",
+      "description": "increased damage against enemies below 35% health"
+    },
+    "dotDurationPct": {
+      "label": "Damage over Time Duration",
+      "base": 0.03,
+      "perLevel": 0.001,
+      "pct": true,
+      "type": "suffix",
+      "weight": 250,
+      "name": "of Lingering",
+      "description": "longer damage over time"
+    },
+    "minionHpPct": {
+      "label": "Minion Health",
+      "base": 0.04,
+      "perLevel": 0.0015,
+      "pct": true,
+      "type": "suffix",
+      "weight": 300,
+      "name": "of the Legion",
+      "description": "increased minion health"
+    }
   },
-  "pctStats": ["critChance", "critDamage", "attackSpeed"],
-  "extraStatLabels": { "maxHp": "Max Health" },
+  "pctStats": [
+    "hpPct",
+    "defensePct",
+    "damagePct",
+    "physDamagePct",
+    "magDamagePct",
+    "healingPct",
+    "shieldPct",
+    "dotDamagePct",
+    "minionDamagePct",
+    "lifeSteal",
+    "thornsPct",
+    "strPct",
+    "intPct",
+    "dexPct",
+    "vitPct",
+    "allPct",
+    "critChance",
+    "critDamage",
+    "attackSpeed",
+    "dodge",
+    "blockChance",
+    "damageReduction",
+    "healingReceivedPct",
+    "cooldownPct",
+    "resourceRegenPct",
+    "buffDurationPct",
+    "threatPct",
+    "damageVsBossPct",
+    "executeDamagePct",
+    "dotDurationPct",
+    "minionHpPct"
+  ],
+  "extraStatLabels": {
+    "maxHp": "Max Health"
+  },
   "naming": {
-    "levelPrefixes": [[1, "Worn"], [6, "Iron"], [12, "Steel"], [20, "Runed"], [30, "Ashen"], [40, "Voidforged"], [52, "Eternal"]],
-    "suffixFromRarity": "epic",
-    "suffixes": [
-      "of the Bear", "of the Owl", "of the Fox", "of Embers", "of Frost", "of the Phoenix", "of Shadows",
-      "of the Ancients", "of Ashenvale", "of the Void"
+    "levelPrefixes": [
+      [
+        1,
+        "Worn"
+      ],
+      [
+        6,
+        "Iron"
+      ],
+      [
+        12,
+        "Steel"
+      ],
+      [
+        20,
+        "Runed"
+      ],
+      [
+        30,
+        "Ashen"
+      ],
+      [
+        40,
+        "Voidforged"
+      ],
+      [
+        52,
+        "Eternal"
+      ]
     ],
-    "requiredLevelBelowItemLevel": 2,
-    "affixRollMin": 0.7,
-    "affixRollRange": 0.3
+    "requiredLevelBelowItemLevel": 2
   },
-  "sellValue": { "base": 5, "perLevel": 3, "rarityFactor": 2 },
+  "sellValue": {
+    "base": 5,
+    "perLevel": 3,
+    "rarityFactor": 2
+  },
   "sockets": {
-    "maxBySlot": { "weapon": 3, "chest": 3, "offhand": 2, "head": 2 },
+    "maxBySlot": {
+      "weapon": 3,
+      "chest": 3,
+      "offhand": 2,
+      "head": 2
+    },
     "maxDefault": 1,
-    "maxByRarity": [1, 1, 2, 2, 3, 3],
-    "chanceByRarity": [0.08, 0.15, 0.25, 0.35, 0.45, 0.6],
+    "maxByRarity": [
+      1,
+      1,
+      2,
+      2,
+      3,
+      3
+    ],
+    "chanceByRarity": [
+      0.08,
+      0.15,
+      0.25,
+      0.35,
+      0.45,
+      0.6
+    ],
     "extraSocketChanceMult": 0.6,
     "guaranteedFromRarity": "legendary"
+  },
+  "affixTiers": [
+    {
+      "tier": 1,
+      "minLevel": 52,
+      "weight": 4,
+      "min": 2.06,
+      "max": 2.31
+    },
+    {
+      "tier": 2,
+      "minLevel": 42,
+      "weight": 10,
+      "min": 1.88,
+      "max": 2.06
+    },
+    {
+      "tier": 3,
+      "minLevel": 32,
+      "weight": 20,
+      "min": 1.69,
+      "max": 1.88
+    },
+    {
+      "tier": 4,
+      "minLevel": 22,
+      "weight": 35,
+      "min": 1.5,
+      "max": 1.69
+    },
+    {
+      "tier": 5,
+      "minLevel": 12,
+      "weight": 55,
+      "min": 1.31,
+      "max": 1.5
+    },
+    {
+      "tier": 6,
+      "minLevel": 5,
+      "weight": 80,
+      "min": 1.12,
+      "max": 1.31
+    },
+    {
+      "tier": 7,
+      "minLevel": 1,
+      "weight": 100,
+      "min": 0.88,
+      "max": 1.12
+    }
+  ],
+  "affixLimits": {
+    "prefix": 3,
+    "suffix": 3
   }
 }

@@ -9,6 +9,7 @@ import { masteryLevel } from '../shared/bestiary.js';
 import { track as trackQuest } from './questLogic.js';
 import { evaluateItem, makeContext, sanitizeFilter, filterFromLegacy } from '../shared/lootfilter.js';
 import { ACHIEVEMENTS } from '../shared/data/achievements.js';
+import { migrateLegacyItem } from '../shared/data/legendaries.js';
 import { SLOT_IDS, generateItem, canEquip, itemSellValue, ITEM_BASES } from '../shared/data/items.js';
 import { createCharacter, addXp, autoDevelop, autoLoadout, syncTree, abilitySlots, cloneRule, treeRefundCost, treeResetCost } from '../shared/character.js';
 import { allocateNode as treeAllocate, refundNode as treeRefund, resetTree as treeReset, availablePoints } from '../shared/skilltree.js';
@@ -65,6 +66,10 @@ export function migratePlayer(p) {
   // players from before the tutorial existed don't get it
   if (!p.tutorial && p.heroId) p.tutorial = { done: true, step: 0, legacy: true };
   migrateTown(p);
+  // tiered affixes: convert items from before
+  for (const it of p.inventory || []) migrateLegacyItem(it);
+  for (const ch of Object.values(p.characters || {})) for (const it of Object.values(ch.equipment || {})) migrateLegacyItem(it);
+  for (const m of p.mailbox || []) migrateLegacyItem(m.item);
   // zones inserted into the chain later: a player who reached a zone also has every zone before it
   const chain = Object.values(ZONES).sort((x, y) => (x.order ?? 0) - (y.order ?? 0));
   const furthest = Math.max(-1, ...chain.map((z, i) => (p.unlockedZones.includes(z.id) ? i : -1)));

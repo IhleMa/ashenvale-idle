@@ -1,5 +1,5 @@
 // UI helpers: escaping, formatting, toasts, modals, tooltips.
-import { STAT_LABELS, PCT_STATS, SLOTS } from '/shared/data/items.js';
+import { STAT_LABELS, PCT_STATS, SLOTS, AFFIXES, itemStats, affixValue, tierRange, isSoulbound } from '/shared/data/items.js';
 import { GEM_KINDS, gemName, gemValue, parseGemKey } from '/shared/gems.js';
 import { rarityById } from '/shared/config.js';
 import { CLASSES } from '/shared/data/classes.js';
@@ -81,19 +81,24 @@ export function rarityLabel(id) {
 }
 
 export function itemTooltipHtml(item, compareTo = null, wearer = null) {
-  const lines = Object.entries(item.stats).map(([k, v]) => {
-    let diff = '';
-    if (compareTo) {
-      const d = v - (compareTo.stats[k] || 0);
-      if (Math.abs(d) > 1e-6) diff = ` <span class="${d > 0 ? 'up' : 'down'}">(${d > 0 ? '+' : ''}${PCT_STATS.has(k) ? (d * 100).toFixed(1) + '%' : fmt(d)})</span>`;
+  const statLine = (k, v, cls = '', tag = '') => `<div class="stat-line ${cls}"><span>${tag}${esc(STAT_LABELS[k] || k)}</span><span>${statValue(k, v)}</span></div>`;
+  let lines;
+  if (item.affixes) {
+    // base (and unique) stats, then every affix with its tier and the tier's value range at this item level
+    lines = Object.entries(itemStats({ ...item, affixes: [] })).map(([k, v]) => statLine(k, v, 'implicit-line'));
+    if (item.affixes.length) lines.push('<div class="affix-sep"></div>');
+    for (const a of item.affixes) {
+      const def = AFFIXES[a.stat];
+      if (!def) continue;
+      const [lo, hi] = tierRange(a.stat, a.tier, item.level);
+      const fmtV = v => (PCT_STATS.has(a.stat) ? (v * 100).toFixed(1) + '%' : fmt(v));
+      lines.push(`<div class="stat-line affix-line"><span><span class="tier-tag t${a.tier}" title="${def.type === 'prefix' ? 'Prefix' : 'Suffix'}: ${esc(def.name)}">T${a.tier}</span>${esc(def.label)}</span><span>${statValue(a.stat, affixValue(a, item.level))} <span class="faint small">(${fmtV(lo)}–${fmtV(hi)})</span></span></div>`);
     }
-    return `<div class="stat-line"><span>${esc(STAT_LABELS[k] || k)}</span><span>${statValue(k, v)}${diff}</span></div>`;
-  });
+  } else lines = Object.entries(item.stats).map(([k, v]) => statLine(k, v));
   if (compareTo) {
-    for (const [k, v] of Object.entries(compareTo.stats)) {
-      if (k in item.stats) continue;
-      lines.push(`<div class="stat-line"><span>${esc(STAT_LABELS[k] || k)}</span><span class="down">(−${PCT_STATS.has(k) ? (v * 100).toFixed(1) + '%' : fmt(v)})</span></div>`);
-    }
+    const keys = [...new Set([...Object.keys(item.stats), ...Object.keys(compareTo.stats)])];
+    const diffs = keys.map(k => [k, (item.stats[k] || 0) - (compareTo.stats[k] || 0)]).filter(([, d]) => Math.abs(d) > 1e-6);
+    if (diffs.length) lines.push(`<div class="compare-head muted small">Compared to equipped</div>${diffs.map(([k, d]) => `<div class="stat-line small"><span>${esc(STAT_LABELS[k] || k)}</span><span class="${d > 0 ? 'up' : 'down'}">${d > 0 ? '+' : '−'}${PCT_STATS.has(k) ? (Math.abs(d) * 100).toFixed(1) + '%' : fmt(Math.abs(d))}</span></div>`).join('')}`);
   }
   if (item.enchant) lines.push(`<div class="stat-line enchant-line"><span>✨ Enchanted: ${esc(STAT_LABELS[item.enchant.stat] || item.enchant.stat)}</span><span>${statValue(item.enchant.stat, item.enchant.value)}</span></div>`);
   if (item.sockets?.length) {
@@ -120,6 +125,7 @@ export function itemTooltipHtml(item, compareTo = null, wearer = null) {
     <div class="item-name rarity-text rarity-${item.rarity} ${item.unique ? 'unique-name' : ''} ${item.set ? 'set-name' : ''}">${esc(item.name)}</div>
     <div class="muted small">${item.unique ? '<span class="unique-name">Unique</span>' : item.set ? '<span class="set-name">Set item</span>' : rarityLabel(item.rarity)} ${esc(SLOTS[item.slot]?.label || '')} · Item level ${item.level}</div>
     ${lines.join('')}
+    ${isSoulbound(item) ? `<div class="soulbound small">🔒 Soulbound until reforged to item level ${item.statRef.level}</div>` : ''}
     <div class="muted small">Requires level ${item.requiredLevel} · ${esc(classes)}</div>
   </div>`;
 }

@@ -10,7 +10,8 @@
 //            { kind:'reflect', pct } · { kind:'healPct', pct } · { kind:'shieldPct', pct, duration } · { kind:'cooldowns', seconds }
 // Passive format: { damageVsBossPct, damageVsHighHpPct, costPct }
 // Images: assets/items/unique_<id>.png and assets/items/set_<setId>_<baseId>.png (fall back to the base item image)
-import { generateItem, ITEM_BASES, AFFIXES } from './items.js';
+import { generateItem, ITEM_BASES, itemStats, itemName, rollAffixes } from './items.js';
+import { rarityById } from '../config.js';
 
 import { CONTENT, withIds, onContentReload } from '../content.js';
 
@@ -31,13 +32,26 @@ export function generateUnique(rng, level, uniqueId = null, zoneId = null) {
   if (!u) return null;
   const lvl = Math.max(u.minLevel, Math.round(level));
   const item = generateItem(rng, lvl, { baseId: u.baseId, rarity: 'legendary' });
-  for (const [k, [b, per]] of Object.entries(u.stats)) {
-    const v = b + per * lvl;
-    item.stats[k] = (item.stats[k] || 0) + (AFFIXES[k]?.pct ? Math.round(v * 1000) / 1000 : Math.round(v));
-  }
+  item.uniqueStats = JSON.parse(JSON.stringify(u.stats)); // fixed unique stats, on top of the random affixes
+  item.stats = itemStats(item);
   item.name = u.name;
   item.unique = u.id;
   return item;
+}
+
+// Items from before tiered affixes: re-roll their affixes in the new system, keeping base, level, rarity, sockets,
+// gems, enchantment, unique/set identity and soulbinding. Gear scaled down by ascension rolls at its original level.
+export function migrateLegacyItem(item, rng = Math.random) {
+  if (!item || item.affixes || !ITEM_BASES[item.baseId]) return false;
+  const level = item.level;
+  item.level = item.statRef?.level || level;
+  rollAffixes(rng, item, rarityById(item.rarity)?.affixes || 0);
+  item.level = level;
+  if (item.unique && UNIQUES[item.unique]) item.uniqueStats = JSON.parse(JSON.stringify(UNIQUES[item.unique].stats));
+  item.stats = itemStats(item);
+  if (item.statRef) item.statRef.stats = itemStats({ ...item, level: item.statRef.level });
+  if (!item.unique && !item.set) item.name = itemName({ ...item, level: item.statRef?.level || level });
+  return true;
 }
 
 export function generateSetItem(rng, level, setId = null, baseId = null, zoneId = null) {

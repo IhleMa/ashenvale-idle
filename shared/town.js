@@ -1,6 +1,6 @@
 // Town calculations shared by server (authoritative) and client (previews).
 import { rarityIndex, rarityById } from './config.js';
-import { AFFIXES, ITEM_BASES } from './data/items.js';
+import { AFFIXES, ITEM_BASES, itemStats } from './data/items.js';
 import { CONTENT } from './content.js';
 import { ZONES } from './data/zones.js';
 import { unlockHeroLevel } from './unlocks.js';
@@ -131,6 +131,7 @@ export function reforgeCost(item, targetLevel) {
 // Items scaled down by ascension remember their original stats (item.statRef), so reforging them back up is exact
 // instead of compounding rounding errors from the small level-1 values.
 export function reforgedStats(item, targetLevel) {
+  if (item.affixes) return itemStats({ ...item, level: targetLevel }); // affix items recompute exactly at any level
   const base = ITEM_BASES[item.baseId];
   const src = item.statRef || { level: item.level, stats: item.stats };
   const stats = {};

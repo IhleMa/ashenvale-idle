@@ -1251,3 +1251,15 @@ html.standalone body { padding-bottom: env(safe-area-inset-bottom); padding-left
 .ann.patch h4 { margin: 8px 0 2px; font-size: 13px; color: var(--accent, #d9a441); }
 .ann.patch ul { margin: 0; padding-left: 18px; line-height: 1.45; }
 .ann.patch li { margin: 2px 0; }
+/* item affixes & tiers */
+.affix-sep { border-top: 1px solid var(--line); margin: 4px 0; }
+.implicit-line span:first-child { color: var(--muted, #aaa); }
+.tier-tag { display: inline-block; min-width: 22px; margin-right: 5px; padding: 0 3px; border-radius: 4px; font-size: 10px; font-weight: 700; text-align: center; line-height: 15px; background: #3a3a3a; color: #ccc; }
+.tier-tag.t1 { background: #ff4d6d; color: #fff; }
+.tier-tag.t2 { background: #ff9a2e; color: #1a1a1a; }
+.tier-tag.t3 { background: #b25cff; color: #fff; }
+.tier-tag.t4 { background: #4a8cff; color: #fff; }
+.tier-tag.t5 { background: #4fd16b; color: #1a1a1a; }
+.compare-head { margin-top: 6px; border-top: 1px solid var(--line); padding-top: 4px; }
+.soulbound { color: #e0b44c; margin-top: 4px; }
+.affix-line > span:last-child { white-space: nowrap; }
