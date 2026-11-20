@@ -82,7 +82,7 @@
         {
           "heading": "Interface",
           "items": [
-            "The inventory moved onto the Character page, next to the equipment. Hovering an item compares it with what the selected character wears in that slot; items the character can't use are dimmed, marked ✖ and say why. Drag items onto an equipment slot to equip them (swapping with what's there), and drag equipped gear back to the inventory to unequip it. The loot filter and filtered-loot log are tabs in the same panel.",
+            "The inventory moved onto the Character page, next to the equipment. Hovering an item compares it with what the selected character wears in that slot; items the character can't use are dimmed, marked ✖ and say why. Drag items onto an equipment slot to equip them (swapping with what's there), and drag equipped gear back to the inventory to unequip it. The loot filter and the filtered-loot log open in a window from the inventory's header.",
             "Builds: every character has 3 build slots on the Skill Tree and Abilities pages. A build saves the skill tree, the ability loadout and the ability rules, and switching between saved builds is free.",
             "Planned builds: on the Skill Tree page, \"Plan nodes\" lets you click out a whole build in advance (e.g. up to level 60). Free and future skill points are spent on the planned nodes automatically, in the order you set. Builds save the plan too.",
             "Threat display in fights: every party member shows its threat (share of the highest threat on an enemy; red with 🎯 when enemies attack it), and every enemy shows who it is attacking.",

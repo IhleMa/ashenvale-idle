@@ -1,7 +1,7 @@
 // Inventory panel (shown on the Character page): browse, compare, equip (also by drag & drop), lock and sell loot.
-import { state, chars } from '../state.js';
+import { state, chars, bus } from '../state.js';
 import { act } from '../net.js';
-import { esc, fmt, run, itemTooltipHtml, tipAttr, rarityLabel, confirmBox, toast } from '../ui.js';
+import { esc, fmt, run, itemTooltipHtml, tipAttr, rarityLabel, confirmBox, toast, modal } from '../ui.js';
 import { itemIcon } from '../assets.js';
 import { CONFIG, rarityIndex } from '/shared/config.js';
 import { SLOTS, canEquip, itemSellValue } from '/shared/data/items.js';
@@ -18,13 +18,37 @@ let filterRarity = 'all';
 let sortBy = 'rarity';
 let selectedUid = null;
 let compareCharId = null;
-let tab = 'items'; // items | filter | log
+
+// Loot filter editor and the filtered-loot log open in a modal (tabs inside), so the page layout stays as it is.
+// after = called when the modal closes (to refresh the badges on the inventory)
+export function openLootFilter(which = 'filter', after = null) {
+  let t = which;
+  const unsub = bus.on('msg:state', () => setTimeout(() => draw(false), 0));
+  const m = modal('<div class="lf-modal"></div>', { wide: true, onClose: () => { unsub?.(); after?.(); } });
+  const host = m.el.querySelector('.lf-modal');
+  function draw(force) {
+    if (!host.isConnected) return;
+    // never rebuild while the player types or picks in the editor
+    if (!force && host.contains(document.activeElement) && document.activeElement.matches('input, select, textarea')) return;
+    const p = state.player;
+    host.innerHTML = `<div class="tabs">${[['filter', `🧹 Loot filter ${p.lootFilter?.enabled ? '<span class="tag done">ON</span>' : '<span class="tag">OFF</span>'}${filterIsDirty() ? ' •' : ''}`], ['log', `📜 Filtered loot${(p.lootLog || []).length ? ` <span class="muted small">${p.lootLog.length}</span>` : ''}`]].map(([id, l]) => `<button class="tab ${t === id ? 'active' : ''}" data-lf-tab="${id}">${l}</button>`).join('')}</div>`
+      + (t === 'filter' ? filterHtml() : logHtml());
+  }
+  host.addEventListener('click', async e => {
+    const tb = e.target.closest('[data-lf-tab]');
+    if (tb) { t = tb.dataset.lfTab; draw(true); return; }
+    await handleFilterClick(e, () => draw(true));
+  });
+  host.addEventListener('change', e => handleFilterChange(e, () => draw(true)));
+  draw(true);
+  return m;
+}
 
 // The inventory lives on the Character page, next to the equipment (see views/character.js):
 // - hovering an item compares it with what the selected character wears in that slot (or says it can't use it)
 // - items can be dragged onto the equipment slots (swapping with what is there) and equipped gear dragged back
 // - the loot filter and the filtered-loot log open in the same panel, which then spans the full width
-export const invTab = () => tab;
+export const invTab = () => 'items'; // loot filter and log are in a modal now
 let dragging = false;
 export const isDragging = () => dragging;
 
@@ -44,9 +68,9 @@ export function invTooltip(item, ch) {
 
 export function inventoryPanelHtml(ch) {
   const p = state.player;
-  const tabs = `<div class="tabs inv-tabs">${[['items', `🎒 Inventory <span class="muted small">${p.inventory.length}/${CONFIG.inventory.limit}</span>`], ['filter', `🧹 Loot filter ${p.lootFilter?.enabled ? '<span class="tag done">ON</span>' : '<span class="tag">OFF</span>'}${filterIsDirty() ? ' •' : ''}`], ['log', `📜 Filtered${(p.lootLog || []).length ? ` <span class="muted small">${p.lootLog.length}</span>` : ''}`]].map(([id, l]) => `<button class="tab ${tab === id ? 'active' : ''}" data-inv-tab="${id}">${l}</button>`).join('')}</div>`;
-  if (tab === 'filter') return `<section class="panel inv-panel wide">${tabs}${filterHtml()}</section>`;
-  if (tab === 'log') return `<section class="panel inv-panel wide">${tabs}${logHtml()}</section>`;
+  const tabs = `<div class="panel-head inv-head"><h3>🎒 Inventory <span class="muted small">${p.inventory.length}/${CONFIG.inventory.limit}</span></h3>
+    <div class="row gap"><button class="btn tiny" data-lf-open="filter">🧹 Loot filter ${p.lootFilter?.enabled ? '<span class="tag done">ON</span>' : '<span class="tag">OFF</span>'}${filterIsDirty() ? ' •' : ''}</button>
+    <button class="btn tiny ghost" data-lf-open="log">📜 Filtered${(p.lootLog || []).length ? ` <span class="muted small">${p.lootLog.length}</span>` : ''}</button></div></div>`;
   const verdicts = inventoryVerdicts(p);
   let items = [...p.inventory];
   if (filterSlot === 'usable') items = items.filter(i => ch && canEquip(i, ch));
@@ -64,7 +88,7 @@ export function inventoryPanelHtml(ch) {
       <select data-f-rarity><option value="all">All rarities</option><option value="special" ${filterRarity === 'special' ? 'selected' : ''}>Uniques & set items</option>${CONFIG.rarities.map(r => `<option value="${r.id}" ${filterRarity === r.id ? 'selected' : ''}>${esc(r.label)}</option>`).join('')}</select>
       <select data-f-sort>${[['rarity', 'Sort: rarity'], ['level', 'Sort: level'], ['slot', 'Sort: slot']].map(([v, l]) => `<option value="${v}" ${sortBy === v ? 'selected' : ''}>${l}</option>`).join('')}</select>
     </div>
-    ${p.inventory.length >= CONFIG.inventory.limit ? `<div class="notice small">Inventory full — new loot is ${p.settings.autoLootAction === 'salvage' ? 'salvaged' : 'sold'} automatically. Set up the <a href="#" data-inv-tab="filter">loot filter</a> to decide what to keep.</div>` : ''}
+    ${p.inventory.length >= CONFIG.inventory.limit ? `<div class="notice small">Inventory full — new loot is ${p.settings.autoLootAction === 'salvage' ? 'salvaged' : 'sold'} automatically. Set up the <a href="#" data-lf-open="filter">loot filter</a> to decide what to keep.</div>` : ''}
     <div class="item-grid">${items.map(i => {
       const no = !!unusableReason(i, ch);
       const v = verdicts.get(i.uid);
@@ -73,7 +97,7 @@ export function inventoryPanelHtml(ch) {
     <div class="row gap wrap small sell-bar">
       <span class="muted">Quick sell:</span>${CONFIG.rarities.slice(0, 4).map(r => `<button class="btn tiny ghost" data-sell-rarity="${r.id}">≤ ${esc(r.label)}</button>`).join('')}
       <span class="grow"></span>
-      <button class="btn tiny" data-inv-tab="filter">🧹 ${p.lootFilter?.enabled ? `${p.lootFilter.rules.filter(r => r.enabled).length} rule(s)` : 'Loot filter: off'}</button>
+      <button class="btn tiny" data-lf-open="filter">🧹 ${p.lootFilter?.enabled ? `${p.lootFilter.rules.filter(r => r.enabled).length} rule(s)` : 'Loot filter: off'}</button>
     </div>
     ${sel ? `<div class="item-detail">${detailHtml(sel, p, verdicts.get(sel.uid), ch)}</div>` : '<p class="muted small">Drag an item onto an equipment slot to equip it (it swaps with what is there), or click it for details. Drag equipped gear back here to unequip it.</p>'}
   </section>`;
@@ -82,10 +106,9 @@ export function inventoryPanelHtml(ch) {
 // events of the inventory panel and drag & drop (root = the Character page); getChar = the selected character
 export function bindInventory(root, rerender, getChar) {
   root.addEventListener('click', async e => {
-    const tb = e.target.closest('[data-inv-tab]');
-    if (tb) { e.preventDefault(); tab = tb.dataset.invTab; rerender(true); return; }
+    const lo = e.target.closest('[data-lf-open]');
+    if (lo) { e.preventDefault(); openLootFilter(lo.dataset.lfOpen, () => rerender(true)); return; }
     if (!e.target.closest('.inv-panel')) return;
-    if (await handleFilterClick(e, () => rerender(true))) return;
     if (e.target.closest('[data-sockets]') && selectedUid) { openSockets(selectedUid); return; }
     const t = e.target.closest('[data-item], button');
     if (!t) return;
@@ -109,7 +132,6 @@ export function bindInventory(root, rerender, getChar) {
   });
   root.addEventListener('change', async e => {
     if (!e.target.closest('.inv-panel')) return;
-    if (await handleFilterChange(e, () => rerender(true))) return;
     const t = e.target;
     if (t.matches('[data-f-slot]')) filterSlot = t.value;
     else if (t.matches('[data-f-rarity]')) filterRarity = t.value;
