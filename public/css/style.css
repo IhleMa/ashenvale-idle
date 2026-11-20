@@ -1327,3 +1327,11 @@ html.standalone body { padding-bottom: env(safe-area-inset-bottom); padding-left
 .equip-slot.drop-ok, .inv-panel.drop-ok { outline: 2px dashed #6fdc8c; outline-offset: 2px; background: rgba(111,220,140,.08); }
 .equip-slot.drop-bad { outline: 2px dashed #ff6b6b; outline-offset: 2px; }
 .drag-src { opacity: .4; }
+/* character page: attributes and equipment keep their size, the inventory takes the rest */
+.char-sheet { grid-template-columns: minmax(290px, 360px) minmax(320px, 400px) minmax(320px, 1fr); align-items: start; }
+.char-sheet > .ascension-panel { grid-column: 1 / -1; }
+@media (max-width: 1250px) {
+  .char-sheet { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .char-sheet > .inv-panel { grid-column: 1 / -1; }
+}
+@media (max-width: 760px) { .char-sheet { grid-template-columns: minmax(0, 1fr); } }
