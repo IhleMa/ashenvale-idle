@@ -7,7 +7,7 @@ import { state, selectedChar } from '../state.js';
 import { act } from '../net.js';
 import { esc, run, tipAttr, toast } from '../ui.js';
 import { abilityIcon } from '../assets.js';
-import { charPicker, bindPicker } from '../components.js';
+import { charPicker, bindPicker, buildsBar, bindBuilds } from '../components.js';
 import { CONFIG } from '/shared/config.js';
 import { CLASSES } from '/shared/data/classes.js';
 import { ABILITIES, classAbilities } from '/shared/data/abilities.js';
@@ -172,6 +172,7 @@ export const abilitiesView = {
   id: 'abilities', label: 'Abilities', icon: '✦',
   mount(root) {
     bindPicker(root, () => { selectedAbility = null; this.render(root); });
+    bindBuilds(root, selectedChar);
     const rerenderEditor = () => {
       const ch = selectedChar();
       const host = root.querySelector('.editor-host');
@@ -264,6 +265,7 @@ export const abilitiesView = {
     const unequipped = Object.keys(ch.abilities).filter(a => !ch.loadout.includes(a) && !ABILITIES[a]?.passive);
     root.innerHTML = `
       ${charPicker(ch.id)}
+      ${buildsBar(ch)}
       <div class="abilities-layout">
         <div class="abilities-left">
           <section class="panel">

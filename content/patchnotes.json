@@ -73,6 +73,7 @@
         {
           "heading": "Interface",
           "items": [
+            "Builds: every character has 3 build slots on the Skill Tree and Abilities pages. A build saves the skill tree, the ability loadout and the ability rules, and switching between saved builds is free.",
             "Patch notes: the 📜 button next to announcements shows what changed. A dot appears when there is something new.",
             "Abilities page: every learned ability shows what it does right now — with its rank, skill-tree changes and rank effects applied, and the real numbers from your character's stats."
           ]

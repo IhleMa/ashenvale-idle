@@ -58,6 +58,19 @@ export function confirmBox(text, okLabel = 'Confirm', { html = false } = {}) {
   });
 }
 
+// Asks for a short text; resolves to the text or null
+export function promptBox(text, value = '', okLabel = 'OK', maxLength = 24) {
+  return new Promise(resolve => {
+    let done = false;
+    const m = modal(`<p>${esc(text)}</p><input class="prompt-input" maxlength="${maxLength}" value="${esc(value)}"><div class="row end gap" style="margin-top:10px"><button class="btn" data-close>Cancel</button><button class="btn primary" data-ok>${esc(okLabel)}</button></div>`, { onClose: () => { if (!done) resolve(null); } });
+    const input = m.el.querySelector('input');
+    const ok = () => { done = true; resolve(input.value); m.close(); };
+    input.focus(); input.select();
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') ok(); });
+    m.el.querySelector('[data-ok]').addEventListener('click', ok);
+  });
+}
+
 // Runs an async action and shows an error toast if it fails
 export async function run(promise, okText) {
   try {

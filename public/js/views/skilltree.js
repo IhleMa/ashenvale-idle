@@ -5,7 +5,7 @@ import { state, selectedChar } from '../state.js';
 import { act } from '../net.js';
 import { esc, fmt, run, toast, confirmBox, tipAttr } from '../ui.js';
 import { assetUrl, abilityIcon } from '../assets.js';
-import { charPicker, bindPicker } from '../components.js';
+import { charPicker, bindPicker , buildsBar, bindBuilds } from '../components.js';
 import { CLASSES } from '/shared/data/classes.js';
 import { ABILITIES } from '/shared/data/abilities.js';
 import { getTree, describeNodeStats, TREE_CONFIG } from '/shared/data/skilltree.js';
@@ -192,6 +192,7 @@ export const skilltreeView = {
     lastSig = null;
     if (focusNode) view = null;
     bindPicker(root, () => { lastSig = null; view = null; this.render(root); });
+    bindBuilds(root, selectedChar);
     const svgPoint = (svg, e) => {
       const pt = svg.createSVGPoint();
       pt.x = e.clientX; pt.y = e.clientY;
@@ -317,7 +318,7 @@ export const skilltreeView = {
           <div class="panel tree-side"></div>
         </div>`;
     }
-    root.querySelector('.tree-picker').innerHTML = charPicker(ch.id);
+    root.querySelector('.tree-picker').innerHTML = charPicker(ch.id) + buildsBar(ch);
     const side = root.querySelector('.tree-side');
     if (!side.contains(document.activeElement)) side.innerHTML = sidebarHtml(ch);
     if (sig !== lastSig) {

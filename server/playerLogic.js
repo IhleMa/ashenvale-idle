@@ -161,6 +161,46 @@ export function refundNode(p, { charId, nodeId }) {
   return { cost };
 }
 
+// ---------------------------------------------------------------- builds: saved skill tree + ability loadout + rules
+// Each character has BUILD_SLOTS slots. Saving and switching are free; switching loads the saved tree (trimmed to
+// the points the character has and the nodes that exist in its current tree), the loadout and the ability rules.
+export const BUILD_SLOTS = 3;
+const buildSlot = slot => { const i = Math.floor(Number(slot)); if (!(i >= 0 && i < BUILD_SLOTS)) fail('Unknown build slot'); return i; };
+export function saveBuild(p, { charId, slot, name }) {
+  const ch = getChar(p, charId);
+  const i = buildSlot(slot);
+  ch.builds ||= [];
+  const old = ch.builds[i];
+  const nm = String(name ?? old?.name ?? '').trim().slice(0, 24) || `Build ${i + 1}`;
+  ch.builds[i] = { name: nm, allocated: [...ch.tree.allocated], loadout: [...ch.loadout], rules: JSON.parse(JSON.stringify(ch.rules || {})), subclass: ch.subclass || null, level: ch.level, points: ch.tree.allocated.length - 1, savedAt: Date.now() };
+  ch.activeBuild = i;
+  return { slot: i, name: nm };
+}
+export function loadBuild(p, { charId, slot }) {
+  const ch = getChar(p, charId);
+  const i = buildSlot(slot);
+  const b = ch.builds?.[i] || fail('That build slot is empty');
+  ch.tree.allocated = [...b.allocated];
+  syncTree(ch); // drops nodes that don't fit (other ascendancy, fewer points) and learns the abilities
+  ch.loadout = b.loadout.filter(a => ch.abilities[a] && !ABILITIES[a]?.passive).slice(0, abilitySlots(ch));
+  for (const [a, r] of Object.entries(b.rules || {})) if (ch.abilities[a]) ch.rules[a] = JSON.parse(JSON.stringify(r));
+  ch.activeBuild = i;
+  return { slot: i, name: b.name, missing: Math.max(0, b.allocated.length - ch.tree.allocated.length) };
+}
+export function renameBuild(p, { charId, slot, name }) {
+  const ch = getChar(p, charId);
+  const b = ch.builds?.[buildSlot(slot)] || fail('That build slot is empty');
+  b.name = String(name || '').trim().slice(0, 24) || b.name;
+  return { name: b.name };
+}
+export function deleteBuild(p, { charId, slot }) {
+  const ch = getChar(p, charId);
+  const i = buildSlot(slot);
+  if (!ch.builds?.[i]) fail('That build slot is empty');
+  ch.builds[i] = null;
+  if (ch.activeBuild === i) ch.activeBuild = null;
+}
+
 export function resetTree(p, { charId }) {
   const ch = getChar(p, charId);
   const cost = treeResetCost(ch);

@@ -244,6 +244,10 @@ export class Game {
       return r;
     },
     refund_node(s, d) { const r = L.refundNode(s.player, d); this.liveUpdateChar(s.player, d.charId); return r; },
+    build_save(s, d) { const r = L.saveBuild(s.player, d); this.liveUpdateChar(s.player, d.charId); return r; },
+    build_load(s, d) { const r = L.loadBuild(s.player, d); this.liveUpdateChar(s.player, d.charId); return r; },
+    build_rename(s, d) { return L.renameBuild(s.player, d); },
+    build_delete(s, d) { L.deleteBuild(s.player, d); },
     reset_tree(s, d) { const r = L.resetTree(s.player, d); this.liveUpdateChar(s.player, d.charId); return r; },
     auto_tree(s, d) { L.autoTree(s.player, d); this.liveUpdateChar(s.player, d.charId); },
     set_loadout(s, d) { L.setLoadout(s.player, d); this.liveUpdateChar(s.player, d.charId); },

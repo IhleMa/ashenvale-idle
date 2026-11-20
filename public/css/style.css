@@ -1293,3 +1293,11 @@ html.standalone body { padding-bottom: env(safe-area-inset-bottom); padding-left
 .rank-effect { color: var(--muted, #999); margin-top: 2px; }
 .rank-effect.on { color: #e8c15a; }
 .ability-now { margin: 3px 0; color: #e8d9a8; }
+/* builds */
+.builds-bar { display: flex; gap: 8px; align-items: stretch; flex-wrap: wrap; margin: 8px 0; }
+.builds-label { align-self: center; font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.build-slot { flex: 1 1 200px; display: flex; flex-direction: column; gap: 4px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel2); }
+.build-slot.empty { flex-direction: row; align-items: center; justify-content: space-between; border-style: dashed; }
+.build-slot.active { border-color: var(--accent, #d9a441); }
+.build-name { background: none; border: none; padding: 0; color: var(--text); font-weight: 700; text-align: left; cursor: pointer; }
+.prompt-input { width: 100%; }
