@@ -187,10 +187,10 @@ label.inline input, label.inline select { display: inline-block; width: auto; ma
 .view-root { max-width: 1400px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
 
 /* ---------- toasts / modal / tooltip ---------- */
-#toasts { position: fixed; right: 16px; bottom: 16px; display: flex; flex-direction: column; gap: 8px; z-index: 100; max-width: min(360px, calc(100vw - 32px)); }
+#toasts { position: fixed; left: 50%; transform: translateX(-50%); bottom: 16px; display: flex; flex-direction: column; align-items: center; gap: 8px; width: max-content; z-index: 100; max-width: min(360px, calc(100vw - 32px)); }
 .toast { background: var(--panel2); border: 1px solid var(--line2); border-left: 4px solid var(--accent); border-radius: 8px; padding: 10px 14px; box-shadow: var(--shadow); animation: toastIn .25s ease-out; transition: opacity .4s, transform .4s; }
 .toast.success { border-left-color: var(--good); } .toast.error { border-left-color: var(--danger); } .toast.achievement { border-left-color: var(--gold); background: linear-gradient(90deg, #3a2c10, var(--panel2)); }
-.toast.out { opacity: 0; transform: translateX(30px); }
+.toast.out { opacity: 0; transform: translateY(10px); }
 @keyframes toastIn { from { opacity: 0; transform: translateY(10px); } }
 .modal-backdrop { position: fixed; inset: 0; background: rgba(0, 0, 0, .65); display: grid; place-items: center; z-index: 130; padding: 16px; animation: fade .15s; }
 @keyframes fade { from { opacity: 0; } }

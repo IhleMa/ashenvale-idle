@@ -110,7 +110,8 @@
             "Patch notes: the 📜 button next to announcements shows what changed. A dot appears when there is something new.",
             "Abilities page: every learned ability shows what it does right now — with its rank, skill-tree changes and rank effects applied, and the real numbers from your character's stats.",
             "Fixed: an ending fight no longer refreshes the page while you have a dropdown open; the page updates once you've made your choice.",
-            "Fixed: the combat page no longer jumps up and down when minions are summoned or die — party members and enemies stay in place."
+            "Fixed: the combat page no longer jumps up and down when minions are summoned or die — party members and enemies stay in place.",
+            "Pop-up messages now appear centered at the bottom of the screen instead of the bottom right."
           ]
         }
       ]
