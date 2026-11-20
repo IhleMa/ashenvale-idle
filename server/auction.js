@@ -2,14 +2,49 @@
 import crypto from 'node:crypto';
 import { CONFIG, rarityIndex } from '../shared/config.js';
 import { MATERIALS } from '../shared/data/town.js';
-import { SLOTS, canEquip, isSoulbound } from '../shared/data/items.js';
+import { SLOTS, AFFIXES, canEquip, isSoulbound } from '../shared/data/items.js';
 import { UNIQUES, SETS, migrateLegacyItem } from '../shared/data/legendaries.js';
-import { parseGemKey, trimSockets } from '../shared/gems.js';
+import { parseGemKey, trimSockets, gearItemStats, GEM_KINDS } from '../shared/gems.js';
 import { GameError, sendMail } from './playerLogic.js';
 
 const fail = m => { throw new GameError(m); };
 const DURATIONS = [12, 24, 48];
 const MAX_PRICE = 100_000_000;
+
+// ---------------------------------------------------------------- affix search
+// q.affixes: [{ stat, min, tier }] (min in the stat's own units: 0.05 = 5%), q.affixMode: 'all' | 'any',
+// q.bestTier: the item needs some affix at this tier or better, q.minAffixes, q.socket: '' | 'empty' | 'gem' | <gem kind>
+function affixQuery(q) {
+  const rows = (Array.isArray(q.affixes) ? q.affixes : []).slice(0, 8)
+    .filter(r => r && AFFIXES[r.stat])
+    .map(r => ({ stat: r.stat, min: r.min !== '' && r.min != null && Number.isFinite(Number(r.min)) ? Number(r.min) : null, tier: Number(r.tier) >= 1 ? Math.floor(Number(r.tier)) : null }));
+  const bestTier = Number(q.bestTier) >= 1 ? Math.floor(Number(q.bestTier)) : null;
+  const minAffixes = Number(q.minAffixes) >= 1 ? Math.floor(Number(q.minAffixes)) : null;
+  const socket = typeof q.socket === 'string' && (['empty', 'gem'].includes(q.socket) || GEM_KINDS[q.socket]) ? q.socket : '';
+  if (!rows.length && !bestTier && !minAffixes && !socket) return null;
+  return { rows, mode: q.affixMode === 'any' ? 'any' : 'all', bestTier, minAffixes, socket };
+}
+export function matchesAffixQuery(item, af) {
+  const affixes = item.affixes || [];
+  if (af.bestTier && !affixes.some(a => a.tier <= af.bestTier)) return false;
+  if (af.minAffixes && affixes.length < af.minAffixes) return false;
+  if (af.socket) {
+    const sockets = item.sockets || [];
+    if (af.socket === 'empty' && !sockets.some(g => !g)) return false;
+    if (af.socket === 'gem' && !sockets.some(Boolean)) return false;
+    if (GEM_KINDS[af.socket] && !sockets.some(g => g && parseGemKey(g)?.kind === af.socket)) return false;
+  }
+  if (!af.rows.length) return true;
+  const stats = gearItemStats(item);
+  const ok = r => {
+    if (r.tier && !affixes.some(a => a.stat === r.stat && a.tier <= r.tier)) return false;
+    if (r.min != null) return (stats[r.stat] || 0) >= r.min - 1e-9;
+    return r.tier ? true : (stats[r.stat] || 0) > 0;
+  };
+  return af.mode === 'any' ? af.rows.some(ok) : af.rows.every(ok);
+}
+const statOf = (l, af) => (l.kind === 'item' && af?.rows[0] ? gearItemStats(l.item)[af.rows[0].stat] || 0 : -1);
+export { affixQuery };
 
 export function priceKey(l) {
   if (l.kind === 'material') return `mat:${l.material}`;
@@ -68,10 +103,15 @@ export class AuctionHouse {
     const minL = Number(q.minLevel) || 0, maxL = Number(q.maxLevel) || 999;
     if (minL || maxL < 999) list = list.filter(l => l.kind !== 'item' || (l.item.level >= minL && l.item.level <= maxL));
     if (q.material && MATERIALS[q.material]) list = list.filter(l => l.material === q.material);
+    // affix filters: every row needs the stat (total on the item, gems included) at least `min`, and/or an affix of it at tier ≤ `tier`
+    const af = affixQuery(q);
+    if (af) list = list.filter(l => l.kind === 'item' && matchesAffixQuery(l.item, af));
     const unit = l => (l.kind === 'material' ? l.price / l.qty : l.price);
     const sorts = {
       price: (a, b) => unit(a) - unit(b), priceDesc: (a, b) => unit(b) - unit(a),
-      level: (a, b) => (b.item?.level || 0) - (a.item?.level || 0), ending: (a, b) => a.expiresAt - b.expiresAt, newest: (a, b) => b.createdAt - a.createdAt,
+      level: (a, b) => (b.item?.level || 0) - (a.item?.level || 0),
+      ending: (a, b) => a.expiresAt - b.expiresAt, newest: (a, b) => b.createdAt - a.createdAt,
+      stat: (a, b) => statOf(b, af) - statOf(a, af), // the first affix filter's stat, highest first
     };
     list.sort(sorts[q.sort] || sorts.newest);
     const pageSize = 30;

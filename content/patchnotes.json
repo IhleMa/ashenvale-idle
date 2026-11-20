@@ -40,6 +40,13 @@
           ]
         },
         {
+          "heading": "Auction House",
+          "items": [
+            "New affix filter: search for up to 6 stats, each with a minimum value and/or a minimum affix tier, and choose whether an item needs all or any of them.",
+            "Also filter by the best affix tier on an item, the number of affixes and its socket (empty, has a gem, or a specific gem). Results show the filtered stats with their tiers, and you can sort by the first filtered stat."
+          ]
+        },
+        {
           "heading": "Bard",
           "items": [
             "Finale is now passive: once three notes have been played, the Bard plays the Finale automatically (15 s cooldown). It no longer needs a loadout slot, so recruited Bards can use 1 more of their other spells.",

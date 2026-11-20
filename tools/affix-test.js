@@ -118,4 +118,18 @@ const rng = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647
   assert.ok(me.hp >= before + 45, `regenerated ${me.hp - before}`);
   ok('gear stats: attribute %, damage reduction, life steal, block and health regeneration work');
 }
+// auction house affix search
+{
+  const { affixQuery, matchesAffixQuery } = await import('../server/auction.js');
+  const it = { uid: 'a', baseId: 'ring', slot: 'ring', rarity: 'epic', level: 50, stats: {}, affixes: [{ stat: 'lifeSteal', tier: 2, roll: 0.5 }, { stat: 'str', tier: 6, roll: 0.5 }, { stat: 'critChance', tier: 4, roll: 0.5 }], sockets: [null] };
+  it.stats = itemStats(it);
+  const m = q => { const af = affixQuery(q); return !af || matchesAffixQuery(it, af); };
+  assert.ok(m({ affixes: [{ stat: 'lifeSteal' }] }));
+  assert.ok(m({ affixes: [{ stat: 'lifeSteal', tier: 2 }] }) && !m({ affixes: [{ stat: 'lifeSteal', tier: 1 }] }));
+  assert.ok(m({ affixes: [{ stat: 'lifeSteal', min: it.stats.lifeSteal }] }) && !m({ affixes: [{ stat: 'lifeSteal', min: it.stats.lifeSteal + 0.001 }] }));
+  assert.ok(!m({ affixes: [{ stat: 'lifeSteal' }, { stat: 'dodge' }] }) && m({ affixes: [{ stat: 'lifeSteal' }, { stat: 'dodge' }], affixMode: 'any' }));
+  assert.ok(m({ bestTier: 2 }) && !m({ bestTier: 1 }) && m({ minAffixes: 3 }) && !m({ minAffixes: 4 }));
+  assert.ok(m({ socket: 'empty' }) && !m({ socket: 'gem' }) && !m({ socket: 'ladder' }));
+  ok('auction search: stat, minimum value, tier, all/any, best tier, affix count and socket filters');
+}
 console.log(`affix-test: ${n} checks passed`);

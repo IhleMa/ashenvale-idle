@@ -5,11 +5,12 @@ import { act } from '../net.js';
 import { esc, fmt, run, toast, tipAttr, itemTooltipHtml, duration, confirmBox, premiumTxt } from '../ui.js';
 import { itemIcon, materialIcon } from '../assets.js';
 import { CONFIG } from '/shared/config.js';
-import { SLOTS, itemSellValue } from '/shared/data/items.js';
+import { SLOTS, AFFIXES, AFFIX_TIERS, PCT_STATS, itemSellValue } from '/shared/data/items.js';
+import { GEM_IDS, GEM_KINDS, gearItemStats } from '/shared/gems.js';
 import { MATERIALS, MATERIAL_IDS } from '/shared/data/town.js';
 import { CLASSES } from '/shared/data/classes.js';
 
-const ui = { tab: 'browse', q: { kind: 'all', query: '', slot: '', rarity: '', usableBy: '', sort: 'newest', page: 0, minLevel: '', maxLevel: '' }, sellItem: null, sellMat: 'ore', sellQty: 10, price: '', hours: 24 };
+const ui = { tab: 'browse', q: { kind: 'all', query: '', slot: '', rarity: '', usableBy: '', sort: 'newest', page: 0, minLevel: '', maxLevel: '', affixes: [], affixMode: 'all', bestTier: '', minAffixes: '', socket: '' }, affixOpen: false, sellItem: null, sellMat: 'ore', sellQty: 10, price: '', hours: 24 };
 let results = null;
 let mine = null;
 let searchTimer = null;
@@ -17,8 +18,13 @@ const now = () => Date.now() + (state.timeOffset || 0);
 
 const goldTxt = n => `<span class="gold-text">◉ ${fmt(n)}</span>`;
 
+// the query as the server wants it: percentage stats are typed as percent (5 = 5%)
+function queryPayload() {
+  const q = ui.q;
+  return { ...q, affixes: q.affixes.filter(r => r.stat).map(r => ({ stat: r.stat, tier: r.tier || null, min: r.min === '' || r.min == null ? null : PCT_STATS.has(r.stat) ? Number(r.min) / 100 : Number(r.min) })) };
+}
 async function search(root) {
-  try { results = await act('ah_search', ui.q); } catch (e) { toast(e.message, 'error'); }
+  try { results = await act('ah_search', queryPayload()); } catch (e) { toast(e.message, 'error'); }
   renderBody(root);
 }
 async function loadMine(root) {
@@ -29,7 +35,46 @@ async function loadMine(root) {
 function listingName(l) {
   if (l.kind === 'material') return `${materialIcon(l.material, 'sm')}<span><b>${fmt(l.qty)}× ${esc(MATERIALS[l.material].name)}</b><small class="muted">${goldTxt(l.unitPrice)} each</small></span>`;
   const it = l.item;
-  return `${itemIcon(it, 'sm')}<span ${tipAttr(itemTooltipHtml(it))}><b class="rarity-text rarity-${it.rarity} ${it.unique ? 'unique-name' : ''} ${it.set ? 'set-name' : ''}">${esc(it.name)}</b><small class="muted">ilvl ${it.level} · ${esc(SLOTS[it.slot]?.label || '')}${it.classes ? ' · ' + it.classes.map(c => CLASSES[c].name).join('/') : ''}</small></span>`;
+  return `${itemIcon(it, 'sm')}<span ${tipAttr(itemTooltipHtml(it))}><b class="rarity-text rarity-${it.rarity} ${it.unique ? 'unique-name' : ''} ${it.set ? 'set-name' : ''}">${esc(it.name)}</b><small class="muted">ilvl ${it.level} · ${esc(SLOTS[it.slot]?.label || '')}${it.classes ? ' · ' + it.classes.map(c => CLASSES[c].name).join('/') : ''}</small>${matchedChips(it)}</span>`;
+}
+
+// the filtered stats on a found item: value and the affix tier
+function matchedChips(it) {
+  const rows = ui.q.affixes.filter(r => r.stat);
+  if (!rows.length) return '';
+  const stats = gearItemStats(it);
+  return `<span class="af-chips">${rows.map(r => {
+    const v = stats[r.stat] || 0;
+    if (!v) return '';
+    const a = (it.affixes || []).filter(x => x.stat === r.stat).sort((x, y) => x.tier - y.tier)[0];
+    return `<span class="af-chip">${a ? `<span class="tier-tag t${a.tier}">T${a.tier}</span>` : ''}${esc(AFFIXES[r.stat].label)} ${PCT_STATS.has(r.stat) ? (v * 100).toFixed(1) + '%' : fmt(v)}</span>`;
+  }).join('')}</span>`;
+}
+
+const statOptions = sel => ['prefix', 'suffix'].map(type => `<optgroup label="${type === 'prefix' ? 'Prefixes' : 'Suffixes'}">${Object.entries(AFFIXES).filter(([, a]) => a.type === type).sort((x, y) => x[1].label.localeCompare(y[1].label) || (x[1].pct ? 1 : -1)).map(([k, a]) => `<option value="${k}" ${sel === k ? 'selected' : ''}>${esc(a.label)}${a.pct && ['str', 'int', 'dex', 'vit', 'defense'].some(f => k === f + 'Pct') ? ' %' : ''}</option>`).join('')}</optgroup>`).join('');
+const tierOptions = (sel, any = 'Any tier') => `<option value="">${any}</option>${AFFIX_TIERS.map(t => `<option value="${t.tier}" ${String(sel) === String(t.tier) ? 'selected' : ''}>T${t.tier}${t.tier > 1 ? ' or better' : ''}</option>`).join('')}`;
+
+function affixFilterHtml() {
+  const q = ui.q;
+  const active = q.affixes.length || q.bestTier || q.minAffixes || q.socket;
+  if (!ui.affixOpen) return `<div class="row gap"><button class="btn small ${active ? 'primary' : 'ghost'}" data-af-open>🔎 Affix filter${active ? ` (${q.affixes.length + (q.bestTier ? 1 : 0) + (q.minAffixes ? 1 : 0) + (q.socket ? 1 : 0)} active)` : ''}</button></div>`;
+  return `<div class="af-panel">
+    <div class="row gap wrap"><b>🔎 Affix filter</b><span class="grow"></span>
+      ${q.affixes.length > 1 ? `<label class="inline small">Item must have <select data-qq="affixMode"><option value="all" ${q.affixMode !== 'any' ? 'selected' : ''}>all</option><option value="any" ${q.affixMode === 'any' ? 'selected' : ''}>any</option></select> of these</label>` : ''}
+      <button class="btn tiny ghost" data-af-clear>Clear</button><button class="btn tiny ghost" data-af-close>Hide</button></div>
+    ${q.affixes.map((r, i) => `<div class="af-row row gap wrap">
+      <select data-af="stat" data-i="${i}"><option value="">Choose a stat…</option>${statOptions(r.stat)}</select>
+      <label class="inline small">at least <input type="number" step="any" min="0" class="af-min" data-af="min" data-i="${i}" value="${esc(r.min ?? '')}" placeholder="any">${r.stat && PCT_STATS.has(r.stat) ? ' %' : ''}</label>
+      <select data-af="tier" data-i="${i}">${tierOptions(r.tier, 'Any tier')}</select>
+      <button class="btn tiny ghost danger" data-af-del="${i}" title="Remove">✕</button></div>`).join('')}
+    ${q.affixes.length < 6 ? '<button class="btn tiny" data-af-add>＋ Add stat</button>' : ''}
+    <div class="row gap wrap small af-extra">
+      <label class="inline">Best affix <select data-qq="bestTier">${tierOptions(q.bestTier, 'any')}</select></label>
+      <label class="inline">At least <select data-qq="minAffixes"><option value="">any</option>${[1, 2, 3, 4, 5, 6].map(n => `<option value="${n}" ${String(q.minAffixes) === String(n) ? 'selected' : ''}>${n}</option>`).join('')}</select> affixes</label>
+      <label class="inline">Socket <select data-qq="socket"><option value="">any</option><option value="empty" ${q.socket === 'empty' ? 'selected' : ''}>empty socket</option><option value="gem" ${q.socket === 'gem' ? 'selected' : ''}>has a gem</option>${GEM_IDS.map(k => `<option value="${k}" ${q.socket === k ? 'selected' : ''}>has ${esc(GEM_KINDS[k].name)}</option>`).join('')}</select></label>
+    </div>
+    <div class="faint small">Values are the item's total for that stat (base, affixes and gems). A tier means the stat must be an affix of that tier or better.</div>
+  </div>`;
 }
 
 function browseHtml() {
@@ -45,8 +90,9 @@ function browseHtml() {
       <select data-q="usableBy"><option value="">Usable by anyone</option>${chars().map(c => `<option value="${c.id}" ${q.usableBy === c.id ? 'selected' : ''}>Usable by ${esc(c.name)}</option>`).join('')}</select>
       <input data-q="minLevel" type="number" min="1" max="60" placeholder="min lvl" value="${esc(q.minLevel)}">
       <input data-q="maxLevel" type="number" min="1" max="60" placeholder="max lvl" value="${esc(q.maxLevel)}">
-      <select data-q="sort">${[['newest', 'Newest'], ['price', 'Price ↑'], ['priceDesc', 'Price ↓'], ['level', 'Item level'], ['ending', 'Ending soon']].map(([v, l]) => `<option value="${v}" ${q.sort === v ? 'selected' : ''}>${l}</option>`).join('')}</select>
+      <select data-q="sort">${[['newest', 'Newest'], ['price', 'Price ↑'], ['priceDesc', 'Price ↓'], ['level', 'Item level'], ['ending', 'Ending soon'], ...(q.affixes.some(r => r.stat) ? [['stat', `Most ${AFFIXES[q.affixes.find(r => r.stat).stat].label}`]] : [])].map(([v, l]) => `<option value="${v}" ${q.sort === v ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select>
     </div>
+    ${affixFilterHtml()}
     ${results ? `<div class="muted small">${results.total} listing${results.total === 1 ? '' : 's'}</div>` : '<p class="muted">Loading…</p>'}
     <table class="ah-table">
       <thead><tr><th>Item</th><th>Seller</th><th>Time left</th><th class="num">Recent avg.</th><th class="num">Price</th><th></th></tr></thead>
@@ -113,8 +159,14 @@ function renderBody(root) {
   const host = root.querySelector('.ah-body');
   if (!host) return;
   const lock = ui.tab !== 'mail' && featureLock(state.player, 'auction');
+  // keep the cursor in the text field being typed in (search results re-render the filters)
+  const ae = document.activeElement, keep = ae && host.contains(ae) && ae.tagName === 'INPUT' ? { q: ae.dataset.q, af: ae.dataset.af, i: ae.dataset.i, pos: ae.selectionStart } : null;
   host.innerHTML = (lock ? `<div class="sync-note">🔒 Buying and selling on the Auction House unlocks at <b>hero level ${lock}</b>. Your mailbox works already.</div>` : '')
     + (ui.tab === 'browse' ? browseHtml() : ui.tab === 'sell' ? sellHtml() : ui.tab === 'mine' ? mineHtml() : mailHtml());
+  if (keep) {
+    const el = host.querySelector(keep.q ? `[data-q="${keep.q}"]` : `[data-af="${keep.af}"][data-i="${keep.i}"]`);
+    if (el) { el.focus(); try { if (keep.pos != null) el.setSelectionRange(keep.pos, keep.pos); } catch {} }
+  }
 }
 
 export const auctionView = {
@@ -131,6 +183,11 @@ export const auctionView = {
       const d = t.dataset;
       if (d.tab) { ui.tab = d.tab; root.querySelectorAll('[data-tab]').forEach(b => b.classList.toggle('active', b === t)); reload(); return; }
       if (d.page) { ui.q.page = Math.max(0, ui.q.page + Number(d.page)); search(root); return; }
+      if ('afOpen' in d) { ui.affixOpen = true; if (!ui.q.affixes.length) ui.q.affixes.push({ stat: '', min: '', tier: '' }); renderBody(root); return; }
+      if ('afClose' in d) { ui.affixOpen = false; renderBody(root); return; }
+      if ('afAdd' in d) { ui.q.affixes.push({ stat: '', min: '', tier: '' }); renderBody(root); return; }
+      if (d.afDel) { ui.q.affixes.splice(Number(d.afDel), 1); ui.q.page = 0; search(root); return; }
+      if ('afClear' in d) { Object.assign(ui.q, { affixes: [{ stat: '', min: '', tier: '' }], affixMode: 'all', bestTier: '', minAffixes: '', socket: '', page: 0 }); if (ui.q.sort === 'stat') ui.q.sort = 'newest'; search(root); return; }
       if (d.buy) {
         const l = results.rows.find(x => x.id === d.buy);
         const name = l.kind === 'material' ? `${l.qty}× ${MATERIALS[l.material].name}` : l.item.name;
@@ -153,12 +210,19 @@ export const auctionView = {
     root.addEventListener('change', e => {
       const t = e.target;
       if (t.dataset.q) { ui.q[t.dataset.q] = t.value; ui.q.page = 0; if (t.dataset.q !== 'query') search(root); return; }
+      if (t.dataset.qq) { ui.q[t.dataset.qq] = t.value; ui.q.page = 0; search(root); return; }
+      if (t.dataset.af && t.dataset.af !== 'min') {
+        const r = ui.q.affixes[Number(t.dataset.i)];
+        if (r) { r[t.dataset.af] = t.value; ui.q.page = 0; if (!ui.q.affixes.some(x => x.stat) && ui.q.sort === 'stat') ui.q.sort = 'newest'; search(root); }
+        return;
+      }
       if (t.matches('[data-sell-mat]')) { ui.sellMat = t.value; ui.sellItem = null; renderBody(root); }
       if (t.matches('[data-hours]')) ui.hours = Number(t.value);
     });
     root.addEventListener('input', e => {
       const t = e.target;
       if (t.dataset.q === 'query') { ui.q.query = t.value; ui.q.page = 0; clearTimeout(searchTimer); searchTimer = setTimeout(() => search(root), 300); }
+      if (t.dataset.af === 'min') { const r = ui.q.affixes[Number(t.dataset.i)]; if (r) { r.min = t.value; ui.q.page = 0; clearTimeout(searchTimer); searchTimer = setTimeout(() => search(root), 400); } }
       if (t.matches('[data-price]')) { ui.price = t.value; const b = root.querySelector('[data-list]'); if (b) { b.disabled = !(Number(t.value) >= 1); b.innerHTML = `List for <span class="gold-text">◉ ${fmt(Number(t.value) || 0)}</span>`; } }
       if (t.matches('[data-sell-qty]')) ui.sellQty = Math.max(1, Number(t.value) || 1);
     });

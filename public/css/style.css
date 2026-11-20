@@ -1282,3 +1282,11 @@ html.standalone body { padding-bottom: env(safe-area-inset-bottom); padding-left
 .gem-q { display: flex; align-items: center; gap: 4px; padding: 2px 6px 2px 2px; border-radius: 8px; background: rgba(255,255,255,.04); }
 .gem-q.empty { opacity: .4; }
 .gem-preview .item-tip { border: 1px solid var(--line); border-radius: 8px; padding: 8px; }
+/* auction house affix filter */
+.af-panel { border: 1px solid var(--line); border-radius: 10px; padding: 10px; margin: 8px 0; display: flex; flex-direction: column; gap: 6px; background: var(--panel2); }
+.af-row select { min-width: 180px; }
+.af-min { width: 80px; }
+.af-extra { padding-top: 6px; border-top: 1px solid var(--line); }
+.af-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px; }
+.af-chip { font-size: 11px; background: rgba(255,255,255,.05); border-radius: 6px; padding: 1px 5px; }
+.af-panel > [data-af-add] { align-self: flex-start; }
