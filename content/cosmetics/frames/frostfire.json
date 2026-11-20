@@ -1,0 +1,13 @@
+{
+  "name": "Frostfire",
+  "tier": "prestige",
+  "price": 1000000,
+  "colors": [
+    "#7fe7ff",
+    "#ffffff",
+    "#ff7a3d"
+  ],
+  "glow": "#9fe8ff",
+  "animated": true,
+  "order": 60
+}

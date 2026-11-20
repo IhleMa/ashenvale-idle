@@ -1,0 +1,16 @@
+{
+  "name": "Prismatic",
+  "tier": "legendary",
+  "price": 5000000,
+  "gradient": [
+    "#ff5e5e",
+    "#ffb85e",
+    "#fff35e",
+    "#5eff8b",
+    "#5ec8ff",
+    "#a35eff",
+    "#ff5e5e"
+  ],
+  "animated": true,
+  "order": 100
+}

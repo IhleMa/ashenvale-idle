@@ -11,6 +11,7 @@ import { coopLineup } from '../shared/coop.js';
 import { createRng, randomSeed } from '../shared/rng.js';
 import { ABILITIES } from '../shared/data/abilities.js';
 import { Rankings } from './rankings.js';
+import { COSMETICS, COSMETIC_KINDS, cosmetic, ownsCosmetic, publicCosmetics } from '../shared/data/cosmetics.js';
 import { Arena } from './arena.js';
 import { AuctionHouse } from './auction.js';
 import { adminActions } from './admin.js';
@@ -99,6 +100,24 @@ export class Game {
     return a;
   }
 
+  // name → worn cosmetics of every player who wears any (built once, then kept up to date)
+  cosmeticMap() {
+    if (!this._cosmetics) {
+      this._cosmetics = {};
+      for (const acc of this.store.allPlayerNames()) {
+        const p = this.sessions.get(acc.id)?.player || this.store.loadPlayer(acc.id);
+        const c = p && publicCosmetics(p);
+        if (c) this._cosmetics[p.name] = c;
+      }
+    }
+    return this._cosmetics;
+  }
+  cosmeticChanged(p) {
+    const c = publicCosmetics(p), map = this.cosmeticMap();
+    if (c) map[p.name] = c; else delete map[p.name];
+    this.broadcast({ t: 'cosmetic', name: p.name, cosmetics: c });
+  }
+
   broadcast(msg) {
     const data = JSON.stringify(msg);
     for (const s of this.sessions.values()) for (const ws of s.sockets) if (ws.readyState === 1) ws.send(data);
@@ -127,6 +146,7 @@ export class Game {
     if (s.graceTimer) { clearTimeout(s.graceTimer); s.graceTimer = null; } // reconnected within the grace period
     s.sockets.add(ws);
     this.send(ws, { t: 'welcome', playerId: player.id, name: player.name, serverTime: Date.now(), buildId: this.buildId, config: { version: CONFIG.version }, isAdmin: this.isAdmin(account), motd: this.settings.get('motd') || '', auction: { feePct: this.settings.get('auctionFeePct'), taxPct: this.settings.get('auctionTaxPct') }, premium: { minutesPerCrystal: this.settings.get('premiumMinutesPerCrystal') } });
+    this.send(ws, { t: 'cosmetics', map: this.cosmeticMap() });
     Q.ensureQuests(player); // before offline progress, so it counts toward today's quests
     if (first) this.handleOffline(s);
     L.maybeAutoRefreshRecruits(player, this.assets.get());
@@ -265,6 +285,29 @@ export class Game {
     loot_log_clear(s) { s.player.lootLog = []; },
     toggle_lock(s, d) { L.toggleLock(s.player, d); },
     set_settings(s, d) { L.setSettings(s.player, d); },
+    // ---- cosmetics (gold sink, no power)
+    cosmetic_buy(s, d) {
+      const p = s.player, kind = String(d.kind), id = String(d.id);
+      const c = COSMETIC_KINDS[kind] && cosmetic(kind, id);
+      if (!c) fail('Unknown cosmetic');
+      if (c.achievement) fail('This title is earned through an achievement');
+      if (ownsCosmetic(p, kind, id)) fail('You already own this');
+      const price = Math.max(0, Math.round(c.price || 0));
+      if (p.gold < price) fail(`You need ${price.toLocaleString('en')} gold`);
+      p.gold -= price;
+      p.cosmetics.owned.push(`${kind}:${id}`);
+      p.stats.cosmeticGold = (p.stats.cosmeticGold || 0) + price;
+      p.cosmetics.equipped[kind] = id; // wear it right away
+      this.cosmeticChanged(p);
+      return { price };
+    },
+    cosmetic_equip(s, d) {
+      const p = s.player, kind = String(d.kind), id = d.id == null ? null : String(d.id);
+      if (!COSMETIC_KINDS[kind]) fail('Unknown cosmetic');
+      if (id && !ownsCosmetic(p, kind, id)) fail("You don't own this");
+      if (id) p.cosmetics.equipped[kind] = id; else delete p.cosmetics.equipped[kind];
+      this.cosmeticChanged(p);
+    },
     // ---- town
     town_upgrade(s, d) { const r = TL.upgradeBuilding(s.player, { buildingId: String(d.buildingId) }); return r; },
     town_assign(s, d) { this.ensureNotInCoop(s.player.id); TL.assignWorker(s.player, { buildingId: String(d.buildingId), charId: d.charId ? String(d.charId) : null }); this.abortSoloIfUsing(s, d.charId); },

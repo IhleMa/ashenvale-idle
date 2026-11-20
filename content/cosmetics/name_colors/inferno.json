@@ -1,0 +1,14 @@
+{
+  "name": "Inferno",
+  "tier": "prestige",
+  "price": 500000,
+  "gradient": [
+    "#ffdd55",
+    "#ff6a00",
+    "#ff1f3d",
+    "#ff6a00",
+    "#ffdd55"
+  ],
+  "animated": true,
+  "order": 80
+}

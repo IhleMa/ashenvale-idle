@@ -1,0 +1,11 @@
+{
+  "name": "Gilded",
+  "tier": "fine",
+  "price": 50000,
+  "gradient": [
+    "#fff1a8",
+    "#f2b632",
+    "#c47f12"
+  ],
+  "order": 50
+}

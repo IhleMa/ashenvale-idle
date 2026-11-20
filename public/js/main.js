@@ -21,6 +21,7 @@ import { partyView } from './views/party.js';
 import { recruitmentView } from './views/recruitment.js';
 import { multiplayerView } from './views/multiplayer.js';
 import { progressionView } from './views/progression.js';
+import { wardrobeView } from './views/wardrobe.js';
 import { rankingsView } from './views/rankings.js';
 import { townView } from './views/town.js';
 import { expeditionsView } from './views/expeditions.js';
@@ -34,7 +35,7 @@ import { arenaView } from './views/arena.js';
 import { gemsView } from './views/gems.js';
 import { createView } from './views/create.js';
 
-const VIEWS = [combatView, riftsView, questsView, characterView, skilltreeView, abilitiesView, partyView, recruitmentView, townView, expeditionsView, gemsView, auctionView, multiplayerView, arenaView, rankingsView, bestiaryView, wikiView, progressionView, adminView];
+const VIEWS = [combatView, riftsView, questsView, characterView, skilltreeView, abilitiesView, partyView, recruitmentView, townView, expeditionsView, gemsView, auctionView, multiplayerView, arenaView, rankingsView, bestiaryView, wikiView, progressionView, wardrobeView, adminView];
 const viewEl = () => document.getElementById('view');
 let current = null;
 let root = null; // per-view container (listeners attached to it die with it)
@@ -367,6 +368,8 @@ bus.on('msg:state', m => {
   renderTutorial();
 });
 bus.on('msg:toast', m => toast(m.text, m.kind));
+bus.on('msg:cosmetics', m => { state.cosmetics = m.map || {}; requestRender(); });
+bus.on('msg:cosmetic', m => { if (m.cosmetics) state.cosmetics[m.name] = m.cosmetics; else delete state.cosmetics[m.name]; requestRender(); renderTopbar(); });
 bus.on('msg:group', m => { state.group = m.group; if (current?.id === 'multiplayer') requestRender(); renderTopbar(); });
 bus.on('msg:invites', m => { state.invites = m.invites; renderTopbar(); if (current?.id === 'multiplayer') requestRender(); });
 bus.on('msg:online', m => { state.online = m.players; if (current?.id === 'multiplayer') requestRender(); });

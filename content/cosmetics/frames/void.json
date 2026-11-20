@@ -1,0 +1,14 @@
+{
+  "name": "Void",
+  "tier": "legendary",
+  "price": 5000000,
+  "colors": [
+    "#1a0033",
+    "#8b3cff",
+    "#ff4dd2",
+    "#8b3cff"
+  ],
+  "glow": "#b44dff",
+  "animated": true,
+  "order": 80
+}

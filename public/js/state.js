@@ -12,6 +12,7 @@ export const state = {
   announcements: [], // active server announcements, newest first
   unseenAnn: new Set(), // ids this player hasn't read yet
   online: [],
+  cosmetics: {},      // player name → worn cosmetics { color, title, frame }
   connection: 'offline',
   battles: { solo: null, coop: null }, // live battle snapshots (kept up to date by combat view)
   lastResults: { solo: null, coop: null },

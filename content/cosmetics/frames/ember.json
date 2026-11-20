@@ -1,0 +1,13 @@
+{
+  "name": "Ember",
+  "tier": "prestige",
+  "price": 500000,
+  "colors": [
+    "#ffd34d",
+    "#ff5a1f",
+    "#c4101f"
+  ],
+  "glow": "#ff6a2a",
+  "animated": true,
+  "order": 50
+}

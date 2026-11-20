@@ -41,6 +41,9 @@ export const TYPE_INFO = {
   'town/elixirs': { label: 'Elixirs', icon: '🧪', group: 'Town' },
   quests: { label: 'Quest types', icon: '📜', group: 'Progress' },
   achievements: { label: 'Achievements', icon: '🏆', group: 'Progress' },
+  'cosmetics/name_colors': { label: 'Name colours', icon: '🎨', group: 'Cosmetics' },
+  'cosmetics/titles': { label: 'Titles', icon: '🏷', group: 'Cosmetics' },
+  'cosmetics/frames': { label: 'Portrait frames', icon: '🖼', group: 'Cosmetics' },
   bots: { label: 'Bot archetypes', icon: '🤖', group: 'Other' },
   settings: { label: 'Settings & tables', icon: '⚙', group: 'Other' },
 };

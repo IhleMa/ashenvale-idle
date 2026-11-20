@@ -5,7 +5,7 @@ import { MATERIALS } from '/shared/data/town.js';
 import { classLabel } from '/shared/data/subclasses.js';
 import { bus, state } from '../state.js';
 import { act } from '../net.js';
-import { esc, fmt, run, tipAttr } from '../ui.js';
+import { esc, fmt, run, tipAttr, nameHtml } from '../ui.js';
 import { portrait, enemyArt, minionArt, abilityIcon, statusIcon, backgroundStyle } from '../assets.js';
 import { ABILITIES } from '/shared/data/abilities.js';
 import { STATUSES } from '/shared/data/statuses.js';
@@ -234,7 +234,7 @@ function minionCard(m) {
 
 function unitCard(u, k, minions = []) {
   const art = u.kind === 'enemy' ? enemyArt(u.defId, 'md') : portrait({ name: u.name, classId: u.classId, portrait: u.portrait }, 'md');
-  const owner = k === 'coop' && u.ownerName ? `<small class="owner">${esc(u.ownerName)}</small>` : '';
+  const owner = k === 'coop' && u.ownerName ? `<small class="owner">${nameHtml(u.ownerName, { title: false })}</small>` : '';
   const tags = u.boss ? '<span class="tag boss">BOSS</span>' : u.tags?.includes('elite') ? '<span class="tag elite">ELITE</span>' : '';
   const abilities = u.side === 'A' ? `<div class="unit-abilities">${u.loadout.map(a => `<span class="cd-wrap" data-ab="${a}" ${tipAttr(`<b>${esc(ABILITIES[a]?.name)}</b><br>${esc(ABILITIES[a]?.description || '')}`)}>${abilityIcon(a, 'xs')}<span class="cd-overlay"></span><span class="cd-num"></span></span>`).join('')}</div>` : '';
   const res = u.resourceMax ? `<div class="bar res thin" style="--rc:${u.resourceColor}"><div class="fill"></div></div>` : '';

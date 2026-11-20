@@ -1,0 +1,11 @@
+{
+  "name": "Gold",
+  "tier": "fine",
+  "price": 50000,
+  "colors": [
+    "#ffe27a",
+    "#c78a14"
+  ],
+  "glow": "#ffcc4d",
+  "order": 20
+}

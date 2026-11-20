@@ -1,0 +1,12 @@
+{
+  "name": "Runic",
+  "tier": "fine",
+  "price": 150000,
+  "colors": [
+    "#5fd3ff",
+    "#2a4dff"
+  ],
+  "glow": "#4cb6ff",
+  "style": "double",
+  "order": 30
+}

@@ -430,6 +430,21 @@ export function validateContent(C) {
   for (const [id, a] of Object.entries(C.bots?.archetypes || {})) for (const k of ['skill', 'activity', 'trader', 'crafter', 'rifter', 'social']) num(`bots.archetypes.${id}.${k}`, a[k], { min: 0, max: 1 });
   if (!(C.bots?.names || []).length) err('bots.names', 'needs at least one name');
 
+  // ---- cosmetics (name colours, titles, portrait frames)
+  const CSS_COLOR = /^#[0-9a-f]{3,8}$/i;
+  const colorList = (w, v, min) => { if (!Array.isArray(v) || v.length < min || !v.every(c => CSS_COLOR.test(c))) err(w, `must be a list of at least ${min} colours like "#ff8800"`); };
+  for (const [key, label] of [['nameColors', 'name_colors'], ['titles', 'titles'], ['frames', 'frames']]) {
+    for (const [id, c] of Object.entries(C.cosmetics?.[key] || {})) {
+      const w = `cosmetics.${label}.${id}`;
+      str(`${w}.name`, c.name);
+      num(`${w}.price`, c.price, { min: 0 });
+      if (c.tier && !['basic', 'fine', 'prestige', 'legendary', 'earned'].includes(c.tier)) err(`${w}.tier`, 'must be basic, fine, prestige, legendary or earned');
+      if (c.achievement && !C.achievements?.achievements?.[c.achievement]) err(`${w}.achievement`, `unknown achievement "${c.achievement}"`);
+      if (key === 'nameColors') { if (c.gradient) colorList(`${w}.gradient`, c.gradient, 2); else if (!CSS_COLOR.test(c.color || '')) err(`${w}.color`, 'needs a colour like "#ff8800" (or a "gradient" list)'); }
+      if (key === 'frames') { colorList(`${w}.colors`, c.colors, 1); if (c.glow && !CSS_COLOR.test(c.glow)) err(`${w}.glow`, 'must be a colour like "#ff8800"'); }
+    }
+  }
+
   // ---- patch notes: newest first, every entry { id, date, title?, sections: [{ heading?, items: [text] }] }
   if (C.patchnotes) {
     const P = C.patchnotes, ids = new Set();

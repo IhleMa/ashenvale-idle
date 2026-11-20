@@ -1,0 +1,11 @@
+{
+  "name": "Abyssal",
+  "tier": "fine",
+  "price": 75000,
+  "gradient": [
+    "#3fe0c5",
+    "#3a6dff",
+    "#8b3cff"
+  ],
+  "order": 70
+}

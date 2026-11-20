@@ -53,6 +53,9 @@ export const COLLECTIONS = [
   ['bots', 'archetypes', 'bots'],
   ['minions', 'minions', 'minions'],
   ['subclasses', 'subclasses', 'subclasses'],
+  ['cosmetics', 'nameColors', 'cosmetics/name_colors'],
+  ['cosmetics', 'titles', 'cosmetics/titles'],
+  ['cosmetics', 'frames', 'cosmetics/frames'],
 ];
 export const SYSTEMS = [...new Set([...Object.keys(SETTINGS_FILES), ...COLLECTIONS.map(c => c[0])])];
 // kept for tools that list the systems

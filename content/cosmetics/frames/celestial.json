@@ -1,0 +1,13 @@
+{
+  "name": "Celestial",
+  "tier": "prestige",
+  "price": 2500000,
+  "colors": [
+    "#fff6c4",
+    "#b48cff",
+    "#5ec8ff"
+  ],
+  "glow": "#d6b8ff",
+  "animated": true,
+  "order": 70
+}

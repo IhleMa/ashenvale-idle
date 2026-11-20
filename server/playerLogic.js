@@ -39,6 +39,7 @@ export function newPlayer(account) {
     recruitment: { offers: [], refreshedAt: 0 },
     stats: { kills: 0, bossKills: 0, recruited: 0, epicFound: 0, legendaryFound: 0, coopWins: 0, heroLevel: 1, zonesUnlocked: 1, fights: 0 },
     achievements: {},
+    cosmetics: { owned: [], equipped: {} }, // bought cosmetics ('kind:id') and the ones worn
     settings: { autoSellBelow: null, autoLootAction: 'sell', autoDevelopRecruits: true, autoDevelopHero: false, publicProfile: true },
     coopChars: [], mailbox: [],
     bestiary: {},       // enemyId -> { kills, seen }
@@ -728,7 +729,7 @@ export function publicPlayer(p) {
     stats: p.stats, achievements: p.achievements, settings: p.settings, coopChars: p.coopChars,
     town: p.town, expeditions: p.expeditions || [], mailbox: p.mailbox || [], serverTime: Date.now(),
     bestiary: p.bestiary || {}, quests: p.quests, rift: p.rift, lootFilter: p.lootFilter, lootLog: p.lootLog || [],
-    tutorial: p.tutorial || null,
+    tutorial: p.tutorial || null, cosmetics: p.cosmetics || { owned: [], equipped: {} },
     arena: p.arena ? (refillAttacks(p.arena), { ...p.arena, recent: undefined, nextAttackAt: refillAttacks(p.arena) }) : null,
   };
 }

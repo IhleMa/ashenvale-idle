@@ -2,7 +2,7 @@
 // Both teams fight at the average level of the two heroes; the fight plays live on the Combat page.
 import { state } from '../state.js';
 import { act } from '../net.js';
-import { esc, fmt, run, duration, botTag } from '../ui.js';
+import { esc, fmt, run, duration, botTag, nameHtml, framed } from '../ui.js';
 import { portrait } from '../assets.js';
 import { classBadge } from '../components.js';
 import { openInspect } from '../inspect.js';
@@ -88,7 +88,7 @@ export const arenaView = {
             <div class="panel-head"><h3>Opponents</h3><button class="btn small ghost" data-arena-refresh ${loading ? 'disabled' : ''}>↻ New opponents</button></div>
             ${a.party == null ? '<p class="muted">Choose your arena team first.</p>' : !view ? '<p class="muted">Looking for opponents…</p>' : view.opponents.length ? `<div class="arena-opponents">${view.opponents.map(o => `
               <div class="arena-opponent">
-                <div class="row gap">${o.hero ? portrait(o.hero, 'sm') : ''}<div class="grow"><b>${esc(o.name)}</b>${botTag(o)} <span class="muted small">${o.hero ? `${esc(o.hero.name)} · Lv ${o.hero.level} ${esc(classLabel(o.hero.classId, o.hero.subclass))}` : ''}</span>
+                <div class="row gap">${o.hero ? framed(portrait(o.hero, 'sm'), o.name) : ''}<div class="grow"><b>${nameHtml(o.name)}</b>${botTag(o)} <span class="muted small">${o.hero ? `${esc(o.hero.name)} · Lv ${o.hero.level} ${esc(classLabel(o.hero.classId, o.hero.subclass))}` : ''}</span>
                   <div class="small">Rating <b>${fmt(o.rating)}</b> · ${o.wins}–${o.losses} · power ${fmt(o.power)} · fight at <b>level ${o.fightLevel}</b></div></div>
                   <button class="btn tiny ghost" data-inspect="${esc(o.name)}">Inspect</button>
                   <button class="btn primary" data-attack="${o.id}" ${a.attacks > 0 ? '' : 'disabled'}>Attack</button></div>

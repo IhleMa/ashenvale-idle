@@ -4,6 +4,8 @@ import { GEM_KINDS, gemName, gemText, parseGemKey, affixPlan, gearItemStats, COM
 import { rarityById } from '/shared/config.js';
 import { CLASSES } from '/shared/data/classes.js';
 import { UNIQUES, SETS, equippedSetCounts } from '/shared/data/legendaries.js';
+import { cosmetic } from '/shared/data/cosmetics.js';
+import { state } from './state.js';
 
 export const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 export const fmt = n => {
@@ -50,6 +52,33 @@ export function modal(innerHtml, { onClose, wide = false } = {}) {
 
 // 🤖 marker for bot players (server decides whether it is shown)
 export const botTag = x => (x?.bot ? ' <span class="bot-tag" title="Bot player">🤖</span>' : '');
+
+// ---- cosmetics: how other players see a name / portrait (state.cosmetics: name → { color, title, frame })
+const cosOf = name => (name === state.player?.name ? state.player?.cosmetics?.equipped : state.cosmetics?.[name]) || {};
+export function nameStyle(colorId) {
+  const c = cosmetic('color', colorId);
+  if (!c) return { cls: '', style: '' };
+  if (c.gradient) return { cls: `pname-grad${c.animated ? ' pname-anim' : ''}`, style: `--pg:linear-gradient(90deg,${c.gradient.join(',')})` };
+  return { cls: '', style: `color:${c.color}` };
+}
+// the player's name in their colour, followed by their title (title: false to leave it out)
+export function nameHtml(name, { title = true, colorId, titleId } = {}) {
+  const cos = cosOf(name);
+  const st = nameStyle(colorId === undefined ? cos.color : colorId);
+  const t = cosmetic('title', titleId === undefined ? cos.title : titleId);
+  return `<span class="pname ${st.cls}" ${st.style ? `style="${st.style}"` : ''}>${esc(name)}</span>${title && t ? ` <span class="ptitle">${esc(t.name)}</span>` : ''}`;
+}
+export function frameStyle(frameId) {
+  const f = cosmetic('frame', frameId);
+  if (!f) return null;
+  const cols = f.colors || ['#888', '#444'];
+  return { cls: `cos-frame${f.animated ? ' cos-frame-anim' : ''}${f.style === 'double' ? ' cos-frame-double' : ''}`, style: `--cf-cols:${[...cols, cols[0]].join(',')};--cf-glow:${f.glow || 'transparent'}` };
+}
+// wrap a portrait in the owner's frame (if they wear one)
+export function framed(portraitHtml, name, frameId) {
+  const st = frameStyle(frameId === undefined ? cosOf(name).frame : frameId);
+  return st ? `<span class="${st.cls}" style="${st.style}">${portraitHtml}</span>` : portraitHtml;
+}
 
 export function confirmBox(text, okLabel = 'Confirm', { html = false } = {}) {
   return new Promise(resolve => {

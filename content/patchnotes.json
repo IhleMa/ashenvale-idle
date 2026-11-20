@@ -6,6 +6,14 @@
       "title": "Tiered affixes, resonance gems, Rogue and Bard changes",
       "sections": [
         {
+          "heading": "Wardrobe (new)",
+          "items": [
+            "New Wardrobe page 👑: spend gold on cosmetics that change only how you look — 11 name colours (up to animated Prismatic), 17 titles and 9 portrait frames (up to the animated Void frame). Prices go from 5,000 to 5,000,000 gold.",
+            "Some titles are earned through achievements instead of bought (e.g. \"Bossbane\", \"the Legendary\").",
+            "Hover any cosmetic to try it on. What you wear is shown to other players in chat, rankings, rift rankings, groups, the arena, co-op battles and when they inspect you."
+          ]
+        },
+        {
           "heading": "Items",
           "items": [
             "New affix system: items roll prefixes and suffixes (up to 3 of each) from 41 different stats. Uncommon items get 1 affix, Rare 2, Epic 3, Legendary 4 and Mythic now 6.",

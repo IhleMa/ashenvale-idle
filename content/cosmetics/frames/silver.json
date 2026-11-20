@@ -1,0 +1,10 @@
+{
+  "name": "Silver",
+  "tier": "basic",
+  "price": 15000,
+  "colors": [
+    "#e9eef2",
+    "#8a97a3"
+  ],
+  "order": 10
+}

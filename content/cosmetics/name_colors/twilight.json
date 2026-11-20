@@ -1,0 +1,10 @@
+{
+  "name": "Twilight",
+  "tier": "fine",
+  "price": 50000,
+  "gradient": [
+    "#8f6bff",
+    "#ff6fb5"
+  ],
+  "order": 60
+}

@@ -1,0 +1,14 @@
+{
+  "name": "Aurora",
+  "tier": "prestige",
+  "price": 1000000,
+  "gradient": [
+    "#5effc4",
+    "#4cc9ff",
+    "#b388ff",
+    "#4cc9ff",
+    "#5effc4"
+  ],
+  "animated": true,
+  "order": 90
+}
