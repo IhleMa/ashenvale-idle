@@ -118,6 +118,16 @@ function summary(ability, rule) {
 }
 
 // ------------------------------------------------------------------ editor
+// "Party member 2 (Mira)": party selectors name who sits in that place of the character's active party
+function selectorLabel(s, ch) {
+  const m = /^party_(\d)$/.exec(s);
+  if (!m) return SELECTORS[s].label;
+  const p = state.player;
+  const party = (p.parties || []).find(x => x.members?.includes(ch.id)) || p.parties?.[p.activeParty ?? 0];
+  const who = p.characters[party?.members?.[Number(m[1]) - 1]];
+  return `${SELECTORS[s].label}${who ? ` (${who.name})` : ' (empty)'}`;
+}
+
 function editorHtml(ch, abilityId) {
   if (ABILITIES[abilityId]?.passive) {
     const p = ABILITIES[abilityId];
@@ -147,7 +157,7 @@ function editorHtml(ch, abilityId) {
 
     <h4>2 · Who to target</h4>
     <div class="row gap wrap">
-      <select data-rule-selector ${sels.length < 2 ? 'disabled' : ''}>${sels.map(s => `<option value="${s}" ${s === rule.target.selector ? 'selected' : ''}>${esc(SELECTORS[s].label)}</option>`).join('')}</select>
+      <select data-rule-selector ${sels.length < 2 ? 'disabled' : ''}>${sels.map(s => `<option value="${s}" ${s === rule.target.selector ? 'selected' : ''}>${esc(selectorLabel(s, ch))}</option>`).join('')}</select>
       ${SELECTORS[rule.target.selector]?.hasParam ? enemyTagSelect(rule.target.param || 'boss', 'data-rule-param') : ''}
     </div>
 

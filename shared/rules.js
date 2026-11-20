@@ -110,6 +110,8 @@ export const SELECTORS = {
   ally_highest_hp_pct: { label: 'Ally with highest health %', side: 'ally', pick: pool => one(maxBy(pool, hpPct)) },
   ally_random:         { label: 'Random living ally', side: 'ally', pick: (pool, b) => one(pool[Math.floor(b.rng() * pool.length)]) },
   ally_tank:           { label: 'Ally tank (fallback: lowest health %)', side: 'ally', pick: pool => one(pool.find(a => a.role === 'tank') || minBy(pool, hpPct)) },
+  // party members by their place in the party (1 = first); nothing if that member is down
+  ...Object.fromEntries([1, 2, 3, 4].map(i => [`party_${i}`, { label: `Party member ${i}`, side: 'ally', pick: (pool, b, u) => one(partyMember(b, u, i - 1, pool)) }])),
   ally_fallen:         { label: 'Fallen ally', side: 'ally', dead: true, pick: pool => one(pool[0]) },
   all_allies:          { label: 'All allies', side: 'ally', area: true, pick: pool => pool },
   own_minions:         { label: 'All my minions', side: 'ally', area: true, minions: true, pick: pool => pool },
@@ -124,6 +126,12 @@ export const SELECTORS = {
   all_enemies:         { label: 'All enemies', side: 'enemy', area: true, pick: pool => pool },
 };
 function one(x) { return x ? [x] : []; }
+// the i-th character of the caster's party in party order (minions don't count); only if it can be targeted
+function partyMember(b, u, i, pool) {
+  const party = b.units.filter(x => x.side === u.side && x.kind === 'character').sort((a, c) => a.position - c.position);
+  const m = party[i];
+  return m && pool.includes(m) ? m : null;
+}
 
 // "Threat" from the point of view of `viewer`:
 // - an enemy AI looks at its threat table (who has generated the most threat against it)

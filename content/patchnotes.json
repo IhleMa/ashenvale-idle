@@ -78,6 +78,7 @@
             "Planned builds: on the Skill Tree page, \"Plan nodes\" lets you click out a whole build in advance (e.g. up to level 60). Free and future skill points are spent on the planned nodes automatically, in the order you set. Builds save the plan too.",
             "Threat display in fights: every party member shows its threat (share of the highest threat on an enemy; red with 🎯 when enemies attack it), and every enemy shows who it is attacking.",
             "New ability conditions: \"An enemy is attacking me\" (use NOT for \"I don't have aggro\"), \"Number of enemies attacking me\", \"An enemy is attacking someone else (not me)\" (great for taunts), \"Number of enemies attacking someone else\", and the target conditions \"Target is attacking me\" / \"Target is attacking someone else\".",
+            "New targets for ally abilities: Party member 1–4 (by their place in the party; the rule editor shows who that is). If that member is down, the ability waits.",
             "Patch notes: the 📜 button next to announcements shows what changed. A dot appears when there is something new.",
             "Abilities page: every learned ability shows what it does right now — with its rank, skill-tree changes and rank effects applied, and the real numbers from your character's stats."
           ]
