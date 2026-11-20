@@ -236,7 +236,9 @@ function unitCard(u, k, minions = []) {
   const abilities = u.side === 'A' ? `<div class="unit-abilities">${u.loadout.map(a => `<span class="cd-wrap" data-ab="${a}" ${tipAttr(`<b>${esc(ABILITIES[a]?.name)}</b><br>${esc(ABILITIES[a]?.description || '')}`)}>${abilityIcon(a, 'xs')}<span class="cd-overlay"></span><span class="cd-num"></span></span>`).join('')}</div>` : '';
   const res = u.resourceMax ? `<div class="bar res thin" style="--rc:${u.resourceColor}"><div class="fill"></div></div>` : '';
   const cls = u.classId ? CLASSES[u.classId] : null;
-  return `<div class="unit ${u.side === 'A' ? 'ally' : 'foe'} ${u.boss ? 'boss' : ''} ${u.isMain ? 'main' : ''}" data-uid="${u.uid}">
+  const ck = u.side === 'A' ? unitKeyOf(u) : '';
+  const keepH = ck && cardMax.get(ck) ? ` style="min-height:${cardMax.get(ck)}px"` : '';
+  return `<div class="unit ${u.side === 'A' ? 'ally' : 'foe'} ${u.boss ? 'boss' : ''} ${u.isMain ? 'main' : ''}" data-uid="${u.uid}" ${ck ? `data-ck="${esc(ck)}"` : ''}${keepH}>
     <div class="unit-art">${art}<div class="floaters"></div></div>
     <div class="unit-info">
       <div class="unit-name">${u.isMain ? '<span class="hero-star">★</span>' : ''}${esc(u.name)} <span class="muted">Lv ${u.level}${u.syncedFrom ? `<span class="sync-tag" ${tipAttr(`Level sync: fights at level ${u.level} (really ${u.syncedFrom}) while the ascended hero levels up again`)}>⇩${u.syncedFrom}</span>` : ''}${cls ? ' ' + esc(classLabel(u.classId, u.subclass)) : ''}</span> ${tags}${owner}</div>
@@ -328,13 +330,29 @@ function buildField() {
 
 // Minions appearing and dying change the height of the battlefield, which made the whole page jump up and down.
 // The field keeps the tallest height it has had for this party (it only grows), so the page stays still.
-const fieldMax = new Map();
+// A ResizeObserver catches growth that happens after building too (portraits loading, a minion's card filling in).
+// Party cards do the same, so a Summoner's card keeps the room of its minions and the cards below it stay put.
+const fieldMax = new Map(), cardMax = new Map();
+let fieldKey = null, fieldObs = null;
 function keepFieldHeight(field, key) {
-  field.style.minHeight = '';
-  const h = field.offsetHeight;
-  const max = Math.max(h, fieldMax.get(key) || 0);
-  fieldMax.set(key, max);
-  field.style.minHeight = max + 'px';
+  fieldKey = key;
+  const grow = () => {
+    for (const c of field.querySelectorAll('.side.allies > .unit[data-ck]')) {
+      const h = c.offsetHeight, k = c.dataset.ck;
+      if (h > (cardMax.get(k) || 0)) { cardMax.set(k, h); c.style.minHeight = h + 'px'; }
+    }
+    const h = field.offsetHeight;
+    if (h > (fieldMax.get(fieldKey) || 0)) fieldMax.set(fieldKey, h);
+    const want = (fieldMax.get(fieldKey) || 0) + 'px';
+    if (field.style.minHeight !== want) field.style.minHeight = want;
+  };
+  grow();
+  if (fieldObs?.el !== field) {
+    fieldObs?.disconnect();
+    fieldObs = new ResizeObserver(grow);
+    fieldObs.el = field;
+    fieldObs.observe(field);
+  }
 }
 
 function refreshSources() {
