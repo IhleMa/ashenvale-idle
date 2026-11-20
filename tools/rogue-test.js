@@ -98,11 +98,11 @@ const has = (u, id) => u.statuses.some(s => s.id === id);
     const cast = id => { for (const eff of (me.abilityDefs[id] || ABILITIES[id]).effects) C.__test.applyEffect(b, me, foe, eff, id); };
     return { b, me, foe, cast };
   };
-  const stacks = f => f.statuses.find(s => s.id === 'bleed')?.stacks || 0;
+  const stacks = f => f.statuses.filter(s => s.id === 'bleed').length; // every application is its own stack
   const f1 = mk('shadow_flurry', 1); f1.cast('poison_blade'); f1.cast('shadow_flurry');
   const f2 = mk('shadow_flurry', 2); f2.cast('poison_blade'); f2.cast('shadow_flurry');
   const f3 = mk('shadow_flurry', 2); f3.cast('shadow_flurry');
-  assert.equal(stacks(f1.foe), 0); assert.equal(stacks(f2.foe), 3); assert.equal(stacks(f3.foe), 0);
+  assert.equal(stacks(f1.foe), 0); assert.equal(stacks(f2.foe), 5); assert.equal(stacks(f3.foe), 0);
   ok('Shadow Flurry rank 2: every hit on a poisoned enemy makes it bleed (only if it is poisoned)');
   const crit = rank => { const x = mk('backstab', rank); x.b.rng = () => 0; x.me.resource = 0; x.cast('backstab'); return x.me.resource; };
   assert.equal(crit(3), 15); assert.equal(crit(2), 0);

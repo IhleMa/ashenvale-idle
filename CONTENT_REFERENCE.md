@@ -310,8 +310,8 @@ Target selectors (`target.selector`):
 
 | id | name | type | description |
 | --- | --- | --- | --- |
-| [`poison`](content/statuses/poison.json) | Poison | debuff | Takes physical damage every second. Stacks. |
-| [`bleed`](content/statuses/bleed.json) | Bleed | debuff | Bleeding for damage every second. |
+| [`poison`](content/statuses/poison.json) | Poison | debuff | Takes physical damage every second. Every application is its own stack with its own timer — no limit. |
+| [`bleed`](content/statuses/bleed.json) | Bleed | debuff | Bleeding for damage every second. Every application is its own stack with its own timer — no limit. |
 | [`burn`](content/statuses/burn.json) | Burn | debuff | Burning for magical damage every second. |
 | [`frostbite`](content/statuses/frostbite.json) | Frostbite | debuff | Attack speed reduced by 25%. |
 | [`stun`](content/statuses/stun.json) | Stun | debuff | Cannot act. |

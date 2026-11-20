@@ -4,7 +4,7 @@
   "tick": "damage",
   "school": "physical",
   "ignoreArmor": true,
-  "maxStacks": 3,
-  "description": "Bleeding for damage every second.",
-  "order": 20
+  "description": "Bleeding for damage every second. Every application is its own stack with its own timer — no limit.",
+  "order": 20,
+  "stacking": "independent"
 }

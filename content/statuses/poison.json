@@ -4,7 +4,7 @@
   "tick": "damage",
   "school": "physical",
   "ignoreArmor": true,
-  "maxStacks": 5,
-  "description": "Takes physical damage every second. Stacks.",
-  "order": 10
+  "description": "Takes physical damage every second. Every application is its own stack with its own timer — no limit.",
+  "order": 10,
+  "stacking": "independent"
 }
