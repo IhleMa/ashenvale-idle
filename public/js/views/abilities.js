@@ -318,6 +318,7 @@ function abilityCard(ch, base) {
       <div class="small muted">${esc(a.description)}</div>
       <div class="small faint">${esc(meta)}</div>
       ${mutHtml}
+      ${Object.entries(a.rankEffects || ABILITIES[a.id]?.rankEffects || {}).map(([r, re]) => `<div class="rank-effect small ${rank >= Number(r) ? 'on' : ''}">▲ Rank ${r} — <b>${esc(re.name)}</b>: ${esc(re.description)}</div>`).join('')}
       <div class="ranks">${Array.from({ length: CONFIG.maxAbilityRank }, (_, i) => `<span class="pip ${i < rank ? 'on' : ''}"></span>`).join('')}</div>
     </div>
     <div class="ability-action col">${action}</div>

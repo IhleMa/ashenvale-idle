@@ -38,7 +38,8 @@
             "New ability Assassin's Mark (Assassination path, outer ring): mark an enemy for 6 seconds. All damage you deal to it is recorded, and when the mark runs out it explodes for 150% of the recorded damage.",
             "Plaguebringer: poisoning an enemy that is already bleeding now spreads the poison to every enemy.",
             "Poisons hit harder: Poison Blade 18% → 25% Physical Power per stack per second, Plague Strike 35% → 45%, Toxic Cloud 30% → 40%.",
-            "Poison Blade has a higher priority, so automatic loadouts now include it."
+            "Poison Blade has a higher priority, so automatic loadouts now include it.",
+            "Ability ranks can now unlock extra effects. First one: Expose Weakness at rank 3 also gives you Opportunist for 10 s — every direct hit on an exposed enemy restores 4 Energy."
           ]
         },
         {

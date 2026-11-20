@@ -1,0 +1,8 @@
+{
+  "name": "Opportunist",
+  "type": "buff",
+  "resourceVsStatus": "exposed",
+  "resourceAmount": 4,
+  "description": "Every direct hit on an exposed enemy restores resource.",
+  "order": 76
+}

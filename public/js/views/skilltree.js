@@ -54,6 +54,9 @@ function nodeTip(ch, n, set) {
   }
   if (ab) html += `<br>${esc(ab.description)}<br><span class="muted">${ab.cost ? `${ab.cost} ${esc(CLASSES[ch.classId].resource.name)} · ` : ''}${ab.cooldown}s cooldown</span>`;
   if (lines.length) html += `<br>${lines.map(esc).join('<br>')}`;
+  // abilities with extra effects at higher ranks
+  const reAb = n.type === 'rank' ? n.rankFor : n.type === 'ability' ? n.ability : null;
+  for (const [r, re] of Object.entries(ABILITIES[reAb]?.rankEffects || {})) html += `<br><span class="${(ch.abilities[reAb] || 0) >= Number(r) ? 'up' : 'muted'}">▲ Rank ${r} — <b>${esc(re.name)}</b>: ${esc(re.description)}</span>`;
   if (n.type === 'rank' && !ch.abilities[n.rankFor]) html += `<br><i class="muted">Only has an effect once ${esc(ABILITIES[n.rankFor]?.name)} is learned.</i>`;
   if (set.has(n.id)) {
     if (n.id !== 'start') html += `<br><span class="muted">${refundMode ? 'Click' : 'Right-click'} to refund (${fmt(treeRefundCost(ch))} gold)</span>`;

@@ -61,6 +61,7 @@ function statusFacts(id) {
   if (s.volatile) f.push('the next element flask lands on every enemy');
   if (s.jumpOnDeath) f.push('jumps to another enemy when its target dies');
   if (s.tickOnApply) f.push('first tick right away');
+  if (s.resourceVsStatus) f.push(`every direct hit on an enemy with ${STATUSES[s.resourceVsStatus]?.name || s.resourceVsStatus} restores ${s.resourceAmount} resource`);
   if (s.recordDamage) f.push(`records the caster's damage; deals ${pct(s.explodePct ?? 1)} of it again when it expires`);
   return f;
 }
@@ -116,6 +117,7 @@ function abilityFacts(a) {
   if (a.requiresStatus) f.push(['Only in', statusLink(a.requiresStatus)]);
   if (a.oncePerFight) f.push(['Limit', 'once per fight']);
   if (a.note) f.push(['Note', `plays a ${a.note === 'low' ? 'Low' : a.note === 'mid' ? 'Mid' : 'High'} note`]);
+  for (const [r, re] of Object.entries(a.rankEffects || {})) f.push([`Rank ${r}`, `<b>${esc(re.name)}</b>: ${esc(re.description)}`]);
   if (a.blade) f.push(['Kind', a.blade === 'weapon' ? 'weapon ability: uses Arcana, leaves Edge' : 'spell: uses Edge, leaves Arcana']);
   return f;
 }

@@ -146,9 +146,19 @@ export function treeMutators(ch) {
   return out;
 }
 // The abilities of a character as they work in combat (only the mutated ones): { abilityId: ability }
+// rank effects: "rankEffects": { "<rank>": { name, description, changes } } on an ability — extra effects that unlock
+// at that ability rank (same change format as mutators)
+export function rankEffectsOf(abilityId, rank) {
+  return Object.entries(ABILITIES[abilityId]?.rankEffects || {}).filter(([r]) => rank >= Number(r)).map(([r, e]) => ({ rank: Number(r), ...e }));
+}
 export function mutatedAbilities(ch) {
   const out = {};
-  for (const [a, sets] of Object.entries(treeMutators(ch))) if (ABILITIES[a]) out[a] = applyMutators(ABILITIES[a], sets);
+  const sets = treeMutators(ch);
+  for (const [a, rank] of Object.entries(ch.abilities || {})) {
+    const extra = rankEffectsOf(a, rank).map(e => e.changes || {});
+    if (extra.length) sets[a] = [...(sets[a] || []), ...extra];
+  }
+  for (const [a, list] of Object.entries(sets)) if (ABILITIES[a]) out[a] = applyMutators(ABILITIES[a], list);
   return out;
 }
 

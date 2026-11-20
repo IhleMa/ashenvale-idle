@@ -757,6 +757,11 @@ function dealDamage(b, src, tgt, raw, { school, ability, bonusCrit = 0, dot = nu
   if (src.stat && src.side !== tgt.side) src.stat.dmg += amount;
   if (tgt.stat && tgt.kind === 'character') tgt.stat.taken += amount + absorbed;
   emit(b, { type: 'damage', src: src.uid, tgt: tgt.uid, amount, absorbed, crit, ability, dot, school, ...(proc ? { proc } : {}), ...(blocked ? { blocked } : {}) });
+  // resource for hitting a marked enemy (Opportunist: Expose Weakness rank 3)
+  if (!dot && !proc && !exact && src.resourceDef && src.side !== tgt.side) for (const s of src.statuses) {
+    const d = STATUSES[s.id];
+    if (d?.resourceVsStatus && tgt.statuses.some(x => x.id === d.resourceVsStatus)) src.resource = Math.min(src.resourceMax, src.resource + (d.resourceAmount || 0));
+  }
   // Life steal (item affix): part of direct damage heals the attacker
   if (!dot && !proc && !exact && src !== tgt && src.alive && src.side !== tgt.side) {
     const ls = mod(src, 'lifeSteal');

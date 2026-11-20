@@ -1290,3 +1290,5 @@ html.standalone body { padding-bottom: env(safe-area-inset-bottom); padding-left
 .af-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px; }
 .af-chip { font-size: 11px; background: rgba(255,255,255,.05); border-radius: 6px; padding: 1px 5px; }
 .af-panel > [data-af-add] { align-self: flex-start; }
+.rank-effect { color: var(--muted, #999); margin-top: 2px; }
+.rank-effect.on { color: #e8c15a; }

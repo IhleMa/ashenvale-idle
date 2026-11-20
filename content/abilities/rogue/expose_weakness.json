@@ -7,14 +7,47 @@
   "cost": 20,
   "cooldown": 15,
   "target": "enemy",
-  "effects": [{ "kind": "status", "status": "exposed", "duration": 10 }],
+  "effects": [
+    {
+      "kind": "status",
+      "status": "exposed",
+      "duration": 10
+    }
+  ],
   "defaultRule": {
     "enabled": true,
     "mode": "all",
-    "conditions": [{ "type": "always" }],
-    "target": { "selector": "enemy_highest_hp" },
-    "targetConditions": [{ "type": "target_missing_status", "status": "exposed" }]
+    "conditions": [
+      {
+        "type": "always"
+      }
+    ],
+    "target": {
+      "selector": "enemy_highest_hp"
+    },
+    "targetConditions": [
+      {
+        "type": "target_missing_status",
+        "status": "exposed"
+      }
+    ]
   },
   "priority": 70,
-  "order": 200
+  "order": 200,
+  "rankEffects": {
+    "3": {
+      "name": "Opportunist",
+      "description": "Also gives you Opportunist for 10 seconds: every direct hit you land on an exposed enemy restores 4 Energy.",
+      "changes": {
+        "effects": [
+          {
+            "kind": "status",
+            "status": "opportunist",
+            "self": true,
+            "duration": 10
+          }
+        ]
+      }
+    }
+  }
 }

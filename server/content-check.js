@@ -132,6 +132,17 @@ export function validateContent(C) {
     if (!npc) num(`${w}.unlockLevel`, a.unlockLevel, { min: 1 });
     if (!Array.isArray(a.effects) || !a.effects.length) err(`${w}.effects`, 'needs at least one effect');
     (a.effects || []).forEach((e, i) => checkEffect(`${w}.effects[${i}]`, e));
+    // rank effects: extra effects at ability rank N (same change format as mutators)
+    for (const [r, re] of Object.entries(a.rankEffects || {})) {
+      const rw = `${w}.rankEffects.${r}`;
+      if (!(+r >= 2 && +r <= (C.config?.maxAbilityRank || 3))) err(rw, `rank must be 2–${C.config?.maxAbilityRank || 3}`);
+      str(`${rw}.name`, re?.name); str(`${rw}.description`, re?.description);
+      for (const [k, v] of Object.entries(re?.changes || {})) {
+        if (!MUTATOR_CHANGES.includes(k)) { err(`${rw}.changes.${k}`, `unknown change (use ${MUTATOR_CHANGES.join(', ')})`); continue; }
+        if (k === 'effects') { if (!Array.isArray(v)) err(`${rw}.changes.effects`, 'must be a list of effects'); else v.forEach((e, j) => checkEffect(`${rw}.changes.effects[${j}]`, e)); }
+        else if (k !== 'set') num(`${rw}.changes.${k}`, v);
+      }
+    }
     checkRule(`${w}.defaultRule`, a.defaultRule);
     if (a.requiresStatus) ref(`${w}.requiresStatus`, a.requiresStatus, statuses, 'status');
     if (a.note && !['low', 'mid', 'high'].includes(a.note)) err(`${w}.note`, 'must be low, mid or high');
