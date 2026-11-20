@@ -184,6 +184,7 @@ export function setLoadout(p, { charId, loadout }) {
   const clean = [...new Set(loadout)].filter(a => typeof a === 'string');
   if (clean.length > abilitySlots(ch)) fail(`Only ${abilitySlots(ch)} ability slots`);
   for (const a of clean) if (!ch.abilities[a]) fail('Ability not unlocked');
+  for (const a of clean) if (ABILITIES[a]?.passive) fail(`${ABILITIES[a].name} is passive and works without a slot`);
   ch.loadout = clean;
 }
 

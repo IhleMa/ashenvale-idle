@@ -35,6 +35,10 @@ const P = {
 };
 
 // ---------- Activation conditions ----------
+// Bard: the note the rules continue from. The Finale's phrase counts while Finale is ready; while it recharges the
+// notes keep rotating (from the last note actually played), and once it is ready again the phrase starts fresh.
+const lastNote = u => (u.notes?.length ? u.notes[u.notes.length - 1] : (u.cooldowns?.finale || 0) > 0 ? u.lastNote || 'none' : 'none');
+
 export const CONDITIONS = {
   always:             { label: 'Whenever available', params: [], test: () => true },
   self_hp_below:      { label: 'Own health below', params: [P.pct('value', 40)], test: (c, b, u) => hpPct(u) < c.value },
@@ -54,7 +58,7 @@ export const CONDITIONS = {
   combat_time_above:  { label: 'Fight has lasted longer than', params: [P.seconds(10)], test: (c, b) => b.time > c.value },
   allies_fallen:      { label: 'Number of fallen allies', params: [P.cmp(), P.count('value', 1)], test: (c, b, u) => cmp(fallenAllies(b, u).length, c.cmp, c.value) },
   own_notes:          { label: 'Number of notes played (Bard, up to 3)', params: [P.cmp(), P.count('value', 3)], test: (c, b, u) => cmp((u.notes || []).length, c.cmp, c.value), format: c => `notes played: ${c.cmp === '<=' ? 'at most' : c.cmp === '==' ? 'exactly' : 'at least'} ${c.value}` },
-  last_note:          { label: 'My last note was (Bard)', params: [P.note()], test: (c, b, u) => (u.notes?.length ? u.notes[u.notes.length - 1] : 'none') === c.note, format: c => `last note: ${c.note === 'none' ? 'none yet' : c.note}` },
+  last_note:          { label: 'My last note was (Bard)', params: [P.note()], test: (c, b, u) => lastNote(u) === c.note, format: c => `last note: ${c.note === 'none' ? 'none yet' : c.note}` },
   own_minions:        { label: 'Number of my minions', params: [P.minion(), P.cmp(), P.count('value', 2)], test: (c, b, u) => cmp(ownMinions(b, u, c.minion).length, c.cmp, c.value), format: c => `my ${c.minion ? MINIONS[c.minion]?.name || c.minion : 'minions'}: ${c.cmp === '<=' ? 'at most' : c.cmp === '==' ? 'exactly' : 'at least'} ${c.value}` },
 };
 

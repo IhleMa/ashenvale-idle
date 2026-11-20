@@ -284,7 +284,7 @@ function act(b, u) {
     if (u.stat && u.kind === 'character') u.stat.casts[abilityId] = (u.stat.casts[abilityId] || 0) + 1;
     targets.forEach((t, i) => { for (const eff of ab.effects) if (!(eff.once && i > 0)) applyEffect(b, u, t, eff, abilityId); });
     u.castMult = 1; u.spent = 0;
-    if (ab.note) { u.notes.push(ab.note); if (u.notes.length > 3) u.notes.shift(); u.hadNotes = true; } // Bard: the last three notes
+    if (ab.note) playNote(b, u, ab.note, targets[0]); // Bard: notes and the automatic Finale
     fireProcs(b, u, 'cast', { ability: abilityId, area: !!ab.area, target: targets[0] });
     u.actionTimer = gcd;
     return;
@@ -487,6 +487,25 @@ function hpAgo(u, seconds) {
 }
 
 // ---------------------------------------------------------------- Bard: Finale plays back the last three notes
+// Finale is passive: after the third note it plays by itself. While it recharges, notes don't count, so the next
+// three notes after the cooldown always form the next Finale (the order the rules play them in decides which one).
+const FINALE = 'finale';
+function playNote(b, u, note, target) {
+  u.hadNotes = true;
+  u.lastNote = note;
+  const knows = !!u.ranks?.[FINALE];
+  if (knows && (u.cooldowns[FINALE] || 0) > 0) return;
+  u.notes.push(note);
+  if (u.notes.length > 3) u.notes.shift();
+  if (!knows || u.notes.length < 3) return;
+  const ab = u.abilityDefs?.[FINALE] || ABILITIES[FINALE];
+  if (!ab) return;
+  u.cooldowns[FINALE] = ab.cooldown;
+  emit(b, { type: 'ability', src: u.uid, ability: FINALE, tgts: [u.uid] });
+  if (u.stat) u.stat.casts[FINALE] = (u.stat.casts[FINALE] || 0) + 1;
+  const tgt = target && target.side !== u.side ? target : enemiesOf(b, u)[0] || u;
+  for (const eff of ab.effects) applyEffect(b, u, tgt, eff, FINALE);
+}
 // eff.finales: { "low,mid,high": { name, target: "party"|"enemies"|"target", effects: [...] }, ..., "dissonance": {...} }
 function playFinale(b, src, tgt, eff, abilityId) {
   const notes = src.notes || [];

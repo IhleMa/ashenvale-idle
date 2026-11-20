@@ -50,12 +50,18 @@ export function syncTree(ch, { manageLoadout = false } = {}) {
   const before = ch.abilities || {};
   ch.abilities = treeAbilities(ch);
   ch.rules = ch.rules || {};
-  ch.loadout = (ch.loadout || []).filter(a => ch.abilities[a]);
+  const hadPassive = (ch.loadout || []).some(a => ABILITIES[a]?.passive);
+  ch.loadout = (ch.loadout || []).filter(a => ch.abilities[a] && !ABILITIES[a]?.passive); // passives (Finale) work without a slot
+  // a passive that used to sit in the loadout frees its slot: fill it with the best learned ability not equipped yet
+  if (hadPassive) for (const a of Object.keys(ch.abilities).filter(x => !ch.loadout.includes(x) && !ABILITIES[x]?.passive && before[x]).sort((x, y) => abilityPriority(y) - abilityPriority(x))) {
+    if (ch.loadout.length >= abilitySlots(ch)) break;
+    insertByPriority(ch.loadout, a);
+  }
   const notEquipped = [];
   const learned = Object.keys(ch.abilities).filter(a => !before[a]).sort((x, y) => abilityPriority(y) - abilityPriority(x));
   for (const a of Object.keys(ch.abilities)) if (!ch.rules[a]) ch.rules[a] = cloneRule(ABILITIES[a].defaultRule);
   for (const a of learned) {
-    if (ch.loadout.includes(a)) continue;
+    if (ch.loadout.includes(a) || ABILITIES[a]?.passive) continue;
     if (ch.loadout.length < abilitySlots(ch)) { insertByPriority(ch.loadout, a); continue; }
     if (manageLoadout) {
       const core = TREE_SPECS[ch.classId]?.start; // the class's bread-and-butter ability always stays
@@ -119,7 +125,7 @@ export function autoLoadout(ch) {
   const core = TREE_SPECS[ch.classId]?.start;
   const muts = treeMutators(ch); // abilities changed by subclass mutators are worth a slot
   const pickScore = a => abilityPriority(a) + (muts[a] ? 1000 * muts[a].length : 0);
-  const others = Object.keys(ch.abilities).filter(a => a !== core).sort((a, b) => pickScore(b) - pickScore(a));
+  const others = Object.keys(ch.abilities).filter(a => a !== core && !ABILITIES[a]?.passive).sort((a, b) => pickScore(b) - pickScore(a));
   const pick = [...(ch.abilities[core] ? [core] : []), ...others].slice(0, abilitySlots(ch));
   return pick.sort((a, b) => abilityPriority(b) - abilityPriority(a));
 }

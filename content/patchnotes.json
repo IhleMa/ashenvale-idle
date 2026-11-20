@@ -27,6 +27,13 @@
           ]
         },
         {
+          "heading": "Bard",
+          "items": [
+            "Finale is now passive: once three notes have been played, the Bard plays the Finale automatically (15 s cooldown). It no longer needs a loadout slot, so recruited Bards can use 1 more of their other spells.",
+            "While Finale recharges the notes keep rotating but don't count; the next three notes after the cooldown form the next Finale."
+          ]
+        },
+        {
           "heading": "Rifts",
           "items": [
             "Every rift tier now has a fixed theme and enemy line-up, and the themes are balanced to be equally hard."

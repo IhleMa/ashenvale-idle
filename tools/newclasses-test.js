@@ -179,7 +179,7 @@ ok('6 new classes, each with 7+ base abilities, a 4-branch tree and 3 ascendanci
     const { b, me, ally, foes } = battle('bard');
     for (const nt of notes) { const id = nt + '_note'; me.notes.push(nt); void id; }
     C.drainEvents(b);
-    cast(b, me, 'finale', foes[0]);
+    for (const eff of ABILITIES.finale.effects) C.__test.applyEffect(b, me, foes[0], eff, 'finale');
     return { b, me, ally, foes, ev: C.drainEvents(b) };
   };
   const tri = play(['low', 'mid', 'high']);
@@ -205,6 +205,23 @@ ok('6 new classes, each with 7+ base abilities, a 4-branch tree and 3 ascendanci
   assert.deepEqual(me.notes, ['mid', 'high', 'low'], 'only the last three notes are kept');
   assert.ok(CONDITIONS.last_note.test({ note: 'low' }, b, me) && CONDITIONS.own_notes.test({ cmp: '>=', value: 3 }, b, me));
   ok('the default rules play Low → Mid → High in a loop; the last three notes are kept for the Finale');
+
+  // Finale is passive: it plays by itself after the third note, needs no slot, and restarts the phrase after its cooldown
+  {
+    const { b, me, ally } = battle('bard');
+    me.ranks.finale = 1;
+    me.loadout = ['high_note', 'mid_note', 'low_note']; me.cooldowns = {}; me.resource = 100;
+    for (const a of me.loadout) me.rules[a] = JSON.parse(JSON.stringify(ABILITIES[a].defaultRule));
+    b.units.forEach(u => { if (u !== me) u.actionTimer = 1e9; });
+    const finales = [], notes = [];
+    for (let i = 0; i < 400; i++) { me.resource = 100; C.stepBattle(b); for (const e of C.drainEvents(b)) { if (e.type === 'phase' && /plays/.test(e.message)) finales.push(e.message); if (e.type === 'ability' && e.ability !== 'finale') notes.push(e.ability); } }
+    assert.ok(finales.length >= 2, `finales: ${finales.length}`);
+    assert.ok(finales.every(f => /Triumph/.test(f)), finales.join(' / '));
+    assert.ok(new Set(notes).size === 3, 'notes keep rotating while Finale recharges');
+    const ch = createCharacter({ id: 'bd', name: 'B', classId: 'bard', level: 30 });
+    assert.ok(ch.abilities.finale && !ch.loadout.includes('finale'), 'Finale is learned but takes no slot');
+  }
+  ok('Finale plays itself after three notes (Triumph every time with the default rules) and takes no loadout slot');
 }
 
 // ---- Spellblade

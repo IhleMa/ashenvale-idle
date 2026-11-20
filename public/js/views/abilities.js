@@ -117,6 +117,11 @@ function summary(ability, rule) {
 
 // ------------------------------------------------------------------ editor
 function editorHtml(ch, abilityId) {
+  if (ABILITIES[abilityId]?.passive) {
+    const p = ABILITIES[abilityId];
+    return `<div class="panel rule-editor"><div class="panel-head"><div class="row gap">${abilityIcon(abilityId, 'md')}<div><h3>${esc(p.name)} <span class="muted small">Rank ${ch.abilities[abilityId]}</span></h3><div class="muted small">Passive</div></div></div></div>
+      <div class="notice">Passive: works by itself and needs no loadout slot, so there is nothing to set up here.</div><p class="small">${esc(p.description)}</p></div>`;
+  }
   const a = ABILITIES[abilityId];
   const rule = getDraft(ch, abilityId);
   const sels = selectorsForAbility(a);
@@ -253,7 +258,7 @@ export const abilitiesView = {
     const all = classAbilities(ch.classId, ch.subclass);
     if (!selectedAbility || !ch.abilities[selectedAbility]) selectedAbility = ch.loadout[0] || Object.keys(ch.abilities)[0] || null;
     const slots = abilitySlots(ch);
-    const unequipped = Object.keys(ch.abilities).filter(a => !ch.loadout.includes(a));
+    const unequipped = Object.keys(ch.abilities).filter(a => !ch.loadout.includes(a) && !ABILITIES[a]?.passive);
     root.innerHTML = `
       ${charPicker(ch.id)}
       <div class="abilities-layout">
@@ -305,7 +310,7 @@ function abilityCard(ch, base) {
   const action = unlocked
     ? `<span class="muted small">Rank ${rank}/${CONFIG.maxAbilityRank}</span>${rank < CONFIG.maxAbilityRank ? `<button class="btn tiny ghost" data-tree-goto="${nodeId}">Empower in tree</button>` : ''}`
     : `<button class="btn tiny ${dist <= availablePoints(ch) ? 'primary' : ''}" data-tree-goto="${nodeId}">Skill tree · ${dist} pt${dist === 1 ? '' : 's'}</button>`;
-  const meta = [a.cost ? `${a.cost} ${cls.resource.name}` : 'No cost', `${a.cooldown}s cooldown`, a.area ? 'Area' : a.target === 'self' ? 'Self' : a.target === 'ally' ? 'Ally' : 'Enemy'].join(' · ');
+  const meta = a.passive ? [`Passive · ${a.cooldown}s cooldown`].join('') : [a.cost ? `${a.cost} ${cls.resource.name}` : 'No cost', `${a.cooldown}s cooldown`, a.area ? 'Area' : a.target === 'self' ? 'Self' : a.target === 'ally' ? 'Ally' : 'Enemy'].join(' · ');
   const tip = `<b>${esc(a.name)}</b><br>${esc(a.description)}<br><span class='muted'>${esc(meta)}</span><br>Each rank: +${Math.round(CONFIG.abilityRankBonus * 100)}% effect (ranks come from Empowered nodes in the skill tree)`;
   return `<div class="ability-card ${unlocked ? '' : 'locked'} ${a.id === selectedAbility ? 'active' : ''}" ${unlocked ? `data-select-ability="${a.id}"` : ''} ${tipAttr(tip)}>
     ${abilityIcon(a.id, 'md')}

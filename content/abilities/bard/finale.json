@@ -3,8 +3,8 @@
   "classId": "bard",
   "unlockLevel": 6,
   "type": "buff",
-  "description": "Plays back the last three notes. Low-Mid-High: Triumph (party +30% damage). High-Mid-Low: Requiem (300% magic damage to every enemy). Mid-Low-High: Hymn (party heal). Mid-High-Low: Chorus of Steel (party shield). Low-High-Mid: Dirge (enemies weaker and slower). High-Low-Mid: Tempo (party faster). A repeated note: Dissonance.",
-  "cost": 20,
+  "description": "Passive: once three notes have been played, the Bard plays them back automatically (15 s cooldown; notes played while it recharges don't count). Low-Mid-High: Triumph (party +30% damage). High-Mid-Low: Requiem (300% magic damage to every enemy). Mid-Low-High: Hymn (party heal). Mid-High-Low: Chorus of Steel (party shield). Low-High-Mid: Dirge (enemies weaker and slower). High-Low-Mid: Tempo (party faster). A repeated note: Dissonance.",
+  "cost": 0,
   "cooldown": 15,
   "target": "self",
   "effects": [
@@ -106,9 +106,7 @@
     "mode": "all",
     "conditions": [
       {
-        "type": "own_notes",
-        "cmp": ">=",
-        "value": 3
+        "type": "always"
       }
     ],
     "target": {
@@ -117,5 +115,6 @@
     "targetConditions": []
   },
   "priority": 90,
-  "order": 40
+  "order": 40,
+  "passive": true
 }

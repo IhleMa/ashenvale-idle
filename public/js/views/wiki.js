@@ -109,6 +109,7 @@ function abilityFacts(a) {
   const f = [];
   const target = { enemy: a.area ? 'every enemy' : 'one enemy', ally: a.area ? 'every ally' : 'one ally', self: 'the caster' }[a.target] || a.target;
   f.push(['Targets', target]);
+  if (a.passive) f.push(['Passive', 'works by itself, needs no loadout slot']);
   f.push(['Cost', a.spendAll ? `${a.cost} + all remaining ${resourceName(a.classId)}` : a.cost ? `${a.cost} ${resourceName(a.classId)}` : 'free']);
   f.push(['Cooldown', a.cooldown ? sec(a.cooldown) : 'none']);
   if (a.requiresStatus) f.push(['Only in', statusLink(a.requiresStatus)]);
