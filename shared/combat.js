@@ -395,7 +395,12 @@ function applyEffect(b, src, tgt, eff, abilityId) {
         let amount = effPower(src, eff.stat) * eff.power * rm;
         if (eff.executeBelow && hpPct(tgt) < eff.executeBelow * 100) amount *= eff.executeMult || 2;
         const ownDebuffs = eff.lifestealPerDebuff ? ownDebuffKinds(src, tgt) : 0; // count before the hit can kill
+        const marked = eff.onHitIfStatus && tgt.statuses.some(s => s.id === eff.onHitIfStatus.status); // e.g. Shadow Flurry on a poisoned target
+        src.lastHitCrit = false;
         const dealt = dealDamage(b, src, tgt, amount, { school: eff.school, ability: abilityId, bonusCrit: eff.bonusCrit, proc: eff.proc });
+        // critResource: a crit refunds resource (Backstab rank 3)
+        if (eff.critResource && src.lastHitCrit && src.resourceDef) src.resource = Math.min(src.resourceMax, src.resource + eff.critResource);
+        if (marked && tgt.alive) for (const e of eff.onHitIfStatus.effects || []) applyEffect(b, src, tgt, e, abilityId);
         // life drain: heal the caster for part of the damage (more for each of its own different debuffs on the target)
         if (dealt > 0 && (eff.lifesteal || eff.lifestealPerDebuff) && src.alive) healUnit(b, src, src, dealt * ((eff.lifesteal || 0) + (eff.lifestealPerDebuff || 0) * ownDebuffs), abilityId);
       }
@@ -729,7 +734,7 @@ function dealDamage(b, src, tgt, raw, { school, ability, bonusCrit = 0, dot = nu
   if (src.vsEnemy && tgt.defId in src.vsEnemy) amount *= 1 + src.vsEnemy[tgt.defId];
   if (b.hooks?.damageMult) amount *= b.hooks.damageMult(src, tgt, school);
   if (b.pvp && src.side !== tgt.side) amount *= b.pvp.damageMult ?? 1; // Arena: players hit each other softer
-  if (!noCrit && b.rng() < Math.min(C.critCap, src.stats.critChance + bonusCrit + mod(src, 'critChance'))) { crit = true; amount *= src.stats.critDamage; }
+  if (!noCrit && b.rng() < Math.min(C.critCap, src.stats.critChance + bonusCrit + mod(src, 'critChance'))) { crit = true; amount *= src.stats.critDamage; src.lastHitCrit = true; }
   if (!ignoreArmor) {
     const def = effDefense(tgt) * (school === 'magical' ? C.magicArmorFactor : 1);
     const red = Math.min(C.armorCap, def / (def + C.armorK + 12 * src.level));

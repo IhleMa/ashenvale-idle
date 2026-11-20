@@ -7,14 +7,53 @@
   "cost": 50,
   "cooldown": 14,
   "target": "enemy",
-  "effects": [{ "kind": "damage", "stat": "physPower", "power": 0.65, "school": "physical", "hits": 5 }],
+  "effects": [
+    {
+      "kind": "damage",
+      "stat": "physPower",
+      "power": 0.65,
+      "school": "physical",
+      "hits": 5
+    }
+  ],
   "defaultRule": {
     "enabled": true,
     "mode": "all",
-    "conditions": [{ "type": "always" }],
-    "target": { "selector": "enemy_current" },
+    "conditions": [
+      {
+        "type": "always"
+      }
+    ],
+    "target": {
+      "selector": "enemy_current"
+    },
     "targetConditions": []
   },
   "priority": 75,
-  "order": 210
+  "order": 210,
+  "rankEffects": {
+    "2": {
+      "name": "Venomous Flurry",
+      "description": "Every hit against a poisoned enemy adds another poison stack (25% Physical Power per second for 8 seconds).",
+      "changes": {
+        "set": {
+          "damage": {
+            "onHitIfStatus": {
+              "status": "poison",
+              "effects": [
+                {
+                  "kind": "status",
+                  "status": "poison",
+                  "duration": 8,
+                  "stat": "physPower",
+                  "power": 0.25,
+                  "stacks": 1
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
 }

@@ -86,4 +86,28 @@ const has = (u, id) => u.statuses.some(s => s.id === id);
   assert.equal(r3.me.resource, 14);
   ok('Expose Weakness rank 3 grants Opportunist: hits on exposed enemies restore 4 energy');
 }
+// Shadow Flurry rank 2 and Backstab rank 3
+{
+  const { mutatedAbilities } = await import('../shared/skilltree.js');
+  const mk = (ab, rank) => {
+    const r = createCharacter({ id: 'r', name: 'Sly', classId: 'rogue', level: 30, isMain: true, autoTree: false });
+    r.abilities = { ...r.abilities, [ab]: rank };
+    const b = C.createBattle({ seed: 2, allies: [C.makeCharacterUnit(r, { ownerId: 'p', ownerName: 'P', position: 0 })], waves: [[{ enemyId: 'swamp_troll', level: 30 }]] });
+    const me = b.units[0], foe = b.units.find(u => u.side === 'B');
+    foe.hp = foe.maxHp = 1e7; b.rng = () => 0.5;
+    const cast = id => { for (const eff of (me.abilityDefs[id] || ABILITIES[id]).effects) C.__test.applyEffect(b, me, foe, eff, id); };
+    return { b, me, foe, cast };
+  };
+  const stacks = f => f.statuses.find(s => s.id === 'poison')?.stacks || 0;
+  const f1 = mk('shadow_flurry', 1); f1.cast('poison_blade'); f1.cast('shadow_flurry');
+  const f2 = mk('shadow_flurry', 2); f2.cast('poison_blade'); f2.cast('shadow_flurry');
+  const f3 = mk('shadow_flurry', 2); f3.cast('shadow_flurry');
+  assert.equal(stacks(f1.foe), 1); assert.equal(stacks(f2.foe), 5); assert.equal(stacks(f3.foe), 0);
+  ok('Shadow Flurry rank 2: every hit on a poisoned enemy adds a poison stack (only if it is poisoned already)');
+  const crit = rank => { const x = mk('backstab', rank); x.b.rng = () => 0; x.me.resource = 0; x.cast('backstab'); return x.me.resource; };
+  assert.equal(crit(3), 15); assert.equal(crit(2), 0);
+  const nocrit = mk('backstab', 3); nocrit.b.rng = () => 0.99; nocrit.me.resource = 0; nocrit.cast('backstab');
+  assert.equal(nocrit.me.resource, 0);
+  ok('Backstab rank 3: a critical Backstab refunds 15 Energy');
+}
 console.log(`rogue-test: ${n} checks passed`);

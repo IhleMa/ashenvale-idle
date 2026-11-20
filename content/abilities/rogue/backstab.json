@@ -7,14 +7,41 @@
   "cost": 35,
   "cooldown": 3,
   "target": "enemy",
-  "effects": [{ "kind": "damage", "stat": "physPower", "power": 1.8, "school": "physical", "bonusCrit": 0.2 }],
+  "effects": [
+    {
+      "kind": "damage",
+      "stat": "physPower",
+      "power": 1.8,
+      "school": "physical",
+      "bonusCrit": 0.2
+    }
+  ],
   "defaultRule": {
     "enabled": true,
     "mode": "all",
-    "conditions": [{ "type": "always" }],
-    "target": { "selector": "enemy_current" },
+    "conditions": [
+      {
+        "type": "always"
+      }
+    ],
+    "target": {
+      "selector": "enemy_current"
+    },
     "targetConditions": []
   },
   "priority": 20,
-  "order": 150
+  "order": 150,
+  "rankEffects": {
+    "3": {
+      "name": "Cold Blood",
+      "description": "A critical Backstab refunds 15 Energy.",
+      "changes": {
+        "set": {
+          "damage": {
+            "critResource": 15
+          }
+        }
+      }
+    }
+  }
 }

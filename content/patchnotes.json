@@ -39,7 +39,9 @@
             "Plaguebringer: poisoning an enemy that is already bleeding now spreads the poison to every enemy.",
             "Poisons hit harder: Poison Blade 18% → 25% Physical Power per stack per second, Plague Strike 35% → 45%, Toxic Cloud 30% → 40%.",
             "Poison Blade has a higher priority, so automatic loadouts now include it.",
-            "Ability ranks can now unlock extra effects. First one: Expose Weakness at rank 3 also gives you Opportunist for 10 s — every direct hit on an exposed enemy restores 4 Energy."
+            "Ability ranks can now unlock extra effects. First one: Expose Weakness at rank 3 also gives you Opportunist for 10 s — every direct hit on an exposed enemy restores 4 Energy.",
+            "Shadow Flurry at rank 2 (Venomous Flurry): every hit against a poisoned enemy adds another poison stack.",
+            "Backstab at rank 3 (Cold Blood): a critical Backstab refunds 15 Energy."
           ]
         },
         {
