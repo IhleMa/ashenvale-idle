@@ -17,11 +17,13 @@ import { ABILITIES } from '/shared/data/abilities.js';
 import { describeNodeStats } from '/shared/data/skilltree.js';
 import { describeChanges } from '/shared/mutators.js';
 import { professionIcon } from '../assets.js';
+import { inventoryPanelHtml, bindInventory, isDragging, invTab } from './inventory.js';
 
 export const characterView = {
   id: 'character', label: 'Character', icon: '👤',
   mount(root) {
-    bindPicker(root, () => this.render(root));
+    bindPicker(root, () => this.render(root, true));
+    bindInventory(root, (force = false) => this.render(root, force), selectedChar);
     root.addEventListener('click', async e => {
       const ch = selectedChar();
       const t = e.target.closest('[data-act]');
@@ -43,9 +45,12 @@ export const characterView = {
       if (e.target.matches('[data-role]')) await run(act('set_role', { charId: ch.id, role: e.target.value }));
     });
   },
-  render(root) {
+  render(root, force = false) {
     const ch = selectedChar();
     if (!ch) return;
+    if (isDragging()) return; // a re-render would cancel the drag
+    // don't rebuild the loot filter editor while the player is typing in it
+    if (!force && invTab() === 'filter' && root.querySelector('.lf-editor')?.contains(document.activeElement) && document.activeElement.matches('input, select')) return;
     const cls = CLASSES[ch.classId];
     const s = computeStats(ch);
     const p = state.player;
@@ -97,11 +102,11 @@ export const characterView = {
         </section>
 
         <section class="panel">
-          <div class="panel-head"><h3>Equipment</h3><span class="muted small">Click a slot to change gear</span></div>
+          <div class="panel-head"><h3>Equipment</h3><span class="muted small">Drag items here · click a slot for choices</span></div>
           <div class="equip-grid">
             ${SLOT_IDS.map(slot => {
               const it = ch.equipment[slot];
-              return `<button class="equip-slot" data-act="slot" data-slot="${slot}" ${it ? tipAttr(itemTooltipHtml(it, null, ch)) : ''}>
+              return `<button class="equip-slot" data-act="slot" data-slot="${slot}" draggable="${it ? 'true' : 'false'}" ${it ? tipAttr(itemTooltipHtml(it, null, ch)) : ''}>
                 ${it ? itemIcon(it, 'md') : slotIcon(slot, 'md')}
                 <span class="slot-text"><small>${esc(SLOTS[slot].label)}</small><b class="${it ? `rarity-text rarity-${it.rarity} ${it.unique ? 'unique-name' : ''} ${it.set ? 'set-name' : ''}` : 'muted'}">${it ? esc(it.name) : 'Empty'}</b></span>
               </button>`;
@@ -110,6 +115,7 @@ export const characterView = {
           ${specialEffectsHtml(ch)}
           <div class="muted small">${p.inventory.filter(i => canEquip(i, ch)).length} usable item(s) in inventory.</div>
         </section>
+        ${inventoryPanelHtml(ch)}
         ${ch.isMain ? ascensionPanel(ch) : ''}
       </div>`;
   },

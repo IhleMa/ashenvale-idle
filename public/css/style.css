@@ -1316,3 +1316,14 @@ html.standalone body { padding-bottom: env(safe-area-inset-bottom); padding-left
 .unit-threat.aggro .thr-bar .fill { background: #e0464e; }
 .unit-threat.aggro .thr-txt { color: #ff7b7b; font-weight: 700; }
 .unit-target { font-size: 10px; color: #ff9a8a; margin-top: 2px; min-height: 12px; }
+/* inventory on the character page */
+.inv-panel .tabs { margin-bottom: 8px; }
+.inv-panel.wide { grid-column: 1 / -1; }
+.inv-panel .item-grid { grid-template-columns: repeat(auto-fill, minmax(54px, 1fr)); gap: 6px; max-height: 430px; overflow-y: auto; padding-right: 2px; }
+.inv-panel .item-detail { border-top: 1px solid var(--line); margin-top: 8px; padding-top: 8px; }
+.item-cell.unusable { opacity: .45; }
+.item-cell .no-use { position: absolute; top: 1px; right: 4px; font-size: 10px; color: #ff6b6b; font-weight: 700; }
+.unusable-note { margin-top: 6px; color: #ff7b7b; font-size: 12px; font-weight: 600; }
+.equip-slot.drop-ok, .inv-panel.drop-ok { outline: 2px dashed #6fdc8c; outline-offset: 2px; background: rgba(111,220,140,.08); }
+.equip-slot.drop-bad { outline: 2px dashed #ff6b6b; outline-offset: 2px; }
+.drag-src { opacity: .4; }

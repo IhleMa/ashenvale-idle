@@ -1,4 +1,4 @@
-// Loot filter editor + log (shown as tabs on the Inventory page).
+// Loot filter editor + log (shown as tabs in the inventory panel on the Character page).
 import { state } from '../state.js';
 import { act } from '../net.js';
 import { esc, fmt, run, toast, confirmBox, tipAttr } from '../ui.js';

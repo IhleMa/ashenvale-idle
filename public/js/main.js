@@ -19,7 +19,6 @@ import { abilitiesView } from './views/abilities.js';
 import { skilltreeView } from './views/skilltree.js';
 import { partyView } from './views/party.js';
 import { recruitmentView } from './views/recruitment.js';
-import { inventoryView } from './views/inventory.js';
 import { multiplayerView } from './views/multiplayer.js';
 import { progressionView } from './views/progression.js';
 import { rankingsView } from './views/rankings.js';
@@ -35,7 +34,7 @@ import { arenaView } from './views/arena.js';
 import { gemsView } from './views/gems.js';
 import { createView } from './views/create.js';
 
-const VIEWS = [combatView, riftsView, questsView, characterView, skilltreeView, abilitiesView, partyView, recruitmentView, townView, expeditionsView, inventoryView, gemsView, auctionView, multiplayerView, arenaView, rankingsView, bestiaryView, wikiView, progressionView, adminView];
+const VIEWS = [combatView, riftsView, questsView, characterView, skilltreeView, abilitiesView, partyView, recruitmentView, townView, expeditionsView, gemsView, auctionView, multiplayerView, arenaView, rankingsView, bestiaryView, wikiView, progressionView, adminView];
 const viewEl = () => document.getElementById('view');
 let current = null;
 let root = null; // per-view container (listeners attached to it die with it)
@@ -135,7 +134,8 @@ function renderNav() {
 function route() {
   if (!state.player) return;
   if (!state.player.heroId) { mount(createView); return; }
-  const id = (location.hash.match(/^#\/(\w+)/) || [])[1] || 'combat';
+  let id = (location.hash.match(/^#\/(\w+)/) || [])[1] || 'combat';
+  if (id === 'inventory') id = 'character'; // the inventory is part of the Character page
   let v = VIEWS.find(x => x.id === id && (!x.adminOnly || state.isAdmin) && isViewVisible(x.id)) || combatView;
   if (pageLock(v.id)) v = lockedView(v);
   if (newViews.delete(v.id)) document.querySelector(`#sidebar a[data-view="${v.id}"]`)?.classList.remove('nav-new');
