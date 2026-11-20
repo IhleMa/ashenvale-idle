@@ -49,7 +49,7 @@ const SETTINGS_LABELS = {
   zones: 'Zones (general)', legendaries: 'Uniques & sets (drop rates)', skilltree: 'Skill tree (layout, costs)', town: 'Town (costs, formulas)',
   expeditions: 'Expeditions (camp)', quests: 'Quests (counts, rewards)', rifts: 'Rifts (scaling, rewards)', gems: 'Gems (tiers, costs)',
   bestiary: 'Bestiary (mastery, tips)', lootfilter: 'Loot filter (limits)', bots: 'Bots (names, chat)',
-  tutorial: 'Tutorial (steps, rewards)',
+  tutorial: 'Tutorial (steps, rewards)', patchnotes: 'Patch notes (shown to players)',
 };
 
 const isPlain = v => v !== null && typeof v === 'object' && !Array.isArray(v);

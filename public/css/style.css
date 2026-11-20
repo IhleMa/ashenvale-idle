@@ -1245,3 +1245,9 @@ html.standalone body { padding-bottom: env(safe-area-inset-bottom); padding-left
 .enchant-now { color: #c8b6ff; }
 .reforge-row.enchant-row { flex-direction: column; align-items: stretch; gap: 3px; }
 .er-line { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; min-width: 0; }
+/* patch notes */
+.ann-badge.dot { min-width: 10px; width: 10px; height: 10px; padding: 0; top: -4px; right: -4px; }
+.ann.patch h3.patch-title { margin: 2px 0 6px; font-size: 15px; }
+.ann.patch h4 { margin: 8px 0 2px; font-size: 13px; color: var(--accent, #d9a441); }
+.ann.patch ul { margin: 0; padding-left: 18px; line-height: 1.45; }
+.ann.patch li { margin: 2px 0; }

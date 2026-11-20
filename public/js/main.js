@@ -10,7 +10,7 @@ import { xpToNext, CONFIG } from '/shared/config.js';
 import { initPwa } from './pwa.js';
 import { initTutorial, renderTutorial, isViewVisible, visibleKey } from './tutorial.js';
 import { CLASSES } from '/shared/data/classes.js';
-import { replaceContent } from '/shared/content.js';
+import { replaceContent, CONTENT } from '/shared/content.js';
 import { hasAbilityAction } from '/shared/character.js';
 import { combatView } from './views/combat.js';
 import { characterView } from './views/character.js';
@@ -309,6 +309,32 @@ bus.on('msg:announcement_removed', m => {
   updateAnnBadge();
   if (current?.id === 'admin') requestRender();
 });
+// ---- patch notes (content/patchnotes.json, newest first); "seen" is remembered per browser
+const NOTES_KEY = 'ashenvale.patchnotesSeen';
+const patchEntries = () => CONTENT.patchnotes?.entries || [];
+const notesSeen = () => { try { return localStorage.getItem(NOTES_KEY); } catch { return null; } };
+function updateNotesBadge() {
+  const newest = patchEntries()[0]?.id;
+  const isNew = !!newest && notesSeen() !== newest;
+  document.getElementById('topbar-notes-badge').hidden = !isNew;
+  document.getElementById('topbar-notes').classList.toggle('has-new', isNew);
+}
+function showPatchNotes() {
+  const list = patchEntries(), seen = notesSeen();
+  const seenIdx = list.findIndex(e => e.id === seen);
+  const fmtDate = d => new Date(d + 'T12:00:00').toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+  const body = list.length ? list.map((e, i) => `<div class="ann patch ${seenIdx === -1 ? (seen ? 'new' : '') : i < seenIdx ? 'new' : ''}">
+      <div class="ann-meta">${(seenIdx === -1 ? !!seen : i < seenIdx) ? '<span class="tag">NEW</span> ' : ''}<span class="muted">${esc(fmtDate(e.date))}</span></div>
+      ${e.title ? `<h3 class="patch-title">${esc(e.title)}</h3>` : ''}
+      ${(e.sections || []).map(s => `${s.heading ? `<h4>${esc(s.heading)}</h4>` : ''}<ul>${(s.items || []).map(t => `<li>${esc(t)}</li>`).join('')}</ul>`).join('')}
+    </div>`).join('') : '<p class="muted">No patch notes yet.</p>';
+  modal(`<h2>📜 Patch notes</h2><div class="ann-list">${body}</div><div class="row end"><button class="btn primary" data-close>Close</button></div>`, {
+    onClose: () => { if (list[0]) { try { localStorage.setItem(NOTES_KEY, list[0].id); } catch {} } updateNotesBadge(); },
+  });
+}
+document.getElementById('topbar-notes').addEventListener('click', showPatchNotes);
+bus.on('content:updated', updateNotesBadge);
+updateNotesBadge();
 bus.on('kicked', reason => banner(`${esc(reason || 'You were disconnected.')} <button class="btn tiny" onclick="location.reload()">Reconnect</button>`, 'warn'));
 bus.on('msg:server_restart', () => banner('⟳ The server is restarting for an update. You will reconnect automatically — your progress is saved.', 'warn'));
 

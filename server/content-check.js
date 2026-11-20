@@ -396,6 +396,20 @@ export function validateContent(C) {
   for (const [id, a] of Object.entries(C.bots?.archetypes || {})) for (const k of ['skill', 'activity', 'trader', 'crafter', 'rifter', 'social']) num(`bots.archetypes.${id}.${k}`, a[k], { min: 0, max: 1 });
   if (!(C.bots?.names || []).length) err('bots.names', 'needs at least one name');
 
+  // ---- patch notes: newest first, every entry { id, date, title?, sections: [{ heading?, items: [text] }] }
+  if (C.patchnotes) {
+    const P = C.patchnotes, ids = new Set();
+    if (!Array.isArray(P.entries)) err('patchnotes.entries', 'must be a list');
+    (P.entries || []).forEach((e, i) => {
+      const w = `patchnotes.entries[${i}]`;
+      if (!e?.id || typeof e.id !== 'string') err(`${w}.id`, 'needs a text id (e.g. the date)');
+      else if (ids.has(e.id)) err(`${w}.id`, `duplicate id "${e.id}"`); else ids.add(e.id);
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(e?.date || '')) err(`${w}.date`, 'must be a date like 2026-11-20');
+      if (!Array.isArray(e?.sections) || !e.sections.length) err(`${w}.sections`, 'needs at least one section');
+      (e?.sections || []).forEach((s, j) => { if (!Array.isArray(s?.items) || !s.items.every(t => typeof t === 'string')) err(`${w}.sections[${j}].items`, 'must be a list of texts'); });
+    });
+  }
+
   // ---- tutorial
   if (C.tutorial) {
     const T = C.tutorial, ids = new Set();

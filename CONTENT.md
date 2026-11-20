@@ -238,3 +238,7 @@ Easiest: **Admin → 📈 XP curve** (drag the points, save — live). In the fi
 - The **rift mechanics** vocabulary and the **bestiary tip conditions**.
 
 The data chooses and combines these freely, but brand-new kinds of behaviour need a small code addition. The validator reports any unknown kind instead of failing silently.
+
+## Patch notes
+
+`content/patchnotes.json` holds `entries`, newest first. Each entry has an `id` (unique, e.g. the date), a `date` (`YYYY-MM-DD`), an optional `title` and `sections`: `[{ "heading": "Rogue", "items": ["…", "…"] }]`. Players see a dot on the 📜 button until they open the notes after a new entry was added at the top.

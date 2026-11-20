@@ -1,0 +1,55 @@
+{
+  "entries": [
+    {
+      "id": "2026-11-20",
+      "date": "2026-11-20",
+      "title": "Rogue rework, fixed rift themes and patch notes",
+      "sections": [
+        { "heading": "Rogue", "items": [
+          "New ability Assassin's Mark (Assassination path, outer ring): mark an enemy for 6 seconds. All damage you deal to it is recorded, and when the mark runs out it explodes for the recorded damage again.",
+          "Plaguebringer: poisoning an enemy that is already bleeding now spreads the poison to every enemy."
+        ] },
+        { "heading": "Rifts", "items": [
+          "Every rift tier now has a fixed theme and enemy line-up, and the themes are balanced to be equally hard."
+        ] },
+        { "heading": "Town", "items": [
+          "The Enchanter now has the same layout as reforging."
+        ] },
+        { "heading": "Interface", "items": [
+          "Patch notes: the 📜 button next to announcements shows what changed. A dot appears when there is something new."
+        ] }
+      ]
+    },
+    {
+      "id": "2026-11-19",
+      "date": "2026-11-19",
+      "title": "Arena, six new classes and the Wiki",
+      "sections": [
+        { "heading": "Arena", "items": [
+          "New: the Arena (from hero level 12). Choose one of your party setups as your arena team and attack other players' teams to earn arena rating and gold.",
+          "Both teams are synced to the average level of the two heroes. Damage, healing and stuns are reduced in the arena."
+        ] },
+        { "heading": "Classes", "items": [
+          "Six new classes: Sentinel, Druid, Chronomancer, Alchemist, Bard and Spellblade (13 in total).",
+          "New class: Warlock, with stacking curses and damage over time. Drain Life is its starting spell.",
+          "Cleric and Druid are now different healers: the Cleric heals in bursts (new: Holy Nova), the Druid heals over time (new: Regrowth, Nature's Cure).",
+          "Summoner (Lich): Grave Detonation now makes Corpse Explosion detonate every minion at once.",
+          "Ability ranks now also make summoned minions stronger (+20% health and power per rank).",
+          "New AI target condition: my debuff stacks on the target. Reap now only needs one of your DoTs on the target."
+        ] },
+        { "heading": "Co-op", "items": [
+          "At most 4 characters per co-op fight, and every player brings only one recruit.",
+          "Recruits fill missing roles first (healer, then tank). Enemies get stronger with every character beyond two.",
+          "Fixed: the co-op fight view sometimes got stuck."
+        ] },
+        { "heading": "Interface", "items": [
+          "New in-game Wiki with classes, abilities, skill trees, statuses, items, the town and zones.",
+          "Shields are now shown on health bars.",
+          "Hero creation: classes are grouped by role.",
+          "Tutorial: the first fights can't be lost, and only the highlighted buttons can be clicked.",
+          "Character sheet: equipped items no longer overflow their card."
+        ] }
+      ]
+    }
+  ]
+}
