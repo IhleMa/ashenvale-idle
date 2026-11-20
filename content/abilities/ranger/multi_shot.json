@@ -8,14 +8,48 @@
   "cooldown": 6,
   "target": "enemy",
   "area": true,
-  "effects": [{ "kind": "damage", "stat": "physPower", "power": 0.8, "school": "physical" }],
+  "effects": [
+    {
+      "kind": "damage",
+      "stat": "physPower",
+      "power": 0.8,
+      "school": "physical"
+    }
+  ],
   "defaultRule": {
     "enabled": true,
     "mode": "all",
-    "conditions": [{ "type": "enemies_alive", "cmp": ">=", "value": 2 }],
-    "target": { "selector": "all_enemies" },
+    "conditions": [
+      {
+        "type": "enemies_alive",
+        "cmp": ">=",
+        "value": 2
+      }
+    ],
+    "target": {
+      "selector": "all_enemies"
+    },
     "targetConditions": []
   },
   "priority": 65,
-  "order": 310
+  "order": 310,
+  "rankEffects": {
+    "2": {
+      "name": "Venom Arrows",
+      "description": "Every enemy hit has a 25% chance to get Serpent Sting's poison.",
+      "changes": {
+        "effects": [
+          {
+            "kind": "status",
+            "status": "poison",
+            "duration": 12,
+            "stat": "physPower",
+            "power": 0.2,
+            "stacks": 1,
+            "chance": 0.25
+          }
+        ]
+      }
+    }
+  }
 }

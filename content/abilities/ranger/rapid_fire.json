@@ -7,14 +7,49 @@
   "cost": 20,
   "cooldown": 30,
   "target": "self",
-  "effects": [{ "kind": "status", "status": "rapid_fire", "duration": 10 }],
+  "effects": [
+    {
+      "kind": "status",
+      "status": "rapid_fire",
+      "duration": 10
+    }
+  ],
   "defaultRule": {
     "enabled": true,
     "mode": "all",
-    "conditions": [{ "type": "always" }],
-    "target": { "selector": "self" },
-    "targetConditions": [{ "type": "target_missing_status", "status": "rapid_fire" }]
+    "conditions": [
+      {
+        "type": "always"
+      }
+    ],
+    "target": {
+      "selector": "self"
+    },
+    "targetConditions": [
+      {
+        "type": "target_missing_status",
+        "status": "rapid_fire"
+      }
+    ]
   },
   "priority": 85,
-  "order": 330
+  "order": 330,
+  "rankEffects": {
+    "3": {
+      "name": "Lock and Load",
+      "description": "While Rapid Fire is active, every hit lowers Kill Shot's cooldown by 1 second.",
+      "changes": {
+        "set": {
+          "status": {
+            "extra": {
+              "hitCooldown": {
+                "ability": "kill_shot",
+                "seconds": 1
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 }

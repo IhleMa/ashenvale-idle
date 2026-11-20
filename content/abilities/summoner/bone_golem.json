@@ -7,17 +7,51 @@
   "cost": 40,
   "cooldown": 40,
   "target": "self",
-  "effects": [{ "kind": "summon", "minion": "bone_golem", "count": 1, "max": 1 }],
+  "effects": [
+    {
+      "kind": "summon",
+      "minion": "bone_golem",
+      "count": 1,
+      "max": 1
+    }
+  ],
   "defaultRule": {
     "enabled": true,
     "mode": "all",
     "conditions": [
-      { "type": "enemies_alive", "cmp": ">=", "value": 1 },
-      { "type": "own_minions", "minion": "bone_golem", "cmp": "<=", "value": 0 }
+      {
+        "type": "enemies_alive",
+        "cmp": ">=",
+        "value": 1
+      },
+      {
+        "type": "own_minions",
+        "minion": "bone_golem",
+        "cmp": "<=",
+        "value": 0
+      }
     ],
-    "target": { "selector": "self" },
+    "target": {
+      "selector": "self"
+    },
     "targetConditions": []
   },
   "priority": 80,
-  "order": 30
+  "order": 30,
+  "rankEffects": {
+    "3": {
+      "name": "Bone Armor",
+      "description": "When the Bone Golem dies, you get a shield worth 30% of its maximum health.",
+      "changes": {
+        "set": {
+          "summon": {
+            "onDeath": {
+              "ownerShieldPct": 0.3,
+              "shieldDuration": 10
+            }
+          }
+        }
+      }
+    }
+  }
 }

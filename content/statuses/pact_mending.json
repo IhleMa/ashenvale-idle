@@ -1,0 +1,7 @@
+{
+  "name": "Pact Mending",
+  "type": "buff",
+  "tick": "heal",
+  "description": "The health paid for Dark Pact comes back every second.",
+  "order": 1210
+}

@@ -35,5 +35,20 @@
     ]
   },
   "priority": 70,
-  "order": 20
+  "order": 20,
+  "rankEffects": {
+    "2": {
+      "name": "Contagion",
+      "description": "When the target dies, Blight spreads to another enemy that doesn't have it.",
+      "changes": {
+        "set": {
+          "status": {
+            "extra": {
+              "spreadOnDeath": true
+            }
+          }
+        }
+      }
+    }
+  }
 }

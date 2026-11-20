@@ -30,5 +30,20 @@
     "targetConditions": []
   },
   "priority": 72,
-  "order": 30
+  "order": 30,
+  "rankEffects": {
+    "3": {
+      "name": "Spreading Pain",
+      "description": "Every tick of Agony has a 10% chance to add another stack.",
+      "changes": {
+        "set": {
+          "status": {
+            "extra": {
+              "spawnChance": 0.1
+            }
+          }
+        }
+      }
+    }
+  }
 }

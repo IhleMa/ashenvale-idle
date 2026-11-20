@@ -33,5 +33,19 @@
     ]
   },
   "priority": 90,
-  "order": 30
+  "order": 30,
+  "rankEffects": {
+    "2": {
+      "name": "Clean Slate",
+      "description": "Rewind also removes all debuffs from the target.",
+      "changes": {
+        "effects": [
+          {
+            "kind": "cleanse",
+            "count": 99
+          }
+        ]
+      }
+    }
+  }
 }

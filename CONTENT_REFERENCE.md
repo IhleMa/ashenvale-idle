@@ -378,6 +378,7 @@ Target selectors (`target.selector`):
 | [`valor_plus`](content/statuses/valor_plus.json) | Battle Hymn | buff | Deals another 10% more damage. |
 | [`arcane_infusion`](content/statuses/arcane_infusion.json) | Arcane Infusion | buff | Every ability gets the Edge or Arcana bonus. |
 | [`cat_form`](content/statuses/cat_form.json) | Cat Form | buff | Attacks 25% faster with +10% critical chance. |
+| [`dilated`](content/statuses/dilated.json) | Dilated | debuff | Slowed by time: deals 10% less damage. |
 | [`frost_mark`](content/statuses/frost_mark.json) | Frost Mark | debuff | Frost element, attacks 20% slower: reacts with Fire (Shatter), Acid (Brittle) or Poison (Numbing Venom). |
 | [`song_of_respite`](content/statuses/song_of_respite.json) | Song of Respite | buff | Restores health every second. One song per Bard. |
 | [`stasis`](content/statuses/stasis.json) | Stasis | debuff | Frozen in time: cannot act and takes no damage. Half as long on bosses. |
@@ -422,6 +423,7 @@ Target selectors (`target.selector`):
 | [`chain_reaction`](content/statuses/chain_reaction.json) | Chain Reaction | buff | Reactions happen again on another enemy at half strength. |
 | [`lullaby`](content/statuses/lullaby.json) | Lullaby | debuff | Attacks 30% slower. |
 | [`regrowth`](content/statuses/regrowth.json) | Regrowth | buff | Restores health every second. |
+| [`pact_mending`](content/statuses/pact_mending.json) | Pact Mending | buff | The health paid for Dark Pact comes back every second. |
 
 ## Stats
 

@@ -33,5 +33,20 @@
     ]
   },
   "priority": 70,
-  "order": 20
+  "order": 20,
+  "rankEffects": {
+    "3": {
+      "name": "Quickening",
+      "description": "The target's next ability after Haste has no cooldown.",
+      "changes": {
+        "set": {
+          "status": {
+            "extra": {
+              "freeCooldown": true
+            }
+          }
+        }
+      }
+    }
+  }
 }

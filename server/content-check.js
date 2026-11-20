@@ -6,7 +6,7 @@ import { MUTATOR_CHANGES } from '../shared/mutators.js';
 import { CONDITIONS, TARGET_CONDITIONS, SELECTORS } from '../shared/rules.js';
 import { VIEW_IDS as TUTORIAL_VIEWS, METRIC_NAMES as TUTORIAL_METRICS } from '../shared/tutorialDefs.js';
 
-const EFFECT_KINDS = ['damage', 'heal', 'status', 'shield', 'taunt', 'cleanse', 'resource', 'summon', 'sacrifice', 'extend', 'consume_dots', 'spread_dots', 'self_damage', 'revive', 'rewind', 'echo', 'reduce_cooldowns', 'prolong', 'finale'];
+const EFFECT_KINDS = ['damage', 'heal', 'status', 'shield', 'taunt', 'cleanse', 'resource', 'summon', 'sacrifice', 'extend', 'consume_dots', 'spread_dots', 'self_damage', 'revive', 'rewind', 'echo', 'reduce_cooldowns', 'prolong', 'finale', 'counter'];
 const PROC_EFFECT_KINDS = [...EFFECT_KINDS, 'reflect', 'healPct', 'shieldPct', 'cooldowns'];
 const PROC_TRIGGERS = ['hit', 'crit', 'struck', 'heal', 'kill', 'cast', 'lowHp'];
 const PROC_TARGETS = ['self', 'target', 'source', 'randomEnemy', 'lowestAlly', 'allAllies'];
@@ -100,6 +100,7 @@ export function validateContent(C) {
       for (const k of ['markMult', 'markExecute', 'splash', 'refundPerStack']) num(`${w}.${k}`, e[k], { min: 0, optional: true });
     }
     if (e.kind === 'self_damage') num(`${w}.pct`, e.pct, { min: 0, max: 0.9 });
+    if (e.kind === 'counter') { num(`${w}.every`, e.every, { min: 2 }); if (!Array.isArray(e.effects) || !e.effects.length) err(`${w}.effects`, 'needs the effects to trigger'); else e.effects.forEach((x, i) => checkEffect(`${w}.effects[${i}]`, x, kinds)); }
     if (e.kind === 'revive') num(`${w}.pct`, e.pct, { min: 0.01, max: 1 });
     if (['rewind', 'echo', 'reduce_cooldowns', 'prolong'].includes(e.kind)) num(`${w}.seconds`, e.seconds, { min: 0, max: 30 });
     if (e.kind === 'echo') num(`${w}.power`, e.power, { min: 0 });

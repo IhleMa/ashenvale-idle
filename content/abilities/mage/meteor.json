@@ -9,16 +9,46 @@
   "target": "enemy",
   "area": true,
   "effects": [
-    { "kind": "damage", "stat": "magPower", "power": 2.6, "school": "magical" },
-    { "kind": "status", "status": "burn", "duration": 6, "stat": "magPower", "power": 0.2 }
+    {
+      "kind": "damage",
+      "stat": "magPower",
+      "power": 2.6,
+      "school": "magical"
+    },
+    {
+      "kind": "status",
+      "status": "burn",
+      "duration": 6,
+      "stat": "magPower",
+      "power": 0.2
+    }
   ],
   "defaultRule": {
     "enabled": true,
     "mode": "all",
-    "conditions": [{ "type": "always" }],
-    "target": { "selector": "all_enemies" },
+    "conditions": [
+      {
+        "type": "always"
+      }
+    ],
+    "target": {
+      "selector": "all_enemies"
+    },
     "targetConditions": []
   },
   "priority": 80,
-  "order": 140
+  "order": 140,
+  "rankEffects": {
+    "3": {
+      "name": "Cataclysm",
+      "description": "If Meteor kills an enemy, half of its cooldown comes back.",
+      "changes": {
+        "set": {
+          "damage": {
+            "killCooldownRefund": 0.5
+          }
+        }
+      }
+    }
+  }
 }

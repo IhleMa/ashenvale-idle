@@ -40,5 +40,22 @@
     "targetConditions": []
   },
   "priority": 100,
-  "order": 70
+  "order": 70,
+  "rankEffects": {
+    "3": {
+      "name": "Stretched Moment",
+      "description": "Enemies are slowed by time while it lasts: they deal 10% less damage.",
+      "changes": {
+        "effects": [
+          {
+            "kind": "status",
+            "status": "dilated",
+            "duration": 10,
+            "allEnemies": true,
+            "once": true
+          }
+        ]
+      }
+    }
+  }
 }

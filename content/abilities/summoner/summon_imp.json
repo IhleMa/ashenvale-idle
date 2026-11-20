@@ -7,17 +7,54 @@
   "cost": 25,
   "cooldown": 10,
   "target": "self",
-  "effects": [{ "kind": "summon", "minion": "ember_imp", "count": 2, "max": 2 }],
+  "effects": [
+    {
+      "kind": "summon",
+      "minion": "ember_imp",
+      "count": 2,
+      "max": 2
+    }
+  ],
   "defaultRule": {
     "enabled": true,
     "mode": "all",
     "conditions": [
-      { "type": "enemies_alive", "cmp": ">=", "value": 1 },
-      { "type": "own_minions", "minion": "ember_imp", "cmp": "<=", "value": 0 }
+      {
+        "type": "enemies_alive",
+        "cmp": ">=",
+        "value": 1
+      },
+      {
+        "type": "own_minions",
+        "minion": "ember_imp",
+        "cmp": "<=",
+        "value": 0
+      }
     ],
-    "target": { "selector": "self" },
+    "target": {
+      "selector": "self"
+    },
     "targetConditions": []
   },
   "priority": 35,
-  "order": 20
+  "order": 20,
+  "rankEffects": {
+    "2": {
+      "name": "Volatile Imps",
+      "description": "Imps explode when they die, dealing 40% of your Magic Power to every enemy.",
+      "changes": {
+        "set": {
+          "summon": {
+            "onDeath": {
+              "explode": {
+                "stat": "magPower",
+                "power": 0.4,
+                "name": "Imp Explosion"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 }

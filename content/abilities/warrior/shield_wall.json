@@ -7,14 +7,46 @@
   "cost": 15,
   "cooldown": 25,
   "target": "self",
-  "effects": [{ "kind": "status", "status": "shield_wall", "duration": 8 }],
+  "effects": [
+    {
+      "kind": "status",
+      "status": "shield_wall",
+      "duration": 8
+    }
+  ],
   "defaultRule": {
     "enabled": true,
     "mode": "all",
-    "conditions": [{ "type": "self_hp_below", "value": 40 }, { "type": "self_missing_status", "status": "shield_wall" }],
-    "target": { "selector": "self" },
+    "conditions": [
+      {
+        "type": "self_hp_below",
+        "value": 40
+      },
+      {
+        "type": "self_missing_status",
+        "status": "shield_wall"
+      }
+    ],
+    "target": {
+      "selector": "self"
+    },
     "targetConditions": []
   },
   "priority": 100,
-  "order": 30
+  "order": 30,
+  "rankEffects": {
+    "3": {
+      "name": "Reinforced Wall",
+      "description": "When Shield Wall ends, you get a shield worth 20% of the damage it prevented.",
+      "changes": {
+        "set": {
+          "status": {
+            "extra": {
+              "absorbShieldPct": 0.2
+            }
+          }
+        }
+      }
+    }
+  }
 }

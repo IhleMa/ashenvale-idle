@@ -37,5 +37,18 @@
     "targetConditions": []
   },
   "priority": 40,
-  "order": 70
+  "order": 70,
+  "rankEffects": {
+    "3": {
+      "name": "Blood Price",
+      "description": "The health Dark Pact costs comes back as healing over 6 seconds.",
+      "changes": {
+        "set": {
+          "self_damage": {
+            "refundOver": 6
+          }
+        }
+      }
+    }
+  }
 }

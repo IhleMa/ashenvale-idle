@@ -9,17 +9,51 @@
   "target": "ally",
   "area": true,
   "effects": [
-    { "kind": "extend", "seconds": 10 },
-    { "kind": "heal", "stat": "magPower", "power": 1 },
-    { "kind": "status", "status": "soul_link", "duration": 10 }
+    {
+      "kind": "extend",
+      "seconds": 10
+    },
+    {
+      "kind": "heal",
+      "stat": "magPower",
+      "power": 1
+    },
+    {
+      "kind": "status",
+      "status": "soul_link",
+      "duration": 10
+    }
   ],
   "defaultRule": {
     "enabled": true,
     "mode": "all",
-    "conditions": [{ "type": "own_minions", "cmp": ">=", "value": 2 }],
-    "target": { "selector": "own_minions" },
+    "conditions": [
+      {
+        "type": "own_minions",
+        "cmp": ">=",
+        "value": 2
+      }
+    ],
+    "target": {
+      "selector": "own_minions"
+    },
     "targetConditions": []
   },
   "priority": 55,
-  "order": 70
+  "order": 70,
+  "rankEffects": {
+    "3": {
+      "name": "Soul Siphon",
+      "description": "While Soul Link is active, you heal for 10% of the damage linked allies take.",
+      "changes": {
+        "set": {
+          "status": {
+            "extra": {
+              "linkHealPct": 0.1
+            }
+          }
+        }
+      }
+    }
+  }
 }

@@ -335,6 +335,10 @@ function act(b, u) {
     u.castMult = bladeCharge(b, u, ab);
     if (ab.oncePerFight) u.usedOnce[abilityId] = true;
     u.cooldowns[abilityId] = ab.cooldown;
+    // Haste rank 3: the next ability after Haste has no cooldown (checked before this cast's effects, so Haste on yourself doesn't use it up)
+    const freeCd = u.statuses.find(s => s.freeCooldown);
+    if (freeCd) { u.cooldowns[abilityId] = 0; freeCd.freeCooldown = false; emit(b, { type: 'proc', src: u.uid, tgt: u.uid, name: 'Haste' }); }
+    u.refunded = false;
     emit(b, { type: 'ability', src: u.uid, ability: abilityId, tgts: targets.map(t => t.uid) });
     if (u.stat && u.kind === 'character') u.stat.casts[abilityId] = (u.stat.casts[abilityId] || 0) + 1;
     targets.forEach((t, i) => { for (const eff of ab.effects) if (!(eff.once && i > 0)) applyEffect(b, u, t, eff, abilityId); });
@@ -400,7 +404,12 @@ function applyEffect(b, src, tgt, eff, abilityId) {
         const ownDebuffs = eff.lifestealPerDebuff ? ownDebuffKinds(src, tgt) : 0; // count before the hit can kill
         const marked = eff.onHitIfStatus && tgt.statuses.some(s => s.id === eff.onHitIfStatus.status); // e.g. Shadow Flurry on a poisoned target
         src.lastHitCrit = false;
-        const dealt = dealDamage(b, src, tgt, amount, { school: eff.school, ability: abilityId, bonusCrit: eff.bonusCrit, proc: eff.proc });
+        const sure = eff.critIfStatus && tgt.statuses.some(s => s.id === eff.critIfStatus) ? 1 : 0; // Aimed Shot rank 3 on a marked target
+        const dealt = dealDamage(b, src, tgt, amount, { school: eff.school, ability: abilityId, bonusCrit: eff.bonusCrit, proc: eff.proc, forceCrit: !!sure });
+        // followUp: a second hit against a wounded target (Heroic Strike rank 3)
+        if (eff.followUp && tgt.alive && hpPct(tgt) < eff.followUp.below * 100) dealDamage(b, src, tgt, amount * eff.followUp.mult, { school: eff.school, ability: abilityId, proc: eff.followUp.name || null });
+        // killCooldownRefund: a kill gives back part of the cooldown, once per cast (Meteor rank 3)
+        if (eff.killCooldownRefund && !tgt.alive && !src.refunded && src.cooldowns[abilityId] > 0) { src.cooldowns[abilityId] *= 1 - eff.killCooldownRefund; src.refunded = true; emit(b, { type: 'proc', src: src.uid, tgt: src.uid, name: 'Cooldown refunded' }); }
         // critResource: a crit refunds resource (Backstab rank 3)
         if (eff.critResource && src.lastHitCrit && src.resourceDef) src.resource = Math.min(src.resourceMax, src.resource + eff.critResource);
         if (marked && tgt.alive) for (const e of eff.onHitIfStatus.effects || []) applyEffect(b, src, tgt, e, abilityId);
@@ -435,8 +444,8 @@ function applyEffect(b, src, tgt, eff, abilityId) {
       // Plaguebringer (Rogue keystone): poisoning a bleeding enemy spreads the poison to every enemy
       const plague = eff.status === 'poison' && src.bonuses?.poisonSpread && target.statuses.some(s => s.id === 'bleed');
       if (plague) emit(b, { type: 'proc', src: src.uid, tgt: target.uid, name: 'Plaguebringer' });
-      for (const t of volatile || plague ? enemiesOf(b, src) : [target])
-        for (let i = 0; i < (STATUSES[eff.status]?.stacking === 'independent' ? eff.stacks || 1 : 1); i++) applyStatus(b, src, t, eff.status, dur, v, eff.stacks || 1);
+      for (const t of volatile || plague || eff.allEnemies ? enemiesOf(b, src) : [target])
+        for (let i = 0; i < (STATUSES[eff.status]?.stacking === 'independent' ? eff.stacks || 1 : 1); i++) applyStatus(b, src, t, eff.status, dur, v, eff.stacks || 1, eff.extra);
       break;
     }
     case 'shield': {
@@ -519,6 +528,17 @@ function applyEffect(b, src, tgt, eff, abilityId) {
       // pay with health (never lethal)
       const cost = Math.min(src.hp - 1, src.hp * (eff.pct || 0.1));
       if (cost > 0) { src.hp -= cost; emit(b, { type: 'damage', src: src.uid, tgt: src.uid, amount: Math.round(cost), absorbed: 0, crit: false, ability: abilityId, school: 'magical' }); }
+      // refundOver: the health comes back as healing over N seconds (Dark Pact rank 3)
+      if (cost > 0 && eff.refundOver) applyStatus(b, src, src, 'pact_mending', eff.refundOver, cost / eff.refundOver, 1);
+      break;
+    }
+    case 'counter': {
+      // every Nth use on the same target triggers extra effects (Frost Bolt rank 2: the third bolt freezes)
+      if (!tgt.alive) return;
+      tgt.counters ||= {};
+      const key = `${src.uid}:${eff.key || abilityId}`;
+      tgt.counters[key] = (tgt.counters[key] || 0) + 1;
+      if (tgt.counters[key] >= (eff.every || 3)) { tgt.counters[key] = 0; for (const e of eff.effects || []) applyEffect(b, src, tgt, e, abilityId); }
       break;
     }
     case 'extend': {
@@ -645,6 +665,7 @@ function summonMinions(b, src, eff, abilityId) {
       continue;
     }
     const nu = addUnit(b, makeMinionUnit(eff.minion, src, b.time, rankMult(src, abilityId)));
+    if (eff.onDeath) nu.onDeath = eff.onDeath; // rank effects: bone shield for the summoner, explosion
     // enemies notice the newcomer (tanky minions loudly)
     for (const e of enemiesOf(b, nu)) if (e.threatTable) e.threatTable[nu.uid] = MINIONS[eff.minion].threat ?? 10;
     emit(b, { type: 'spawn', src: src.uid, unit: publicUnit(nu) });
@@ -668,7 +689,8 @@ function sacrificeMinions(b, src, eff, abilityId) {
   }
 }
 
-function applyStatus(b, src, tgt, id, duration, value, stacks) {
+// extra: fields stored on the status instance (rank effects: e.g. Agony's spawn chance, Shield Wall's absorb shield)
+function applyStatus(b, src, tgt, id, duration, value, stacks, extra = null) {
   const def = STATUSES[id];
   if (!def) return;
   if (def.element && tryReaction(b, src, tgt, id)) return; // the new mark reacted instead of landing
@@ -682,13 +704,15 @@ function applyStatus(b, src, tgt, id, duration, value, stacks) {
     if (def.maxStacks) existing.stacks = Math.min(def.maxStacks, existing.stacks + stacks);
     if (def.absorb) existing.value = Math.max(existing.value, value); else existing.value = Math.max(existing.value, value);
     existing.src = src.uid;
+    if (extra) Object.assign(existing, extra);
   } else {
-    tgt.statuses.push({ id, remaining: duration, duration, value, stacks: def.maxStacks ? Math.min(def.maxStacks, stacks) : 1, src: src.uid, tickTimer: def.tickOnApply ? 0.001 : C.statusTickInterval }); // tickOnApply: first tick right away
+    tgt.statuses.push({ id, remaining: duration, duration, value, stacks: def.maxStacks ? Math.min(def.maxStacks, stacks) : 1, src: src.uid, tickTimer: def.tickOnApply ? 0.001 : C.statusTickInterval, ...(extra || {}) }); // tickOnApply: first tick right away
   }
   emit(b, { type: 'status', src: src.uid, tgt: tgt.uid, status: id });
 }
 
 function tickStatuses(b, u) {
+  const spawned = [];
   for (const s of u.statuses) {
     s.remaining -= DT;
     const def = STATUSES[s.id];
@@ -701,13 +725,18 @@ function tickStatuses(b, u) {
         const src = b.units.find(x => x.uid === s.src) || u;
         const amount = s.value * (def.maxStacks ? s.stacks : 1);
         if (def.tick === 'damage') dealDamage(b, src, u, amount, { school: def.school, ability: null, dot: s.id, ignoreArmor: def.ignoreArmor, noCrit: !def.canCrit });
+        // spawnChance (Agony rank 3): a tick can add another stack (the new stack doesn't spawn more)
+        if (s.spawnChance && u.alive && b.rng() < s.spawnChance) spawned.push({ ...s, remaining: s.duration, spawnChance: 0, tickTimer: C.statusTickInterval });
         else if (def.tick === 'heal') healUnit(b, src, u, amount, null, s.id);
         if (!u.alive) return;
       }
     }
   }
+  if (spawned.length) u.statuses.push(...spawned);
   const before = u.statuses.length;
   const exploding = u.statuses.filter(s => s.remaining <= 0 && STATUSES[s.id].recordDamage && s.recorded > 0);
+  // Shield Wall rank 3: when the wall ends, a shield worth part of the damage it prevented
+  for (const s of u.statuses) if (s.remaining <= 0 && s.absorbShieldPct && s.prevented > 0 && u.alive) { applyStatus(b, u, u, 'barrier', 8, s.prevented * s.absorbShieldPct, 1); s.prevented = 0; }
   u.statuses = u.statuses.filter(s => s.remaining > 0 && !(STATUSES[s.id].absorb && s.value <= 0));
   if (u.statuses.length !== before) emit(b, { type: 'status_end', tgt: u.uid });
   // Assassin's Mark: when the mark runs out, the damage it recorded is dealt again
@@ -718,7 +747,7 @@ function tickStatuses(b, u) {
   }
 }
 
-function dealDamage(b, src, tgt, raw, { school, ability, bonusCrit = 0, dot = null, ignoreArmor = false, noCrit = false, proc = null, exact = false }) {
+function dealDamage(b, src, tgt, raw, { school, ability, bonusCrit = 0, dot = null, ignoreArmor = false, noCrit = false, proc = null, exact = false, forceCrit = false }) {
   if (!tgt.alive) return 0;
   if (mod(tgt, 'invulnerable') > 0) return 0; // Stasis
   if (!dot && !exact && school === 'physical' && mod(tgt, 'dodge') > 0 && b.rng() < mod(tgt, 'dodge')) {
@@ -737,7 +766,7 @@ function dealDamage(b, src, tgt, raw, { school, ability, bonusCrit = 0, dot = nu
   if (src.vsEnemy && tgt.defId in src.vsEnemy) amount *= 1 + src.vsEnemy[tgt.defId];
   if (b.hooks?.damageMult) amount *= b.hooks.damageMult(src, tgt, school);
   if (b.pvp && src.side !== tgt.side) amount *= b.pvp.damageMult ?? 1; // Arena: players hit each other softer
-  if (!noCrit && b.rng() < Math.min(C.critCap, src.stats.critChance + bonusCrit + mod(src, 'critChance'))) { crit = true; amount *= src.stats.critDamage; src.lastHitCrit = true; }
+  if (!noCrit && (forceCrit || b.rng() < Math.min(C.critCap, src.stats.critChance + bonusCrit + mod(src, 'critChance')))) { crit = true; amount *= src.stats.critDamage; src.lastHitCrit = true; }
   if (!ignoreArmor) {
     const def = effDefense(tgt) * (school === 'magical' ? C.magicArmorFactor : 1);
     const red = Math.min(C.armorCap, def / (def + C.armorK + 12 * src.level));
@@ -760,6 +789,14 @@ function dealDamage(b, src, tgt, raw, { school, ability, bonusCrit = 0, dot = nu
   }
   // a mark records the damage its caster deals to the target (its own explosion excluded)
   if (!exact) for (const s of tgt.statuses) if (STATUSES[s.id].recordDamage && s.src === src.uid) s.recorded = (s.recorded || 0) + amount + absorbed;
+  for (const s of tgt.statuses) {
+    // Shield Wall rank 3: count the damage the wall prevented (its damage-taken reduction)
+    if (s.absorbShieldPct) { const red = -(STATUSES[s.id].mods?.damageTakenPct || 0); if (red > 0 && red < 1) s.prevented = (s.prevented || 0) + (amount + absorbed) * red / (1 - red); }
+    // Soul Link rank 3: the caster heals for part of the damage linked allies take
+    if (s.linkHealPct && amount > 0) { const c = b.units.find(x => x.uid === s.src); if (c?.alive) healUnit(b, c, c, amount * s.linkHealPct, null, null, 'Soul Link'); }
+  }
+  // Rapid Fire rank 3: every direct hit lowers another ability's cooldown
+  if (!dot && !proc && src.side !== tgt.side) for (const s of src.statuses) if (s.hitCooldown && src.cooldowns[s.hitCooldown.ability] > 0) src.cooldowns[s.hitCooldown.ability] = Math.max(0, src.cooldowns[s.hitCooldown.ability] - s.hitCooldown.seconds);
   tgt.hp = Math.max(0, tgt.hp - amount);
   if (tgt.hp <= 0 && (tgt.undying || mod(tgt, 'undying') > 0)) tgt.hp = 1; // Borrowed Time, Fortress, the first tutorial fights
   if (src.stat && src.side !== tgt.side) src.stat.dmg += amount;
@@ -879,6 +916,18 @@ function kill(b, src, tgt) {
       const from = b.units.find(x => x.uid === jumpers[0].src) || src;
       for (const s of jumpers) applyStatus(b, b.units.find(x => x.uid === s.src) || from, to, s.id, s.remaining, s.value, s.stacks || 1);
     }
+  }
+  // spreadOnDeath (Blight rank 2): a fresh copy goes to another enemy that doesn't have it yet
+  for (const sp of tgt.statuses.filter(x => x.spreadOnDeath && x.remaining > 0)) {
+    const to = b.units.find(x => x.side === tgt.side && x.alive && x !== tgt && !x.statuses.some(y => y.id === sp.id));
+    const from = b.units.find(x => x.uid === sp.src);
+    if (to && from) { applyStatus(b, from, to, sp.id, sp.duration, sp.value, sp.stacks || 1); emit(b, { type: 'proc', src: from.uid, tgt: to.uid, name: STATUSES[sp.id].name + ' spreads' }); }
+  }
+  // a minion's death effects (Bone Golem rank 3: bone shield for its owner; Summon Imps rank 2: explosion)
+  if (tgt.onDeath) {
+    const owner = b.units.find(x => x.uid === tgt.ownerUid);
+    if (tgt.onDeath.ownerShieldPct && owner?.alive) applyStatus(b, owner, owner, 'barrier', tgt.onDeath.shieldDuration || 10, tgt.maxHp * tgt.onDeath.ownerShieldPct, 1);
+    if (tgt.onDeath.explode && owner) for (const e of b.units.filter(x => x.side !== tgt.side && x.alive)) dealDamage(b, owner, e, effPower(owner, tgt.onDeath.explode.stat || 'magPower') * tgt.onDeath.explode.power, { school: 'magical', ability: null, noCrit: true, proc: tgt.onDeath.explode.name || 'Explosion' });
   }
   tgt.statuses = [];
   emit(b, { type: 'death', src: src.uid, tgt: tgt.uid });

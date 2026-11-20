@@ -65,6 +65,9 @@ export function effText(eff, classId, opts = {}) {
       if (exB) t += eff.executeStacks ? `; against targets below ${pct(exB)} health +${pct(eff.executeStacks.perStack)} for every ${statusLink(eff.executeStacks.status)} stack on them` : `, ×${eff.executeMult || 2} against targets below ${pct(exB)} health`;
       if (eff.splash) t += `, and ${pct(eff.splash)} of that to every other enemy`;
       if (eff.critResource) t += `; a critical hit refunds ${eff.critResource} ${resourceName(classId)}`;
+      if (eff.critIfStatus) t += `; always crits against targets with ${statusLink(eff.critIfStatus)}`;
+      if (eff.followUp) t += `; against targets below ${pct(eff.followUp.below)} health it hits again for ${pct(eff.followUp.mult)}`;
+      if (eff.killCooldownRefund) t += `; a kill gives back ${pct(eff.killCooldownRefund)} of the cooldown`;
       if (eff.onHitIfStatus) t += `; every hit on a target with ${statusLink(eff.onHitIfStatus.status)} also ${(eff.onHitIfStatus.effects || []).map(e => effText(e, classId, { ...opts, withStatus: false }).replace(/^applies/, 'adds')).join(', ')}`;
       if (eff.lifesteal || eff.lifestealPerDebuff) t += `, healing the caster for ${pct(eff.lifesteal || 0)}${eff.lifestealPerDebuff ? ` + ${pct(eff.lifestealPerDebuff)} per own debuff on the target` : ''} of the damage`;
       return t;
@@ -73,22 +76,31 @@ export function effText(eff, classId, opts = {}) {
     case 'status': {
       const s = STATUSES[eff.status];
       const dur = eff.duration >= 900 ? 'until changed' : `for ${sec(eff.duration)}`;
-      let t = `${eff.self ? 'gains' : 'applies'} ${statusLink(eff.status)} ${dur}`;
+      let t = `${eff.chance ? `${pct(eff.chance)} chance to ` : ''}${eff.self ? 'gain' + (eff.chance ? '' : 's') : 'appl' + (eff.chance ? 'y' : 'ies')} ${statusLink(eff.status)}${eff.allEnemies ? ' on every enemy' : ''} ${dur}`;
+      const x = eff.extra || {};
+      const extras = [x.absorbShieldPct && `a shield worth ${pct(x.absorbShieldPct)} of the damage it prevented when it ends`, x.hitCooldown && `every hit lowers ${x.hitCooldown.ability.replace(/_/g, ' ')}'s cooldown by ${x.hitCooldown.seconds} s`,
+        x.spawnChance && `each tick has a ${pct(x.spawnChance)} chance to add a stack`, x.spreadOnDeath && 'spreads to another enemy when the target dies', x.linkHealPct && `you heal for ${pct(x.linkHealPct)} of the damage they take`, x.freeCooldown && 'the next ability after it has no cooldown'].filter(Boolean);
       if (s?.tick && eff.power) t += ` (${pw(eff.power, eff.stat, s.tick === 'damage' ? 1 + (st?.dotDamagePct || 0) : 1)} ${s.tick === 'heal' ? 'healing' : 'damage'} per second${s.maxStacks ? ' per stack' : ''})`;
       else if (opts.withStatus && s) { const facts = statusFacts(eff.status).filter(x => !/^stacks up to/.test(x)); if (facts.length) t += ` (${facts.join(', ')})`; }
       if (eff.stacks > 1) t += ` ×${eff.stacks}`;
+      if (extras.length) t += `; ${extras.join('; ')}`;
       return t;
     }
     case 'shield': return `${eff.self ? 'shields the caster' : 'shields'} for ${pw(eff.power, eff.stat)} for ${sec(eff.duration)}`;
     case 'taunt': return `taunts enemies for ${sec(eff.duration || 0)}`;
-    case 'cleanse': return `removes up to ${eff.count || 1} harmful effect${(eff.count || 1) > 1 ? 's' : ''}`;
+    case 'cleanse': return (eff.count || 1) >= 99 ? 'removes all harmful effects' : `removes up to ${eff.count || 1} harmful effect${(eff.count || 1) > 1 ? 's' : ''}`;
+    case 'counter': return `every ${['', '', 'second', 'third', 'fourth', 'fifth'][eff.every || 3] || `${eff.every}th`} use on the same target also ${(eff.effects || []).map(e => effText(e, classId, { ...opts, withStatus: false })).join(', ')}`;
     case 'resource': return `gives ${eff.amount} ${resourceName(classId)}`;
-    case 'summon': return eff.minion ? `summons ${eff.count || 1}× ${esc(MINIONS[eff.minion]?.name || eff.minion)}${eff.max ? ` (up to ${eff.max}; at the limit the oldest is renewed)` : ''}` : `summons ${esc(ENEMIES[eff.enemyId]?.name || eff.enemyId)}`;
+    case 'summon': {
+      const od = eff.onDeath || {};
+      const death = [od.ownerShieldPct && `when it dies you get a shield worth ${pct(od.ownerShieldPct)} of its maximum health`, od.explode && `when it dies it explodes for ${pct(od.explode.power)} of your ${statName(od.explode.stat || 'magPower')} on every enemy`].filter(Boolean);
+      return (eff.minion ? `summons ${eff.count || 1}× ${esc(MINIONS[eff.minion]?.name || eff.minion)}${eff.max ? ` (up to ${eff.max}; at the limit the oldest is renewed)` : ''}` : `summons ${esc(ENEMIES[eff.enemyId]?.name || eff.enemyId)}`) + (death.length ? `; ${death.join('; ')}` : '');
+    }
     case 'sacrifice': return `detonates ${eff.all ? 'every minion' : `${eff.count || 1} minion${(eff.count || 1) > 1 ? 's' : ''} (the one closest to fading first)`}, each dealing ${pct(eff.power)} of its maximum health to every enemy`;
     case 'extend': return `makes the minion last ${sec(eff.seconds)} longer`;
     case 'consume_dots': return `removes ${eff.own ? 'its own' : 'all'} damage over time on the target and deals ${pw(eff.power, eff.stat)} for every second they had left${eff.mark ? `; ×${eff.markMult} on targets with ${statusLink(eff.mark)}${eff.markExecute ? `, which also kills non-bosses below ${pct(eff.markExecute)} health` : ''}` : ''}${eff.splash ? `; ${pct(eff.splash)} of it splashes to other enemies` : ''}${eff.refundPerStack ? `; refunds ${eff.refundPerStack} ${resourceName(classId)} per stack` : ''}`;
     case 'spread_dots': return 'copies its own damage over time effects from the target to every other enemy';
-    case 'self_damage': return `costs ${pct(eff.pct)} of current health (never lethal)`;
+    case 'self_damage': return `costs ${pct(eff.pct)} of current health (never lethal)${eff.refundOver ? `, which comes back as healing over ${eff.refundOver} s` : ''}`;
     case 'revive': return `brings a fallen ally back with ${pct(eff.pct)} health`;
     case 'rewind': return `sets health back to what it was ${sec(eff.seconds)} ago (only if that was more)`;
     case 'echo': return `deals ${pct(eff.power)} of the health the target lost in the last ${sec(eff.seconds)} again`;

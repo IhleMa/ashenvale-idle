@@ -22,6 +22,18 @@
           ]
         },
         {
+          "heading": "Ability ranks",
+          "items": [
+            "18 new rank effects (shown on the ability cards and skill tree):",
+            "Warrior — Heroic Strike 3: hits again for 50% below 50% health · Battle Cry 2: +10 Rage per buffed ally · Shield Wall 3: a shield worth 20% of the damage it prevented when it ends.",
+            "Mage — Frost Bolt 2: every third bolt on the same enemy freezes it for 1 s · Flame Wave 3: burning ground on every enemy hit · Meteor 3: a kill gives back half the cooldown.",
+            "Ranger — Aimed Shot 3: always crits on targets with Hunter's Mark · Multi-Shot 2: 25% chance per enemy to poison it like Serpent Sting · Rapid Fire 3: every hit lowers Kill Shot's cooldown by 1 s.",
+            "Warlock — Agony 3: each tick has a 10% chance to add a stack · Blight 2: spreads to another enemy when the target dies · Dark Pact 3: the health cost comes back over 6 s.",
+            "Summoner — Bone Golem 3: a bone shield (30% of its health) when it dies · Summon Imps 2: imps explode when they die · Soul Link 3: you heal for 10% of the damage linked allies take.",
+            "Chronomancer — Haste 3: the target's next ability has no cooldown · Rewind 2: also removes all debuffs · Time Dilation 3: enemies deal 10% less damage while it lasts."
+          ]
+        },
+        {
           "heading": "Gems",
           "items": [
             "Gems were reworked into 11 resonance gems. A socketed gem changes the affixes of its own item instead of adding a flat stat.",

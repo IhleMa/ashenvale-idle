@@ -7,14 +7,44 @@
   "cost": 20,
   "cooldown": 3,
   "target": "enemy",
-  "effects": [{ "kind": "damage", "stat": "physPower", "power": 1.6, "school": "physical" }],
+  "effects": [
+    {
+      "kind": "damage",
+      "stat": "physPower",
+      "power": 1.6,
+      "school": "physical"
+    }
+  ],
   "defaultRule": {
     "enabled": true,
     "mode": "all",
-    "conditions": [{ "type": "always" }],
-    "target": { "selector": "enemy_current" },
+    "conditions": [
+      {
+        "type": "always"
+      }
+    ],
+    "target": {
+      "selector": "enemy_current"
+    },
     "targetConditions": []
   },
   "priority": 20,
-  "order": 10
+  "order": 10,
+  "rankEffects": {
+    "3": {
+      "name": "Crushing Blow",
+      "description": "Against an enemy below 50% health, Heroic Strike hits a second time for 50% of its damage.",
+      "changes": {
+        "set": {
+          "damage": {
+            "followUp": {
+              "below": 0.5,
+              "mult": 0.5,
+              "name": "Crushing Blow"
+            }
+          }
+        }
+      }
+    }
+  }
 }

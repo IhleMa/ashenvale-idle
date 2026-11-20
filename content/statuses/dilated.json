@@ -1,0 +1,9 @@
+{
+  "name": "Dilated",
+  "type": "debuff",
+  "mods": {
+    "damagePct": -0.1
+  },
+  "description": "Slowed by time: deals 10% less damage.",
+  "order": 915
+}

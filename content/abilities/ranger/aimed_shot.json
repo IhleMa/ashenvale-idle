@@ -7,14 +7,40 @@
   "cost": 25,
   "cooldown": 4,
   "target": "enemy",
-  "effects": [{ "kind": "damage", "stat": "physPower", "power": 1.75, "school": "physical" }],
+  "effects": [
+    {
+      "kind": "damage",
+      "stat": "physPower",
+      "power": 1.75,
+      "school": "physical"
+    }
+  ],
   "defaultRule": {
     "enabled": true,
     "mode": "all",
-    "conditions": [{ "type": "always" }],
-    "target": { "selector": "enemy_current" },
+    "conditions": [
+      {
+        "type": "always"
+      }
+    ],
+    "target": {
+      "selector": "enemy_current"
+    },
     "targetConditions": []
   },
   "priority": 20,
-  "order": 290
+  "order": 290,
+  "rankEffects": {
+    "3": {
+      "name": "Marked Shot",
+      "description": "Against an enemy with Hunter's Mark, Aimed Shot always crits.",
+      "changes": {
+        "set": {
+          "damage": {
+            "critIfStatus": "marked"
+          }
+        }
+      }
+    }
+  }
 }

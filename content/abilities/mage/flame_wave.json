@@ -8,14 +8,46 @@
   "cooldown": 9,
   "target": "enemy",
   "area": true,
-  "effects": [{ "kind": "damage", "stat": "magPower", "power": 1.1, "school": "magical" }],
+  "effects": [
+    {
+      "kind": "damage",
+      "stat": "magPower",
+      "power": 1.1,
+      "school": "magical"
+    }
+  ],
   "defaultRule": {
     "enabled": true,
     "mode": "all",
-    "conditions": [{ "type": "enemies_alive", "cmp": ">=", "value": 2 }],
-    "target": { "selector": "all_enemies" },
+    "conditions": [
+      {
+        "type": "enemies_alive",
+        "cmp": ">=",
+        "value": 2
+      }
+    ],
+    "target": {
+      "selector": "all_enemies"
+    },
     "targetConditions": []
   },
   "priority": 65,
-  "order": 110
+  "order": 110,
+  "rankEffects": {
+    "3": {
+      "name": "Scorched Earth",
+      "description": "Leaves burning ground: every enemy hit burns for 15% Magic Power per second for 4 seconds.",
+      "changes": {
+        "effects": [
+          {
+            "kind": "status",
+            "status": "burn",
+            "duration": 4,
+            "stat": "magPower",
+            "power": 0.15
+          }
+        ]
+      }
+    }
+  }
 }
