@@ -244,6 +244,8 @@ function unitCard(u, k, minions = []) {
       ${res}
       ${u.classId && Object.values(ABILITIES).some(a => a.classId === u.classId && a.note) ? '<div class="unit-notes" title="Notes for the next Finale"></div>' : ''}
       <div class="unit-statuses"></div>
+      ${u.side === 'A' && u.kind !== 'minion' ? '<div class="unit-threat" title="Threat: your share of the highest threat on an enemy (100% = it attacks you). 🎯 = enemies attacking you."><div class="thr-bar"><div class="fill"></div></div><span class="thr-txt"></span></div>' : ''}
+      ${u.side === 'B' ? '<div class="unit-target"></div>' : ''}
       ${abilities}
     </div>
     ${minions.length ? `<div class="unit-minions">${minions.map(minionCard).join('')}</div>` : ''}
@@ -369,6 +371,18 @@ function update() {
       const i = stEl.querySelector(`[data-st="${id}"] i`);
       if (i) i.textContent = rem > 99 ? '' : Math.ceil(rem);
     }
+    // threat: allies show their share of the top threat and how many enemies attack them; enemies show their target
+    const thrEl = el.querySelector('.unit-threat');
+    if (thrEl && u.thr != null) {
+      thrEl.querySelector('.fill').style.width = Math.min(100, u.thr) + '%';
+      const txt = `Threat ${u.thr}%${u.ag ? ` · 🎯 ${u.ag}` : ''}`;
+      const te = thrEl.querySelector('.thr-txt');
+      if (te.textContent !== txt) te.textContent = txt;
+      thrEl.classList.toggle('aggro', u.ag > 0);
+      thrEl.classList.toggle('high', !u.ag && u.thr >= 80);
+    }
+    const tgEl = el.querySelector('.unit-target');
+    if (tgEl) { const t = u.tg != null ? b.units.get(u.tg) : null; const txt = t && u.alive ? `→ ${t.name}` : ''; if (tgEl.textContent !== txt) tgEl.textContent = txt; }
     if (u.exp != null) { const x = el.querySelector('.minion-exp'); if (x) x.textContent = `${Math.max(0, Math.ceil(u.exp - b.time))}s`; }
     if (u.side === 'A' && u.cd) {
       for (const [ab, rem] of Object.entries(u.cd)) {

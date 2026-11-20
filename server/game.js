@@ -693,7 +693,7 @@ export class Game {
         const b = s.solo.battle;
         stepBattle(b);
         const events = drainEvents(b);
-        if (!this.headless) this.sendTo(p.id, { t: 'bt', k: 'solo', time: Math.round(b.time * 10) / 10, wave: b.waveIndex + 1, u: b.units.map(dynamicUnit), e: events });
+        if (!this.headless) this.sendTo(p.id, { t: 'bt', k: 'solo', time: Math.round(b.time * 10) / 10, wave: b.waveIndex + 1, u: b.units.map(u => dynamicUnit(u, b)), e: events });
         if (b.state !== 'running') this.finishSoloBattle(s);
       }
       this.flushState(s);
@@ -875,7 +875,7 @@ export class Game {
   tickCoop(g) {
     const b = g.battle;
     stepBattle(b);
-    const msg = { t: 'bt', k: 'coop', time: Math.round(b.time * 10) / 10, wave: b.waveIndex + 1, u: b.units.map(dynamicUnit), e: drainEvents(b) };
+    const msg = { t: 'bt', k: 'coop', time: Math.round(b.time * 10) / 10, wave: b.waveIndex + 1, u: b.units.map(u => dynamicUnit(u, b)), e: drainEvents(b) };
     for (const id of g.members) this.sendTo(id, msg);
     if (b.state === 'running') return;
 

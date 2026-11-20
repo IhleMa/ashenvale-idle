@@ -39,6 +39,19 @@ const P = {
 // notes keep rotating (from the last note actually played), and once it is ready again the phrase starts fresh.
 const lastNote = u => (u.notes?.length ? u.notes[u.notes.length - 1] : (u.cooldowns?.finale || 0) > 0 ? u.lastNote || 'none' : 'none');
 
+// Aggro: who an enemy is attacking — a taunting unit, otherwise the one with the most threat on it
+export function aggroTargetOf(b, enemy) {
+  if (!enemy?.threatTable || !enemy.alive) return null;
+  const foes = enemiesOf(b, enemy);
+  const taunter = foes.find(f => hasStatus(f, 'taunting'));
+  if (taunter) return taunter;
+  let best = null, bestT = -1;
+  for (const f of foes) { const t = enemy.threatTable[f.uid] || 0; if (t > bestT) { bestT = t; best = f; } }
+  return best;
+}
+// how many enemies are attacking this unit
+export const aggroCount = (b, u) => enemiesOf(b, u).filter(e => aggroTargetOf(b, e) === u).length;
+
 export const CONDITIONS = {
   always:             { label: 'Whenever available', params: [], test: () => true },
   self_hp_below:      { label: 'Own health below', params: [P.pct('value', 40)], test: (c, b, u) => hpPct(u) < c.value },
@@ -58,6 +71,8 @@ export const CONDITIONS = {
   combat_time_above:  { label: 'Fight has lasted longer than', params: [P.seconds(10)], test: (c, b) => b.time > c.value },
   allies_fallen:      { label: 'Number of fallen allies', params: [P.cmp(), P.count('value', 1)], test: (c, b, u) => cmp(fallenAllies(b, u).length, c.cmp, c.value) },
   own_notes:          { label: 'Number of notes played (Bard, up to 3)', params: [P.cmp(), P.count('value', 3)], test: (c, b, u) => cmp((u.notes || []).length, c.cmp, c.value), format: c => `notes played: ${c.cmp === '<=' ? 'at most' : c.cmp === '==' ? 'exactly' : 'at least'} ${c.value}` },
+  has_aggro:          { label: 'An enemy is attacking me (I have aggro)', params: [], test: (c, b, u) => aggroCount(b, u) > 0, format: () => 'an enemy is attacking me' },
+  aggro_count:        { label: 'Number of enemies attacking me', params: [P.cmp(), P.count('value', 1)], test: (c, b, u) => cmp(aggroCount(b, u), c.cmp, c.value), format: c => `enemies attacking me: ${c.cmp === '<=' ? 'at most' : c.cmp === '==' ? 'exactly' : 'at least'} ${c.value}` },
   last_note:          { label: 'My last note was (Bard)', params: [P.note()], test: (c, b, u) => lastNote(u) === c.note, format: c => `last note: ${c.note === 'none' ? 'none yet' : c.note}` },
   own_minions:        { label: 'Number of my minions', params: [P.minion(), P.cmp(), P.count('value', 2)], test: (c, b, u) => cmp(ownMinions(b, u, c.minion).length, c.cmp, c.value), format: c => `my ${c.minion ? MINIONS[c.minion]?.name || c.minion : 'minions'}: ${c.cmp === '<=' ? 'at most' : c.cmp === '==' ? 'exactly' : 'at least'} ${c.value}` },
 };
@@ -65,7 +80,9 @@ export const CONDITIONS = {
 // ---------- Target conditions (filters on candidates) ----------
 export const TARGET_CONDITIONS = {
   alive:                 { label: 'Target must be alive', params: [], test: (c, t) => t.alive, locked: true },
-  target_missing_status: { label: 'Target must NOT have', params: [P.status('renew')], test: (c, t) => !hasStatus(t, c.status) },
+  target_attacking_me:     { label: 'Target is attacking me', params: [], test: (c, t, b, u) => aggroTargetOf(b, t) === u },
+  target_not_attacking_me: { label: 'Target is attacking someone else', params: [], test: (c, t, b, u) => !!t.threatTable && aggroTargetOf(b, t) !== u },
+  target_missing_status: { label: 'Target must NOT have', params: [P.status('exposed')], test: (c, t) => !hasStatus(t, c.status) },
   target_has_status:     { label: 'Target must have', params: [P.status('poison')], test: (c, t) => hasStatus(t, c.status) },
   target_has_debuff:     { label: 'Target has any debuff', params: [], test: (c, t) => hasDebuff(t) },
   target_hp_lost_recent: { label: 'Target lost health in the last 4 seconds (% of max)', params: [P.pct('value', 20)], test: (c, t) => { const h = t.hpHist || []; const past = h.length ? h[Math.max(0, h.length - 9)] : t.hp; return ((past - t.hp) / t.maxHp) * 100 >= c.value; }, format: c => `target lost ≥${c.value}% health in 4 s` },

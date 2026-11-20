@@ -11,7 +11,7 @@ import { combatGems } from './gems.js';
 import { equipmentEffects } from './data/legendaries.js';
 import { createRng } from './rng.js';
 import { mutatedAbilities } from './skilltree.js';
-import { resolveRule, hpPct, hasStatus, enemiesOf, alliesOf, ownMinions } from './rules.js';
+import { resolveRule, hpPct, hasStatus, enemiesOf, alliesOf, ownMinions, aggroTargetOf } from './rules.js';
 
 const C = CONFIG.combat;
 const DT = C.tickMs / 1000;
@@ -202,7 +202,7 @@ function nextWave(b) {
     b.hooks?.spawn?.(b, u, HOOK_API);
   });
   b.phaseTime = 0;
-  emit(b, { type: 'wave', wave: b.waveIndex + 1, total: b.waves.length, units: b.units.filter(u => u.side === 'B').map(publicUnit) });
+  emit(b, { type: 'wave', wave: b.waveIndex + 1, total: b.waves.length, units: b.units.filter(u => u.side === 'B').map(u => publicUnit(u)) });
 }
 
 function seedThreat(b, enemy) {
@@ -903,7 +903,7 @@ const HOOK_API = {
 };
 
 // ---------------------------------------------------------------- serialization for clients
-export function publicUnit(u) {
+export function publicUnit(u, b = null) {
   return {
     uid: u.uid, side: u.side, kind: u.kind, name: u.name, defId: u.defId, classId: u.classId || null, subclass: u.subclass || null,
     ...(u.abilityDefs && Object.keys(u.abilityDefs).length ? { cdMax: Object.fromEntries(Object.entries(u.abilityDefs).map(([k, a]) => [k, a.cooldown])) } : {}),
@@ -912,7 +912,7 @@ export function publicUnit(u) {
     ...(u.kind === 'minion' ? { ownerUid: u.ownerUid, charId: u.charId, summonerName: u.summonerName, duration: u.duration } : {}),
     maxHp: u.maxHp, resourceMax: u.resourceMax, resourceColor: u.resourceDef?.color || null, resourceName: u.resourceDef?.name || null,
     loadout: u.loadout,
-    ...dynamicUnit(u),
+    ...dynamicUnit(u, b),
   };
 }
 
@@ -929,7 +929,23 @@ function statusView(u) {
   return out;
 }
 
-export function dynamicUnit(u) {
+// b given: threat info — allies: thr = highest share of the top threat on any enemy (100 = has aggro there), ag = enemies
+// attacking them; enemies: tg = uid of the unit they attack
+function threatInfo(b, u) {
+  if (u.threatTable) { const t = u.alive ? aggroTargetOf(b, u) : null; return { tg: t ? t.uid : null }; }
+  if (u.side !== 'A') return {};
+  if (!u.alive) return { thr: 0, ag: 0 };
+  let thr = 0, ag = 0;
+  for (const e of enemiesOf(b, u)) {
+    if (!e.threatTable) continue;
+    const alive = alliesOf(b, u).filter(a => a.alive);
+    const top = Math.max(0, ...alive.map(a => e.threatTable[a.uid] || 0));
+    if (top > 0) thr = Math.max(thr, (e.threatTable[u.uid] || 0) / top);
+    if (aggroTargetOf(b, e) === u) ag++;
+  }
+  return { thr: Math.round(thr * 100), ag };
+}
+export function dynamicUnit(u, b = null) {
   const cds = {};
   for (const k of u.loadout) cds[k] = Math.round((u.cooldowns[k] || 0) * 10) / 10;
   return {
@@ -940,13 +956,14 @@ export function dynamicUnit(u) {
     st: statusView(u),
     ...(u.hadNotes ? { notes: [...u.notes] } : {}), // Bard: the notes waiting for the Finale
     ...(u.expiresAt != null ? { exp: Math.round(u.expiresAt * 10) / 10 } : {}), // battle time when a minion fades
+    ...(b && !b.pvp ? threatInfo(b, u) : {}),
   };
 }
 
 export function battleSnapshot(b) {
   return {
     time: Math.round(b.time * 10) / 10, state: b.state, wave: b.waveIndex + 1, waves: b.waves.length,
-    units: b.units.map(publicUnit), meta: b.meta,
+    units: b.units.map(u => publicUnit(u, b)), meta: b.meta,
   };
 }
 

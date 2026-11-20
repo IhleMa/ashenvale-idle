@@ -110,4 +110,18 @@ const has = (u, id) => u.statuses.some(s => s.id === id);
   assert.equal(nocrit.me.resource, 0);
   ok('Backstab rank 3: a critical Backstab refunds 15 Energy');
 }
+// aggro conditions and threat info
+{
+  const { CONDITIONS, TARGET_CONDITIONS } = await import('../shared/rules.js');
+  const t = createCharacter({ id: 't', name: 'Tank', classId: 'warrior', level: 20 }); t.role = 'tank';
+  const r = createCharacter({ id: 'r', name: 'Rog', classId: 'rogue', level: 20 });
+  const b = C.createBattle({ seed: 3, allies: [C.makeCharacterUnit(t, { ownerId: 'p', ownerName: 'P', position: 0 }), C.makeCharacterUnit(r, { ownerId: 'p', ownerName: 'P', position: 1 })], waves: [[{ enemyId: 'swamp_troll', level: 20 }]] });
+  const [tu, ru] = b.units, foe = b.units.find(u => u.side === 'B');
+  foe.threatTable[tu.uid] = 1000; foe.threatTable[ru.uid] = 400;
+  assert.ok(CONDITIONS.has_aggro.test({}, b, tu) && !CONDITIONS.has_aggro.test({}, b, ru));
+  assert.ok(TARGET_CONDITIONS.target_not_attacking_me.test({}, foe, b, ru) && TARGET_CONDITIONS.target_attacking_me.test({}, foe, b, tu));
+  const d = C.dynamicUnit(ru, b);
+  assert.equal(d.thr, 40); assert.equal(d.ag, 0); assert.equal(C.dynamicUnit(foe, b).tg, tu.uid);
+  ok('aggro: "an enemy is attacking me" and "target is attacking someone else" conditions; threat share for the display');
+}
 console.log(`rogue-test: ${n} checks passed`);
