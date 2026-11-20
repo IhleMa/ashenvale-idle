@@ -1,4 +1,6 @@
 // Abilities: unlock/upgrade, loadout priority and the per-ability behaviour (rule) editor.
+import { abilityNow } from '/shared/abilityText.js';
+import { computeStats } from '/shared/stats.js';
 import { classLabel } from '/shared/data/subclasses.js';
 import { SUBCLASSES } from '/shared/data/subclasses.js';
 import { state, selectedChar } from '../state.js';
@@ -134,6 +136,7 @@ function editorHtml(ch, abilityId) {
       <label class="switch"><input type="checkbox" data-rule-enabled ${rule.enabled ? 'checked' : ''}><span></span> Enabled</label>
     </div>
     ${equipped ? '' : '<div class="notice">This ability is not in the loadout, so it will not be used in combat.</div>'}
+    <div class="small ability-now"><b>Right now${ch.abilities[abilityId] > 1 ? ` (rank ${ch.abilities[abilityId]})` : ''}:</b> ${esc(abilityNow(ch, abilityId, nowCtx(ch)))}</div>
     <div class="rule-summary">${summary(a, rule)}</div>
 
     <h4>1 · When to use it</h4>
@@ -298,6 +301,13 @@ function mutatorNodes(ch, abilityId) {
   return Object.values(tree.nodes).filter(n => n.mutator?.ability === abilityId).map(n => ({ n, on: ch.tree.allocated.includes(n.id) }));
 }
 
+// stats and mutated ability definitions for the "Now" lines (cached per render pass)
+let nowCache = null;
+function nowCtx(ch) {
+  if (nowCache?.ch !== ch || Date.now() - nowCache.at > 500) nowCache = { ch, at: Date.now(), stats: computeStats(ch), defs: mutatedAbilities(ch) };
+  return nowCache;
+}
+
 function abilityCard(ch, base) {
   const muts = mutatorNodes(ch, base.id);
   const a = mutatedAbilities(ch)[base.id] ? { ...mutatedAbilities(ch)[base.id], id: base.id } : base;
@@ -316,6 +326,7 @@ function abilityCard(ch, base) {
     ${abilityIcon(a.id, 'md')}
     <div class="grow"><b>${esc(a.name)}</b> <span class="type-tag t-${a.type}">${a.type}</span>${a.subclass && SUBCLASSES[a.subclass] ? ` <span class="sub-tag" style="--sub-color:${esc(SUBCLASSES[a.subclass].color || '#c9a24a')}">${esc(SUBCLASSES[a.subclass].glyph || '')} ${esc(SUBCLASSES[a.subclass].name)}</span>` : ''}
       <div class="small muted">${esc(a.description)}</div>
+      ${unlocked ? `<div class="small ability-now"><b>Now${rank > 1 ? ` (rank ${rank})` : ''}:</b> ${esc(abilityNow(ch, a.id, nowCtx(ch)))}</div>` : ''}
       <div class="small faint">${esc(meta)}</div>
       ${mutHtml}
       ${Object.entries(a.rankEffects || ABILITIES[a.id]?.rankEffects || {}).map(([r, re]) => `<div class="rank-effect small ${rank >= Number(r) ? 'on' : ''}">▲ Rank ${r} — <b>${esc(re.name)}</b>: ${esc(re.description)}</div>`).join('')}

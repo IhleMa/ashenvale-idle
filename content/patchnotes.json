@@ -73,7 +73,8 @@
         {
           "heading": "Interface",
           "items": [
-            "Patch notes: the 📜 button next to announcements shows what changed. A dot appears when there is something new."
+            "Patch notes: the 📜 button next to announcements shows what changed. A dot appears when there is something new.",
+            "Abilities page: every learned ability shows what it does right now — with its rank, skill-tree changes and rank effects applied, and the real numbers from your character's stats."
           ]
         }
       ]

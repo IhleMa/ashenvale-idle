@@ -1292,3 +1292,4 @@ html.standalone body { padding-bottom: env(safe-area-inset-bottom); padding-left
 .af-panel > [data-af-add] { align-self: flex-start; }
 .rank-effect { color: var(--muted, #999); margin-top: 2px; }
 .rank-effect.on { color: #e8c15a; }
+.ability-now { margin: 3px 0; color: #e8d9a8; }
