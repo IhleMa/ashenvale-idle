@@ -1,5 +1,5 @@
 // Expedition calculations shared by server (rewards) and client (estimates).
-import { EXPEDITIONS, CAMP_SLOTS, CAMP_MEMBERS } from './data/expeditions.js';
+import { EXPEDITIONS, CAMP_SLOTS, CAMP_MEMBERS, EXPEDITION_DURATIONS } from './data/expeditions.js';
 import { bLevel } from './town.js';
 
 export const campSlots = p => CAMP_SLOTS[bLevel(p, 'expedition_camp')] || 0;
@@ -23,20 +23,23 @@ export function teamFactors(dest, chars) {
   return { members, power, prof, avgLevel };
 }
 
+// Longer expeditions give more per hour (durations[].bonusPerHour, e.g. +10% at 8 hours): planning pays off
+export const durationBonus = hours => EXPEDITION_DURATIONS.find(d => d.hours === Number(hours))?.bonusPerHour || 0;
+
 // Expected yields (no randomness) — client shows this as an estimate; server applies ±15% variance
 export function expectedYield(dest, chars, hours) {
   const f = teamFactors(dest, chars);
-  const time = Math.pow(hours, 0.92);
+  const time = hours * (1 + durationBonus(hours));
   const mult = f.members * f.power * f.prof * time;
   const out = {};
   for (const [m, perHour] of Object.entries(dest.yields)) out[m] = perHour * mult;
   const rare = {};
-  for (const [m, ch] of Object.entries(dest.rare || {})) rare[m] = ch * hours * f.members * f.prof;
+  for (const [m, ch] of Object.entries(dest.rare || {})) rare[m] = ch * time * f.members * f.prof;
   return { yields: out, rare, factors: f };
 }
 
 export function expeditionXp(dest, hours) {
-  return Math.round(hours * 35 * (1 + dest.level * 0.25));
+  return Math.round(hours * (1 + durationBonus(hours)) * 35 * (1 + dest.level * 0.25));
 }
 
 export { EXPEDITIONS };

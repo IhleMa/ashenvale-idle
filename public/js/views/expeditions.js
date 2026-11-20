@@ -68,7 +68,7 @@ function plannerHtml(p) {
       <div class="small">Recommended level <b>${d.level}</b>${d.bonus ? ` · Bonus for ${professionIcon(d.bonus, 'xxs')} <b>${esc(PROFESSIONS[d.bonus].name)}</b>` : ' · Any profession'}</div></div></div>
     ${locked ? `<div class="notice">Requires Expedition Camp level ${d.campLevel}. <a href="#/town">Upgrade it in the Town →</a></div>` : ''}
     <h4>Duration</h4>
-    <div class="row gap wrap">${EXPEDITION_DURATIONS.map(x => `<button class="btn small ${x.hours === ui.hours ? 'primary' : ''}" data-hours="${x.hours}">${x.label}</button>`).join('')}</div>
+    <div class="row gap wrap">${EXPEDITION_DURATIONS.map(x => `<button class="btn small ${x.hours === ui.hours ? 'primary' : ''}" data-hours="${x.hours}" ${x.bonusPerHour ? `title="+${Math.round(x.bonusPerHour * 100)}% materials and XP per hour"` : ''}>${x.label}${x.bonusPerHour ? ` <span class="small up">+${Math.round(x.bonusPerHour * 100)}%</span>` : ''}</button>`).join('')}</div>
     <h4>Team <span class="muted small">${team.length}/${maxMembers}</span></h4>
     <div class="exp-team">${recruits.map(c => {
       const busy = statusLabel(p, c);

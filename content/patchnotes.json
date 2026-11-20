@@ -55,6 +55,12 @@
           ]
         },
         {
+          "heading": "Expeditions",
+          "items": [
+            "Longer expeditions now pay off: per hour they give more materials and XP instead of less. 1 hour +2%, 4 hours +5%, 8 hours +10% per hour compared to a 15-minute trip (before, 8 hours gave about 24% less per hour)."
+          ]
+        },
+        {
           "heading": "Bard",
           "items": [
             "Finale is now passive: once three notes have been played, the Bard plays the Finale automatically (15 s cooldown). It no longer needs a loadout slot, so recruited Bards can use 1 more of their other spells.",

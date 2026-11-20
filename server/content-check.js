@@ -350,6 +350,7 @@ export function validateContent(C) {
   for (const [t, m] of Object.entries(town.materialOfType || {})) ref(`town.materialOfType.${t}`, m, materials, 'material');
 
   // ---- expeditions
+  for (const [i, d] of (C.expeditions?.durations || []).entries()) if (d.bonusPerHour != null) num(`expeditions.durations[${i}].bonusPerHour`, d.bonusPerHour, { min: 0 });
   for (const [id, x] of Object.entries(C.expeditions?.expeditions || {})) {
     for (const k of Object.keys(x.yields || {})) ref(`expeditions.expeditions.${id}.yields`, k, materials, 'material');
     for (const k of Object.keys(x.rare || {})) ref(`expeditions.expeditions.${id}.rare`, k, materials, 'material');
