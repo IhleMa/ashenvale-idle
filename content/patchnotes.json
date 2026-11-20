@@ -90,7 +90,8 @@
             "New targets for ally abilities: Party member 1–4 (by their place in the party; the rule editor shows who that is). If that member is down, the ability waits.",
             "Patch notes: the 📜 button next to announcements shows what changed. A dot appears when there is something new.",
             "Abilities page: every learned ability shows what it does right now — with its rank, skill-tree changes and rank effects applied, and the real numbers from your character's stats.",
-            "Fixed: an ending fight no longer refreshes the page while you have a dropdown open; the page updates once you've made your choice."
+            "Fixed: an ending fight no longer refreshes the page while you have a dropdown open; the page updates once you've made your choice.",
+            "Fixed: the combat page no longer jumps up and down when minions are summoned or die — the battlefield keeps its height."
           ]
         }
       ]

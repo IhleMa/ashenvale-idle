@@ -323,6 +323,18 @@ function buildField() {
     <div class="side allies">${allies.map(u => unitCard(u, k, minionsOf(u))).join('') || '<div class="muted center pad">Your party is resting…</div>'}</div>
     <div class="side enemies">${foes.map(u => unitCard(u, k)).join('')}</div>
     <div class="result-banner" hidden></div>`;
+  keepFieldHeight(field, `${k}|${allies.map(u => u.name).join(',')}`);
+}
+
+// Minions appearing and dying change the height of the battlefield, which made the whole page jump up and down.
+// The field keeps the tallest height it has had for this party (it only grows), so the page stays still.
+const fieldMax = new Map();
+function keepFieldHeight(field, key) {
+  field.style.minHeight = '';
+  const h = field.offsetHeight;
+  const max = Math.max(h, fieldMax.get(key) || 0);
+  fieldMax.set(key, max);
+  field.style.minHeight = max + 'px';
 }
 
 function refreshSources() {
