@@ -317,7 +317,7 @@ Target selectors (`target.selector`):
 | [`stun`](content/statuses/stun.json) | Stun | debuff | Cannot act. |
 | [`weakened`](content/statuses/weakened.json) | Weakened | debuff | Deals 20% less damage. |
 | [`exposed`](content/statuses/exposed.json) | Exposed | debuff | Takes 15% more damage. |
-| [`assassins_mark`](content/statuses/assassins_mark.json) | Assassin's Mark | debuff | Records the damage its caster deals. When it runs out, the recorded damage is dealt again. |
+| [`assassins_mark`](content/statuses/assassins_mark.json) | Assassin's Mark | debuff | Records the damage its caster deals. When it runs out, 150% of the recorded damage is dealt again. |
 | [`marked`](content/statuses/marked.json) | Hunter's Mark | debuff | Takes 10% more damage. |
 | [`sundered`](content/statuses/sundered.json) | Sundered | debuff | Defense reduced by 30%. |
 | [`necrotic`](content/statuses/necrotic.json) | Necrotic Wound | debuff | Healing received reduced by 8% per stack. |

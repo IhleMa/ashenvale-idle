@@ -2,7 +2,7 @@
   "name": "Assassin's Mark",
   "type": "debuff",
   "recordDamage": true,
-  "explodePct": 1,
-  "description": "Records the damage its caster deals. When it runs out, the recorded damage is dealt again.",
+  "explodePct": 1.5,
+  "description": "Records the damage its caster deals. When it runs out, 150% of the recorded damage is dealt again.",
   "order": 75
 }

@@ -3,7 +3,7 @@
   "classId": "rogue",
   "unlockLevel": 28,
   "type": "debuff",
-  "description": "Mark an enemy for 6 seconds. All damage you deal to it in that time is recorded — when the mark runs out it explodes and deals the recorded damage again.",
+  "description": "Mark an enemy for 6 seconds. All damage you deal to it in that time is recorded — when the mark runs out it explodes for 150% of the recorded damage.",
   "cost": 35,
   "cooldown": 24,
   "target": "enemy",

@@ -9,7 +9,7 @@
   "target": "enemy",
   "effects": [
     { "kind": "damage", "stat": "physPower", "power": 0.9, "school": "physical" },
-    { "kind": "status", "status": "poison", "duration": 8, "stat": "physPower", "power": 0.18 }
+    { "kind": "status", "status": "poison", "duration": 8, "stat": "physPower", "power": 0.25 }
   ],
   "defaultRule": {
     "enabled": true,
@@ -18,6 +18,6 @@
     "target": { "selector": "enemy_highest_hp" },
     "targetConditions": []
   },
-  "priority": 35,
+  "priority": 72,
   "order": 160
 }
