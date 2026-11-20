@@ -95,7 +95,8 @@
         {
           "heading": "Town",
           "items": [
-            "The Enchanter now has the same layout as reforging."
+            "The Enchanter now has the same layout as reforging.",
+            "Salvage Yard: filter items by name or stat search, slot, rarity (also \"Rare or lower\" and uniques & sets), maximum item level and locked state; sort by rarity, level, slot or most materials; \"Select shown\" selects every unlocked item that is shown."
           ]
         },
         {

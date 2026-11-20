@@ -30,13 +30,16 @@ const saveHl = () => { try { localStorage.setItem(HL_KEY, JSON.stringify(hl)); }
 const hlRows = () => hl.rows.filter(r => r.stat);
 const hlActive = () => !!(hl.text.trim() || hlRows().length);
 const statLabel = k => AFFIXES[k]?.label || k;
+// every word must appear in the item's name, rarity, slot or one of its stats (also used by the salvage yard)
+export function itemTextMatch(it, text, stats = gearItemStats(it)) {
+  const words = String(text || '').trim().toLowerCase().split(/\s+/).filter(Boolean);
+  if (!words.length) return true;
+  const hay = [it.name, it.rarity, SLOTS[it.slot]?.label, ...Object.keys(stats).filter(k => stats[k]).map(statLabel)].join(' ').toLowerCase();
+  return words.every(w => hay.includes(w));
+}
 export function hlMatch(it) {
-  const words = hl.text.trim().toLowerCase().split(/\s+/).filter(Boolean);
   const stats = gearItemStats(it);
-  if (words.length) {
-    const hay = [it.name, it.rarity, SLOTS[it.slot]?.label, ...Object.keys(stats).filter(k => stats[k]).map(statLabel)].join(' ').toLowerCase();
-    if (!words.every(w => hay.includes(w))) return false;
-  }
+  if (!itemTextMatch(it, hl.text, stats)) return false;
   const rows = hlRows();
   if (!rows.length) return true;
   const ok = r => {

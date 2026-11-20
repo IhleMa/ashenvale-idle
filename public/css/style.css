@@ -1347,3 +1347,7 @@ html.standalone body { padding-bottom: env(safe-area-inset-bottom); padding-left
 .item-cell.unusable.hl { opacity: .75; }
 .minion-now { margin-top: 4px; padding: 4px 6px; border-left: 2px solid #8fd18f; background: rgba(143, 209, 143, .06); border-radius: 4px; line-height: 1.45; }
 .minion-now-head { color: #9fe09f; font-weight: 600; margin-right: 4px; }
+.salv-filters { margin-bottom: 8px; }
+.salv-filters input[type=search] { flex: 1 1 180px; min-width: 160px; width: auto; }
+.salv-filters .af-min { width: 70px; flex: none; }
+.salv-filters select { width: auto; flex: none; }

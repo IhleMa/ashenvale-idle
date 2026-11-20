@@ -11,6 +11,40 @@ import { BUILDINGS, BUILDING_IDS, MATERIALS, MATERIAL_IDS, PROFESSIONS, ELIXIRS,
 import { ITEM_BASES, SLOTS, STAT_LABELS } from '/shared/data/items.js';
 import { CLASSES } from '/shared/data/classes.js';
 import * as T from '/shared/town.js';
+import { itemTextMatch } from './inventory.js';
+
+// salvage yard filters (kept while the page is open)
+const salv = { text: '', slot: 'all', rarity: 'all', maxLevel: '', sort: 'rarity-asc', hideLocked: false };
+const SALV_SORTS = [['rarity-asc', 'Rarity: lowest first'], ['rarity-desc', 'Rarity: highest first'], ['level-asc', 'Level: lowest first'], ['level-desc', 'Level: highest first'], ['slot', 'Slot'], ['yield', 'Most materials first']];
+function salvageItems(p, level, enchanter) {
+  let items = p.inventory.filter(i => (salv.slot === 'all' || i.slot === salv.slot)
+    && (salv.rarity === 'all' || (salv.rarity === 'special' ? (i.unique || i.set) : salv.rarity.startsWith('<=') ? rarityIndex(i.rarity) <= rarityIndex(salv.rarity.slice(2)) : i.rarity === salv.rarity))
+    && (salv.maxLevel === '' || i.level <= Number(salv.maxLevel))
+    && !(salv.hideLocked && i.locked));
+  const total = it => Object.values(T.salvageYield(it, level, enchanter)).reduce((a, b) => a + b, 0);
+  const by = {
+    'rarity-asc': (a, b) => rarityIndex(a.rarity) - rarityIndex(b.rarity) || a.level - b.level,
+    'rarity-desc': (a, b) => rarityIndex(b.rarity) - rarityIndex(a.rarity) || b.level - a.level,
+    'level-asc': (a, b) => a.level - b.level || rarityIndex(a.rarity) - rarityIndex(b.rarity),
+    'level-desc': (a, b) => b.level - a.level || rarityIndex(b.rarity) - rarityIndex(a.rarity),
+    slot: (a, b) => (SLOTS[a.slot]?.label || a.slot).localeCompare(SLOTS[b.slot]?.label || b.slot) || b.level - a.level,
+    yield: (a, b) => total(b) - total(a),
+  }[salv.sort] || (() => 0);
+  return items.sort(by);
+}
+// the text search only hides cells, so typing keeps the focus
+function applySalvText(root) {
+  const p = state.player;
+  let n = 0;
+  for (const cell of root.querySelectorAll('.salvage-grid [data-salv]')) {
+    const it = p.inventory.find(i => i.uid === cell.dataset.salv);
+    const show = !!it && itemTextMatch(it, salv.text);
+    cell.style.display = show ? '' : 'none';
+    if (show) n++;
+  }
+  const c = root.querySelector('[data-salv-count]');
+  if (c) c.textContent = `${n} shown`;
+}
 
 const ui = { selected: 'town_hall', salvageSel: new Set(), craftBase: null, craftLevel: null, craftQuality: 'standard', enchantChar: null, enchantStat: 'str' };
 let timer = null;
@@ -197,13 +231,24 @@ function specificHtml(p, id) {
   }
   if (b.level < 1) return '<p class="muted">Construct this building to use it.</p>';
   if (id === 'salvage_yard') {
-    const items = p.inventory;
-    const sel = [...ui.salvageSel].map(uid => items.find(i => i.uid === uid)).filter(Boolean);
+    const items = salvageItems(p, b.level, !!T.worker(p, 'enchanter'));
+    const shown = items.filter(i => itemTextMatch(i, salv.text));
+    const sel = [...ui.salvageSel].map(uid => p.inventory.find(i => i.uid === uid)).filter(Boolean);
     const preview = {};
     for (const it of sel) for (const [k, v] of Object.entries(T.salvageYield(it, b.level, !!T.worker(p, 'enchanter')))) preview[k] = (preview[k] || 0) + v;
     return `<h4>Salvage equipment</h4>
       <p class="muted small">Select items to break down. Locked items 🔒 are protected. Uncommon+ items also give arcane materials${T.worker(p, 'enchanter') ? ' (+25% thanks to your enchanter)' : ''}.</p>
-      <div class="salvage-grid">${items.map(i => `<button class="item-cell ${ui.salvageSel.has(i.uid) ? 'active' : ''} ${i.locked ? 'locked' : ''}" data-salv="${i.uid}" ${tipAttr(itemTooltipHtml(i) + `<div class='muted small'>Salvages into: ${esc(Object.entries(T.salvageYield(i, b.level, !!T.worker(p, 'enchanter'))).map(([k, v]) => `${v} ${MATERIALS[k].name}`).join(', '))}</div>`)}>${itemIcon(i, 'sm')}${i.locked ? '<span class="lock">🔒</span>' : ''}<span class="ilvl">${i.level}</span></button>`).join('') || '<p class="muted">Your inventory is empty.</p>'}</div>
+      <div class="row gap wrap small salv-filters">
+        <input type="search" data-salv-text value="${esc(salv.text)}" placeholder="Search: name or stat">
+        <select data-salv-f="slot"><option value="all">All slots</option>${Object.entries(SLOTS).map(([k, s]) => `<option value="${k}" ${salv.slot === k ? 'selected' : ''}>${esc(s.label)}</option>`).join('')}</select>
+        <select data-salv-f="rarity"><option value="all">All rarities</option>${CONFIG.rarities.map(r => `<option value="${r.id}" ${salv.rarity === r.id ? 'selected' : ''}>${esc(r.label)}</option>`).join('')}${CONFIG.rarities.slice(1, -1).map(r => `<option value="<=${r.id}" ${salv.rarity === '<=' + r.id ? 'selected' : ''}>${esc(r.label)} or lower</option>`).join('')}<option value="special" ${salv.rarity === 'special' ? 'selected' : ''}>Uniques & set items</option></select>
+        <label class="inline">level ≤ <input type="number" min="1" class="af-min" data-salv-f="maxLevel" value="${esc(salv.maxLevel)}" placeholder="any"></label>
+        <select data-salv-f="sort">${SALV_SORTS.map(([v, l]) => `<option value="${v}" ${salv.sort === v ? 'selected' : ''}>${l}</option>`).join('')}</select>
+        <label class="inline"><input type="checkbox" data-salv-f="hideLocked" ${salv.hideLocked ? 'checked' : ''}> hide locked</label>
+        <span class="muted" data-salv-count>${shown.length} shown</span>
+        <button class="btn tiny" data-salv-all ${tipAttr('Select every unlocked item that is shown')}>Select shown</button>
+      </div>
+      <div class="salvage-grid">${items.map(i => `<button class="item-cell ${ui.salvageSel.has(i.uid) ? 'active' : ''} ${i.locked ? 'locked' : ''}" data-salv="${i.uid}" ${tipAttr(itemTooltipHtml(i) + `<div class='muted small'>Salvages into: ${esc(Object.entries(T.salvageYield(i, b.level, !!T.worker(p, 'enchanter'))).map(([k, v]) => `${v} ${MATERIALS[k].name}`).join(', '))}</div>`)}>${itemIcon(i, 'sm')}${i.locked ? '<span class="lock">🔒</span>' : ''}<span class="ilvl">${i.level}</span></button>`.replace('<button ', itemTextMatch(i, salv.text) ? '<button ' : '<button style="display:none" ')).join('') || `<p class="muted">${p.inventory.length ? 'No item matches these filters.' : 'Your inventory is empty.'}</p>`}</div>
       <div class="row between wrap gap"><span class="small">${sel.length} selected → ${matsList(preview)}</span>
         <span class="row gap"><button class="btn tiny ghost" data-salv-clear>Clear</button><button class="btn small primary" data-salv-go ${sel.length ? '' : 'disabled'}>Salvage selected</button></span></div>
       <div class="row gap wrap small" style="margin-top:8px"><span class="muted">Salvage all unlocked:</span>${CONFIG.rarities.slice(0, 4).map(r => `<button class="btn tiny ghost" data-salv-rarity="${r.id}">≤ ${esc(r.label)}</button>`).join('')}</div>
@@ -308,6 +353,11 @@ export const townView = {
         rerender(); return;
       }
       if ('salvClear' in d) { ui.salvageSel.clear(); rerender(); return; }
+      if ('salvAll' in d) {
+        const b = p.town.buildings.salvage_yard;
+        for (const i of salvageItems(p, b?.level || 1, !!T.worker(p, 'enchanter'))) if (!i.locked && itemTextMatch(i, salv.text)) ui.salvageSel.add(i.uid);
+        rerender(); return;
+      }
       if ('salvGo' in d) {
         const r = await run(act('salvage_items', { itemUids: [...ui.salvageSel] }));
         if (r) { ui.salvageSel.clear(); toast(`Salvaged ${r.count} item(s): ${Object.entries(r.materials).map(([k, v]) => `${v} ${MATERIALS[k].name}`).join(', ')}`, 'success'); }
@@ -337,10 +387,14 @@ export const townView = {
       }
       if (d.brew) { const r = await run(act('brew_elixir', { elixirId: d.brew })); if (r) toast(`${ELIXIRS[d.brew].name} active for ${duration((r.expiresAt - now()) / 1000)}.`, 'success'); }
     });
+    root.addEventListener('input', e => {
+      if (e.target.matches('[data-salv-text]')) { salv.text = e.target.value; applySalvText(root); }
+    });
     root.addEventListener('change', async e => {
       const t = e.target;
       if (t.matches('[data-craft-level]')) { ui.craftLevel = Number(t.value) || null; rerender(); }
       else if (t.matches('[data-craft-quality]')) { ui.craftQuality = t.value; rerender(); }
+      else if (t.matches('[data-salv-f]')) { const k = t.dataset.salvF; salv[k] = t.type === 'checkbox' ? t.checked : t.value; rerender(); }
       else if (t.matches('[data-autoloot]')) await run(act('set_settings', { autoLootAction: t.value }), 'Auto-loot updated.');
     });
     // live countdowns and progress bars
