@@ -39,4 +39,14 @@ const recruits = (l, pid) => l.byPlayer[pid].slice(1).map(c => c.classId);
   assert.deepEqual(sizes(l), [1, 1, 1, 1]);
   ok('4 players: heroes only');
 }
+{
+  const ps = [player('a', 'warrior', 'mage'), player('b', 'cleric', 'rogue'), player('c', 'mage', 'ranger')];
+  const l = coopLineup(ps, 0, ['c']);
+  assert.deepEqual(sizes(l), [1, 1, 2]);
+  assert.equal(l.reasons[l.byPlayer.c[1].id], 'leader');
+  assert.deepEqual(sizes(coopLineup(ps, 0, ['b', 'c'])), [1, 2, 1], 'never more than the free places');
+  assert.deepEqual(sizes(coopLineup(ps.slice(0, 2), 0, [])), [1, 1], 'the leader can leave every recruit out');
+  assert.deepEqual(sizes(coopLineup(ps.slice(0, 2), 0, ['b'])), [1, 2]);
+  ok('the leader chooses which offered recruits fight (still at most one each, never more than the free places)');
+}
 console.log(`Co-op: all ${n} checks passed.`);

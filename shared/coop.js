@@ -10,14 +10,23 @@ import { CLASSES } from './data/classes.js';
 const roleOf = c => CLASSES[c.classId]?.role;
 
 // players: [{ id, hero, picks: [character in preference order] }] in group order; turn: index of whose turn it is
-// returns { byPlayer: { id: [hero, ...recruits] }, reasons: { charId: 'role:healer' | 'turn' | 'solo' } }
-export function coopLineup(players, turn = 0) {
+// chosen: the leader's choice — ids of the players whose offered recruit fights (null = automatic, as above)
+// returns { byPlayer: { id: [hero, ...recruits] }, reasons: { charId: 'role:healer' | 'turn' | 'leader' } }
+export function coopLineup(players, turn = 0, chosen = null) {
   const size = CONFIG.coop.partySize || 4;
   const out = { byPlayer: {}, reasons: {} };
   if (!players.length) return out;
   for (const pl of players) out.byPlayer[pl.id] = pl.hero ? [pl.hero] : [];
   let free = Math.max(0, size - players.filter(pl => pl.hero).length);
   const limit = CONFIG.coop.recruitsPerPlayer ?? 1;
+  if (Array.isArray(chosen)) { // the leader decided: exactly these players' recruits, while places are left
+    for (const pl of players) {
+      if (free <= 0) break;
+      if (!chosen.includes(pl.id)) continue;
+      for (const c of pl.picks.slice(0, limit)) { if (free <= 0) break; out.byPlayer[pl.id].push(c); out.reasons[c.id] = 'leader'; free--; }
+    }
+    return out;
+  }
   const order = players.map((_, i) => players[(turn + i) % players.length]);
   const taken = new Set();
   const count = id => out.byPlayer[id].length - 1;

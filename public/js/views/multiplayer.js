@@ -43,6 +43,14 @@ export const multiplayerView = {
       if (d.decline) await run(act('group_decline', { groupId: d.decline }));
       if (d.kick) await run(act('group_kick', { playerId: d.kick }));
       if (d.promote) await run(act('group_promote', { playerId: d.promote }));
+      // leader: let a member's offered recruit fight or sit out; 'auto' hands it back to the automatic choice
+      if (d.recruitToggle) {
+        const g = state.group;
+        const fighting = g.members.filter(m => m.characters.some(c => !c.isMain)).map(m => m.id);
+        const ids = fighting.includes(d.recruitToggle) ? fighting.filter(id => id !== d.recruitToggle) : [...fighting, d.recruitToggle];
+        await run(act('group_set_recruits', { playerIds: ids }));
+      }
+      if ('recruitAuto' in d) await run(act('group_set_recruits', { playerIds: null }));
       if (d.start) {
         if (!state.group) await run(act('group_create'));
         if (await run(act('group_start', { encounterId: d.start })) !== undefined) location.hash = '#/combat';
@@ -131,13 +139,28 @@ export const multiplayerView = {
   },
 };
 
+// leader only: a member's offered recruit can be switched between fighting and sitting out
+function recruitButton(g, m, isLeader) {
+  if (!isLeader || g.members.length < 2) return '';
+  const fights = m.characters.find(c => !c.isMain);
+  const offered = fights || m.bench?.[0];
+  if (!offered) return '';
+  const used = g.members.filter(x => x.characters.some(c => !c.isMain)).length;
+  if (fights) return `<button class="btn tiny" data-recruit-toggle="${m.id}" ${tipAttr(`${esc(offered.name)} fights in the next fight. Click to leave them out.`)}>✓ Fights</button>`;
+  const full = used >= g.freeSlots;
+  return `<button class="btn tiny ghost" data-recruit-toggle="${m.id}" ${full ? 'disabled' : ''} ${tipAttr(full ? 'No recruit place left: leave another recruit out first' : `Let ${esc(offered.name)} fight in the next fight`)}>Let fight</button>`;
+}
+
 function groupHtml(g, me, isLeader) {
   return `<div class="group-members">${g.members.map(m => `<div class="group-member">
       <div class="row gap"><b>${m.id === g.leaderId ? '👑 ' : ''}${esc(m.name)}</b>${botTag(m)}<span class="conn-dot ${m.online ? 'on' : ''}" title="${m.online ? 'Online' : 'Offline'}"></span>
         <span class="grow"></span>${m.id !== me ? `<button class="btn tiny ghost" data-inspect="${esc(m.name)}">Inspect</button>` : ''}${isLeader && m.id !== me ? `<button class="btn tiny ghost" data-promote="${m.id}">Make leader</button><button class="btn tiny ghost danger" data-kick="${m.id}">Remove</button>` : ''}</div>
-      <div class="member-chars">${m.characters.map(c => `<span class="member-char">${portrait(c, 'xs')}<span>${c.isMain ? '★ ' : ''}${esc(c.name)} <small class="muted">Lv ${c.level}</small> ${classBadge(c.classId)}${c.reason?.startsWith('role:') ? ` <span class="tag small" title="Brought along because the group has no ${esc(ROLE_LABEL(c.reason.slice(5)))}">fills ${esc(ROLE_LABEL(c.reason.slice(5)))}</span>` : c.reason === 'turn' && g.members.length > 2 ? ' <span class="tag small" title="This player\'s turn for the recruit place">their turn</span>' : ''}</span></span>`).join('')}
-        ${m.bench?.length && g.members.length > 1 ? `<span class="member-char benched" title="No free place in the next fight">${m.bench.map(c => esc(c.name)).join(', ')} <small class="muted">sit${m.bench.length > 1 ? '' : 's'} out</small></span>` : ''}</div>
+      <div class="member-chars">${m.characters.map(c => `<span class="member-char">${portrait(c, 'xs')}<span>${c.isMain ? '★ ' : ''}${esc(c.name)} <small class="muted">Lv ${c.level}</small> ${classBadge(c.classId)}${c.reason?.startsWith('role:') ? ` <span class="tag small" title="Brought along because the group has no ${esc(ROLE_LABEL(c.reason.slice(5)))}">fills ${esc(ROLE_LABEL(c.reason.slice(5)))}</span>` : c.reason === 'turn' && g.members.length > 2 ? ' <span class="tag small" title="This player\'s turn for the recruit place">their turn</span>' : c.reason === 'leader' && g.members.length > 1 ? ' <span class="tag small" title="Picked by the group leader">leader\'s pick</span>' : ''}</span></span>`).join('')}
+        ${m.bench?.length && g.members.length > 1 ? `<span class="member-char benched" title="${g.leaderRecruits ? 'The leader left this recruit out' : 'No free place in the next fight'}">${m.bench.map(c => esc(c.name)).join(', ')} <small class="muted">sit${m.bench.length > 1 ? '' : 's'} out</small></span>` : ''}
+        ${recruitButton(g, m, isLeader)}</div>
     </div>`).join('')}
+    ${isLeader && g.members.length > 1 ? `<div class="row gap small"><span class="muted">Recruits: ${g.leaderRecruits ? '<b>chosen by you</b>' : 'automatic (missing roles first, then in turn)'} · ${g.freeSlots} place${g.freeSlots === 1 ? '' : 's'}</span>${g.leaderRecruits ? `<button class="btn tiny ghost" data-recruit-auto ${tipAttr('Let the game choose again: missing roles first, then in turn')}>Automatic</button>` : ''}</div>`
+      : g.leaderRecruits && g.members.length > 1 ? '<div class="muted small">The leader chose which recruits fight.</div>' : ''}
     ${g.invites.length ? `<div class="muted small">Pending: ${g.invites.map(esc).join(', ')}</div>` : ''}
     <div class="muted small">Next fight: ${g.members.reduce((n, m) => n + m.characters.length, 0)} / ${CONFIG.coop.partySize} characters.${g.members.length < CONFIG.coop.maxPlayers ? '' : ' Group is full.'}</div>
     ${g.inBattle ? '<div class="notice good">Your group is fighting! <a href="#/combat">Watch the battle →</a></div>' : ''}

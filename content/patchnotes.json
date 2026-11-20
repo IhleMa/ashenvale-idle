@@ -99,6 +99,12 @@
           ]
         },
         {
+          "heading": "Multiplayer",
+          "items": [
+            "The group leader can now choose which offered recruits fight: \"✓ Fights\" / \"Let fight\" next to each member's recruit, or \"Automatic\" to go back to the old choice (missing roles first, then in turn). Still at most one recruit per player. The choice resets when someone joins or leaves or the leader changes."
+          ]
+        },
+        {
           "heading": "Interface",
           "items": [
             "The inventory moved onto the Character page, next to the equipment. Hovering an item compares it with what the selected character wears in that slot; items the character can't use are dimmed, marked ✖ and say why. Drag items onto an equipment slot to equip them (swapping with what's there), and drag equipped gear back to the inventory to unequip it. The loot filter and the filtered-loot log open in a window from the inventory's header.",

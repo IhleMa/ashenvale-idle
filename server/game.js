@@ -77,7 +77,7 @@ export class Game {
 
   // Groups survive restarts (battles and pending invites do not)
   saveGroups() {
-    const data = [...this.groups.values()].map(g => ({ id: g.id, leaderId: g.leaderId, members: g.members, chat: g.chat.slice(-30) }));
+    const data = [...this.groups.values()].map(g => ({ id: g.id, leaderId: g.leaderId, members: g.members, leaderRecruits: g.leaderRecruits || null, chat: g.chat.slice(-30) }));
     this.store.putDoc('groups', data);
   }
   loadGroups() {
@@ -85,7 +85,7 @@ export class Game {
     if (!Array.isArray(data)) return;
     for (const g of data) {
       if (!Array.isArray(g.members) || !g.members.length) continue;
-      const group = { id: g.id, leaderId: g.members.includes(g.leaderId) ? g.leaderId : g.members[0], members: g.members, invites: new Map(), battle: null, chat: g.chat || [] };
+      const group = { id: g.id, leaderId: g.members.includes(g.leaderId) ? g.leaderId : g.members[0], members: g.members, leaderRecruits: Array.isArray(g.leaderRecruits) ? g.leaderRecruits : null, invites: new Map(), battle: null, chat: g.chat || [] };
       this.groups.set(group.id, group);
       for (const m of group.members) this.playerGroup.set(m, group.id);
     }
@@ -434,6 +434,7 @@ export class Game {
       if (g.members.length >= CONFIG.coop.maxPlayers) fail('Group is full');
       g.invites.delete(s.player.id);
       g.members.push(s.player.id);
+      g.leaderRecruits = null; // the group changed: back to automatic
       this.playerGroup.set(s.player.id, g.id);
       this.sendInvites(s.player.id);
       this.groupMessage(g, `${s.player.name} joined the group.`);
@@ -457,7 +458,23 @@ export class Game {
       if (g.leaderId !== s.player.id) fail('Only the leader can promote');
       if (!g.members.includes(d.playerId)) fail('Invalid member');
       g.leaderId = d.playerId;
+      g.leaderRecruits = null; // the new leader decides afresh
       this.groupMessage(g, `${this.nameOf(d.playerId)} is now the group leader.`);
+      this.broadcastGroup(g);
+    },
+    // the leader decides which members' offered recruits fight (null = automatic: missing roles first, then in turn)
+    group_set_recruits(s, d) {
+      const g = this.groupOf(s.player.id) || fail('Not in a group');
+      if (g.leaderId !== s.player.id) fail('Only the leader can choose the recruits');
+      if (d.playerIds == null) g.leaderRecruits = null;
+      else {
+        if (!Array.isArray(d.playerIds)) fail('Invalid selection');
+        const ids = [...new Set(d.playerIds.map(String))].filter(id => g.members.includes(id));
+        const players = g.members.map(id => this.sessions.get(id)?.player || this.store.loadPlayer(id)).filter(Boolean);
+        const free = Math.max(0, (CONFIG.coop.partySize || 4) - players.filter(p => L.hero(p)).length);
+        if (ids.length > free) fail(`Only ${free} recruit place${free === 1 ? '' : 's'} left`);
+        g.leaderRecruits = ids;
+      }
       this.broadcastGroup(g);
     },
     group_chat(s, d) {
@@ -773,7 +790,7 @@ export class Game {
 
   // who fights in the group's next co-op fight (max CONFIG.coop.partySize characters)
   coopLineupOf(g, players) {
-    return coopLineup(players.map(p => ({ id: p.id, hero: L.hero(p), picks: L.coopPicks(p) })), g.recruitTurn || 0);
+    return coopLineup(players.map(p => ({ id: p.id, hero: L.hero(p), picks: L.coopPicks(p) })), g.recruitTurn || 0, g.leaderRecruits || null);
   }
 
   publicGroup(g) {
@@ -781,7 +798,8 @@ export class Game {
     const players = g.members.map(id => this.sessions.get(id)?.player || this.store.loadPlayer(id)).filter(Boolean);
     const lineup = this.coopLineupOf(g, players);
     return {
-      id: g.id, leaderId: g.leaderId,
+      id: g.id, leaderId: g.leaderId, leaderRecruits: g.leaderRecruits || null,
+      freeSlots: Math.max(0, (CONFIG.coop.partySize || 4) - players.filter(p => L.hero(p)).length),
       members: g.members.map(id => {
         const p = players.find(x => x.id === id);
         const chars = p ? lineup.byPlayer[id] || [] : [];
@@ -827,6 +845,7 @@ export class Game {
     if (g.battle) this.sendTo(playerId, { t: 'battle_abort', k: 'coop' });
     if (g.members.length === 0) { this.groups.delete(g.id); return; }
     if (g.leaderId === playerId) g.leaderId = g.members[0];
+    g.leaderRecruits = null; // the group changed: back to automatic
     this.groupMessage(g, `${this.nameOf(playerId)} ${verb}.`);
     this.broadcastGroup(g);
   }
