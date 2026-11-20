@@ -161,18 +161,25 @@ function mount(v) {
   v.render(root);
 }
 
-// Re-render the active view when state changes, but never while the player is typing in it
+// Re-render the active view when state changes, but never while the player is typing in it or has a dropdown open
+// (a fight ending would otherwise rebuild the page and close the dropdown)
+let selectBusy = null; // the <select> the player is choosing in, from pressing it until it changes or loses focus
 function requestRender() {
   if (!current) return;
   const a = document.activeElement;
-  if (a && root?.contains(a) && /INPUT|TEXTAREA/.test(a.tagName) && !['button', 'checkbox', 'range'].includes(a.type)) {
+  const typing = a && root?.contains(a) && /INPUT|TEXTAREA/.test(a.tagName) && !['button', 'checkbox', 'range'].includes(a.type);
+  if (typing || (selectBusy && root?.contains(selectBusy))) {
     pendingRender = true;
     return;
   }
   pendingRender = false;
   if (current.render && root) current.render(root);
 }
-document.addEventListener('focusout', () => setTimeout(() => { if (pendingRender) requestRender(); }, 50));
+const flushRender = () => setTimeout(() => { if (pendingRender) requestRender(); }, 50);
+document.addEventListener('focusout', e => { if (e.target === selectBusy) selectBusy = null; flushRender(); });
+document.addEventListener('mousedown', e => { const s = e.target.closest?.('select'); if (s) selectBusy = s; }, true);
+document.addEventListener('keydown', e => { if (e.target?.tagName === 'SELECT') selectBusy = e.target; }, true);
+document.addEventListener('change', e => { if (e.target === selectBusy) { selectBusy = null; flushRender(); } }, true);
 export { requestRender };
 
 function renderTopbar() {
