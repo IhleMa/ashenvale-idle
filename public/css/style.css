@@ -1345,3 +1345,5 @@ html.standalone body { padding-bottom: env(safe-area-inset-bottom); padding-left
 .hl-bar .af-min { width: 80px; flex: none; }
 .hl-bar .hl-row select { width: auto; flex: none; }
 .item-cell.unusable.hl { opacity: .75; }
+.minion-now { margin-top: 4px; padding: 4px 6px; border-left: 2px solid #8fd18f; background: rgba(143, 209, 143, .06); border-radius: 4px; line-height: 1.45; }
+.minion-now-head { color: #9fe09f; font-weight: 600; margin-right: 4px; }
