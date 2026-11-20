@@ -1263,3 +1263,9 @@ html.standalone body { padding-bottom: env(safe-area-inset-bottom); padding-left
 .compare-head { margin-top: 6px; border-top: 1px solid var(--line); padding-top: 4px; }
 .soulbound { color: #e0b44c; margin-top: 4px; }
 .affix-line > span:last-child { white-space: nowrap; }
+.affix-group { margin: 6px 0 2px; padding-top: 4px; border-top: 1px solid var(--line); font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.affix-group.affix-prefix { color: #7fb4ff; }
+.affix-group.affix-suffix { color: #e3a857; }
+.affix-line { padding-left: 6px; border-left: 2px solid transparent; }
+.affix-line.affix-prefix { border-left-color: #7fb4ff; }
+.affix-line.affix-suffix { border-left-color: #e3a857; }

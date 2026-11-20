@@ -17,6 +17,7 @@ export const ITEM_BASES = withIds(I.bases);
 // (roll 0–1 inside the tier's range), so its stats can be recomputed exactly at any item level (reforging).
 export const AFFIXES = I.affixes;
 export const AFFIX_TIERS = I.affixTiers;
+export const AFFIX_LIMITS = I.affixLimits || { prefix: 3, suffix: 3 };
 
 export const STAT_LABELS = {
   ...Object.fromEntries(Object.entries(AFFIXES).map(([k, v]) => [k, v.label])),

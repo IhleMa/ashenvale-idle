@@ -10,6 +10,7 @@
           "items": [
             "New affix system: items roll prefixes and suffixes (up to 3 of each) from 41 different stats. Uncommon items get 1 affix, Rare 2, Epic 3, Legendary 4 and Mythic now 6.",
             "Every affix has a tier from T7 to T1. Better tiers need a higher item level, are much rarer and give bigger values. Hover an item to see each affix's tier and its possible range.",
+            "Item tooltips group affixes under Prefixes (blue) and Suffixes (orange), with how many of the 3 slots each uses.",
             "Strong stats like Damage %, Life Steal, Cooldown Recovery and All Attributes are rare; plain attributes, Health and Defense are common.",
             "New stats include Physical/Magic Damage %, Life Steal, Block, Dodge, Damage Reduction, Health Regeneration, Healing Received, Cooldown Recovery, Damage vs Bosses, Damage vs Wounded, Shield Strength, Thorns and more.",
             "The best prefix and suffix now name the item, e.g. \"Brutal Steel Sword of the Fox\".",

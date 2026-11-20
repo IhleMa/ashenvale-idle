@@ -1,5 +1,5 @@
 // UI helpers: escaping, formatting, toasts, modals, tooltips.
-import { STAT_LABELS, PCT_STATS, SLOTS, AFFIXES, itemStats, affixValue, tierRange, isSoulbound } from '/shared/data/items.js';
+import { STAT_LABELS, PCT_STATS, SLOTS, AFFIXES, AFFIX_LIMITS, itemStats, affixValue, tierRange, isSoulbound } from '/shared/data/items.js';
 import { GEM_KINDS, gemName, gemValue, parseGemKey } from '/shared/gems.js';
 import { rarityById } from '/shared/config.js';
 import { CLASSES } from '/shared/data/classes.js';
@@ -86,13 +86,17 @@ export function itemTooltipHtml(item, compareTo = null, wearer = null) {
   if (item.affixes) {
     // base (and unique) stats, then every affix with its tier and the tier's value range at this item level
     lines = Object.entries(itemStats({ ...item, affixes: [] })).map(([k, v]) => statLine(k, v, 'implicit-line'));
-    if (item.affixes.length) lines.push('<div class="affix-sep"></div>');
-    for (const a of item.affixes) {
+    // prefixes and suffixes in their own groups, each with how many of the possible slots are used
+    const groups = ['prefix', 'suffix'].map(type => [type, item.affixes.filter(a => AFFIXES[a.stat]?.type === type)]);
+    for (const [type, list] of groups) {
+      if (!list.length) continue;
+      lines.push(`<div class="affix-group affix-${type}">${type === 'prefix' ? 'Prefixes' : 'Suffixes'} <span class="faint">${list.length}/${AFFIX_LIMITS[type] ?? 3}</span></div>`);
+      for (const a of list) {
       const def = AFFIXES[a.stat];
-      if (!def) continue;
       const [lo, hi] = tierRange(a.stat, a.tier, item.level);
       const fmtV = v => (PCT_STATS.has(a.stat) ? (v * 100).toFixed(1) + '%' : fmt(v));
-      lines.push(`<div class="stat-line affix-line"><span><span class="tier-tag t${a.tier}" title="${def.type === 'prefix' ? 'Prefix' : 'Suffix'}: ${esc(def.name)}">T${a.tier}</span>${esc(def.label)}</span><span>${statValue(a.stat, affixValue(a, item.level))} <span class="faint small">(${fmtV(lo)}–${fmtV(hi)})</span></span></div>`);
+      lines.push(`<div class="stat-line affix-line affix-${type}"><span><span class="tier-tag t${a.tier}" title="${type === 'prefix' ? 'Prefix' : 'Suffix'}: ${esc(def.name)}">T${a.tier}</span>${esc(def.label)}</span><span>${statValue(a.stat, affixValue(a, item.level))} <span class="faint small">(${fmtV(lo)}–${fmtV(hi)})</span></span></div>`);
+      }
     }
   } else lines = Object.entries(item.stats).map(([k, v]) => statLine(k, v));
   if (compareTo) {
