@@ -1,6 +1,6 @@
 # Missing assets
 
-**570 of 570** images still missing (482 recommended, 88 optional).
+**557 of 557** images still missing (469 recommended, 88 optional).
 Only the missing files are listed; see [ASSETS.md](ASSETS.md) for everything, sizes and naming rules. Drop files into `public/assets/<folder>/`
 (any of .png, .webp, .jpg, .jpeg, .gif, .svg, .avif).
 
@@ -16,9 +16,9 @@ Only the missing files are listed; see [ASSETS.md](ASSETS.md) for everything, si
 | [Co-op encounter art](#co-op-encounter-art) | 4 |
 | [Achievements](#achievements) | 16 |
 | [Town buildings](#town-buildings) | 10 |
-| [Materials](#materials) | 34 |
+| [Materials](#materials) | 22 |
 | [Professions](#professions) | 8 |
-| [Gems](#gems) | 12 |
+| [Gems](#gems) | 11 |
 | [Elixirs](#elixirs) | 5 |
 | [Expedition destinations](#expedition-destinations) | 7 |
 | [Interface](#interface) | 2 |
@@ -498,18 +498,6 @@ Only the missing files are listed; see [ASSETS.md](ASSETS.md) for everything, si
 - [ ] `materials/shadow_silk.png` — Shadow Silk
 - [ ] `materials/dragonbone.png` — Dragonbone
 - [ ] `materials/void_ichor.png` — Void Ichor
-- [ ] `materials/shard_str.png` — Strength Shard
-- [ ] `materials/shard_int.png` — Intelligence Shard
-- [ ] `materials/shard_dex.png` — Dexterity Shard
-- [ ] `materials/shard_vit.png` — Vitality Shard
-- [ ] `materials/shard_hp.png` — Health Shard
-- [ ] `materials/shard_defense.png` — Defense Shard
-- [ ] `materials/shard_physPower.png` — Physical Power Shard
-- [ ] `materials/shard_magPower.png` — Magic Power Shard
-- [ ] `materials/shard_healPower.png` — Healing Power Shard
-- [ ] `materials/shard_critChance.png` — Critical Chance Shard
-- [ ] `materials/shard_critDamage.png` — Critical Damage Shard
-- [ ] `materials/shard_attackSpeed.png` — Attack Speed Shard
 
 ## Professions
 
@@ -524,18 +512,17 @@ Only the missing files are listed; see [ASSETS.md](ASSETS.md) for everything, si
 
 ## Gems
 
-- [ ] `gems/str.png` — Ruby (optional per tier: str_1 … str_5)
-- [ ] `gems/int.png` — Sapphire (optional per tier: int_1 … int_5)
-- [ ] `gems/dex.png` — Emerald (optional per tier: dex_1 … dex_5)
-- [ ] `gems/vit.png` — Amber (optional per tier: vit_1 … vit_5)
-- [ ] `gems/hp.png` — Bloodstone (optional per tier: hp_1 … hp_5)
-- [ ] `gems/defense.png` — Onyx (optional per tier: defense_1 … defense_5)
-- [ ] `gems/physPower.png` — Garnet (optional per tier: physPower_1 … physPower_5)
-- [ ] `gems/magPower.png` — Amethyst (optional per tier: magPower_1 … magPower_5)
-- [ ] `gems/healPower.png` — Pearl (optional per tier: healPower_1 … healPower_5)
-- [ ] `gems/critChance.png` — Topaz (optional per tier: critChance_1 … critChance_5)
-- [ ] `gems/critDamage.png` — Diamond (optional per tier: critDamage_1 … critDamage_5)
-- [ ] `gems/attackSpeed.png` — Citrine (optional per tier: attackSpeed_1 … attackSpeed_5)
+- [ ] `gems/ladder.png` — Ladder Gem (optional per tier: ladder_1 … ladder_5)
+- [ ] `gems/keystone.png` — Keystone (optional per tier: keystone_1 … keystone_5)
+- [ ] `gems/underdog.png` — Underdog Gem (optional per tier: underdog_1 … underdog_5)
+- [ ] `gems/harmony.png` — Harmony Gem (optional per tier: harmony_1 … harmony_5)
+- [ ] `gems/balance.png` — Balance Gem (optional per tier: balance_1 … balance_5)
+- [ ] `gems/purity.png` — Purity Gem (optional per tier: purity_1 … purity_5)
+- [ ] `gems/sacrifice.png` — Sacrifice Gem (optional per tier: sacrifice_1 … sacrifice_5)
+- [ ] `gems/mirror.png` — Mirror Gem (optional per tier: mirror_1 … mirror_5)
+- [ ] `gems/tide.png` — Tide Gem (optional per tier: tide_1 … tide_5)
+- [ ] `gems/last_stand.png` — Last Stand Gem (optional per tier: last_stand_1 … last_stand_5)
+- [ ] `gems/momentum.png` — Momentum Gem (optional per tier: momentum_1 … momentum_5)
 
 ## Elixirs
 

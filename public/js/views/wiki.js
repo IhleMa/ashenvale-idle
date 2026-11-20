@@ -10,6 +10,7 @@ import { SUBCLASSES, subclassesOf } from '/shared/data/subclasses.js';
 import { TREE_SPECS, describeNodeStats } from '/shared/data/skilltree.js';
 import { MINIONS } from '/shared/data/minions.js';
 import { SELECTORS, CONDITIONS, TARGET_CONDITIONS, describeCondition } from '/shared/rules.js';
+import { GEM_IDS, GEM_KINDS, GEM_TIERS, GEM_CONFIG, COMBAT_GEMS, gemText, gemValue } from '/shared/gems.js';
 import { SLOTS, SLOT_IDS, ITEM_BASES, AFFIXES, AFFIX_TIERS, PCT_STATS, tierRange } from '/shared/data/items.js';
 import { UNIQUES, SETS } from '/shared/data/legendaries.js';
 import { BUILDINGS, MATERIALS, buildingEffects } from '/shared/data/town.js';
@@ -248,6 +249,9 @@ function itemsPage() {
       const common = a.weight >= 800 ? 'very common' : a.weight >= 400 ? 'common' : a.weight >= 250 ? 'uncommon' : a.weight >= 150 ? 'rare' : 'very rare';
       return `<tr><td><b>${esc(a.label)}</b>${a.description ? `<div class="muted small">${esc(a.description)}</div>` : ''}</td><td>${a.type}</td><td>${esc(a.name)}</td><td>${common} <span class="faint small">(${a.weight})</span></td><td class="small">${a.slots ? a.slots.map(x => esc(SLOTS[x]?.label || x)).join(', ') : 'all'}</td><td>${f(lo[0])}–${f(lo[1])}</td><td>${f(hi[0])}–${f(hi[1])}</td></tr>`;
     }).join('')}</table>
+    <h3>Gems</h3>
+    <p>Items can have sockets (more on better rarities and some slots; the Jeweler drills more). A socketed <b>resonance gem</b> changes the affixes of its own item — one gem of each kind per item. Gems drop from enemies (bosses and rifts most often, better qualities from higher-level enemies) and the Jeweler cuts Chipped gems from Gem Fragments; ${GEM_CONFIG.fuseCount} gems fuse into one of the next quality.</p>
+    <table class="wiki-table"><tr><th>Gem</th><th>Effect</th>${GEM_TIERS.slice(1).map(t => `<th>${esc(t.name)}</th>`).join('')}</tr>${GEM_IDS.map(k => `<tr><td><b>${esc(GEM_KINDS[k].name)}</b>${COMBAT_GEMS.has(GEM_KINDS[k].effect) ? '<div class="muted small">in combat</div>' : ''}</td><td class="small">${esc(gemText(k, 1)).replace(/\d+%/, 'X')}</td>${GEM_TIERS.slice(1).map((t, i) => { const v = gemValue(k, i + 1); return `<td>${GEM_KINDS[k].effect === 'keystone' ? v + ' tier' + (v > 1 ? 's' : '') : Math.round(v * 100) + '%'}</td>`; }).join('')}</tr>`).join('')}</table>
     <h3>Uniques</h3><table class="wiki-table"><tr><th>Unique</th><th>Item</th><th>From level</th><th>Where</th><th>Effect</th></tr>${Object.values(UNIQUES).sort((a, b) => a.minLevel - b.minLevel).map(u => `<tr><td class="unique-name"><b>${esc(u.name)}</b></td><td>${esc(ITEM_BASES[u.baseId]?.name || u.baseId)}</td><td>${u.minLevel}</td><td class="small">${(u.zones || []).map(z => esc(ZONES[z]?.name || z)).join(', ') || 'anywhere'}</td><td class="small">${esc(u.description || '')}</td></tr>`).join('')}</table>
     <h3>Sets</h3>${Object.values(SETS).map(s => `<div class="wiki-sub" style="--sub-color:#3fbf6a"><h4 class="set-name">${esc(s.name)} <span class="muted small">from level ${s.minLevel}${s.zones?.length ? ` · ${s.zones.map(z => esc(ZONES[z]?.name || z)).join(', ')}` : ''}</span></h4><p class="small">${Object.values(s.pieces).map(esc).join(' · ')}</p><ul class="small">${Object.entries(s.bonuses).map(([n, b]) => `<li><b>${n} pieces:</b> ${esc(b.description)}</li>`).join('')}</ul></div>`).join('')}`;
 }

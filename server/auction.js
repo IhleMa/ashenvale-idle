@@ -4,6 +4,7 @@ import { CONFIG, rarityIndex } from '../shared/config.js';
 import { MATERIALS } from '../shared/data/town.js';
 import { SLOTS, canEquip, isSoulbound } from '../shared/data/items.js';
 import { UNIQUES, SETS, migrateLegacyItem } from '../shared/data/legendaries.js';
+import { parseGemKey } from '../shared/gems.js';
 import { GameError, sendMail } from './playerLogic.js';
 
 const fail = m => { throw new GameError(m); };
@@ -24,6 +25,7 @@ export class AuctionHouse {
     this.data = { listings: [], history: [], ...game.store.getDoc('auction', {}) };
     this.dirty = false;
     for (const l of this.data.listings) if (l.item && migrateLegacyItem(l.item)) this.dirty = true; // tiered affixes
+    for (const l of this.data.listings) if (l.item?.sockets?.some(g => g && !parseGemKey(g))) { l.item.sockets = l.item.sockets.map(g => (g && parseGemKey(g) ? g : null)); this.dirty = true; } // old stat gems
   }
 
   // queues the auction house for the next database flush (written together with the players involved)

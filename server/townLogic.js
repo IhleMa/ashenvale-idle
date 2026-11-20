@@ -21,7 +21,19 @@ export function migrateTown(p) {
     while (inn < 5 && INN_ROSTER[inn] < recruits) inn++;
     p.town.buildings.inn.level = inn;
   }
-  p.town.gems ||= {}; // gem pouch: 'stat:tier' -> count
+  p.town.gems ||= {}; // gem pouch: 'kind:quality' -> count
+  // resonance gems replaced the stat gems: old gems and stat shards become Gem Fragments
+  if (!p.town.gemsV2) {
+    p.town.gemsV2 = true;
+    let frags = 0;
+    for (const [k, n] of Object.entries(p.town.gems)) { const r = G.legacyGemRefund(k); if (r) { frags += r * n; delete p.town.gems[k]; } }
+    const items = [...(p.inventory || []), ...Object.values(p.characters || {}).flatMap(c => Object.values(c.equipment || {})), ...(p.mailbox || []).map(m => m.item)];
+    for (const it of items) if (it?.sockets) it.sockets = it.sockets.map(g => { if (g && !G.parseGemKey(g)) { frags += G.legacyGemRefund(g); return null; } return g; });
+    let shards = 0;
+    for (const k of Object.keys(p.town.materials)) if (k.startsWith('shard_')) { shards += p.town.materials[k]; delete p.town.materials[k]; }
+    frags += Math.floor(shards / G.LEGACY_SHARDS_PER_FRAGMENT);
+    if (frags) { p.town.materials.gem_fragment = (p.town.materials.gem_fragment || 0) + frags; p.town.gemRefund = { fragments: frags, at: Date.now() }; }
+  }
   // v0.5: Mine & Herb Garden were replaced by expeditions — refund what was spent on them
   const LEGACY = { mine: { gold: 200, metal_scrap: 10, leather_scrap: 6 }, herb_garden: { gold: 200, leather_scrap: 8, cloth_scrap: 8 } };
   for (const [id, cost] of Object.entries(LEGACY)) {
@@ -159,7 +171,6 @@ export function assignWorker(p, { buildingId, charId }) {
 function salvageOne(p, item) {
   const lvl = T.bLevel(p, 'salvage_yard');
   const y = { ...T.salvageYield(item, lvl, !!T.worker(p, 'enchanter')) };
-  for (const [k, v] of Object.entries(G.shardYield(item, lvl))) y[k] = (y[k] || 0) + v; // stat shards
   addMaterials(p, y);
   returnGems(p, item);
   return y;
@@ -183,29 +194,31 @@ function rollDoubles(p, count) {
   return extra;
 }
 
-export function cutGem(p, { stat, count = 1 }) {
-  if (!G.GEM_STATS.includes(stat)) fail('Unknown gem');
+export function cutGem(p, { kind, stat, count = 1 }) {
+  kind = kind || stat;
+  if (!G.GEM_KINDS[kind]) fail('Unknown gem');
   requireBuilding(p, 'jeweler');
   const w = requireWorker(p, 'jeweler');
   const n = Math.max(1, Math.min(50, Math.floor(Number(count) || 1)));
-  pay(p, G.cutCost(stat, n));
+  pay(p, G.cutCost(n));
   const extra = rollDoubles(p, n);
-  const key = G.gemKey(stat, 1);
+  const key = G.gemKey(kind, 1);
   p.town.gems[key] = (p.town.gems[key] || 0) + n + extra;
   const msg = gainProfessionXp(w, 6 * n);
   return { gem: key, count: n + extra, extra, msg };
 }
 
-export function fuseGems(p, { stat, tier, count = 1 }) {
+export function fuseGems(p, { kind, stat, tier, count = 1 }) {
+  kind = kind || stat;
   const t = Math.floor(Number(tier));
-  if (!G.GEM_STATS.includes(stat) || !(t >= 1 && t < G.MAX_GEM_TIER)) fail('Unknown gem');
+  if (!G.GEM_KINDS[kind] || !(t >= 1 && t < G.MAX_GEM_TIER)) fail('Unknown gem');
   requireBuilding(p, 'jeweler');
   const w = requireWorker(p, 'jeweler');
   const need = G.GEM_TIERS[t + 1].jeweler;
   if (T.bLevel(p, 'jeweler') < need) fail(`${G.GEM_TIERS[t + 1].name} gems need Jeweler level ${need}`);
   const n = Math.max(1, Math.min(50, Math.floor(Number(count) || 1)));
-  const from = G.gemKey(stat, t), to = G.gemKey(stat, t + 1);
-  if ((p.town.gems[from] || 0) < G.GEM_CONFIG.fuseCount * n) fail(`You need ${G.GEM_CONFIG.fuseCount * n}× ${G.gemName(stat, t)}`);
+  const from = G.gemKey(kind, t), to = G.gemKey(kind, t + 1);
+  if ((p.town.gems[from] || 0) < G.GEM_CONFIG.fuseCount * n) fail(`You need ${G.GEM_CONFIG.fuseCount * n}× ${G.gemName(kind, t)}`);
   pay(p, G.fuseCost(t, n));
   p.town.gems[from] -= G.GEM_CONFIG.fuseCount * n;
   if (!p.town.gems[from]) delete p.town.gems[from];
@@ -220,7 +233,9 @@ export function socketGem(p, { itemUid, charId, index, gem }) {
   const g = G.parseGemKey(gem) || fail('Unknown gem');
   const i = Math.floor(Number(index));
   if (!item.sockets || !(i >= 0 && i < item.sockets.length)) fail('This item has no such socket');
-  if (!(p.town.gems[gem] > 0)) fail(`You have no ${G.gemName(g.stat, g.tier)}`);
+  if (!(p.town.gems[gem] > 0)) fail(`You have no ${G.gemName(g.kind, g.tier)}`);
+  // one gem of each kind per item
+  if (item.sockets.some((x, j) => j !== i && G.parseGemKey(x)?.kind === g.kind)) fail(`This item already has a ${G.GEM_KINDS[g.kind].name}`);
   let fee = 0;
   if (item.sockets[i]) { // swap: pull the old gem out first (costs the unsocket fee)
     const old = G.parseGemKey(item.sockets[i]);

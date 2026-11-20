@@ -35,7 +35,7 @@ content/
   achievements/<id>.json
   quests/_settings.json + quests/<type>.json
   rifts/_settings.json + rifts/affixes/<id>.json
-  gems/_settings.json + gems/<stat>.json
+  gems/_settings.json + gems/<kind>.json
   lootfilter/_settings.json + lootfilter/<preset>.json
   bots/_settings.json + bots/<archetype>.json
 ```
@@ -108,7 +108,7 @@ The console command `content` checks the files on disk; `content reload` also ap
 | `achievements/` | Goals on player counters (`kills`, `bossKills`, `heroLevel`, …) with gold rewards |
 | `quests/` | Daily/weekly quest settings, title templates, targets, weights and rewards |
 | `rifts/` | Rift scaling, time limit, wave composition, rewards, weekly rotation and **affixes** |
-| `gems/` | Gem names/colours per stat, tiers with cut/fuse costs, shard yield, socket drilling and removal costs |
+| `gems/` | Resonance gems (name, colour, `effect`, `values` per quality, description with `{v}`), qualities with cut/fuse costs, drops (`drops`), socket drilling and removal costs |
 | `bestiary.json` | Mastery tiers, wording for enemy targeting and the rules for "How to prepare" tips |
 | `lootfilter/` | Rule limit and the presets in the loot filter menu |
 | `bots/` | Bot name pool, chat lines and personality archetypes |

@@ -7,6 +7,7 @@ import { STATUSES } from './data/statuses.js';
 import { ENEMIES, enemyStatsAt } from './data/enemies.js';
 import { MINIONS } from './data/minions.js';
 import { computeStats } from './stats.js';
+import { combatGems } from './gems.js';
 import { equipmentEffects } from './data/legendaries.js';
 import { createRng } from './rng.js';
 import { mutatedAbilities } from './skilltree.js';
@@ -50,8 +51,61 @@ export function makeCharacterUnit(ch, { ownerId, ownerName, position, bonuses = 
     gearMods: { dodge: Math.min(C.dodgeCap ?? 0.4, s.dodge), thornsPct: s.thornsPct, cooldownRatePct: s.cooldownPct, resourceRegenPct: s.resourceRegenPct, threatPct: s.threatPct,
       lifeSteal: s.lifeSteal, blockChance: s.blockChance, hpRegen: s.hpRegen, healingTakenPct: s.healingReceivedPct, shieldPct: s.shieldPct,
       physDamagePct: s.physDamagePct, magDamagePct: s.magDamagePct, executeDamagePct: s.executeDamagePct, damageVsBossPct: s.damageVsBossPct },
+    gemDyn: gemDynamics(ch, s),
     minionBonus: { damagePct: s.minionDamagePct || 0, hpPct: s.minionHpPct || 0, durationPct: s.minionDurationPct || 0, extraMax: s.minionMax || 0 },
   };
+}
+
+// ---------------------------------------------------------------- combat gems (Tide, Last Stand, Momentum)
+// The stat change of every gem state is worked out once (full stats with the state on, minus without) and added or
+// removed while the fight runs.
+function gemDynamics(ch, s) {
+  const gems = Object.values(ch.equipment || {}).filter(Boolean).flatMap(combatGems);
+  if (!gems.length) return null;
+  const def = e => gems.find(g => g.effect === e)?.def;
+  const diff = dyn => {
+    const s2 = computeStats(ch, dyn), d = {};
+    for (const [k, v] of Object.entries(s2)) if (typeof v === 'number' && typeof s[k] === 'number' && Math.abs(v - s[k]) > 1e-9) d[k] = v - s[k];
+    return d;
+  };
+  return {
+    tide: def('tide') ? { prefix: diff({ tide: 'prefix' }), suffix: diff({ tide: 'suffix' }), period: def('tide').period ?? 8 } : null,
+    lastStand: def('last_stand') ? { delta: diff({ lastStand: true }), threshold: def('last_stand').threshold ?? 0.5 } : null,
+    momentum: def('momentum') ? { delta: diff({ momentum: 1 }), duration: def('momentum').duration ?? 10, maxStacks: def('momentum').maxStacks ?? 5 } : null,
+    state: { tide: null, lastStand: false, momentum: 0, momentumUntil: 0 },
+  };
+}
+const GEM_GEAR_KEYS = { dodge: 'dodge', thornsPct: 'thornsPct', cooldownPct: 'cooldownRatePct', resourceRegenPct: 'resourceRegenPct', threatPct: 'threatPct', lifeSteal: 'lifeSteal',
+  blockChance: 'blockChance', hpRegen: 'hpRegen', healingReceivedPct: 'healingTakenPct', shieldPct: 'shieldPct', physDamagePct: 'physDamagePct', magDamagePct: 'magDamagePct',
+  executeDamagePct: 'executeDamagePct', damageVsBossPct: 'damageVsBossPct' };
+const GEM_BONUS_KEYS = new Set(['damagePct', 'healingPct', 'damageTakenPct', 'dotDamagePct', 'dotDurationPct', 'buffDurationPct']);
+function applyGemDelta(u, d, k) {
+  if (!d || !k) return;
+  for (const [key, v] of Object.entries(d)) {
+    const x = v * k;
+    if (key === 'maxHp') { u.maxHp = Math.max(1, u.maxHp + x); if (x > 0 && u.alive) u.hp += x; u.hp = Math.min(u.hp, u.maxHp); continue; }
+    if (GEM_GEAR_KEYS[key]) u.gearMods[GEM_GEAR_KEYS[key]] = (u.gearMods[GEM_GEAR_KEYS[key]] || 0) + x;
+    if (GEM_BONUS_KEYS.has(key)) u.bonuses[key] = (u.bonuses[key] || 0) + x;
+    if (typeof u.stats[key] === 'number') u.stats[key] += x;
+  }
+}
+function updateGems(b, u) {
+  const g = u.gemDyn, st = g.state;
+  if (g.tide) {
+    const want = Math.floor(b.time / g.tide.period) % 2 ? 'suffix' : 'prefix';
+    if (st.tide !== want) { if (st.tide) applyGemDelta(u, g.tide[st.tide], -1); applyGemDelta(u, g.tide[want], 1); st.tide = want; }
+  }
+  if (g.lastStand) {
+    const want = u.hp / u.maxHp < g.lastStand.threshold;
+    if (want !== st.lastStand) { applyGemDelta(u, g.lastStand.delta, want ? 1 : -1); st.lastStand = want; if (want) emit(b, { type: 'proc', src: u.uid, tgt: u.uid, name: 'Last Stand' }); }
+  }
+  if (g.momentum && st.momentum && b.time >= st.momentumUntil) { applyGemDelta(u, g.momentum.delta, -st.momentum); st.momentum = 0; }
+}
+function gemKill(b, u) {
+  const m = u.gemDyn?.momentum, st = u.gemDyn?.state;
+  if (!m || !u.alive) return;
+  if (st.momentum < m.maxStacks) { applyGemDelta(u, m.delta, 1); st.momentum++; }
+  st.momentumUntil = b.time + m.duration;
 }
 
 const newStat = () => ({ dmg: 0, heal: 0, taken: 0, deaths: 0, casts: {} });
@@ -203,6 +257,7 @@ export function stepBattle(b) {
     // health history (Rewind, Collapse): one sample every half second, the last 8 seconds
     if (b.ticks % 5 === 0) { (u.hpHist ||= []).push(u.hp); if (u.hpHist.length > 17) u.hpHist.shift(); }
     tickStatuses(b, u);
+    if (u.gemDyn && u.alive) updateGems(b, u); // combat gems
     // Health Regeneration (item affix)
     if (u.alive && u.gearMods?.hpRegen && u.hp < u.maxHp) u.hp = Math.min(u.maxHp, u.hp + u.gearMods.hpRegen * DT * (b.pvp?.healingMult ?? 1));
     if (u.boss && u.enrageAfter && b.phaseTime >= u.enrageAfter && !u.enraged) {
@@ -800,6 +855,7 @@ function healUnit(b, src, tgt, raw, ability, hot = null, proc = null) {
 function kill(b, src, tgt) {
   tgt.alive = false;
   tgt.hp = 0;
+  if (src?.gemDyn && src.side !== tgt.side) gemKill(b, src); // Momentum
   // statuses that jump to another enemy when their carrier dies (Plague Swarm)
   const jumpers = tgt.statuses.filter(s => STATUSES[s.id]?.jumpOnDeath && s.remaining > 0);
   if (jumpers.length) {

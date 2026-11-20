@@ -6,13 +6,6 @@ import { ITEM_BASES } from './items.js';
 const T = CONTENT.town;
 
 export const MATERIALS = T.materials;
-// Stat shards: every stat on a salvaged item turns into shards of that stat; the Jeweler cuts them into gems (shared/gems.js)
-function addShards() {
-  for (const { stat, label, color } of T.shardStats) {
-    MATERIALS[`shard_${stat}`] = { name: `${label} Shard`, glyph: '◆', color, group: 'shard', stat, description: `Salvaged from items with ${label}. The Jeweler cuts these into gems.` };
-  }
-}
-addShards();
 export const MATERIAL_IDS = Object.keys(MATERIALS);
 
 export const PROFESSIONS = withIds(T.professions);
@@ -33,7 +26,6 @@ export const BUILD_TIME = T.buildTime;
 export const BUILDINGS = withIds(T.buildings);
 export const BUILDING_IDS = Object.keys(BUILDINGS);
 onContentReload(() => {
-  addShards();
   refillArray(MATERIAL_IDS, Object.keys(MATERIALS));
   withIds(PROFESSIONS); refillArray(PROFESSION_IDS, Object.keys(PROFESSIONS));
   refillObject(ITEM_MATERIAL, itemMaterials());

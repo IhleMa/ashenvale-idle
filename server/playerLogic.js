@@ -624,6 +624,7 @@ export function applyRewards(p, chars, rewards) {
   }
   p.gold += rewards.gold;
   if (rewards.materials && p.town) for (const [k, v] of Object.entries(rewards.materials)) p.town.materials[k] = (p.town.materials[k] || 0) + v;
+  if (rewards.gems && p.town) for (const [k, v] of Object.entries(rewards.gems)) p.town.gems[k] = (p.town.gems[k] || 0) + v;
   let sold = 0, kept = 0;
   for (const it of rewards.items) (receiveItem(p, it) === 'kept' ? kept++ : sold++);
   p.stats.kills += rewards.kills || 0;

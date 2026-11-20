@@ -37,7 +37,6 @@ export function validateContent(C) {
   const cfg = C.config, classes = C.classes?.classes || {}, abilities = C.abilities?.abilities || {}, statuses = C.statuses?.statuses || {};
   const items = C.items || {}, enemies = C.enemies?.enemies || {}, zones = C.zones?.zones || {}, town = C.town || {}, minions = C.minions?.minions || {};
   const materials = { ...(town.materials || {}) };
-  for (const s of town.shardStats || []) materials[`shard_${s.stat}`] = true;
   const rarities = new Set((cfg?.rarities || []).map(r => r.id));
   const affixStats = items.affixes || {};
 
@@ -337,7 +336,6 @@ export function validateContent(C) {
   for (const req of ['town_hall', 'inn', 'salvage_yard', 'expedition_camp', 'jeweler']) if (!town.buildings?.[req]) err('town.buildings', `the game needs the building "${req}"`);
   for (const [id, e] of Object.entries(town.elixirs || {})) obj(`town.elixirs.${id}.bonus`, e.bonus);
   for (const [id, q] of Object.entries(town.qualities || {})) if (!rarities.has(q.minRarity)) err(`town.qualities.${id}.minRarity`, 'unknown rarity');
-  for (const s of town.shardStats || []) if (!(s.stat in affixStats)) err('town.shardStats', `unknown stat "${s.stat}"`);
   for (const [t, m] of Object.entries(town.materialOfType || {})) ref(`town.materialOfType.${t}`, m, materials, 'material');
 
   // ---- expeditions
@@ -386,7 +384,14 @@ export function validateContent(C) {
   for (const k of ['hpGrowth', 'damageGrowth']) num(`rifts.config.${k}`, C.rifts?.config?.[k], { min: 1, max: 3 });
 
   // ---- gems
-  for (const [s, a] of Object.entries(affixStats)) if (a.gem && !C.gems?.kinds?.[s]) err('gems.kinds', `no gem for the stat "${s}" (marked "gem": true)`);
+  const GEM_EFFECTS = ['ladder', 'keystone', 'underdog', 'harmony', 'balance', 'purity', 'sacrifice', 'mirror', 'tide', 'last_stand', 'momentum'];
+  for (const [id, g] of Object.entries(C.gems?.kinds || {})) {
+    const w = `gems.kinds.${id}`;
+    str(`${w}.name`, g.name); str(`${w}.description`, g.description);
+    if (!GEM_EFFECTS.includes(g.effect)) err(`${w}.effect`, `unknown effect (use ${GEM_EFFECTS.join(', ')})`);
+    if (!Array.isArray(g.values) || !g.values.length || !g.values.every(isNum)) err(`${w}.values`, 'needs a list of numbers, one per quality');
+  }
+  for (const [k, a] of Object.entries(affixStats)) if (!['offense', 'defense', 'attribute', 'utility'].includes(a.group)) err(`items.affixes.${k}.group`, 'must be offense, defense, attribute or utility (used by Last Stand and Momentum gems)');
   (C.gems?.tiers || []).forEach((t, i) => {
     if (i === 0 && !t.cutCost) err('gems.tiers[0]', 'the first tier needs a cutCost');
     if (i > 0 && !t.fuseCost) err(`gems.tiers[${i}]`, 'needs a fuseCost');

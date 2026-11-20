@@ -87,7 +87,7 @@ const rng = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647
 
 // combat stats from gear
 {
-  const gear = stats => ({ uid: 'g', baseId: 'dagger', slot: 'ring', rarity: 'common', level: 30, stats, affixes: [] });
+  const gear = stats => ({ uid: 'g', baseId: 'dagger', slot: 'ring', rarity: 'common', level: 30, stats }); // plain stats, no affix list
   const make = stats => {
     const ch = createCharacter({ id: 'r', name: 'R', classId: 'rogue', level: 30, isMain: true });
     ch.equipment = { ...ch.equipment, ring: gear(stats) };

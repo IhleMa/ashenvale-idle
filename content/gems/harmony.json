@@ -1,0 +1,14 @@
+{
+  "name": "Harmony Gem",
+  "color": "#6fc3d9",
+  "effect": "harmony",
+  "values": [
+    0.1,
+    0.14,
+    0.18,
+    0.23,
+    0.3
+  ],
+  "description": "If this item has all 3 prefixes or all 3 suffixes, that full side gets +{v}.",
+  "order": 40
+}

@@ -3,7 +3,7 @@
     {
       "id": "2026-11-20",
       "date": "2026-11-20",
-      "title": "Tiered item affixes, Rogue rework and patch notes",
+      "title": "Tiered affixes, resonance gems, Rogue and Bard changes",
       "sections": [
         {
           "heading": "Items",
@@ -17,6 +17,17 @@
             "All existing items were converted: they keep their base, level, rarity, sockets, gems and enchantment and got new tiered affixes.",
             "Gear scaled down by ascension is soulbound: it can't be sold on the Auction House until you reforge it back to its original item level.",
             "Loot filter: new conditions for the best affix tier on an item (\"has a tier 2 or better affix\", \"no affix better than tier 5\")."
+          ]
+        },
+        {
+          "heading": "Gems",
+          "items": [
+            "Gems were reworked into 11 resonance gems. A socketed gem changes the affixes of its own item instead of adding a flat stat.",
+            "Ladder, Keystone, Underdog, Harmony, Balance, Purity, Sacrifice and Mirror work all the time; Tide, Last Stand and Momentum change your item in combat.",
+            "Every gem comes in 5 qualities (Chipped to Perfect); 3 gems fuse into the next quality at the Jeweler. One gem of each kind per item.",
+            "Gems drop from enemies of level 18 and above (bosses and rifts most often, better qualities from higher-level enemies). The Jeweler can also cut a Chipped gem of your choice from Gem Fragments.",
+            "Stat shards are gone. Your old gems and shards were turned into Gem Fragments.",
+            "Item tooltips show what the gems do: changed tiers, bonuses (◆), sacrificed and mirrored affixes."
           ]
         },
         {

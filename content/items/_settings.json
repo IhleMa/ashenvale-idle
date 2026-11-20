@@ -34,7 +34,7 @@
       "type": "prefix",
       "weight": 800,
       "name": "Brutal",
-      "gem": true
+      "group": "offense"
     },
     "magPower": {
       "label": "Magic Power",
@@ -43,7 +43,7 @@
       "type": "prefix",
       "weight": 800,
       "name": "Arcane",
-      "gem": true
+      "group": "offense"
     },
     "healPower": {
       "label": "Healing Power",
@@ -52,7 +52,7 @@
       "type": "prefix",
       "weight": 700,
       "name": "Blessed",
-      "gem": true
+      "group": "offense"
     },
     "hp": {
       "label": "Health",
@@ -61,7 +61,7 @@
       "type": "prefix",
       "weight": 1000,
       "name": "Hale",
-      "gem": true
+      "group": "defense"
     },
     "defense": {
       "label": "Defense",
@@ -70,7 +70,7 @@
       "type": "prefix",
       "weight": 1000,
       "name": "Sturdy",
-      "gem": true
+      "group": "defense"
     },
     "hpPct": {
       "label": "Maximum Health",
@@ -79,7 +79,8 @@
       "pct": true,
       "type": "prefix",
       "weight": 300,
-      "name": "Vigorous"
+      "name": "Vigorous",
+      "group": "defense"
     },
     "defensePct": {
       "label": "Defense",
@@ -89,7 +90,8 @@
       "type": "prefix",
       "weight": 350,
       "name": "Fortified",
-      "description": "increased Defense"
+      "description": "increased Defense",
+      "group": "defense"
     },
     "damagePct": {
       "label": "Damage",
@@ -105,7 +107,8 @@
         "ring",
         "amulet"
       ],
-      "description": "increased damage dealt"
+      "description": "increased damage dealt",
+      "group": "offense"
     },
     "physDamagePct": {
       "label": "Physical Damage",
@@ -122,7 +125,8 @@
         "amulet",
         "hands"
       ],
-      "description": "increased physical damage"
+      "description": "increased physical damage",
+      "group": "offense"
     },
     "magDamagePct": {
       "label": "Magic Damage",
@@ -139,7 +143,8 @@
         "amulet",
         "head"
       ],
-      "description": "increased magic damage"
+      "description": "increased magic damage",
+      "group": "offense"
     },
     "healingPct": {
       "label": "Healing Done",
@@ -157,7 +162,8 @@
         "head",
         "chest"
       ],
-      "description": "increased healing done"
+      "description": "increased healing done",
+      "group": "offense"
     },
     "shieldPct": {
       "label": "Shield Strength",
@@ -167,7 +173,8 @@
       "type": "prefix",
       "weight": 300,
       "name": "Warding",
-      "description": "stronger shields you cast"
+      "description": "stronger shields you cast",
+      "group": "offense"
     },
     "dotDamagePct": {
       "label": "Damage over Time",
@@ -177,7 +184,8 @@
       "type": "prefix",
       "weight": 300,
       "name": "Festering",
-      "description": "increased damage over time"
+      "description": "increased damage over time",
+      "group": "offense"
     },
     "minionDamagePct": {
       "label": "Minion Damage",
@@ -187,7 +195,8 @@
       "type": "prefix",
       "weight": 300,
       "name": "Commanding",
-      "description": "increased minion damage"
+      "description": "increased minion damage",
+      "group": "offense"
     },
     "lifeSteal": {
       "label": "Life Steal",
@@ -203,7 +212,8 @@
         "amulet",
         "hands"
       ],
-      "description": "of direct damage dealt is healed"
+      "description": "of direct damage dealt is healed",
+      "group": "offense"
     },
     "thornsPct": {
       "label": "Thorns",
@@ -219,7 +229,8 @@
         "head",
         "hands"
       ],
-      "description": "of direct damage taken is dealt back"
+      "description": "of direct damage taken is dealt back",
+      "group": "defense"
     },
     "str": {
       "label": "Strength",
@@ -228,7 +239,7 @@
       "type": "suffix",
       "weight": 1000,
       "name": "of the Bear",
-      "gem": true
+      "group": "attribute"
     },
     "int": {
       "label": "Intelligence",
@@ -237,7 +248,7 @@
       "type": "suffix",
       "weight": 1000,
       "name": "of the Owl",
-      "gem": true
+      "group": "attribute"
     },
     "dex": {
       "label": "Dexterity",
@@ -246,7 +257,7 @@
       "type": "suffix",
       "weight": 1000,
       "name": "of the Fox",
-      "gem": true
+      "group": "attribute"
     },
     "vit": {
       "label": "Vitality",
@@ -255,7 +266,7 @@
       "type": "suffix",
       "weight": 1000,
       "name": "of the Whale",
-      "gem": true
+      "group": "attribute"
     },
     "strPct": {
       "label": "Strength",
@@ -265,7 +276,8 @@
       "type": "suffix",
       "weight": 250,
       "name": "of the Titan",
-      "description": "increased Strength"
+      "description": "increased Strength",
+      "group": "attribute"
     },
     "intPct": {
       "label": "Intelligence",
@@ -275,7 +287,8 @@
       "type": "suffix",
       "weight": 250,
       "name": "of the Sage",
-      "description": "increased Intelligence"
+      "description": "increased Intelligence",
+      "group": "attribute"
     },
     "dexPct": {
       "label": "Dexterity",
@@ -285,7 +298,8 @@
       "type": "suffix",
       "weight": 250,
       "name": "of the Wind",
-      "description": "increased Dexterity"
+      "description": "increased Dexterity",
+      "group": "attribute"
     },
     "vitPct": {
       "label": "Vitality",
@@ -295,7 +309,8 @@
       "type": "suffix",
       "weight": 250,
       "name": "of the Mountain",
-      "description": "increased Vitality"
+      "description": "increased Vitality",
+      "group": "attribute"
     },
     "allPct": {
       "label": "All Attributes",
@@ -309,7 +324,8 @@
         "ring",
         "amulet"
       ],
-      "description": "increased Strength, Intelligence, Dexterity, Vitality and Health"
+      "description": "increased Strength, Intelligence, Dexterity, Vitality and Health",
+      "group": "attribute"
     },
     "critChance": {
       "label": "Critical Chance",
@@ -319,7 +335,7 @@
       "type": "suffix",
       "weight": 400,
       "name": "of Precision",
-      "gem": true
+      "group": "offense"
     },
     "critDamage": {
       "label": "Critical Damage",
@@ -329,7 +345,7 @@
       "type": "suffix",
       "weight": 400,
       "name": "of Ruin",
-      "gem": true
+      "group": "offense"
     },
     "attackSpeed": {
       "label": "Attack Speed",
@@ -339,7 +355,7 @@
       "type": "suffix",
       "weight": 300,
       "name": "of Haste",
-      "gem": true
+      "group": "offense"
     },
     "dodge": {
       "label": "Dodge",
@@ -355,7 +371,8 @@
         "head",
         "chest"
       ],
-      "description": "chance to avoid physical hits"
+      "description": "chance to avoid physical hits",
+      "group": "defense"
     },
     "blockChance": {
       "label": "Block",
@@ -371,7 +388,8 @@
         "head",
         "feet"
       ],
-      "description": "chance to take half damage from a direct hit"
+      "description": "chance to take half damage from a direct hit",
+      "group": "defense"
     },
     "damageReduction": {
       "label": "Damage Reduction",
@@ -381,7 +399,8 @@
       "type": "suffix",
       "weight": 150,
       "name": "of the Fortress",
-      "description": "less damage taken"
+      "description": "less damage taken",
+      "group": "defense"
     },
     "hpRegen": {
       "label": "Health Regeneration",
@@ -390,7 +409,8 @@
       "type": "suffix",
       "weight": 500,
       "name": "of Renewal",
-      "description": "health per second"
+      "description": "health per second",
+      "group": "defense"
     },
     "healingReceivedPct": {
       "label": "Healing Received",
@@ -400,7 +420,8 @@
       "type": "suffix",
       "weight": 350,
       "name": "of the Faithful",
-      "description": "increased healing received"
+      "description": "increased healing received",
+      "group": "defense"
     },
     "cooldownPct": {
       "label": "Cooldown Recovery",
@@ -417,7 +438,8 @@
         "amulet",
         "weapon"
       ],
-      "description": "faster cooldowns"
+      "description": "faster cooldowns",
+      "group": "utility"
     },
     "resourceRegenPct": {
       "label": "Resource Regeneration",
@@ -427,7 +449,8 @@
       "type": "suffix",
       "weight": 350,
       "name": "of Focus",
-      "description": "faster resource regeneration"
+      "description": "faster resource regeneration",
+      "group": "utility"
     },
     "buffDurationPct": {
       "label": "Buff Duration",
@@ -437,7 +460,8 @@
       "type": "suffix",
       "weight": 300,
       "name": "of Endurance",
-      "description": "longer buffs you cast"
+      "description": "longer buffs you cast",
+      "group": "utility"
     },
     "threatPct": {
       "label": "Threat",
@@ -453,7 +477,8 @@
         "head",
         "weapon"
       ],
-      "description": "more threat generated"
+      "description": "more threat generated",
+      "group": "utility"
     },
     "damageVsBossPct": {
       "label": "Damage vs Bosses",
@@ -463,7 +488,8 @@
       "type": "suffix",
       "weight": 250,
       "name": "of the Slayer",
-      "description": "increased damage against bosses"
+      "description": "increased damage against bosses",
+      "group": "offense"
     },
     "executeDamagePct": {
       "label": "Damage vs Wounded",
@@ -473,7 +499,8 @@
       "type": "suffix",
       "weight": 250,
       "name": "of the Executioner",
-      "description": "increased damage against enemies below 35% health"
+      "description": "increased damage against enemies below 35% health",
+      "group": "offense"
     },
     "dotDurationPct": {
       "label": "Damage over Time Duration",
@@ -483,7 +510,8 @@
       "type": "suffix",
       "weight": 250,
       "name": "of Lingering",
-      "description": "longer damage over time"
+      "description": "longer damage over time",
+      "group": "utility"
     },
     "minionHpPct": {
       "label": "Minion Health",
@@ -493,7 +521,8 @@
       "type": "suffix",
       "weight": 300,
       "name": "of the Legion",
-      "description": "increased minion health"
+      "description": "increased minion health",
+      "group": "utility"
     }
   },
   "pctStats": [

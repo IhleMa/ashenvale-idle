@@ -19,7 +19,7 @@ import { rosterLimit, upgradeCost, canAfford, upgradeBlocker, bLevel } from '../
 import { busyWith } from '../shared/expeditions.js';
 import { maxStartTier, RIFT } from '../shared/rifts.js';
 import { featureLock } from '../shared/unlocks.js';
-import { GEM_STATS, GEM_CONFIG, shardId, parseGemKey } from '../shared/gems.js';
+import { GEM_IDS, cutCost, parseGemKey } from '../shared/gems.js';
 import { rarityIndex, CONFIG } from '../shared/config.js';
 import { PRESETS, newRule } from '../shared/lootfilter.js';
 
@@ -411,12 +411,11 @@ export class BotManager {
 
   doGems(b, p) {
     if (!p.town || !p.town.buildings.jeweler?.worker) return;
-    for (const stat of GEM_STATS) {
-      if ((p.town.materials[shardId(stat)] || 0) >= GEM_CONFIG.shardsPerGem && p.gold > 2000) { this.act(b, 'gem_cut', { stat }); b.doing = 'cutting gems'; break; }
-    }
+    const cc = cutCost(1);
+    if (p.gold > 2000 + cc.gold && Object.entries(cc.mats).every(([k, v]) => (p.town.materials[k] || 0) >= v) && chance(0.3)) { this.act(b, 'gem_cut', { kind: GEM_IDS[Math.floor(Math.random() * GEM_IDS.length)] }); b.doing = 'cutting gems'; }
     for (const [key, n] of Object.entries(p.town.gems || {})) {
       const g = parseGemKey(key);
-      if (g && n >= 3 && g.tier < 5 && chance(0.5)) this.act(b, 'gem_fuse', { stat: g.stat, tier: g.tier });
+      if (g && n >= 3 && g.tier < 5 && chance(0.5)) this.act(b, 'gem_fuse', { kind: g.kind, tier: g.tier });
     }
     // socket the best gem into an empty socket on a fighter
     const gems = Object.entries(p.town.gems || {}).filter(([, n]) => n > 0).map(([k]) => k).sort((x, y) => parseGemKey(y).tier - parseGemKey(x).tier);

@@ -11,6 +11,7 @@ import { initPwa } from './pwa.js';
 import { initTutorial, renderTutorial, isViewVisible, visibleKey } from './tutorial.js';
 import { CLASSES } from '/shared/data/classes.js';
 import { replaceContent, CONTENT } from '/shared/content.js';
+import { parseGemKey, gemName } from '/shared/gems.js';
 import { hasAbilityAction } from '/shared/character.js';
 import { combatView } from './views/combat.js';
 import { characterView } from './views/character.js';
@@ -378,6 +379,7 @@ function showOfflineSummary(s) {
       <div><span class="big-num">${fmt(s.itemsKept)}</span><span>items kept${s.itemsSold ? ` (${fmt(s.itemsSold)} sold)` : ''}</span></div>
     </div>
     ${Object.keys(s.materials || {}).length ? `<h3>Zone materials</h3><p>${Object.entries(s.materials).map(([k, v]) => `<span class="cost">${esc(MATERIALS[k]?.glyph || '')} ${fmt(v)} ${esc(MATERIALS[k]?.name || k)}</span>`).join(' ')}</p>` : ''}
+    ${Object.keys(s.gems || {}).length ? `<h3>Gems found</h3><p>${Object.entries(s.gems).map(([k, v]) => { const g = parseGemKey(k); return g ? `<span class="cost">💎 ${v > 1 ? v + '× ' : ''}${esc(gemName(g.kind, g.tier))}</span>` : ''; }).join(' ')}</p>` : ''}
     ${lv ? `<h3>Level ups</h3><ul>${lv}</ul>` : ''}
     ${found ? `<h3>Notable loot</h3><ul>${found}</ul>` : ''}
     ${s.achievements.length ? `<h3>Achievements</h3><ul>${s.achievements.map(a => `<li>★ ${esc(a)}</li>`).join('')}</ul>` : ''}

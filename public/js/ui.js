@@ -1,6 +1,6 @@
 // UI helpers: escaping, formatting, toasts, modals, tooltips.
 import { STAT_LABELS, PCT_STATS, SLOTS, AFFIXES, AFFIX_LIMITS, itemStats, affixValue, tierRange, isSoulbound } from '/shared/data/items.js';
-import { GEM_KINDS, gemName, gemValue, parseGemKey } from '/shared/gems.js';
+import { GEM_KINDS, gemName, gemText, parseGemKey, affixPlan, gearItemStats, COMBAT_GEMS } from '/shared/gems.js';
 import { rarityById } from '/shared/config.js';
 import { CLASSES } from '/shared/data/classes.js';
 import { UNIQUES, SETS, equippedSetCounts } from '/shared/data/legendaries.js';
@@ -87,28 +87,35 @@ export function itemTooltipHtml(item, compareTo = null, wearer = null) {
     // base (and unique) stats, then every affix with its tier and the tier's value range at this item level
     lines = Object.entries(itemStats({ ...item, affixes: [] })).map(([k, v]) => statLine(k, v, 'implicit-line'));
     // prefixes and suffixes in their own groups, each with how many of the possible slots are used
-    const groups = ['prefix', 'suffix'].map(type => [type, item.affixes.filter(a => AFFIXES[a.stat]?.type === type)]);
+    // socketed gems already applied: tier changes (Keystone), switched-off affixes (Sacrifice), bonuses and the Mirror copy
+    const plan = affixPlan(item);
+    const groups = ['prefix', 'suffix'].map(type => [type, plan.filter(a => a.type === type)]);
     for (const [type, list] of groups) {
       if (!list.length) continue;
-      lines.push(`<div class="affix-group affix-${type}">${type === 'prefix' ? 'Prefixes' : 'Suffixes'} <span class="faint">${list.length}/${AFFIX_LIMITS[type] ?? 3}</span></div>`);
+      lines.push(`<div class="affix-group affix-${type}">${type === 'prefix' ? 'Prefixes' : 'Suffixes'} <span class="faint">${list.filter(a => !a.mirror).length}/${AFFIX_LIMITS[type] ?? 3}</span></div>`);
       for (const a of list) {
       const def = AFFIXES[a.stat];
-      const [lo, hi] = tierRange(a.stat, a.tier, item.level);
+      const [lo, hi] = tierRange(a.stat, a.eff ?? a.tier, item.level);
       const fmtV = v => (PCT_STATS.has(a.stat) ? (v * 100).toFixed(1) + '%' : fmt(v));
-      lines.push(`<div class="stat-line affix-line affix-${type}"><span><span class="tier-tag t${a.tier}" title="${type === 'prefix' ? 'Prefix' : 'Suffix'}: ${esc(def.name)}">T${a.tier}</span>${esc(def.label)}</span><span>${statValue(a.stat, affixValue(a, item.level))} <span class="faint small">(${fmtV(lo)}–${fmtV(hi)})</span></span></div>`);
+      const tierTag = a.eff !== a.tier ? `<span class="tier-tag t${a.tier} dim">T${a.tier}</span><span class="gem-mark">→</span><span class="tier-tag t${a.eff}">T${a.eff}</span>` : `<span class="tier-tag t${a.tier}" title="${type === 'prefix' ? 'Prefix' : 'Suffix'}: ${esc(def.name)}">T${a.tier}</span>`;
+      const boost = !a.mirror && Math.abs(a.mult - 1) > 1e-9 ? ` <span class="gem-mark" title="from socketed gems">◆${a.mult > 1 ? '+' : ''}${Math.round((a.mult - 1) * 100)}%</span>` : '';
+      if (a.mirror) lines.push(`<div class="stat-line affix-line affix-${type} mirror-line"><span><span class="gem-mark">◆ Mirror</span> ${esc(def.label)}</span><span>${statValue(a.stat, a.value)}</span></div>`);
+      else if (a.off) lines.push(`<div class="stat-line affix-line affix-${type} affix-off" title="Switched off by the Sacrifice gem"><span>${tierTag}<s>${esc(def.label)}</s></span><span class="faint">sacrificed</span></div>`);
+      else lines.push(`<div class="stat-line affix-line affix-${type}"><span>${tierTag}${esc(def.label)}${boost}</span><span>${statValue(a.stat, a.value)} <span class="faint small">(${fmtV(lo)}–${fmtV(hi)})</span></span></div>`);
       }
     }
   } else lines = Object.entries(item.stats).map(([k, v]) => statLine(k, v));
   if (compareTo) {
-    const keys = [...new Set([...Object.keys(item.stats), ...Object.keys(compareTo.stats)])];
-    const diffs = keys.map(k => [k, (item.stats[k] || 0) - (compareTo.stats[k] || 0)]).filter(([, d]) => Math.abs(d) > 1e-6);
+    const mine = gearItemStats(item), theirs = gearItemStats(compareTo);
+    const keys = [...new Set([...Object.keys(mine), ...Object.keys(theirs)])];
+    const diffs = keys.map(k => [k, (mine[k] || 0) - (theirs[k] || 0)]).filter(([, d]) => Math.abs(d) > 1e-6);
     if (diffs.length) lines.push(`<div class="compare-head muted small">Compared to equipped</div>${diffs.map(([k, d]) => `<div class="stat-line small"><span>${esc(STAT_LABELS[k] || k)}</span><span class="${d > 0 ? 'up' : 'down'}">${d > 0 ? '+' : '−'}${PCT_STATS.has(k) ? (Math.abs(d) * 100).toFixed(1) + '%' : fmt(Math.abs(d))}</span></div>`).join('')}`);
   }
   if (item.enchant) lines.push(`<div class="stat-line enchant-line"><span>✨ Enchanted: ${esc(STAT_LABELS[item.enchant.stat] || item.enchant.stat)}</span><span>${statValue(item.enchant.stat, item.enchant.value)}</span></div>`);
   if (item.sockets?.length) {
     for (const g of item.sockets) {
       const gem = g && parseGemKey(g);
-      lines.push(gem ? `<div class="stat-line socket-line"><span><i class="sock-dot full" style="--gem:${GEM_KINDS[gem.stat].color}"></i>${esc(gemName(gem.stat, gem.tier))}</span><span>${statValue(gem.stat, gemValue(gem.stat, gem.tier))}</span></div>`
+      lines.push(gem ? `<div class="socket-line gem-line"><div><i class="sock-dot full" style="--gem:${GEM_KINDS[gem.kind].color}"></i><b>${esc(gemName(gem.kind, gem.tier))}</b>${COMBAT_GEMS.has(GEM_KINDS[gem.kind].effect) ? ' <span class="faint small">(in combat)</span>' : ''}</div><div class="small muted">${esc(gemText(gem.kind, gem.tier))}</div></div>`
         : '<div class="stat-line socket-line muted"><span><i class="sock-dot"></i>Empty socket</span><span></span></div>');
     }
   }

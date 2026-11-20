@@ -1269,3 +1269,16 @@ html.standalone body { padding-bottom: env(safe-area-inset-bottom); padding-left
 .affix-line { padding-left: 6px; border-left: 2px solid transparent; }
 .affix-line.affix-prefix { border-left-color: #7fb4ff; }
 .affix-line.affix-suffix { border-left-color: #e3a857; }
+/* resonance gems */
+.gem-mark { color: #e8c15a; font-size: 11px; margin: 0 3px; }
+.tier-tag.dim { opacity: .45; margin-right: 0; }
+.affix-off { opacity: .6; }
+.mirror-line span:first-child { color: #a9c7e8; }
+.gem-line { margin: 3px 0; }
+.gem-line .small { padding-left: 16px; }
+.gem-kinds { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 10px; }
+.gem-kind { border: 1px solid var(--line); border-radius: 10px; padding: 10px; background: var(--panel2); display: flex; flex-direction: column; gap: 8px; }
+.gem-qualities { display: flex; gap: 6px; flex-wrap: wrap; }
+.gem-q { display: flex; align-items: center; gap: 4px; padding: 2px 6px 2px 2px; border-radius: 8px; background: rgba(255,255,255,.04); }
+.gem-q.empty { opacity: .4; }
+.gem-preview .item-tip { border: 1px solid var(--line); border-radius: 8px; padding: 8px; }

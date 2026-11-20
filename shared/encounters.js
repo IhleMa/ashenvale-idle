@@ -5,6 +5,7 @@ import { ENEMIES } from './data/enemies.js';
 import { ZONES, COOP_ENCOUNTERS, bossWave } from './data/zones.js';
 import { generateItem } from './data/items.js';
 import { DROP_CHANCE, generateUnique, generateSetItem } from './data/legendaries.js';
+import { rollGemDrop } from './gems.js';
 
 export function zoneLevel(zone, heroLevel) {
   return Math.max(zone.levelRange[0], Math.min(zone.levelRange[1], heroLevel));
@@ -59,6 +60,7 @@ export function computeRewards(kills, rng, { rewardMult = 1, lootBoost = 0, loot
   let xp = 0, gold = 0;
   const items = [];
   const materials = {};
+  const gems = {};
   const zone = zoneId ? ZONES[zoneId] : null;
   const MD = CONTENT.zones.materialDrops || {};
   for (const k of kills) {
@@ -76,6 +78,8 @@ export function computeRewards(kills, rng, { rewardMult = 1, lootBoost = 0, loot
       const mult = Math.min(3, rewardMult) * lootMult;
       if (rng() < DROP_CHANCE.unique[tier] * mult) { const u = generateUnique(rng, k.level, null, zoneId); if (u) items.push(u); }
       if (rng() < DROP_CHANCE.set[tier] * mult) { const si = generateSetItem(rng, k.level, null, null, zoneId); if (si) items.push(si); }
+      const gem = rollGemDrop(rng, k.level, tier, mult); // resonance gems
+      if (gem) gems[gem] = (gems[gem] || 0) + 1;
       // the zone's own material
       if (zone?.material) {
         let n = 0;
@@ -86,5 +90,5 @@ export function computeRewards(kills, rng, { rewardMult = 1, lootBoost = 0, loot
     }
   }
   // killList: lets XP be adjusted per character (ascended heroes, see applyRewards)
-  return { xp: Math.round(xp * rewardMult), gold: Math.round(gold * rewardMult), items, materials, killList: kills };
+  return { xp: Math.round(xp * rewardMult), gold: Math.round(gold * rewardMult), items, materials, gems, killList: kills };
 }

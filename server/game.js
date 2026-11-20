@@ -320,8 +320,8 @@ export class Game {
     brew_elixir(s, d) { const r = TL.brew(s.player, d, L.hero(s.player).level); this.profToast(s, r.msg); this.questDone(s.player, Q.track(s.player, 'craft', 1)); return r; },
 
     // ---- gems & sockets
-    gem_cut(s, d) { const r = TL.cutGem(s.player, { stat: String(d.stat), count: d.count }); this.profToast(s, r.msg); this.questDone(s.player, Q.track(s.player, 'craft', 1)); return r; },
-    gem_fuse(s, d) { const r = TL.fuseGems(s.player, { stat: String(d.stat), tier: d.tier, count: d.count }); this.profToast(s, r.msg); this.questDone(s.player, Q.track(s.player, 'craft', 1)); return r; },
+    gem_cut(s, d) { const r = TL.cutGem(s.player, { kind: String(d.kind || d.stat), count: d.count }); this.profToast(s, r.msg); this.questDone(s.player, Q.track(s.player, 'craft', 1)); return r; },
+    gem_fuse(s, d) { const r = TL.fuseGems(s.player, { kind: String(d.kind || d.stat), tier: d.tier, count: d.count }); this.profToast(s, r.msg); this.questDone(s.player, Q.track(s.player, 'craft', 1)); return r; },
     gem_socket(s, d) { return TL.socketGem(s.player, { itemUid: String(d.itemUid), charId: d.charId, index: d.index, gem: String(d.gem) }); },
     gem_unsocket(s, d) { return TL.unsocketGem(s.player, { itemUid: String(d.itemUid), charId: d.charId, index: d.index }); },
     gem_drill(s, d) { const r = TL.drillSocket(s.player, { itemUid: String(d.itemUid), charId: d.charId }); this.profToast(s, r.msg); this.questDone(s.player, Q.track(s.player, 'craft', 1)); return r; },
@@ -661,7 +661,7 @@ export class Game {
     return {
       xp: rewards.xp, gold: rewards.gold,
       items: rewards.items.map(i => ({ name: i.name, rarity: i.rarity, baseId: i.baseId })),
-      sold: res.sold, levelUps: res.levelUps, materials: rewards.materials || {},
+      sold: res.sold, levelUps: res.levelUps, materials: rewards.materials || {}, gems: rewards.gems || {},
     };
   }
 
@@ -719,6 +719,7 @@ export class Game {
     let simTime = 0, fights = 0, wins = 0, xp = 0, gold = 0, kills = 0, itemsKept = 0, itemsSold = 0;
     const found = [];
     const mats = {}; // zone materials found
+    const gemsFound = {};
     let lastKills = null; // kills of the last simulated fight (for per-character XP adjustments)
     while (simTime < seconds && fights < CONFIG.offline.maxSimulatedFights) {
       const h = L.hero(p);
@@ -733,6 +734,7 @@ export class Game {
       wins++;
       const r = this.applyElixirRewards(p, computeRewards(b.kills, rng, { rewardMult: CONFIG.offline.efficiency, lootMult: this.settings.get('lootRate'), zoneId: zone.id }), at);
       for (const [k, v] of Object.entries(r.materials || {})) mats[k] = (mats[k] || 0) + v;
+      for (const [k, v] of Object.entries(r.gems || {})) gemsFound[k] = (gemsFound[k] || 0) + v;
       r.kills = b.kills.length;
       xp += r.xp; gold += r.gold; kills += r.kills;
       Q.onBattle(p, { won: true, kills: b.kills, gold: r.gold });
@@ -756,7 +758,7 @@ export class Game {
     p.stats.fights += fights;
     const achievements = L.checkAchievements(p).map(a => a.name);
     return {
-      seconds: Math.round(seconds), zone: zone.name, fights, wins, kills, xp, gold, itemsKept, itemsSold, found: found.slice(0, 10), achievements, materials: mats,
+      seconds: Math.round(seconds), zone: zone.name, fights, wins, kills, xp, gold, itemsKept, itemsSold, found: found.slice(0, 10), achievements, materials: mats, gems: gemsFound,
       levels: chars.filter(c => c.level > startLevels[c.id]).map(c => ({ name: c.name, from: startLevels[c.id], to: c.level })),
     };
   }

@@ -1,0 +1,15 @@
+{
+  "name": "Last Stand Gem",
+  "color": "#d9822b",
+  "effect": "last_stand",
+  "values": [
+    0.4,
+    0.55,
+    0.7,
+    0.85,
+    1.0
+  ],
+  "threshold": 0.5,
+  "description": "Below {threshold} health, the defensive affixes on this item get +{v} (Health, Defense, Block, Dodge, Damage Reduction, Regeneration, …).",
+  "order": 100
+}

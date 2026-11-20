@@ -137,7 +137,7 @@ try {
   ok(Object.keys(ABILITIES).filter(a => a.startsWith('e_') || a.startsWith('b_')).every(a => describeEnemyAbility(a).text.length > 20), 'all enemy abilities describable');
 
   // ---------------------------------------------------------------- loot filter
-  const mk = (over) => ({ ...generateItem(createRng(Math.random() * 1e9 | 0), 3, { rarity: 'common', baseId: 'ring' }), ...over });
+  const mk = (over) => ({ ...generateItem(createRng(Math.random() * 1e9 | 0), 3, { rarity: 'common', baseId: 'ring' }), affixes: undefined, ...over }); // hand-set stats
   r = act('loot_filter_save', { filter: { enabled: true, protectUpgrades: true, rules: [
     { name: 'Keep crit uncommons', action: 'keep', rarities: ['uncommon'], anyStats: ['critDamage'] },
     { name: 'Junk', action: 'salvage', rarities: ['common', 'uncommon'] },
@@ -164,7 +164,7 @@ try {
   const legacy = filterFromLegacy({ autoSellBelow: 'uncommon', autoLootAction: 'salvage' });
   ok(legacy.enabled && legacy.rules[0].action === 'salvage' && legacy.rules[0].rarities.join() === 'common,uncommon', 'old auto-sell setting becomes a filter rule');
 
-  // ---------------------------------------------------------------- shards, gems & sockets
+  // ---------------------------------------------------------------- gems & sockets
   {
     const TL = await import('../server/townLogic.js');
     const G = await import('../shared/gems.js');
@@ -176,38 +176,37 @@ try {
     ok(socketed > 0 && socketed < total * 0.4, `drops with sockets: ${(socketed / total * 100).toFixed(1)}%`);
     const sal = generateItem(createRng(9), 30, { rarity: 'rare' });
     p.inventory.push(sal);
-    const before = { ...p.town.materials };
     r = act('salvage_items', { itemUids: [sal.uid] });
-    const gotShards = Object.keys(sal.stats).every(st => (p.town.materials[G.shardId(st)] || 0) > (before[G.shardId(st)] || 0));
-    ok(r.ok && gotShards, `salvage gives shards for every stat: ${Object.entries(r.result.materials).filter(([k]) => k.startsWith('shard_')).map(([k, v]) => `${v} ${k}`).join(', ')}`);
+    ok(r.ok && !Object.keys(r.result.materials).some(k => k.startsWith('shard_')), 'salvage gives no stat shards anymore');
     L.hero(p).level = Math.max(L.hero(p).level, 25); // gems unlock at hero level 20
-    r = act('gem_cut', { stat: 'str' });
+    r = act('gem_cut', { kind: 'ladder' });
     ok(!r.ok && /Jeweler/.test(r.error), 'cutting needs a Jeweler: ' + r.error);
     const jw = createCharacter({ id: 'jw', name: 'Gemma', classId: 'rogue', level: 5 });
     jw.profession = { id: 'jewelcrafting', level: 10, xp: 0 };
     p.characters.jw = jw;
     p.town.buildings.jeweler = { level: 2, upgrade: null, worker: 'jw' };
-    p.town.materials.shard_str = 49; p.town.materials.gem_fragment = 500; p.town.materials.arcane_dust = 500; p.town.materials.magic_essence = 50; p.town.materials.prismatic_shard = 50; p.town.materials.void_crystal = 10;
+    p.town.materials.gem_fragment = 0; p.town.materials.arcane_dust = 500; p.town.materials.magic_essence = 50; p.town.materials.prismatic_shard = 50; p.town.materials.void_crystal = 10;
     p.gold = 1e6;
-    r = act('gem_cut', { stat: 'str' });
-    ok(!r.ok && /Missing 1 Strength Shard/.test(r.error), 'needs 50 shards: ' + r.error);
-    p.town.materials.shard_str = 50 * 7;
-    r = act('gem_cut', { stat: 'str', count: 7 });
-    ok(r.ok && p.town.gems['str:1'] >= 7 && p.town.materials.shard_str === 0, `cut 7 Chipped Rubies (got ${r.result?.count})`);
-    r = act('gem_fuse', { stat: 'str', tier: 1, count: 2 });
-    ok(r.ok && p.town.gems['str:2'] >= 2 && p.town.gems['str:1'] === (r.result ? p.town.gems['str:1'] : -1), `fused 6 Chipped → ${r.result?.count} Flawed`);
-    r = act('gem_fuse', { stat: 'str', tier: 2 });
+    r = act('gem_cut', { kind: 'ladder' });
+    ok(!r.ok && /Gem Fragment/.test(r.error), 'cutting needs Gem Fragments: ' + r.error);
+    p.town.materials.gem_fragment = 5000;
+    for (let i = 0; i < 7; i++) act('gem_cut', { kind: 'ladder' });
+    ok(p.town.gems['ladder:1'] >= 7, `cut 7 Chipped Ladder Gems (have ${p.town.gems['ladder:1']})`);
+    r = act('gem_fuse', { kind: 'ladder', tier: 1, count: 2 });
+    ok(r.ok && p.town.gems['ladder:2'] >= 2, `fused 6 Chipped → ${r.result?.count} Flawed`);
+    r = act('gem_fuse', { kind: 'ladder', tier: 2 });
     ok(!r.ok, 'Polished needs Jeweler 3 / enough gems: ' + r.error);
     // socket into the hero's weapon
     const w = h.equipment.weapon;
     w.sockets = [null];
+    w.affixes = [{ stat: 'str', tier: 3, roll: 0.5 }];
     const strBefore = equipmentStats(h).str || 0;
-    r = act('gem_socket', { itemUid: w.uid, charId: h.id, index: 0, gem: 'str:2' });
+    r = act('gem_socket', { itemUid: w.uid, charId: h.id, index: 0, gem: 'ladder:2' });
     const gained = (equipmentStats(h).str || 0) - strBefore;
-    ok(r.ok && w.sockets[0] === 'str:2' && gained > 0, `Flawed Ruby socketed into ${w.name}: +${gained} Strength (gem value ${G.gemValue('str', 2)})`);
-    const flawed = p.town.gems['str:2'] || 0, g0 = p.gold;
+    ok(r.ok && w.sockets[0] === 'ladder:2' && gained > 0, `Flawed Ladder Gem socketed into ${w.name}: its T3 Strength gains +${gained}`);
+    const flawed = p.town.gems['ladder:2'] || 0, g0 = p.gold;
     r = act('gem_unsocket', { itemUid: w.uid, charId: h.id, index: 0 });
-    ok(r.ok && !w.sockets[0] && p.town.gems['str:2'] === flawed + 1 && p.gold === g0 - G.unsocketCost(2, w.level), `unsocket returns the gem for ${G.unsocketCost(2, w.level)}g`);
+    ok(r.ok && !w.sockets[0] && p.town.gems['ladder:2'] === flawed + 1 && p.gold === g0 - G.unsocketCost(2, w.level), `unsocket returns the gem for ${G.unsocketCost(2, w.level)}g`);
     const maxW = maxSockets(w);
     r = act('gem_drill', { itemUid: w.uid, charId: h.id });
     ok(maxW < 2 || (!r.ok && /level 3/.test(r.error)), 'socket #2 needs Jeweler level 3');
@@ -218,11 +217,11 @@ try {
     ok(!r.ok, 'third socket blocked: ' + r.error);
     // selling a socketed item returns its gem
     const sell = generateItem(createRng(3), 10, { rarity: 'rare' });
-    sell.sockets = ['str:1'];
+    sell.sockets = ['ladder:1'];
     p.inventory.push(sell);
-    const chipped = p.town.gems['str:1'] || 0;
+    const chipped = p.town.gems['ladder:1'] || 0;
     r = act('sell_item', { itemUid: sell.uid });
-    ok(r.ok && p.town.gems['str:1'] === chipped + 1, 'selling returns socketed gems');
+    ok(r.ok && p.town.gems['ladder:1'] === chipped + 1, 'selling returns socketed gems');
   }
 
   // public state carries the new data

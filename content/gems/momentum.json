@@ -1,0 +1,16 @@
+{
+  "name": "Momentum Gem",
+  "color": "#e0464e",
+  "effect": "momentum",
+  "values": [
+    0.03,
+    0.04,
+    0.05,
+    0.06,
+    0.08
+  ],
+  "duration": 10,
+  "maxStacks": 5,
+  "description": "Every kill gives +{v} to the offensive affixes on this item for {duration} s, stacking up to {maxStacks} times.",
+  "order": 110
+}

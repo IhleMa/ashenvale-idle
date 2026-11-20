@@ -1,0 +1,14 @@
+{
+  "name": "Balance Gem",
+  "color": "#b7a4e0",
+  "effect": "balance",
+  "values": [
+    0.08,
+    0.11,
+    0.14,
+    0.18,
+    0.24
+  ],
+  "description": "If this item has as many prefixes as suffixes, all its affixes get +{v}.",
+  "order": 50
+}

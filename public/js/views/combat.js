@@ -1,4 +1,5 @@
 // Combat view: live, server-driven battle display (presentation only — all math happens on the server).
+import { parseGemKey, gemName } from '/shared/gems.js';
 import { UNIQUES, SETS } from '/shared/data/legendaries.js';
 import { MATERIALS } from '/shared/data/town.js';
 import { classLabel } from '/shared/data/subclasses.js';
@@ -97,7 +98,7 @@ bus.on('msg:battle_end', m => {
     }
     if (s.kind === 'arena') addLog(b, { cat: 'event', t: b.time, html: `<span class="${s.result === 'victory' ? 'log-win' : 'log-loss'}">${s.result === 'victory' ? 'Arena victory' : 'Arena defeat'} against ${esc(s.opponent)}${s.byTime ? ' (on time)' : ''}: ${s.delta >= 0 ? '+' : ''}${s.delta} rating → ${fmt(s.rating)}${s.gold ? `, +${fmt(s.gold)} gold` : ''}</span>` });
     else if (s.result === 'victory') {
-      const items = (s.items?.length ? ` · ${s.items.length} item${s.items.length > 1 ? 's' : ''}` : '') + Object.entries(s.materials || {}).map(([k, v]) => ` · <b>+${v} ${esc(MATERIALS[k]?.name || k)}</b>`).join('');
+      const items = (s.items?.length ? ` · ${s.items.length} item${s.items.length > 1 ? 's' : ''}` : '') + Object.entries(s.materials || {}).map(([k, v]) => ` · <b>+${v} ${esc(MATERIALS[k]?.name || k)}</b>`).join('') + Object.entries(s.gems || {}).map(([k, v]) => { const g = parseGemKey(k); return g ? ` · <b>💎 ${v > 1 ? v + '× ' : ''}${esc(gemName(g.kind, g.tier))}</b>` : ''; }).join('');
       addLog(b, { cat: 'event', t: b.time, html: `<span class="log-win">Victory! +${fmt(s.xp)} XP, +${fmt(s.gold)} gold${items}</span>` });
     } else addLog(b, { cat: 'event', t: b.time, html: '<span class="log-loss">Defeat… your party regroups.</span>' });
   }
@@ -423,7 +424,7 @@ function showBanner(s) {
     return;
   }
   el.innerHTML = s.result === 'victory'
-    ? `<b>${s.kind === 'rift' ? (s.timed ? 'Rift timed!' : 'Rift cleared') : 'Victory'}</b>${riftLine}<span>${s.repeat && !s.xp ? 'Tier already cleared — no XP or gold' : `+${fmt(s.xp)} XP · +${fmt(s.gold)} gold${s.firstClear ? ' (first clear)' : ''}`}${s.items?.length ? ` · ${s.items.length} loot` : ''}${Object.entries(s.materials || {}).map(([k, v]) => ` · +${v} ${esc(MATERIALS[k]?.glyph || '')} ${esc(MATERIALS[k]?.name || k)}`).join('')}</span>`
+    ? `<b>${s.kind === 'rift' ? (s.timed ? 'Rift timed!' : 'Rift cleared') : 'Victory'}</b>${riftLine}<span>${s.repeat && !s.xp ? 'Tier already cleared — no XP or gold' : `+${fmt(s.xp)} XP · +${fmt(s.gold)} gold${s.firstClear ? ' (first clear)' : ''}`}${s.items?.length ? ` · ${s.items.length} loot` : ''}${Object.entries(s.materials || {}).map(([k, v]) => ` · +${v} ${esc(MATERIALS[k]?.glyph || '')} ${esc(MATERIALS[k]?.name || k)}`).join('')}${Object.entries(s.gems || {}).map(([k, v]) => { const g = parseGemKey(k); return g ? ` · <b class="gem-found">💎 ${v > 1 ? v + '× ' : ''}${esc(gemName(g.kind, g.tier))}</b>` : ''; }).join('')}</span>`
     : `<b>Defeat</b>${riftLine}<span>Tip: click an enemy to see its abilities in the Bestiary, then adjust behaviour, gear or party.</span>`;
   setTimeout(() => { if (el.isConnected) el.hidden = true; }, s.kind === 'rift' ? 5000 : 2200);
 }

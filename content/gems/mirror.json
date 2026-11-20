@@ -1,0 +1,14 @@
+{
+  "name": "Mirror Gem",
+  "color": "#a9c7e8",
+  "effect": "mirror",
+  "values": [
+    0.25,
+    0.3,
+    0.35,
+    0.4,
+    0.5
+  ],
+  "description": "This item gets its best affix a second time at {v} of its value.",
+  "order": 80
+}

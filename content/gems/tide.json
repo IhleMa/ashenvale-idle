@@ -1,0 +1,15 @@
+{
+  "name": "Tide Gem",
+  "color": "#3d86d6",
+  "effect": "tide",
+  "values": [
+    0.15,
+    0.2,
+    0.25,
+    0.3,
+    0.4
+  ],
+  "period": 8,
+  "description": "In combat, alternates every {period} s: first the prefixes on this item get +{v}, then the suffixes.",
+  "order": 90
+}

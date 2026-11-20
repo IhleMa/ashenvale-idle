@@ -1,0 +1,14 @@
+{
+  "name": "Ladder Gem",
+  "color": "#e8c15a",
+  "effect": "ladder",
+  "values": [
+    0.02,
+    0.03,
+    0.04,
+    0.05,
+    0.06
+  ],
+  "description": "Every affix on this item gets +{v} for each tier it is above T7 (a T1 affix gets 6×).",
+  "order": 10
+}

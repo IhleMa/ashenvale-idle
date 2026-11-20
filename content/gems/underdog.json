@@ -1,0 +1,14 @@
+{
+  "name": "Underdog Gem",
+  "color": "#8fb86b",
+  "effect": "underdog",
+  "values": [
+    0.2,
+    0.3,
+    0.4,
+    0.5,
+    0.6
+  ],
+  "description": "T5, T6 and T7 affixes on this item get +{v}.",
+  "order": 30
+}

@@ -477,18 +477,6 @@ Slots: `weapon`, `offhand`, `head`, `chest`, `hands`, `feet`, `ring`, `amulet`
 | `shadow_silk` | Shadow Silk | Silk spun from darkness in the Shadowfell. Needed for town upgrades and Superior/Masterwork crafting. |
 | `dragonbone` | Dragonbone | Bone from the ancient dragons of the Dragonbone Wastes. Needed for town upgrades and Superior/Masterwork crafting. |
 | `void_ichor` | Void Ichor | The black blood of the Voidscar. Needed for town upgrades and Superior/Masterwork crafting. |
-| `shard_str` | Strength Shard | Salvaged from items with Strength. The Jeweler cuts these into gems. |
-| `shard_int` | Intelligence Shard | Salvaged from items with Intelligence. The Jeweler cuts these into gems. |
-| `shard_dex` | Dexterity Shard | Salvaged from items with Dexterity. The Jeweler cuts these into gems. |
-| `shard_vit` | Vitality Shard | Salvaged from items with Vitality. The Jeweler cuts these into gems. |
-| `shard_hp` | Health Shard | Salvaged from items with Health. The Jeweler cuts these into gems. |
-| `shard_defense` | Defense Shard | Salvaged from items with Defense. The Jeweler cuts these into gems. |
-| `shard_physPower` | Physical Power Shard | Salvaged from items with Physical Power. The Jeweler cuts these into gems. |
-| `shard_magPower` | Magic Power Shard | Salvaged from items with Magic Power. The Jeweler cuts these into gems. |
-| `shard_healPower` | Healing Power Shard | Salvaged from items with Healing Power. The Jeweler cuts these into gems. |
-| `shard_critChance` | Critical Chance Shard | Salvaged from items with Critical Chance. The Jeweler cuts these into gems. |
-| `shard_critDamage` | Critical Damage Shard | Salvaged from items with Critical Damage. The Jeweler cuts these into gems. |
-| `shard_attackSpeed` | Attack Speed Shard | Salvaged from items with Attack Speed. The Jeweler cuts these into gems. |
 
 ## Town
 

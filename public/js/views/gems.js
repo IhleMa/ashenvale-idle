@@ -1,14 +1,13 @@
-// Jewelcrafting: stat shards → gems → sockets.
+// Jewelcrafting: resonance gems (cut, fuse) and sockets.
 import { state } from '../state.js';
 import { act } from '../net.js';
 import { esc, fmt, bar, run, toast, tipAttr, confirmBox, itemTooltipHtml } from '../ui.js';
 import { itemIcon, gemIcon, materialIcon, portrait } from '../assets.js';
 import { MATERIALS } from '/shared/data/town.js';
-import { SLOTS, AFFIXES, PCT_STATS, maxSockets } from '/shared/data/items.js';
-import { GEM_STATS, GEM_KINDS, GEM_TIERS, MAX_GEM_TIER, GEM_CONFIG, shardId, gemKey, parseGemKey, gemName, gemValue, cutCost, fuseCost, drillCost, drillJewelerLevel, unsocketCost } from '/shared/gems.js';
+import { SLOTS, maxSockets } from '/shared/data/items.js';
+import { GEM_IDS, GEM_KINDS, GEM_TIERS, MAX_GEM_TIER, GEM_CONFIG, COMBAT_GEMS, gemKey, parseGemKey, gemName, gemText, cutCost, fuseCost, drillCost, drillJewelerLevel, unsocketCost } from '/shared/gems.js';
 
-const ui = { tab: 'shards', sel: null, cutCount: 1 }; // sel = { uid, charId }
-const statTxt = (stat, v) => (PCT_STATS.has(stat) ? `+${(v * 100).toFixed(1)}%` : `+${fmt(v)}`);
+const ui = { tab: 'pouch', sel: null }; // sel = { uid, charId }
 const jLevel = p => p.town?.buildings?.jeweler?.level || 0;
 const jWorker = p => { const id = p.town?.buildings?.jeweler?.worker; return id ? p.characters[id] : null; };
 
@@ -27,45 +26,32 @@ function jewelerNote(p) {
   return `<div class="muted small">💍 Jeweler level ${jLevel(p)} · ${esc(w.name)} (Jewelcrafting ${w.profession.level}) — ${Math.round(Math.min(0.2, w.profession.level / 250) * 100)}% chance for a bonus gem when cutting or fusing.</div>`;
 }
 
-// ---------------------------------------------------------------- shards tab
-function shardsHtml(p) {
-  const can = jLevel(p) >= 1 && jWorker(p);
-  return `<section class="panel">
-    <div class="panel-head"><h3>◆ Stat shards</h3><span class="muted small">${GEM_CONFIG.shardsPerGem} shards of one stat → 1 Chipped gem</span></div>
-    <p class="muted small">Every stat on an item you salvage becomes shards of that stat — higher item level and rarity give more. That includes items your <a href="#/inventory">loot filter</a> salvages automatically.</p>
-    ${jewelerNote(p)}
-    <div class="row gap small">Cut <select data-cut-count>${[1, 5, 10].map(n => `<option value="${n}" ${ui.cutCount === n ? 'selected' : ''}>×${n}</option>`).join('')}</select> at a time</div>
-    <div class="shard-grid">${GEM_STATS.map(stat => {
-      const have = Math.floor(p.town.materials[shardId(stat)] || 0);
-      const cost = cutCost(stat, ui.cutCount);
-      const ok = can && affordable(p, cost);
-      return `<div class="shard-card">
-        <div class="row gap">${gemIcon(stat, 1, 'md')}<div class="grow"><b>${esc(AFFIXES[stat].label)}</b><div class="muted small">${esc(GEM_KINDS[stat].name)} · ${statTxt(stat, gemValue(stat, 1))} per Chipped gem</div></div></div>
-        ${bar(Math.min(have, GEM_CONFIG.shardsPerGem), GEM_CONFIG.shardsPerGem, 'thin', `${fmt(have)} / ${GEM_CONFIG.shardsPerGem} shards`)}
-        <div class="row gap"><span class="faint small grow">${costHtml(p, cost)}</span><button class="btn tiny ${ok ? 'primary' : ''}" data-cut="${stat}" ${ok ? '' : 'disabled'}>Cut ${ui.cutCount > 1 ? '×' + ui.cutCount : ''}</button></div>
-      </div>`;
-    }).join('')}</div>
-  </section>`;
-}
-
-// ---------------------------------------------------------------- pouch tab
+// ---------------------------------------------------------------- gems tab: every gem kind, its qualities, cutting & fusing
 function pouchHtml(p) {
   const gems = p.town.gems || {};
   const total = Object.values(gems).reduce((a, b) => a + b, 0);
+  const can = jLevel(p) >= 1 && jWorker(p);
+  const cc = cutCost(1);
   return `<section class="panel">
-    <div class="panel-head"><h3>💎 Gem pouch <span class="muted small">${fmt(total)} gems</span></h3><span class="muted small">${GEM_CONFIG.fuseCount} gems → 1 gem of the next tier</span></div>
+    <div class="panel-head"><h3>💎 Resonance gems <span class="muted small">${fmt(total)} in your pouch</span></h3><span class="muted small">${GEM_CONFIG.fuseCount} gems → 1 of the next quality</span></div>
+    <p class="muted small">A socketed gem changes the <b>affixes of its own item</b>. Gems drop from enemies (bosses and rifts most often); the Jeweler cuts a Chipped gem of your choice from Gem Fragments (${costHtml(p, cc)}). One gem of each kind per item.</p>
     ${jewelerNote(p)}
-    <table class="gem-table"><thead><tr><th>Gem</th>${GEM_TIERS.slice(1).map((t, i) => `<th ${tipAttr(`Needs Jeweler level ${t.jeweler} to make`)}>${esc(t.name)}</th>`).join('')}</tr></thead>
-    <tbody>${GEM_STATS.map(stat => `<tr><td><b>${esc(GEM_KINDS[stat].name)}</b> <span class="muted small">${esc(AFFIXES[stat].label)}</span></td>
-      ${GEM_TIERS.slice(1).map((t, i) => {
-        const tier = i + 1;
-        const n = gems[gemKey(stat, tier)] || 0;
-        const canFuse = tier < MAX_GEM_TIER && n >= GEM_CONFIG.fuseCount;
-        const fc = tier < MAX_GEM_TIER ? fuseCost(tier) : null;
-        const fuseOk = canFuse && jWorker(p) && jLevel(p) >= GEM_TIERS[tier + 1].jeweler && affordable(p, fc);
-        return `<td class="gem-cell ${n ? '' : 'empty'}"><div class="row gap">${gemIcon(stat, tier, 'sm')}<span><b>${n}</b><br><span class="faint small">${statTxt(stat, gemValue(stat, tier))}</span></span></div>
-          ${canFuse ? `<button class="btn tiny ${fuseOk ? 'primary' : ''}" data-fuse="${stat}" data-tier="${tier}" ${fuseOk ? '' : 'disabled'} ${tipAttr(`Fuse ${GEM_CONFIG.fuseCount}× ${esc(gemName(stat, tier))} → 1× ${esc(gemName(stat, tier + 1))}<br>${costHtml(p, fc)}${jLevel(p) < GEM_TIERS[tier + 1].jeweler ? `<br>Needs Jeweler level ${GEM_TIERS[tier + 1].jeweler}` : ''}`)}>Fuse ⤴</button>` : ''}</td>`;
-      }).join('')}</tr>`).join('')}</tbody></table>
+    ${p.town.gemRefund?.fragments && Date.now() - p.town.gemRefund.at < 14 * 864e5 ? `<div class="notice small">Gems were reworked: your old stat gems and shards were turned into ${fmt(p.town.gemRefund.fragments)} Gem Fragments.</div>` : ''}
+    <div class="gem-kinds">${GEM_IDS.map(kind => {
+      const g = GEM_KINDS[kind];
+      return `<div class="gem-kind">
+        <div class="row gap">${gemIcon(kind, 1, 'md')}<div class="grow"><b>${esc(g.name)}</b>${COMBAT_GEMS.has(g.effect) ? ' <span class="tag">combat</span>' : ''}<div class="small muted">${esc(gemText(kind, 1))}</div></div>
+          <button class="btn tiny ${can && affordable(p, cc) ? 'primary' : ''}" data-cut="${kind}" ${can && affordable(p, cc) ? '' : 'disabled'} ${tipAttr(`Cut a ${esc(gemName(kind, 1))}<br>${costHtml(p, cc)}`)}>Cut</button></div>
+        <div class="gem-qualities">${GEM_TIERS.slice(1).map((t, i) => {
+          const tier = i + 1, n = gems[gemKey(kind, tier)] || 0;
+          const canFuse = tier < MAX_GEM_TIER && n >= GEM_CONFIG.fuseCount;
+          const fc = tier < MAX_GEM_TIER ? fuseCost(tier) : null;
+          const fuseOk = canFuse && jWorker(p) && jLevel(p) >= GEM_TIERS[tier + 1].jeweler && affordable(p, fc);
+          return `<div class="gem-q ${n ? '' : 'empty'}" ${tipAttr(`<b>${esc(gemName(kind, tier))}</b><br>${esc(gemText(kind, tier))}`)}>${gemIcon(kind, tier, 'sm')}<b>${n}</b>
+            ${canFuse ? `<button class="btn tiny ${fuseOk ? 'primary' : ''}" data-fuse="${kind}" data-tier="${tier}" ${fuseOk ? '' : 'disabled'} ${tipAttr(`Fuse ${GEM_CONFIG.fuseCount}× ${esc(gemName(kind, tier))} → 1× ${esc(gemName(kind, tier + 1))}<br>${costHtml(p, fc)}${jLevel(p) < GEM_TIERS[tier + 1].jeweler ? `<br>Needs Jeweler level ${GEM_TIERS[tier + 1].jeweler}` : ''}`)}>⤴</button>` : ''}</div>`;
+        }).join('')}</div>
+      </div>`;
+    }).join('')}</div>
   </section>`;
 }
 
@@ -82,7 +68,7 @@ function socketsHtml(p) {
   const chars = Object.values(p.characters).sort((a, b) => (party.has(b.id) - party.has(a.id)) || (b.isMain - a.isMain));
   const selected = findSel(p);
   const invSocketed = p.inventory.filter(i => i.sockets?.length || maxSockets(i) > 0).sort((a, b) => (b.sockets?.length || 0) - (a.sockets?.length || 0) || b.level - a.level);
-  const slotCell = (it, charId) => `<button class="sock-item ${selected?.item.uid === it.uid ? 'active' : ''}" data-pick="${it.uid}" data-char="${charId || ''}" ${tipAttr(itemTooltipHtml(it))}>${itemIcon(it, 'sm')}<span class="sock-dots">${(it.sockets || []).map(g => `<i class="${g ? 'full' : ''}" style="${g ? `--gem:${GEM_KINDS[parseGemKey(g)?.stat]?.color}` : ''}"></i>`).join('')}</span></button>`;
+  const slotCell = (it, charId) => `<button class="sock-item ${selected?.item.uid === it.uid ? 'active' : ''}" data-pick="${it.uid}" data-char="${charId || ''}" ${tipAttr(itemTooltipHtml(it))}>${itemIcon(it, 'sm')}<span class="sock-dots">${(it.sockets || []).map(g => `<i class="${g ? 'full' : ''}" style="${g ? `--gem:${GEM_KINDS[parseGemKey(g)?.kind]?.color}` : ''}"></i>`).join('')}</span></button>`;
   return `<div class="sock-layout">
     <section class="panel sock-pick">
       <h3>Choose an item</h3>
@@ -97,7 +83,8 @@ function socketsHtml(p) {
 function itemSocketHtml(p, { item, ch }) {
   const sockets = item.sockets || [];
   const max = maxSockets(item);
-  const gems = Object.entries(p.town.gems || {}).filter(([, n]) => n > 0).map(([k, n]) => ({ k, n, ...parseGemKey(k) })).filter(g => g.stat).sort((a, b) => b.tier - a.tier || a.stat.localeCompare(b.stat));
+  const used = new Set(sockets.map(g => parseGemKey(g)?.kind).filter(Boolean));
+  const gems = Object.entries(p.town.gems || {}).filter(([, n]) => n > 0).map(([k, n]) => ({ k, n, ...parseGemKey(k) })).filter(g => g.kind).sort((a, b) => a.kind.localeCompare(b.kind) || b.tier - a.tier);
   const dc = sockets.length < max ? drillCost(item) : null;
   const dl = sockets.length < max ? drillJewelerLevel(item) : null;
   const canDrill = dc && jWorker(p) && jLevel(p) >= dl && affordable(p, dc);
@@ -106,13 +93,14 @@ function itemSocketHtml(p, { item, ch }) {
     ${sockets.length ? sockets.map((g, i) => {
       const gem = g && parseGemKey(g);
       return `<div class="socket ${gem ? 'full' : ''}">
-        <div class="socket-hole">${gem ? gemIcon(gem.stat, gem.tier, 'md') : '<span class="empty-socket"></span>'}</div>
-        <div class="grow">${gem ? `<b>${esc(gemName(gem.stat, gem.tier))}</b> <span class="good-text">${statTxt(gem.stat, gemValue(gem.stat, gem.tier))} ${esc(AFFIXES[gem.stat].label)}</span>` : '<span class="muted">Empty socket</span>'}
-          <div class="row gap wrap"><select data-gem-for="${i}"><option value="">${gem ? 'Swap for…' : 'Insert a gem…'}</option>${gems.map(x => `<option value="${x.k}">${esc(gemName(x.stat, x.tier))} (${statTxt(x.stat, gemValue(x.stat, x.tier))} ${esc(AFFIXES[x.stat].label)}) ×${x.n}</option>`).join('')}</select>
+        <div class="socket-hole">${gem ? gemIcon(gem.kind, gem.tier, 'md') : '<span class="empty-socket"></span>'}</div>
+        <div class="grow">${gem ? `<b>${esc(gemName(gem.kind, gem.tier))}</b><div class="small muted">${esc(gemText(gem.kind, gem.tier))}</div>` : '<span class="muted">Empty socket</span>'}
+          <div class="row gap wrap"><select data-gem-for="${i}"><option value="">${gem ? 'Swap for…' : 'Insert a gem…'}</option>${gems.filter(x => !used.has(x.kind) || x.kind === gem?.kind).map(x => `<option value="${x.k}">${esc(gemName(x.kind, x.tier))} ×${x.n}</option>`).join('')}</select>
           ${gem ? `<button class="btn tiny ghost" data-unsocket="${i}" ${tipAttr('The gem goes back into your pouch.')}>Remove (${fmt(unsocketCost(gem.tier, item.level))}g)</button>` : ''}</div></div>
       </div>`;
     }).join('') : '<p class="muted small">This item has no sockets yet.</p>'}
-    ${!gems.length ? '<p class="faint small">Your gem pouch is empty — cut gems from shards first.</p>' : ''}
+    ${!gems.length ? '<p class="faint small">Your gem pouch is empty — gems drop from enemies, or cut one at the Jeweler.</p>' : ''}
+    <h4>With its gems</h4><div class="gem-preview">${itemTooltipHtml(item)}</div>
     ${dc ? `<div class="drill"><h4>Drill a socket</h4><div class="small">${costHtml(p, dc)}</div>
         ${jLevel(p) < dl ? `<div class="warn-text small">Socket #${sockets.length + 1} needs Jeweler level ${dl}.</div>` : !jWorker(p) ? '<div class="warn-text small">Needs a jewelcrafter working at the Jeweler.</div>' : ''}
         <button class="btn small ${canDrill ? 'primary' : ''}" data-drill ${canDrill ? '' : 'disabled'}>🔩 Drill socket #${sockets.length + 1}</button></div>`
@@ -123,9 +111,9 @@ function itemSocketHtml(p, { item, ch }) {
 function html() {
   const p = state.player;
   if (!p.town) return '<section class="panel"><p class="muted">Create your hero first.</p></section>';
-  const tabs = [['shards', '◆ Shards & cutting'], ['pouch', '💎 Gem pouch & fusing'], ['sockets', '🔩 Sockets']];
+  const tabs = [['pouch', '💎 Gems & fusing'], ['sockets', '🔩 Sockets']];
   return `<div class="tabs">${tabs.map(([id, l]) => `<button class="tab ${ui.tab === id ? 'active' : ''}" data-gtab="${id}">${l}</button>`).join('')}</div>
-    ${ui.tab === 'shards' ? shardsHtml(p) : ui.tab === 'pouch' ? pouchHtml(p) : socketsHtml(p)}`;
+    ${ui.tab === 'sockets' ? socketsHtml(p) : pouchHtml(p)}`;
 }
 
 export function openSockets(uid, charId = null) { ui.tab = 'sockets'; ui.sel = { uid, charId }; location.hash = '#/gems'; }
@@ -140,13 +128,13 @@ export const gemsView = {
       if (d.gtab) { ui.tab = d.gtab; this.render(root); return; }
       if (d.pick) { ui.sel = { uid: d.pick, charId: d.char || null }; this.render(root); return; }
       if (d.cut) {
-        const r = await run(act('gem_cut', { stat: d.cut, count: ui.cutCount }));
+        const r = await run(act('gem_cut', { kind: d.cut, count: 1 }));
         if (r) toast(`Cut ${r.count}× ${gemName(d.cut, 1)}${r.extra ? ` (${r.extra} bonus!)` : ''}`, 'success');
         return;
       }
       if (d.fuse) {
         const tier = Number(d.tier);
-        const r = await run(act('gem_fuse', { stat: d.fuse, tier }));
+        const r = await run(act('gem_fuse', { kind: d.fuse, tier }));
         if (r) toast(`Fused into ${gemName(d.fuse, tier + 1)}${r.extra ? ' — and a bonus one!' : ''}`, 'success');
         return;
       }
@@ -161,7 +149,6 @@ export const gemsView = {
     });
     root.addEventListener('change', async e => {
       const t = e.target;
-      if (t.matches('[data-cut-count]')) { ui.cutCount = Number(t.value); this.render(root); return; }
       if (t.matches('[data-gem-for]') && t.value) {
         const sel = findSel(state.player);
         if (!sel) return;
@@ -169,7 +156,7 @@ export const gemsView = {
         const old = sel.item.sockets?.[idx];
         if (old) {
           const o = parseGemKey(old);
-          if (!(await confirmBox(`Swap the ${gemName(o.stat, o.tier)} (back to your pouch, ${fmt(unsocketCost(o.tier, sel.item.level))} gold) for this gem?`, 'Swap'))) { t.value = ''; return; }
+          if (!(await confirmBox(`Swap the ${gemName(o.kind, o.tier)} (back to your pouch, ${fmt(unsocketCost(o.tier, sel.item.level))} gold) for this gem?`, 'Swap'))) { t.value = ''; return; }
         }
         await run(act('gem_socket', { itemUid: sel.item.uid, charId: sel.ch?.id || null, index: idx, gem: t.value }), 'Gem socketed.');
       }

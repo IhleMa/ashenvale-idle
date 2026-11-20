@@ -8,7 +8,6 @@ import { SLOTS, canEquip, itemSellValue } from '/shared/data/items.js';
 import { CLASSES } from '/shared/data/classes.js';
 import { MATERIALS } from '/shared/data/town.js';
 import { salvageYield } from '/shared/town.js';
-import { shardYield } from '/shared/gems.js';
 import { maxSockets } from '/shared/data/items.js';
 import { openSockets } from './gems.js';
 import { FILTER_ACTIONS } from '/shared/lootfilter.js';
@@ -120,7 +119,7 @@ function detailHtml(item, p, verdict) {
     <div class="row gap end">
       ${item.sockets?.length || maxSockets(item) ? `<button class="btn small ghost" data-sockets>💎 Sockets${item.sockets?.length ? ` (${item.sockets.filter(Boolean).length}/${item.sockets.length})` : ''}</button>` : ''}
       <button class="btn small ghost" data-lock>${item.locked ? 'Unlock' : 'Lock'}</button>
-      <button class="btn small" data-salvage ${item.locked ? 'disabled' : ''} ${tipAttr('Break down into: ' + esc(Object.entries({ ...salvageYield(item, p.town?.buildings?.salvage_yard?.level || 1), ...shardYield(item, p.town?.buildings?.salvage_yard?.level || 1) }).map(([k, v]) => `${v} ${MATERIALS[k].name}`).join(', ')) + (item.sockets?.some(Boolean) ? '<br>Socketed gems go back to your pouch.' : ''))}>Salvage</button>
+      <button class="btn small" data-salvage ${item.locked ? 'disabled' : ''} ${tipAttr('Break down into: ' + esc(Object.entries({ ...salvageYield(item, p.town?.buildings?.salvage_yard?.level || 1)}).map(([k, v]) => `${v} ${MATERIALS[k].name}`).join(', ')) + (item.sockets?.some(Boolean) ? '<br>Socketed gems go back to your pouch.' : ''))}>Salvage</button>
       <button class="btn small danger" data-sell ${item.locked ? 'disabled' : ''}>Sell</button>
     </div>`;
 }

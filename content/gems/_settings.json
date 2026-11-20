@@ -1,66 +1,173 @@
 {
-  "_about": "Gem tiers (cut/fuse costs), shard yield, drilling and removal costs. Every gem kind (one per stat) is its own file in this folder.",
+  "_about": "Resonance gems: socketed gems change the affixes of their own item (see the gem files in this folder: effect, values per quality). Gem qualities (cut/fuse costs, Jeweler level), drops, drilling and removal costs.",
   "tiers": [
     {
       "name": "Chipped",
-      "refLevel": 8,
       "jeweler": 1,
-      "boost": 1,
-      "cutCost": { "gold": 150, "mats": { "gem_fragment": 4 } }
+      "cutCost": {
+        "gold": 400,
+        "mats": {
+          "gem_fragment": 30
+        }
+      }
     },
     {
       "name": "Flawed",
-      "refLevel": 18,
       "jeweler": 2,
-      "boost": 1.1,
-      "fuseCost": { "gold": 600, "mats": { "gem_fragment": 8, "arcane_dust": 6 } }
+      "fuseCost": {
+        "gold": 600,
+        "mats": {
+          "gem_fragment": 8,
+          "arcane_dust": 6
+        }
+      }
     },
     {
       "name": "Polished",
-      "refLevel": 30,
       "jeweler": 3,
-      "boost": 1.2,
-      "fuseCost": { "gold": 2000, "mats": { "gem_fragment": 12, "magic_essence": 4 } }
+      "fuseCost": {
+        "gold": 2000,
+        "mats": {
+          "gem_fragment": 12,
+          "magic_essence": 4
+        }
+      }
     },
     {
       "name": "Flawless",
-      "refLevel": 44,
       "jeweler": 4,
-      "boost": 1.35,
-      "fuseCost": { "gold": 6000, "mats": { "gem_fragment": 16, "prismatic_shard": 2 } }
+      "fuseCost": {
+        "gold": 6000,
+        "mats": {
+          "gem_fragment": 16,
+          "prismatic_shard": 2
+        }
+      }
     },
     {
       "name": "Perfect",
-      "refLevel": 60,
       "jeweler": 5,
-      "boost": 1.5,
-      "fuseCost": { "gold": 15000, "mats": { "gem_fragment": 20, "void_crystal": 1, "prismatic_shard": 3 } }
+      "fuseCost": {
+        "gold": 15000,
+        "mats": {
+          "gem_fragment": 20,
+          "void_crystal": 1,
+          "prismatic_shard": 3
+        }
+      }
     }
   ],
-  "valueFactor": 0.6,
-  "config": { "shardsPerGem": 50, "fuseCount": 3 },
-  "shardYield": { "base": 0.6, "levelDivisor": 25, "perRarity": 0.6, "perSalvageLevel": 0.05 },
-  "bonusGemChance": { "levelDivisor": 250, "max": 0.2 },
+  "config": {
+    "fuseCount": 3
+  },
+  "bonusGemChance": {
+    "levelDivisor": 250,
+    "max": 0.2
+  },
   "drill": {
-    "gold": { "base": 200, "perItemLevel": 25 },
+    "gold": {
+      "base": 200,
+      "perItemLevel": 25
+    },
     "sockets": [
-      { "jeweler": 2, "goldMult": 1, "mats": { "gem_fragment": 6, "arcane_dust": { "base": 4, "perItemLevels": 5 } } },
+      {
+        "jeweler": 2,
+        "goldMult": 1,
+        "mats": {
+          "gem_fragment": 6,
+          "arcane_dust": {
+            "base": 4,
+            "perItemLevels": 5
+          }
+        }
+      },
       {
         "jeweler": 3,
         "goldMult": 2.5,
-        "mats": { "gem_fragment": 12, "arcane_dust": { "base": 4, "perItemLevels": 5 }, "prismatic_shard": 2 }
+        "mats": {
+          "gem_fragment": 12,
+          "arcane_dust": {
+            "base": 4,
+            "perItemLevels": 5
+          },
+          "prismatic_shard": 2
+        }
       },
       {
         "jeweler": 5,
         "goldMult": 4,
         "mats": {
           "gem_fragment": 18,
-          "arcane_dust": { "base": 4, "perItemLevels": 5 },
+          "arcane_dust": {
+            "base": 4,
+            "perItemLevels": 5
+          },
           "prismatic_shard": 4,
           "void_crystal": 1
         }
       }
     ]
   },
-  "unsocketCost": { "perTierSquared": 30, "perItemLevel": 4 }
+  "unsocketCost": {
+    "perTierSquared": 30,
+    "perItemLevel": 4
+  },
+  "drops": {
+    "normal": 0.004,
+    "elite": 0.03,
+    "boss": 0.2,
+    "qualityByLevel": [
+      [
+        18,
+        [
+          100
+        ]
+      ],
+      [
+        25,
+        [
+          100,
+          25
+        ]
+      ],
+      [
+        35,
+        [
+          100,
+          30,
+          8
+        ]
+      ],
+      [
+        45,
+        [
+          100,
+          35,
+          10,
+          2
+        ]
+      ],
+      [
+        55,
+        [
+          100,
+          40,
+          12,
+          3,
+          0.6
+        ]
+      ]
+    ],
+    "_about": "Chance per kill (normal / elite / boss). Gems only drop from enemies of at least the first qualityByLevel level (the Gems page unlocks at hero level 20); each entry: [min enemy level, weights for Chipped, Flawed, …]."
+  },
+  "legacyRefund": {
+    "gemFragmentsPerOldGem": [
+      10,
+      30,
+      90,
+      270,
+      810
+    ],
+    "shardsPerFragment": 10
+  }
 }

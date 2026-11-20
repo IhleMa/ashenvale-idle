@@ -1,0 +1,14 @@
+{
+  "name": "Keystone",
+  "color": "#d9d2c3",
+  "effect": "keystone",
+  "values": [
+    1,
+    2,
+    3,
+    4,
+    6
+  ],
+  "description": "The weakest affix on this item counts up to {n} tier(s) better, but never better than the item's best affix.",
+  "order": 20
+}

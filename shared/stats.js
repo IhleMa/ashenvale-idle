@@ -3,7 +3,7 @@ import { CONFIG } from './config.js';
 import { CLASSES, TRAITS, classTier } from './data/classes.js';
 import { treeStats } from './skilltree.js';
 import { setStatBonuses } from './data/legendaries.js';
-import { socketStats } from './gems.js';
+import { gearItemStats } from './gems.js';
 import { gearSyncFactor } from './levelsync.js';
 
 export const ATTRIBUTES = {
@@ -31,22 +31,22 @@ const GEAR_FLAT = new Set(['str', 'int', 'dex', 'vit', 'hp', 'defense', 'physPow
 export const GEAR_COMBAT = ['physDamagePct', 'magDamagePct', 'shieldPct', 'lifeSteal', 'thornsPct', 'blockChance', 'hpRegen', 'healingReceivedPct',
   'cooldownPct', 'resourceRegenPct', 'buffDurationPct', 'threatPct', 'damageVsBossPct', 'executeDamagePct'];
 
-export function equipmentStats(ch) {
+// dyn: the state of combat gems (Tide, Last Stand, Momentum) — see shared/gems.js
+export function equipmentStats(ch, dyn = null) {
   const out = {};
   for (const item of Object.values(ch.equipment || {})) {
     if (!item) continue;
     const f = ch.gearSync ? gearSyncFactor(ch.gearSync, item.level, ch.gearUp) : 1; // level sync (ascension) scales gear down
-    for (const [k, v] of Object.entries(item.stats)) out[k] = (out[k] || 0) + v * f;
+    for (const [k, v] of Object.entries(gearItemStats(item, dyn))) out[k] = (out[k] || 0) + v * f; // affixes with their socketed gems
     if (item.enchant) out[item.enchant.stat] = (out[item.enchant.stat] || 0) + item.enchant.value * f; // Enchanter's Study
-    if (item.sockets) for (const [k, v] of Object.entries(socketStats(item))) out[k] = (out[k] || 0) + v * f; // socketed gems
   }
   return out;
 }
 
-export function computeStats(ch) {
+export function computeStats(ch, dyn = null) {
   const cls = CLASSES[ch.classId];
   const bonus = collectBonuses(ch);
-  const gear = equipmentStats(ch);
+  const gear = equipmentStats(ch, dyn);
   // every gear stat besides the flat core stats works like the same skill-tree bonus (Damage %, Strength %, …)
   for (const [k, v] of Object.entries(gear)) if (!GEAR_FLAT.has(k)) bonus[k] = (bonus[k] || 0) + v;
   const mainMult = ch.isMain ? 1 + CONFIG.mainCharacter.attributeBonus : 1;
