@@ -1335,3 +1335,13 @@ html.standalone body { padding-bottom: env(safe-area-inset-bottom); padding-left
   .char-sheet > .inv-panel { grid-column: 1 / -1; }
 }
 @media (max-width: 760px) { .char-sheet { grid-template-columns: minmax(0, 1fr); } }
+
+/* inventory highlight */
+.hl-bar { display: flex; flex-direction: column; gap: 6px; margin: 6px 0; }
+.hl-bar .hl-text { min-width: 220px; flex: 1 1 220px; max-width: 360px; }
+.item-cell.hl { border-color: #ffd34d; box-shadow: 0 0 0 1px #ffd34d, 0 0 12px rgba(255, 211, 77, .55); }
+.item-cell.hl-dim { opacity: .28; }
+.item-cell.hl-hide { display: none; }
+.hl-bar .af-min { width: 80px; flex: none; }
+.hl-bar .hl-row select { width: auto; flex: none; }
+.item-cell.unusable.hl { opacity: .75; }

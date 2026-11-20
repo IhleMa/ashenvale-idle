@@ -10,6 +10,9 @@ import { MATERIALS } from '/shared/data/town.js';
 import { salvageYield } from '/shared/town.js';
 import { maxSockets } from '/shared/data/items.js';
 import { openSockets } from './gems.js';
+import { statOptions, tierOptions } from './auction.js';
+import { AFFIXES, PCT_STATS } from '/shared/data/items.js';
+import { gearItemStats } from '/shared/gems.js';
 import { FILTER_ACTIONS } from '/shared/lootfilter.js';
 import { filterHtml, logHtml, inventoryVerdicts, handleFilterClick, handleFilterChange, filterIsDirty } from './lootfilter.js';
 
@@ -18,6 +21,67 @@ let filterRarity = 'all';
 let sortBy = 'rarity';
 let selectedUid = null;
 let compareCharId = null;
+
+// ---- Highlight: mark every item that has a stat (with a minimum value and/or affix tier) or matches a text search.
+// Kept in this browser between visits. Typing only toggles classes on the cells, so the input never loses focus.
+const HL_KEY = 'ashenvale.invHighlight';
+const hl = (() => { try { return { text: '', rows: [], mode: 'all', only: false, ...JSON.parse(localStorage.getItem(HL_KEY) || '{}') }; } catch { return { text: '', rows: [], mode: 'all', only: false }; } })();
+const saveHl = () => { try { localStorage.setItem(HL_KEY, JSON.stringify(hl)); } catch {} };
+const hlRows = () => hl.rows.filter(r => r.stat);
+const hlActive = () => !!(hl.text.trim() || hlRows().length);
+const statLabel = k => AFFIXES[k]?.label || k;
+export function hlMatch(it) {
+  const words = hl.text.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  const stats = gearItemStats(it);
+  if (words.length) {
+    const hay = [it.name, it.rarity, SLOTS[it.slot]?.label, ...Object.keys(stats).filter(k => stats[k]).map(statLabel)].join(' ').toLowerCase();
+    if (!words.every(w => hay.includes(w))) return false;
+  }
+  const rows = hlRows();
+  if (!rows.length) return true;
+  const ok = r => {
+    const v = stats[r.stat] || 0;
+    if (!v) return false;
+    if (r.min !== '' && r.min != null && v < (PCT_STATS.has(r.stat) ? Number(r.min) / 100 : Number(r.min)) - 1e-9) return false;
+    if (r.tier && !(it.affixes || []).some(a => a.stat === r.stat && a.tier <= Number(r.tier))) return false;
+    return true;
+  };
+  return hl.mode === 'any' ? rows.some(ok) : rows.every(ok);
+}
+const hlClass = it => !hlActive() ? '' : hlMatch(it) ? 'hl' : hl.only ? 'hl-dim hl-hide' : 'hl-dim';
+// re-mark the cells in place (no re-render)
+function applyHighlight(root) {
+  const panel = root.querySelector('.inv-panel');
+  if (!panel) return;
+  let n = 0;
+  for (const cell of panel.querySelectorAll('.item-cell[data-item]')) {
+    const it = state.player.inventory.find(i => i.uid === cell.dataset.item);
+    cell.classList.remove('hl', 'hl-dim', 'hl-hide');
+    const c = it ? hlClass(it) : '';
+    if (c) cell.classList.add(...c.split(' '));
+    if (c === 'hl') n++;
+  }
+  const cnt = panel.querySelector('[data-hl-count]');
+  if (cnt) cnt.textContent = hlActive() ? `${n} match${n === 1 ? '' : 'es'}` : '';
+}
+function highlightHtml(items) {
+  const n = hlActive() ? items.filter(hlMatch).length : 0;
+  return `<div class="hl-bar">
+    <div class="row gap wrap small">
+      <input type="search" class="hl-text" data-hl-text value="${esc(hl.text)}" placeholder="✨ Highlight: name or stat, e.g. crit fire">
+      <button class="btn tiny" data-hl-add title="Highlight items with a stat, optionally with a minimum value or affix tier">＋ Stat</button>
+      ${hl.rows.length > 1 ? `<label class="inline">must have <select data-hl-mode><option value="all" ${hl.mode !== 'any' ? 'selected' : ''}>all</option><option value="any" ${hl.mode === 'any' ? 'selected' : ''}>any</option></select></label>` : ''}
+      <label class="inline"><input type="checkbox" data-hl-only ${hl.only ? 'checked' : ''}> only show matches</label>
+      <span class="muted" data-hl-count>${hlActive() ? `${n} match${n === 1 ? '' : 'es'}` : ''}</span>
+      ${hlActive() || hl.rows.length ? '<button class="btn tiny ghost" data-hl-clear>Clear</button>' : ''}
+    </div>
+    ${hl.rows.map((r, i) => `<div class="row gap wrap small hl-row">
+      <select data-hl="stat" data-i="${i}"><option value="">Choose a stat…</option>${statOptions(r.stat)}</select>
+      <label class="inline">at least <input type="number" step="any" min="0" class="af-min" data-hl="min" data-i="${i}" value="${esc(r.min ?? '')}" placeholder="any">${r.stat && PCT_STATS.has(r.stat) ? ' %' : ''}</label>
+      <select data-hl="tier" data-i="${i}">${tierOptions(r.tier, 'Any tier')}</select>
+      <button class="btn tiny ghost danger" data-hl-del="${i}" title="Remove">✕</button></div>`).join('')}
+  </div>`;
+}
 
 // Loot filter editor and the filtered-loot log open in a modal (tabs inside), so the page layout stays as it is.
 // after = called when the modal closes (to refresh the badges on the inventory)
@@ -88,11 +152,12 @@ export function inventoryPanelHtml(ch) {
       <select data-f-rarity><option value="all">All rarities</option><option value="special" ${filterRarity === 'special' ? 'selected' : ''}>Uniques & set items</option>${CONFIG.rarities.map(r => `<option value="${r.id}" ${filterRarity === r.id ? 'selected' : ''}>${esc(r.label)}</option>`).join('')}</select>
       <select data-f-sort>${[['rarity', 'Sort: rarity'], ['level', 'Sort: level'], ['slot', 'Sort: slot']].map(([v, l]) => `<option value="${v}" ${sortBy === v ? 'selected' : ''}>${l}</option>`).join('')}</select>
     </div>
+    ${highlightHtml(items)}
     ${p.inventory.length >= CONFIG.inventory.limit ? `<div class="notice small">Inventory full — new loot is ${p.settings.autoLootAction === 'salvage' ? 'salvaged' : 'sold'} automatically. Set up the <a href="#" data-lf-open="filter">loot filter</a> to decide what to keep.</div>` : ''}
     <div class="item-grid">${items.map(i => {
       const no = !!unusableReason(i, ch);
       const v = verdicts.get(i.uid);
-      return `<button class="item-cell ${i.uid === selectedUid ? 'active' : ''} ${i.unique ? 'unique' : ''} ${i.set ? 'set' : ''} ${no ? 'unusable' : ''}" data-item="${i.uid}" draggable="${no ? 'false' : 'true'}" ${tipAttr(invTooltip(i, ch))}>${itemIcon(i, 'md')}${i.locked ? '<span class="lock">🔒</span>' : ''}${no ? '<span class="no-use">✖</span>' : ''}${v && v.action !== 'keep' ? `<span class="lf-badge" title="Loot filter: ${FILTER_ACTIONS[v.action].label}">${FILTER_ACTIONS[v.action].icon}</span>` : ''}<span class="ilvl">${i.level}</span></button>`;
+      return `<button class="item-cell ${hlClass(i)} ${i.uid === selectedUid ? 'active' : ''} ${i.unique ? 'unique' : ''} ${i.set ? 'set' : ''} ${no ? 'unusable' : ''}" data-item="${i.uid}" draggable="${no ? 'false' : 'true'}" ${tipAttr(invTooltip(i, ch))}>${itemIcon(i, 'md')}${i.locked ? '<span class="lock">🔒</span>' : ''}${no ? '<span class="no-use">✖</span>' : ''}${v && v.action !== 'keep' ? `<span class="lf-badge" title="Loot filter: ${FILTER_ACTIONS[v.action].label}">${FILTER_ACTIONS[v.action].icon}</span>` : ''}<span class="ilvl">${i.level}</span></button>`;
     }).join('') || '<p class="muted pad">No items match.</p>'}</div>
     <div class="row gap wrap small sell-bar">
       <span class="muted">Quick sell:</span>${CONFIG.rarities.slice(0, 4).map(r => `<button class="btn tiny ghost" data-sell-rarity="${r.id}">≤ ${esc(r.label)}</button>`).join('')}
@@ -113,6 +178,9 @@ export function bindInventory(root, rerender, getChar) {
     const t = e.target.closest('[data-item], button');
     if (!t) return;
     const d = t.dataset;
+    if ('hlAdd' in d) { if (hl.rows.length < 6) hl.rows.push({ stat: '', min: '', tier: '' }); saveHl(); rerender(); return; }
+    if (d.hlDel) { hl.rows.splice(Number(d.hlDel), 1); saveHl(); rerender(); return; }
+    if ('hlClear' in d) { Object.assign(hl, { text: '', rows: [], mode: 'all' }); saveHl(); rerender(); return; }
     if (d.item) { selectedUid = selectedUid === d.item ? null : d.item; rerender(); return; }
     if (d.equipTo) { await run(act('equip', { charId: d.equipTo, itemUid: selectedUid }), 'Equipped.'); selectedUid = null; return; }
     if ('sell' in d) { const r = await run(act('sell_item', { itemUid: selectedUid })); if (r) { selectedUid = null; } return; }
@@ -137,8 +205,22 @@ export function bindInventory(root, rerender, getChar) {
     else if (t.matches('[data-f-rarity]')) filterRarity = t.value;
     else if (t.matches('[data-f-sort]')) sortBy = t.value;
     else if (t.matches('[data-compare]')) compareCharId = t.value;
+    else if (t.matches('[data-hl-mode]')) { hl.mode = t.value; saveHl(); applyHighlight(root); return; }
+    else if (t.matches('[data-hl-only]')) { hl.only = t.checked; saveHl(); applyHighlight(root); return; }
+    else if (t.matches('[data-hl="stat"]')) { hl.rows[Number(t.dataset.i)].stat = t.value; saveHl(); rerender(); return; }
+    else if (t.matches('[data-hl="tier"]')) { hl.rows[Number(t.dataset.i)].tier = t.value; saveHl(); applyHighlight(root); return; }
     else return;
     rerender();
+  });
+
+  // typing in the highlight search or a minimum value updates the marks live
+  root.addEventListener('input', e => {
+    const t = e.target;
+    if (!t.closest?.('.inv-panel')) return;
+    if (t.matches('[data-hl-text]')) hl.text = t.value;
+    else if (t.matches('[data-hl="min"]')) hl.rows[Number(t.dataset.i)].min = t.value;
+    else return;
+    saveHl(); applyHighlight(root);
   });
 
   // ---- drag & drop: inventory item → equipment slot (equip/swap), equipped item → inventory (unequip)

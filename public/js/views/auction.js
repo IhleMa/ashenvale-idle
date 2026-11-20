@@ -51,8 +51,8 @@ function matchedChips(it) {
   }).join('')}</span>`;
 }
 
-const statOptions = sel => ['prefix', 'suffix'].map(type => `<optgroup label="${type === 'prefix' ? 'Prefixes' : 'Suffixes'}">${Object.entries(AFFIXES).filter(([, a]) => a.type === type).sort((x, y) => x[1].label.localeCompare(y[1].label) || (x[1].pct ? 1 : -1)).map(([k, a]) => `<option value="${k}" ${sel === k ? 'selected' : ''}>${esc(a.label)}${a.pct && ['str', 'int', 'dex', 'vit', 'defense'].some(f => k === f + 'Pct') ? ' %' : ''}</option>`).join('')}</optgroup>`).join('');
-const tierOptions = (sel, any = 'Any tier') => `<option value="">${any}</option>${AFFIX_TIERS.map(t => `<option value="${t.tier}" ${String(sel) === String(t.tier) ? 'selected' : ''}>T${t.tier}${t.tier > 1 ? ' or better' : ''}</option>`).join('')}`;
+export const statOptions = sel => ['prefix', 'suffix'].map(type => `<optgroup label="${type === 'prefix' ? 'Prefixes' : 'Suffixes'}">${Object.entries(AFFIXES).filter(([, a]) => a.type === type).sort((x, y) => x[1].label.localeCompare(y[1].label) || (x[1].pct ? 1 : -1)).map(([k, a]) => `<option value="${k}" ${sel === k ? 'selected' : ''}>${esc(a.label)}${a.pct && ['str', 'int', 'dex', 'vit', 'defense'].some(f => k === f + 'Pct') ? ' %' : ''}</option>`).join('')}</optgroup>`).join('');
+export const tierOptions = (sel, any = 'Any tier') => `<option value="">${any}</option>${AFFIX_TIERS.map(t => `<option value="${t.tier}" ${String(sel) === String(t.tier) ? 'selected' : ''}>T${t.tier}${t.tier > 1 ? ' or better' : ''}</option>`).join('')}`;
 
 function affixFilterHtml() {
   const q = ui.q;
