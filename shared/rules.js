@@ -51,6 +51,8 @@ export function aggroTargetOf(b, enemy) {
 }
 // how many enemies are attacking this unit
 export const aggroCount = (b, u) => enemiesOf(b, u).filter(e => aggroTargetOf(b, e) === u).length;
+// how many enemies are attacking someone else (enemies without threat, e.g. players in the Arena, don't count)
+export const looseCount = (b, u) => enemiesOf(b, u).filter(e => e.threatTable && aggroTargetOf(b, e) && aggroTargetOf(b, e) !== u).length;
 
 export const CONDITIONS = {
   always:             { label: 'Whenever available', params: [], test: () => true },
@@ -72,6 +74,8 @@ export const CONDITIONS = {
   allies_fallen:      { label: 'Number of fallen allies', params: [P.cmp(), P.count('value', 1)], test: (c, b, u) => cmp(fallenAllies(b, u).length, c.cmp, c.value) },
   own_notes:          { label: 'Number of notes played (Bard, up to 3)', params: [P.cmp(), P.count('value', 3)], test: (c, b, u) => cmp((u.notes || []).length, c.cmp, c.value), format: c => `notes played: ${c.cmp === '<=' ? 'at most' : c.cmp === '==' ? 'exactly' : 'at least'} ${c.value}` },
   has_aggro:          { label: 'An enemy is attacking me (I have aggro)', params: [], test: (c, b, u) => aggroCount(b, u) > 0, format: () => 'an enemy is attacking me' },
+  enemy_not_on_me:    { label: 'An enemy is attacking someone else (not me)', params: [], test: (c, b, u) => looseCount(b, u) > 0, format: () => 'an enemy is attacking someone else' },
+  loose_count:        { label: 'Number of enemies attacking someone else', params: [P.cmp(), P.count('value', 1)], test: (c, b, u) => cmp(looseCount(b, u), c.cmp, c.value), format: c => `enemies attacking someone else: ${c.cmp === '<=' ? 'at most' : c.cmp === '==' ? 'exactly' : 'at least'} ${c.value}` },
   aggro_count:        { label: 'Number of enemies attacking me', params: [P.cmp(), P.count('value', 1)], test: (c, b, u) => cmp(aggroCount(b, u), c.cmp, c.value), format: c => `enemies attacking me: ${c.cmp === '<=' ? 'at most' : c.cmp === '==' ? 'exactly' : 'at least'} ${c.value}` },
   last_note:          { label: 'My last note was (Bard)', params: [P.note()], test: (c, b, u) => lastNote(u) === c.note, format: c => `last note: ${c.note === 'none' ? 'none yet' : c.note}` },
   own_minions:        { label: 'Number of my minions', params: [P.minion(), P.cmp(), P.count('value', 2)], test: (c, b, u) => cmp(ownMinions(b, u, c.minion).length, c.cmp, c.value), format: c => `my ${c.minion ? MINIONS[c.minion]?.name || c.minion : 'minions'}: ${c.cmp === '<=' ? 'at most' : c.cmp === '==' ? 'exactly' : 'at least'} ${c.value}` },

@@ -122,6 +122,8 @@ const has = (u, id) => u.statuses.some(s => s.id === id);
   assert.ok(TARGET_CONDITIONS.target_not_attacking_me.test({}, foe, b, ru) && TARGET_CONDITIONS.target_attacking_me.test({}, foe, b, tu));
   const d = C.dynamicUnit(ru, b);
   assert.equal(d.thr, 40); assert.equal(d.ag, 0); assert.equal(C.dynamicUnit(foe, b).tg, tu.uid);
+  assert.ok(CONDITIONS.enemy_not_on_me.test({}, b, ru) && !CONDITIONS.enemy_not_on_me.test({}, b, tu));
+  assert.ok(CONDITIONS.loose_count.test({ cmp: '>=', value: 1 }, b, ru) && CONDITIONS.loose_count.test({ cmp: '==', value: 0 }, b, tu));
   ok('aggro: "an enemy is attacking me" and "target is attacking someone else" conditions; threat share for the display');
 }
 console.log(`rogue-test: ${n} checks passed`);
