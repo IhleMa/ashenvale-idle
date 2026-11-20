@@ -8,5 +8,6 @@
   ],
   "glow": "#5cff8a",
   "style": "double",
-  "order": 40
+  "order": 40,
+  "fx": "runes"
 }

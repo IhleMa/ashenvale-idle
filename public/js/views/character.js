@@ -1,7 +1,7 @@
 // Character sheet: attributes, stats, equipment, role.
 import { state, selectedChar } from '../state.js';
 import { act } from '../net.js';
-import { esc, fmt, pct, bar, run, modal, itemTooltipHtml, tipAttr, confirmBox } from '../ui.js';
+import { esc, fmt, pct, bar, run, modal, itemTooltipHtml, tipAttr, confirmBox, framed, heroNameHtml } from '../ui.js';
 import { portrait, itemIcon, slotIcon } from '../assets.js';
 import { charPicker, bindPicker, charTitle, roleBadge, classBadge } from '../components.js';
 import { CONFIG, xpToNext } from '/shared/config.js';
@@ -58,9 +58,9 @@ export const characterView = {
       ${charPicker(ch.id)}
       <div class="char-sheet">
         <section class="panel char-head">
-          <div class="char-portrait">${portrait(ch, 'xl')}</div>
+          <div class="char-portrait">${ch.isMain ? framed(portrait(ch, 'xl'), state.player.name) : portrait(ch, 'xl')}</div>
           <div class="char-ident">
-            <h2>${ch.isMain ? '<span class="hero-star">★</span> ' : ''}${esc(ch.name)} <button class="icon-btn small" data-act="rename" title="Rename">✎</button></h2>
+            <h2>${ch.isMain ? '<span class="hero-star">★</span> ' + heroNameHtml(ch.name, state.player.name) : esc(ch.name)} <button class="icon-btn small" data-act="rename" title="Rename">✎</button></h2>
             <div class="muted">${esc(charTitle(ch))} · ${classBadge(ch.classId, ch.subclass)} ${ch.isMain ? '<span class="tag hero">HERO</span>' : ''}</div>
             <div class="lvl-line"><b>Level ${ch.level}</b>${ch.level < CONFIG.levelCap ? bar(ch.xp, xpToNext(ch.level), 'xp', `${fmt(ch.xp)} / ${fmt(xpToNext(ch.level))} XP`) : '<span class="muted"> (max level)</span>'}</div>
             <div class="row gap wrap">

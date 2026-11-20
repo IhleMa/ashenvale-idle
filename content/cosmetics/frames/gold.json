@@ -7,5 +7,6 @@
     "#c78a14"
   ],
   "glow": "#ffcc4d",
-  "order": 20
+  "order": 20,
+  "fx": "shine"
 }

@@ -9,5 +9,6 @@
   ],
   "glow": "#d6b8ff",
   "animated": true,
-  "order": 70
+  "order": 70,
+  "fx": "orbit"
 }

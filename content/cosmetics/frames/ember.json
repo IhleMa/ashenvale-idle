@@ -9,5 +9,6 @@
   ],
   "glow": "#ff6a2a",
   "animated": true,
-  "order": 50
+  "order": 50,
+  "fx": "embers"
 }

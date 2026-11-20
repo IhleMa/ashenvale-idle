@@ -9,5 +9,6 @@
   ],
   "glow": "#9fe8ff",
   "animated": true,
-  "order": 60
+  "order": 60,
+  "fx": "frost"
 }

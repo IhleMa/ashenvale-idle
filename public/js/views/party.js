@@ -3,7 +3,7 @@ import { partySyncLevel, syncedCharacter } from '/shared/levelsync.js';
 import { classLabel } from '/shared/data/subclasses.js';
 import { state, chars } from '../state.js';
 import { act } from '../net.js';
-import { esc, fmt, run, tipAttr } from '../ui.js';
+import { esc, fmt, run, tipAttr, heroNameHtml } from '../ui.js';
 import { portrait } from '../assets.js';
 import { roleBadge, classBadge, charTitle } from '../components.js';
 import { CONFIG } from '/shared/config.js';
@@ -79,7 +79,7 @@ export const partyView = {
               <span class="pos">${i + 1}</span>
               ${portrait(c, 'md')}
               <div class="grow">
-                <b>${c.isMain ? '<span class="hero-star">★</span> ' : ''}${esc(c.name)}</b> <span class="muted small">Lv ${c.level}${fighting[i] !== c ? ` <span class="sync-tag">⇩ fights at ${fighting[i].level}</span>` : ''} · ${esc(charTitle(c))}</span>
+                <b>${c.isMain ? '<span class="hero-star">★</span> ' + heroNameHtml(c.name, state.player.name) : esc(c.name)}</b> <span class="muted small">Lv ${c.level}${fighting[i] !== c ? ` <span class="sync-tag">⇩ fights at ${fighting[i].level}</span>` : ''} · ${esc(charTitle(c))}</span>
                 <div class="row gap small">${classBadge(c.classId, c.subclass)}
                   <select data-role-for="${c.id}" class="small-select">${Object.entries(CONFIG.roles).map(([id, r]) => `<option value="${id}" ${c.role === id ? 'selected' : ''}>${esc(r.label)}</option>`).join('')}</select>
                   <span class="muted">HP ${fmt(stats[i].maxHp)} · Power ${fmt(powerRating(stats[i]))}</span>

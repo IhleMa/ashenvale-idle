@@ -10,5 +10,6 @@
   ],
   "glow": "#b44dff",
   "animated": true,
-  "order": 80
+  "order": 80,
+  "fx": "void"
 }

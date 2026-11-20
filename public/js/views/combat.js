@@ -5,7 +5,7 @@ import { MATERIALS } from '/shared/data/town.js';
 import { classLabel } from '/shared/data/subclasses.js';
 import { bus, state } from '../state.js';
 import { act } from '../net.js';
-import { esc, fmt, run, tipAttr, nameHtml } from '../ui.js';
+import { esc, fmt, run, tipAttr, nameHtml, heroNameHtml } from '../ui.js';
 import { portrait, enemyArt, minionArt, abilityIcon, statusIcon, backgroundStyle } from '../assets.js';
 import { ABILITIES } from '/shared/data/abilities.js';
 import { STATUSES } from '/shared/data/statuses.js';
@@ -244,7 +244,7 @@ function unitCard(u, k, minions = []) {
   return `<div class="unit ${u.side === 'A' ? 'ally' : 'foe'} ${u.boss ? 'boss' : ''} ${u.isMain ? 'main' : ''}" data-uid="${u.uid}" ${ck ? `data-ck="${esc(ck)}"` : ''}${keepH}>
     <div class="unit-art">${art}<div class="floaters"></div></div>
     <div class="unit-info">
-      <div class="unit-name">${u.isMain ? '<span class="hero-star">★</span>' : ''}${esc(u.name)} <span class="muted">Lv ${u.level}${u.syncedFrom ? `<span class="sync-tag" ${tipAttr(`Level sync: fights at level ${u.level} (really ${u.syncedFrom}) while the ascended hero levels up again`)}>⇩${u.syncedFrom}</span>` : ''}${cls ? ' ' + esc(classLabel(u.classId, u.subclass)) : ''}</span> ${tags}${owner}</div>
+      <div class="unit-name">${u.isMain ? '<span class="hero-star">★</span>' : ''}${u.isMain && (u.ownerName || u.side === 'A') ? heroNameHtml(u.name, u.ownerName || state.player?.name) : esc(u.name)} <span class="muted">Lv ${u.level}${u.syncedFrom ? `<span class="sync-tag" ${tipAttr(`Level sync: fights at level ${u.level} (really ${u.syncedFrom}) while the ascended hero levels up again`)}>⇩${u.syncedFrom}</span>` : ''}${cls ? ' ' + esc(classLabel(u.classId, u.subclass)) : ''}</span> ${tags}${owner}</div>
       <div class="bar hp"><div class="fill"></div><div class="shield"></div><span class="bar-label"></span></div>
       ${res}
       ${u.classId && Object.values(ABILITIES).some(a => a.classId === u.classId && a.note) ? '<div class="unit-notes" title="Notes for the next Finale"></div>' : ''}

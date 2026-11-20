@@ -68,11 +68,17 @@ export function nameHtml(name, { title = true, colorId, titleId } = {}) {
   const t = cosmetic('title', titleId === undefined ? cos.title : titleId);
   return `<span class="pname ${st.cls}" ${st.style ? `style="${st.style}"` : ''}>${esc(name)}</span>${title && t ? ` <span class="ptitle">${esc(t.name)}</span>` : ''}`;
 }
+// a player's hero (★ character) shares the player's name colour
+export function heroNameHtml(heroName, ownerName) {
+  const st = nameStyle(ownerName ? cosOf(ownerName).color : null);
+  return st.cls || st.style ? `<span class="pname ${st.cls}" ${st.style ? `style="${st.style}"` : ''}>${esc(heroName)}</span>` : esc(heroName);
+}
 export function frameStyle(frameId) {
   const f = cosmetic('frame', frameId);
   if (!f) return null;
   const cols = f.colors || ['#888', '#444'];
-  return { cls: `cos-frame${f.animated ? ' cos-frame-anim' : ''}${f.style === 'double' ? ' cos-frame-double' : ''}`, style: `--cf-cols:${[...cols, cols[0]].join(',')};--cf-glow:${f.glow || 'transparent'}` };
+  return { cls: `cos-frame${f.animated ? ' cos-frame-anim' : ''}${f.style === 'double' ? ' cos-frame-double' : ''}${f.fx ? ` cos-fx-${f.fx}` : ''}`,
+    style: `--cf-cols:${[...cols, cols[0]].join(',')};--cf-c1:${cols[0]};--cf-c2:${cols[1] || cols[0]};--cf-c3:${cols[2] || cols[1] || cols[0]};--cf-glow:${f.glow || cols[0]}` };
 }
 // wrap a portrait in the owner's frame (if they wear one)
 export function framed(portraitHtml, name, frameId) {

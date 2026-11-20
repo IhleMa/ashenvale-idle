@@ -441,7 +441,7 @@ export function validateContent(C) {
       if (c.tier && !['basic', 'fine', 'prestige', 'legendary', 'earned'].includes(c.tier)) err(`${w}.tier`, 'must be basic, fine, prestige, legendary or earned');
       if (c.achievement && !C.achievements?.achievements?.[c.achievement]) err(`${w}.achievement`, `unknown achievement "${c.achievement}"`);
       if (key === 'nameColors') { if (c.gradient) colorList(`${w}.gradient`, c.gradient, 2); else if (!CSS_COLOR.test(c.color || '')) err(`${w}.color`, 'needs a colour like "#ff8800" (or a "gradient" list)'); }
-      if (key === 'frames') { colorList(`${w}.colors`, c.colors, 1); if (c.glow && !CSS_COLOR.test(c.glow)) err(`${w}.glow`, 'must be a colour like "#ff8800"'); }
+      if (key === 'frames') { colorList(`${w}.colors`, c.colors, 1); if (c.fx && !['shine', 'runes', 'embers', 'frost', 'orbit', 'void'].includes(c.fx)) err(`${w}.fx`, 'must be shine, runes, embers, frost, orbit or void'); if (c.glow && !CSS_COLOR.test(c.glow)) err(`${w}.glow`, 'must be a colour like "#ff8800"'); }
     }
   }
 

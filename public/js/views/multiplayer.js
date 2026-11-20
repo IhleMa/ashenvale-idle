@@ -2,7 +2,7 @@
 import { classLabel } from '/shared/data/subclasses.js';
 import { state, chars, bus } from '../state.js';
 import { act } from '../net.js';
-import { esc, run, tipAttr, botTag, nameHtml, framed } from '../ui.js';
+import { esc, run, tipAttr, botTag, nameHtml, framed, heroNameHtml } from '../ui.js';
 import { portrait, classIcon, backgroundStyle } from '../assets.js';
 import { classBadge } from '../components.js';
 import { openInspect } from '../inspect.js';
@@ -125,7 +125,7 @@ export const multiplayerView = {
           <section class="panel">
             <h3>Players online <span class="muted small">${state.online.length}</span></h3>
             <div class="online-list">${state.online.filter(o => o.id !== me).map(o => `<div class="bench-row">
-              ${o.hero ? classIcon(o.hero.classId, 'xs') : ''}<div class="grow"><b>${nameHtml(o.name)}</b>${botTag(o)}<div class="muted small">${o.hero ? `${esc(o.hero.name)} · Lv ${o.hero.level} ${esc(CLASSES[o.hero.classId].name)}` : 'Creating hero…'}</div></div>
+              ${o.hero ? classIcon(o.hero.classId, 'xs') : ''}<div class="grow"><b>${nameHtml(o.name)}</b>${botTag(o)}<div class="muted small">${o.hero ? `${heroNameHtml(o.hero.name, o.name)} · Lv ${o.hero.level} ${esc(CLASSES[o.hero.classId].name)}` : 'Creating hero…'}</div></div>
               ${o.hero ? `<button class="btn tiny ghost" data-inspect="${esc(o.name)}">Inspect</button>` : ''}
               ${isLeader && !o.inGroup && o.hero ? `<button class="btn tiny" data-invite="${esc(o.name)}">Invite</button>` : o.inGroup ? '<span class="muted small">in group</span>' : ''}
             </div>`).join('') || '<p class="muted small">Nobody else is online right now.</p>'}</div>
@@ -155,7 +155,7 @@ function groupHtml(g, me, isLeader) {
   return `<div class="group-members">${g.members.map(m => `<div class="group-member">
       <div class="row gap"><b>${m.id === g.leaderId ? '👑 ' : ''}${nameHtml(m.name)}</b>${botTag(m)}<span class="conn-dot ${m.online ? 'on' : ''}" title="${m.online ? 'Online' : 'Offline'}"></span>
         <span class="grow"></span>${m.id !== me ? `<button class="btn tiny ghost" data-inspect="${esc(m.name)}">Inspect</button>` : ''}${isLeader && m.id !== me ? `<button class="btn tiny ghost" data-promote="${m.id}">Make leader</button><button class="btn tiny ghost danger" data-kick="${m.id}">Remove</button>` : ''}</div>
-      <div class="member-chars">${m.characters.map(c => `<span class="member-char">${c.isMain ? framed(portrait(c, 'xs'), m.name) : portrait(c, 'xs')}<span>${c.isMain ? '★ ' : ''}${esc(c.name)} <small class="muted">Lv ${c.level}</small> ${classBadge(c.classId)}${c.reason?.startsWith('role:') ? ` <span class="tag small" title="Brought along because the group has no ${esc(ROLE_LABEL(c.reason.slice(5)))}">fills ${esc(ROLE_LABEL(c.reason.slice(5)))}</span>` : c.reason === 'turn' && g.members.length > 2 ? ' <span class="tag small" title="This player\'s turn for the recruit place">their turn</span>' : c.reason === 'leader' && g.members.length > 1 ? ' <span class="tag small" title="Picked by the group leader">leader\'s pick</span>' : ''}</span></span>`).join('')}
+      <div class="member-chars">${m.characters.map(c => `<span class="member-char">${c.isMain ? framed(portrait(c, 'xs'), m.name) : portrait(c, 'xs')}<span>${c.isMain ? '★ ' + heroNameHtml(c.name, m.name) : esc(c.name)} <small class="muted">Lv ${c.level}</small> ${classBadge(c.classId)}${c.reason?.startsWith('role:') ? ` <span class="tag small" title="Brought along because the group has no ${esc(ROLE_LABEL(c.reason.slice(5)))}">fills ${esc(ROLE_LABEL(c.reason.slice(5)))}</span>` : c.reason === 'turn' && g.members.length > 2 ? ' <span class="tag small" title="This player\'s turn for the recruit place">their turn</span>' : c.reason === 'leader' && g.members.length > 1 ? ' <span class="tag small" title="Picked by the group leader">leader\'s pick</span>' : ''}</span></span>`).join('')}
         ${m.bench?.length && g.members.length > 1 ? `<span class="member-char benched" title="${g.leaderRecruits ? 'The leader left this recruit out' : 'No free place in the next fight'}">${m.bench.map(c => esc(c.name)).join(', ')} <small class="muted">sit${m.bench.length > 1 ? '' : 's'} out</small></span>` : ''}
         ${recruitButton(g, m, isLeader)}</div>
     </div>`).join('')}

@@ -5,7 +5,7 @@ import { classLabel, subclassesOf } from '/shared/data/subclasses.js';
 import { bus, state, hero } from './state.js';
 import { connect, disconnect, apiPost, getToken, setToken, act } from './net.js';
 import { loadAssets, portrait } from './assets.js';
-import { esc, fmt, toast, modal, initTooltips, duration, bar } from './ui.js';
+import { esc, fmt, toast, modal, initTooltips, duration, bar, framed, heroNameHtml } from './ui.js';
 import { xpToNext, CONFIG } from '/shared/config.js';
 import { initPwa } from './pwa.js';
 import { initTutorial, renderTutorial, isViewVisible, visibleKey } from './tutorial.js';
@@ -192,7 +192,7 @@ function renderTopbar() {
   const el = document.getElementById('topbar-hero');
   if (!h) { el.innerHTML = ''; return; }
   const cls = CLASSES[h.classId];
-  el.innerHTML = `${portrait(h, 'xs')}<div><div class="name">${esc(h.name)} <span class="muted">Lv ${h.level} ${esc(classLabel(h.classId, h.subclass))}${h.ascensions ? ' 🌟' : ''}</span></div>${bar(h.xp, xpToNext(h.level), 'xp thin', '')}</div>`;
+  el.innerHTML = `${framed(portrait(h, 'xs'), state.player.name)}<div><div class="name">${heroNameHtml(h.name, state.player.name)} <span class="muted">Lv ${h.level} ${esc(classLabel(h.classId, h.subclass))}${h.ascensions ? ' 🌟' : ''}</span></div>${bar(h.xp, xpToNext(h.level), 'xp thin', '')}</div>`;
   // badges for unspent points
   const treePts = Object.values(p.characters).filter(hasAbilityAction).length;
   setBadge('skilltree', treePts ? '!' : '');
