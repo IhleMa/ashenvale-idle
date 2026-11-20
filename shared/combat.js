@@ -340,7 +340,7 @@ function act(b, u) {
     targets.forEach((t, i) => { for (const eff of ab.effects) if (!(eff.once && i > 0)) applyEffect(b, u, t, eff, abilityId); });
     u.castMult = 1; u.spent = 0;
     if (ab.note) playNote(b, u, ab.note, targets[0]); // Bard: notes and the automatic Finale
-    fireProcs(b, u, 'cast', { ability: abilityId, area: !!ab.area, target: targets[0] });
+    fireProcs(b, u, 'cast', { ability: abilityId, area: !!ab.area, target: targets[0], taunt: ab.effects.some(e => e.kind === 'taunt') });
     u.actionTimer = gcd;
     return;
   }
@@ -821,6 +821,7 @@ function fireProcs(b, u, trigger, ctx) {
       if (p.icd && b.time - p.lastAt < p.icd) continue;
       const f = p.filter;
       if (f?.ability && ctx.ability !== f.ability) continue;
+      if (f?.taunt && !ctx.taunt) continue; // any ability that taunts (Taunt, Challenging Shout, Bear Form, …)
       if (f?.area && !ctx.area) continue;
       if (f?.school && ctx.school !== f.school) continue;
       if (p.chance < 1 && b.rng() >= p.chance) continue;

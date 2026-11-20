@@ -17,7 +17,8 @@
             "All existing items were converted: they keep their base, level, rarity, sockets, gems and enchantment and got new tiered affixes.",
             "Gear scaled down by ascension is soulbound: it can't be sold on the Auction House until you reforge it back to its original item level.",
             "Loot filter: new conditions for the best affix tier on an item (\"has a tier 2 or better affix\", \"no affix better than tier 5\").",
-            "Mythic items are much rarer: loot boosts from bosses, rifts and crafting no longer raise the chance for Legendary and Mythic beyond Epic's. A boss drop is now Mythic about 1% of the time instead of 9–18%."
+            "Mythic items are much rarer: loot boosts from bosses, rifts and crafting no longer raise the chance for Legendary and Mythic beyond Epic's. A boss drop is now Mythic about 1% of the time instead of 9–18%.",
+            "Juggernaut's Bulwark (4 pieces): Shield Wall now triggers from any ability that taunts — e.g. the Sentinel's Shield Slam, Challenging Shout or Guardian's Oath — not just the Warrior's Taunt. It can trigger at most once every 10 seconds (the same as Taunt's cooldown)."
           ]
         },
         {

@@ -15,21 +15,22 @@
       }
     },
     "4": {
-      "description": "Using Taunt also grants Shield Wall for 4s.",
+      "description": "Taunting (with any ability that taunts) also grants Shield Wall for 4s (at most once every 10s).",
       "procs": [
         {
           "name": "Juggernaut",
           "trigger": "cast",
           "chance": 1,
           "filter": {
-            "ability": "taunt"
+            "taunt": true
           },
           "target": "self",
           "effect": {
             "kind": "status",
             "status": "shield_wall",
             "duration": 4
-          }
+          },
+          "icd": 10
         }
       ]
     }

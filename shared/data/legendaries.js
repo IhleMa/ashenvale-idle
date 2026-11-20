@@ -5,6 +5,7 @@
 // Proc format: { trigger, chance, icd?, once?, filter?, target, effect, name }
 //   trigger: 'hit' (you deal direct damage) | 'crit' | 'struck' (you take damage) | 'heal' (you heal with an ability)
 //            'kill' | 'cast' (you use an ability) | 'lowHp' (your health drops below 30%)
+//   filter: { ability } one ability, { taunt: true } any ability that taunts, { area: true }, { school }
 //   target:  'self' | 'target' | 'source' | 'randomEnemy' | 'lowestAlly' | 'allAllies'
 //   effect:  any ability effect (damage/heal/status/shield/resource) plus
 //            { kind:'reflect', pct } · { kind:'healPct', pct } · { kind:'shieldPct', pct, duration } · { kind:'cooldowns', seconds }
