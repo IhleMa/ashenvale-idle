@@ -95,7 +95,8 @@ export const characterView = {
             ${statRow('Magic Power', fmt(s.magPower))}
             ${statRow('Healing Power', fmt(s.healPower))}
             ${statRow('Defense', fmt(s.defense), 'Reduces physical damage (half effect vs. magic).')}
-            ${statRow('Critical Chance', cappedPct(s.critChance, s.uncapped?.critChance), capTip(CONFIG.combat.critCap, s.uncapped?.critChance))}
+            ${statRow('Crit Chance (attacks)', cappedPct(s.critChance, s.uncapped?.critChance), `Basic attacks and weapon abilities: weapon base ${pct(s.weaponCrit)} × (1 + ${pct(s.critInc, 0)} increased critical chance). Some abilities add base crit chance. ${capTip(CONFIG.combat.critCap, s.uncapped?.critChance)}`)}
+            ${statRow('Crit Chance (spells)', cappedPct(s.spellCrit, s.uncapped?.spellCrit), `Spells (magic power abilities): spell base ${pct(CONFIG.combat.spellCritBase ?? 0.07)} × (1 + ${pct(s.critInc, 0)} increased critical chance). Heals crit with half of it. ${capTip(CONFIG.combat.critCap, s.uncapped?.spellCrit)}`)}
             ${statRow('Critical Damage', pct(s.critDamage, 0))}
             ${statRow('Attack Speed', cappedPct(s.attackSpeed, s.uncapped?.attackSpeed, 0), capTip(CONFIG.combat.attackSpeedCap, s.uncapped?.attackSpeed, 0))}
             ${statRow(cls.resource.name, `${s.resourceMax} (+${cls.resource.regen}/s)`)}
@@ -204,7 +205,7 @@ function statRow(label, value, tip) {
 function attrTip(classId, attr) {
   const sc = CLASSES[classId].scaling;
   const names = { hp: 'Health', physPower: 'Physical Power', magPower: 'Magic Power', healPower: 'Healing Power', defense: 'Defense', critChance: 'Crit Chance', attackSpeed: 'Attack Speed' };
-  const parts = Object.entries(sc).filter(([, m]) => m[attr]).map(([k, m]) => `${names[k]}: ${k === 'critChance' || k === 'attackSpeed' ? '+' + (m[attr] * 100).toFixed(2) + '%' : '+' + m[attr]} per point`);
+  const parts = Object.entries(sc).filter(([, m]) => m[attr]).map(([k, m]) => `${names[k]}: ${k === 'critChance' ? '+' + +(m[attr] * 100).toFixed(2) + '% increased' : k === 'attackSpeed' ? '+' + (m[attr] * 100).toFixed(2) + '%' : '+' + m[attr]} per point`);
   return `<b>${ATTRIBUTES[attr].label}</b> for ${esc(CLASSES[classId].name)}<br>${parts.join('<br>') || 'No effect for this class.'}`;
 }
 

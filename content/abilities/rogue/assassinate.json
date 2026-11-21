@@ -14,7 +14,7 @@
       "stat": "physPower",
       "power": 3.2,
       "school": "physical",
-      "bonusCrit": 0.3,
+      "bonusCrit": 0.06,
       "executeBelow": 0.25,
       "executeMult": 3
     }

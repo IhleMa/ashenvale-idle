@@ -1,5 +1,5 @@
 // UI helpers: escaping, formatting, toasts, modals, tooltips.
-import { STAT_LABELS, PCT_STATS, SLOTS, AFFIXES, AFFIX_LIMITS, itemStats, affixValue, tierRange, isSoulbound } from '/shared/data/items.js';
+import { STAT_LABELS, PCT_STATS, SLOTS, AFFIXES, AFFIX_LIMITS, itemStats, affixValue, tierRange, isSoulbound, ITEM_BASES } from '/shared/data/items.js';
 import { GEM_KINDS, gemName, gemText, parseGemKey, affixPlan, gearItemStats, COMBAT_GEMS } from '/shared/gems.js';
 import { rarityById } from '/shared/config.js';
 import { CLASSES } from '/shared/data/classes.js';
@@ -142,6 +142,8 @@ export function itemTooltipHtml(item, compareTo = null, wearer = null) {
   if (item.affixes) {
     // base (and unique) stats, then every affix with its tier and the tier's value range at this item level
     lines = Object.entries(itemStats({ ...item, affixes: [] })).map(([k, v]) => statLine(k, v, 'implicit-line'));
+    const bc = ITEM_BASES[item.baseId]?.baseCrit; // weapons: the base crit chance of attacks made with it
+    if (bc) lines.unshift(`<div class="stat-line implicit-line"><span>Base Critical Chance</span><span>${pct(bc)}</span></div>`);
     // prefixes and suffixes in their own groups, each with how many of the possible slots are used
     // socketed gems already applied: tier changes (Keystone), switched-off affixes (Sacrifice), bonuses and the Mirror copy
     const plan = affixPlan(item);

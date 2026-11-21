@@ -29,7 +29,7 @@
         "8": {
           "name": "Apex Predator",
           "stats": {
-            "critChance": 0.06,
+            "critChance": 0.78,
             "damagePct": 0.1
           }
         }

@@ -15,7 +15,7 @@
     "magPower": { "int": 1 },
     "healPower": { "int": 0.4 },
     "defense": { "str": 0.25, "vit": 0.4, "dex": 0.15 },
-    "critChance": { "dex": 0.0016 },
+    "critChance": { "dex": 0.0208 },
     "attackSpeed": { "dex": 0.0022 }
   },
   "basicAttack": { "name": "Slash", "stat": "physPower", "power": 0.9, "school": "physical" },
@@ -24,7 +24,7 @@
   "tiers": [
     { "level": 1, "title": "Cutpurse" },
     { "level": 10, "title": "Assassin", "bonus": { "dexPct": 0.05 } },
-    { "level": 25, "title": "Shadowblade", "bonus": { "critChance": 0.04, "critDamage": 0.15 } },
+    { "level": 25, "title": "Shadowblade", "bonus": { "critChance": 0.52, "critDamage": 0.15 } },
     { "level": 40, "title": "Ashen Phantom", "mainOnly": true, "bonus": { "allPct": 0.06 } }
   ],
   "order": 30

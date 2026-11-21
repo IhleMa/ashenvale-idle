@@ -2,7 +2,8 @@
   "name": "Wand",
   "slot": "weapon",
   "classes": ["mage", "cleric", "summoner", "warlock", "chronomancer", "alchemist", "bard", "spellblade"],
-  "stats": { "magPower": [4, 1.4], "critChance": [0.01, 0.0003] },
+  "baseCrit": 0.07,
+  "stats": { "magPower": [4, 1.4], "critChance": [0.13, 0.0039] },
   "material": "cloth",
   "order": 60
 }

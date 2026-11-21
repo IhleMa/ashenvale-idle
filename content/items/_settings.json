@@ -328,9 +328,9 @@
       "group": "attribute"
     },
     "critChance": {
-      "label": "Critical Chance",
-      "base": 0.008,
-      "perLevel": 0.0003,
+      "label": "increased Critical Chance",
+      "base": 0.104,
+      "perLevel": 0.0039,
       "pct": true,
       "type": "suffix",
       "weight": 400,

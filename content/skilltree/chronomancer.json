@@ -48,7 +48,7 @@
           "name": "Momentum",
           "stats": {
             "attackSpeed": 0.08,
-            "critChance": 0.03
+            "critChance": 0.39
           }
         }
       }

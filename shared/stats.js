@@ -5,6 +5,7 @@ import { treeStats } from './skilltree.js';
 import { setStatBonuses } from './data/legendaries.js';
 import { gearItemStats } from './gems.js';
 import { gearSyncFactor } from './levelsync.js';
+import { ITEM_BASES } from './data/items.js';
 
 export const ATTRIBUTES = {
   str: { label: 'Strength', short: 'STR' },
@@ -66,12 +67,20 @@ export function computeStats(ch, dyn = null) {
   };
   const pctMul = key => 1 + (bonus[key + 'Pct'] || 0);
 
+  // Critical chance works like in Path of Exile: every hit has a base crit chance — the weapon's for attacks
+  // (basic attacks and weapon abilities), the spell's for spells — and all crit bonuses are "% increased" that
+  // multiply it: crit = base × (1 + increased). critInc is that sum (attributes, gear, skill tree, …).
+  const critInc = conv('critChance') + (gear.critChance || 0) + (bonus.critChance || 0);
+  const weaponCrit = ITEM_BASES[ch.equipment?.weapon?.baseId]?.baseCrit ?? CONFIG.combat.unarmedCritBase ?? 0.05;
+  const rawCrit = weaponCrit * (1 + critInc);
+  const rawSpellCrit = (CONFIG.combat.spellCritBase ?? 0.07) * (1 + critInc);
   // stats with a cap: the value before capping is kept so the interface can show how far over the cap you are
-  const rawCrit = 0.05 + conv('critChance') + (gear.critChance || 0) + (bonus.critChance || 0);
   const rawSpeed = 1 + conv('attackSpeed') + (gear.attackSpeed || 0) + (bonus.attackSpeed || 0);
   const s = {
     attributes,
-    uncapped: { critChance: rawCrit, attackSpeed: rawSpeed },
+    uncapped: { critChance: rawCrit, spellCrit: rawSpellCrit, attackSpeed: rawSpeed },
+    critInc, weaponCrit,
+    spellCrit: Math.min(CONFIG.combat.critCap, rawSpellCrit),
     maxHp: Math.round((40 + 8 * ch.level + conv('hp') + (gear.hp || 0)) * (1 + allPct + (bonus.hpPct || 0))),
     physPower: Math.round((conv('physPower') + (gear.physPower || 0)) * pctMul('physPower')),
     magPower: Math.round((conv('magPower') + (gear.magPower || 0)) * pctMul('magPower')),
@@ -116,7 +125,7 @@ export function powerRating(stats) {
   const school = heal ? g('healingPct') + g('shieldPct') * 0.5 : stats.magPower > stats.physPower ? g('magDamagePct') : g('physDamagePct');
   const mult = 1 + (heal ? 0 : g('damagePct')) + school + 0.5 * (g('dotDamagePct') + g('minionDamagePct')) + 0.25 * (g('damageVsBossPct') + g('executeDamagePct'))
     + g('cooldownPct') + 0.3 * g('resourceRegenPct') + 0.2 * g('buffDurationPct');
-  const offense = Math.max(stats.physPower, stats.magPower, stats.healPower * 0.9) * (1 + stats.critChance * (stats.critDamage - 1)) * stats.attackSpeed * mult;
+  const offense = Math.max(stats.physPower, stats.magPower, stats.healPower * 0.9) * (1 + (stats.magPower > stats.physPower ? stats.spellCrit ?? stats.critChance : stats.critChance) * (stats.critDamage - 1)) * stats.attackSpeed * mult;
   const defense = stats.maxHp * (1 + stats.defense / 100) / Math.max(0.25, 1 + g('damageTakenPct')) * (1 + g('dodge') + g('blockChance') * 0.5)
     * (1 + 0.3 * g('healingReceivedPct') + 2 * g('lifeSteal')) + g('hpRegen') * 30;
   return Math.round(offense * 2 + defense * 0.25);

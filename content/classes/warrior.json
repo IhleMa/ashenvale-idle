@@ -15,7 +15,7 @@
     "magPower": { "int": 1 },
     "healPower": { "int": 0.5, "vit": 0.2 },
     "defense": { "str": 0.45, "vit": 0.7 },
-    "critChance": { "dex": 0.0007 },
+    "critChance": { "dex": 0.0091 },
     "attackSpeed": { "dex": 0.0012 }
   },
   "basicAttack": { "name": "Strike", "stat": "physPower", "power": 1, "school": "physical" },

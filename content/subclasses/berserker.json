@@ -25,7 +25,7 @@
           "name": "Blood Frenzy",
           "stats": {
             "damagePct": 0.1,
-            "critChance": 0.03
+            "critChance": 0.39
           }
         },
         "8": {

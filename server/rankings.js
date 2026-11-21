@@ -110,7 +110,7 @@ export class Rankings {
       const allocated = ch.tree?.allocated || ['start'];
       return {
         ...base,
-        stats: { attributes: s.attributes, maxHp: s.maxHp, physPower: s.physPower, magPower: s.magPower, healPower: s.healPower, defense: s.defense, critChance: s.critChance, critDamage: s.critDamage, attackSpeed: s.attackSpeed, uncapped: s.uncapped },
+        stats: { attributes: s.attributes, maxHp: s.maxHp, physPower: s.physPower, magPower: s.magPower, healPower: s.healPower, defense: s.defense, critChance: s.critChance, spellCrit: s.spellCrit, critDamage: s.critDamage, attackSpeed: s.attackSpeed, uncapped: s.uncapped },
         equipment: ch.equipment,
         rules: Object.fromEntries(ch.loadout.map(a => [a, ch.rules[a]])),
         tree: {

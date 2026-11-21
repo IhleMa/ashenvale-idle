@@ -15,7 +15,7 @@
     "magPower": { "int": 1 },
     "healPower": { "int": 0.5 },
     "defense": { "str": 0.25, "vit": 0.45 },
-    "critChance": { "dex": 0.0011 },
+    "critChance": { "dex": 0.0143 },
     "attackSpeed": { "dex": 0.0026 }
   },
   "basicAttack": { "name": "Shoot", "stat": "physPower", "power": 1, "school": "physical" },
@@ -23,7 +23,7 @@
   "tiers": [
     { "level": 1, "title": "Scout" },
     { "level": 10, "title": "Pathfinder", "bonus": { "dexPct": 0.05 } },
-    { "level": 25, "title": "Sharpshooter", "bonus": { "attackSpeed": 0.08, "critChance": 0.02 } },
+    { "level": 25, "title": "Sharpshooter", "bonus": { "attackSpeed": 0.08, "critChance": 0.26 } },
     { "level": 40, "title": "Warden of Ashenvale", "mainOnly": true, "bonus": { "allPct": 0.06 } }
   ],
   "order": 50

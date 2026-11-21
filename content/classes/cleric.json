@@ -15,7 +15,7 @@
     "magPower": { "int": 1.6 },
     "healPower": { "int": 2.3, "vit": 0.3 },
     "defense": { "str": 0.35, "vit": 0.55 },
-    "critChance": { "dex": 0.0007, "int": 0.0002 },
+    "critChance": { "dex": 0.0091, "int": 0.0026 },
     "attackSpeed": { "dex": 0.001 }
   },
   "basicAttack": { "name": "Mace Strike", "stat": "magPower", "power": 0.7, "school": "magical" },

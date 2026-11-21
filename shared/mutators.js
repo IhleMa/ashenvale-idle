@@ -3,7 +3,7 @@
 //   power      +0.3  → every damage/heal/shield/over-time effect of the ability is 30 % stronger
 //   cost       -5    → resource cost (never below 0)          cooldown  -2 → seconds (never below 0.5)
 //   hits       +2    → extra hits on its damage effects      duration  +3 → seconds on its statuses/shields/taunts
-//   bonusCrit  +0.2  → extra crit chance on its damage       executeBelow 0.45 → sets the execute threshold
+//   bonusCrit  +0.04 → added base crit chance on its damage      executeBelow 0.45 → sets the execute threshold
 //   effects    [...] → extra effects (same format as ability effects; "once": true = only on the first target,
 //                      "self": true = on the caster)
 import { ABILITIES } from './data/abilities.js';

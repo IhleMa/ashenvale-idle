@@ -6,6 +6,16 @@
       "title": "Tiered affixes, resonance gems, Rogue and Bard changes",
       "sections": [
         {
+          "heading": "Critical hits (reworked)",
+          "items": [
+            "Critical chance now works like in Path of Exile: crit = (base + added) × (1 + % increased), capped at 95% (was 75%).",
+            "Base crit: attacks (basic attacks and weapon abilities) use your weapon — Dagger 8%, Wand and Crossbow 7%, Bow and Staff 6.5%, Sword 6%, Axe and Mace 5.5%, unarmed 5%. Spells use 7%. Weapon tooltips show their base critical chance.",
+            "Added base crit: a few abilities add to the base (Backstab +4%, Assassinate +6%, Deadeye Shot +8%, Pounce +10%, and some ascendancy upgrades).",
+            "Everything else is now \"% increased critical chance\": attributes (e.g. Rogue +2.08% increased per Dexterity), the Precision affix, item implicits, uniques, sets, skill tree, ascendancies, the Keen Eye trait, War Chant and Cat Form. All values were converted so a typical build ends up close to its old crit chance; existing items and enchantments convert automatically.",
+            "The Character page shows two crit chances: attacks and spells, with the calculation in the tooltip. Heals crit with half of your spell crit chance; minions keep half of their owner's attack crit chance. Critical damage is unchanged."
+          ]
+        },
+        {
           "heading": "Wardrobe (new)",
           "items": [
             "New Wardrobe page 👑: spend gold on cosmetics that change only how you look — 11 name colours (up to animated Prismatic), 17 titles, 9 portrait frames (up to the animated Void frame) and 9 profile borders. Prices go from 5,000 to 5,000,000 gold.",

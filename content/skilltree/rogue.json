@@ -15,7 +15,7 @@
       "attrs": ["dex", "str"],
       "abilities": { "3": "execute", "7": "shadow_flurry", "8": "assassins_mark" },
       "notables": {
-        "4": { "name": "Deadly Aim", "stats": { "critChance": 0.05 } }
+        "4": { "name": "Deadly Aim", "stats": { "critChance": 0.65 } }
       }
     },
     {
@@ -24,7 +24,7 @@
       "abilities": { "2": "evasion", "6": "expose_weakness" },
       "notables": {
         "4": { "name": "Fleet Footed", "stats": { "attackSpeed": 0.08 } },
-        "8": { "name": "Shadow Dance", "stats": { "attackSpeed": 0.1, "critChance": 0.03 } }
+        "8": { "name": "Shadow Dance", "stats": { "attackSpeed": 0.1, "critChance": 0.39 } }
       }
     },
     {

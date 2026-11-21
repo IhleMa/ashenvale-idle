@@ -24,8 +24,8 @@
       "attrs": ["dex", "str"],
       "abilities": { "3": "shield_bash" },
       "notables": {
-        "4": { "name": "Precision", "stats": { "critChance": 0.04 } },
-        "8": { "name": "Relentless", "stats": { "attackSpeed": 0.1, "critChance": 0.02 } }
+        "4": { "name": "Precision", "stats": { "critChance": 0.52 } },
+        "8": { "name": "Relentless", "stats": { "attackSpeed": 0.1, "critChance": 0.26 } }
       }
     },
     {

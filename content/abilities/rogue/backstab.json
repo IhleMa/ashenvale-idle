@@ -13,7 +13,7 @@
       "stat": "physPower",
       "power": 1.8,
       "school": "physical",
-      "bonusCrit": 0.2
+      "bonusCrit": 0.04
     }
   ],
   "defaultRule": {

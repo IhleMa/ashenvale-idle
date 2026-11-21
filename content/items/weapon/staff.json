@@ -2,6 +2,7 @@
   "name": "Staff",
   "slot": "weapon",
   "classes": ["mage", "cleric", "summoner", "warlock", "druid", "chronomancer"],
+  "baseCrit": 0.065,
   "stats": { "magPower": [5, 1.6], "healPower": [3, 1] },
   "material": "cloth",
   "order": 50

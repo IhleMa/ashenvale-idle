@@ -2,7 +2,7 @@
   "name": "Leather Gloves",
   "slot": "hands",
   "classes": ["rogue", "ranger", "warrior", "druid", "alchemist", "bard", "spellblade"],
-  "stats": { "defense": [1, 0.4], "critChance": [0.01, 0.0002] },
+  "stats": { "defense": [1, 0.4], "critChance": [0.13, 0.0026] },
   "material": "leather",
   "order": 190
 }

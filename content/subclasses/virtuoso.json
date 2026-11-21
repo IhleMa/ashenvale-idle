@@ -7,7 +7,7 @@
   "description": "Plays faster and harder: more Finales and damaging notes.",
   "bonus": {
     "attackSpeed": 0.05,
-    "critChance": 0.03
+    "critChance": 0.39
   },
   "branches": [
     {

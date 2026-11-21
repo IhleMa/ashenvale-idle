@@ -6,7 +6,7 @@
       "attrs": ["dex", "str"],
       "abilities": { "3": "hunters_mark", "7": "kill_shot" },
       "notables": {
-        "4": { "name": "Steady Aim", "stats": { "critChance": 0.04 } },
+        "4": { "name": "Steady Aim", "stats": { "critChance": 0.52 } },
         "8": { "name": "Deadeye", "stats": { "critDamage": 0.35 } }
       }
     },

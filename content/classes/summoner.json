@@ -18,7 +18,7 @@
     "magPower": { "int": 2.2 },
     "healPower": { "int": 0.6 },
     "defense": { "str": 0.2, "vit": 0.4 },
-    "critChance": { "dex": 0.0008, "int": 0.0002 },
+    "critChance": { "dex": 0.0104, "int": 0.0026 },
     "attackSpeed": { "dex": 0.0012 }
   },
   "basicAttack": { "name": "Soul Bolt", "stat": "magPower", "power": 0.8, "school": "magical" },

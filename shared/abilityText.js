@@ -10,7 +10,7 @@ import { ABILITIES } from './data/abilities.js';
 
 export const pct = (v, d = 0) => `${(Math.round(v * 100 * 10 ** d) / 10 ** d)}%`;
 export const signed = v => `${v > 0 ? '+' : ''}${pct(v)}`;
-const STAT = { physPower: 'physical power', magPower: 'magic power', healPower: 'healing power', maxHp: 'maximum health', defense: 'defense', hp: 'health', critChance: 'critical chance', attackSpeed: 'attack speed' };
+const STAT = { physPower: 'physical power', magPower: 'magic power', healPower: 'healing power', maxHp: 'maximum health', defense: 'defense', hp: 'health', critChance: 'increased critical chance', attackSpeed: 'attack speed' };
 export const statName = s => STAT[s] || s || 'power';
 export const sec = s => `${Math.round(s * 10) / 10} s`;
 const resourceName = classId => CLASSES[classId]?.resource?.name || 'resource';
@@ -21,7 +21,7 @@ const MOD_TEXT = {
   dotTakenPct: v => `${signed(v)} damage taken from damage over time`, dotSpeedPct: v => `own damage over time ticks ${signed(v)} faster`, dodge: v => `${pct(v)} chance to dodge physical hits`,
   thornsPct: v => `attackers take ${pct(v)} of their hit back`, invulnerable: () => 'takes no damage', undying: () => 'cannot drop below 1 health',
   cooldownRatePct: v => `cooldowns run ${signed(v)} faster`, resourceRegenPct: v => `${signed(v)} resource regeneration`, threatPct: v => `${signed(v)} threat`,
-  critChance: v => `${signed(v)} critical chance`, reactionPct: v => `next reaction ${signed(v)} stronger`, chainReaction: () => 'reactions repeat on another enemy at half strength',
+  critChance: v => `${signed(v)} increased critical chance`, reactionPct: v => `next reaction ${signed(v)} stronger`, chainReaction: () => 'reactions repeat on another enemy at half strength',
   costPct: v => `abilities cost ${signed(v)}`,
 };
 export const modsText = mods => Object.entries(mods || {}).map(([k, v]) => (MOD_TEXT[k] ? MOD_TEXT[k](v) : `${k} ${v}`));
@@ -61,7 +61,7 @@ export function effText(eff, classId, opts = {}) {
     case 'damage': {
       const hits = eff.hits || 1;
       let t = `deals ${pw(eff.power * hits, eff.stat)}${eff.perSpent ? ` per point of ${resourceName(classId)} spent` : ''} as ${eff.school || 'physical'} damage${hits > 1 ? ` in ${hits} hits` : ''}`;
-      if (eff.bonusCrit) t += ` (${signed(eff.bonusCrit)} critical chance)`;
+      if (eff.bonusCrit) t += ` (${signed(eff.bonusCrit)} added base critical chance)`;
       const exB = (eff.executeBelowByRank ? eff.executeBelowByRank[Math.min(eff.executeBelowByRank.length, opts.rank || 1) - 1] : eff.executeBelow || 0) + (eff.executeBelowAdd || 0);
       if (exB) t += eff.executeStacks ? `; against targets below ${pct(exB)} health +${pct(eff.executeStacks.perStack)} for every ${statusLink(eff.executeStacks.status)} stack on them` : `, ×${eff.executeMult || 2} against targets below ${pct(exB)} health`;
       if (eff.splash) t += `, and ${pct(eff.splash)} of that to every other enemy`;

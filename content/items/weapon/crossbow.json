@@ -2,6 +2,7 @@
   "name": "Crossbow",
   "slot": "weapon",
   "classes": ["ranger"],
+  "baseCrit": 0.07,
   "stats": { "physPower": [5, 1.7] },
   "material": "metal",
   "order": 80

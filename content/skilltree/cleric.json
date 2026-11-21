@@ -34,7 +34,7 @@
       "abilities": {},
       "notables": {
         "4": { "name": "Clarity", "stats": { "attackSpeed": 0.06 } },
-        "8": { "name": "Divine Favor", "stats": { "critChance": 0.05, "healingPct": 0.06 } }
+        "8": { "name": "Divine Favor", "stats": { "critChance": 0.65, "healingPct": 0.06 } }
       }
     }
   ],

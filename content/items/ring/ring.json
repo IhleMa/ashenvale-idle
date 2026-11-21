@@ -2,7 +2,7 @@
   "name": "Ring",
   "slot": "ring",
   "classes": null,
-  "stats": { "critChance": [0.01, 0.0003] },
+  "stats": { "critChance": [0.13, 0.0039] },
   "material": "gem",
   "order": 250
 }

@@ -2,6 +2,7 @@
   "name": "Sword",
   "slot": "weapon",
   "classes": ["warrior", "rogue", "sentinel", "spellblade", "bard"],
+  "baseCrit": 0.06,
   "stats": { "physPower": [4, 1.5] },
   "material": "metal",
   "order": 10

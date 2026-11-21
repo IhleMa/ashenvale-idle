@@ -53,7 +53,7 @@
       "vit": 0.4
     },
     "critChance": {
-      "dex": 0.001
+      "dex": 0.013
     },
     "attackSpeed": {
       "dex": 0.0015

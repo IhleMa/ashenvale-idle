@@ -15,7 +15,7 @@
     "magPower": { "int": 2.4 },
     "healPower": { "int": 0.8 },
     "defense": { "str": 0.2, "vit": 0.35 },
-    "critChance": { "dex": 0.0008, "int": 0.0003 },
+    "critChance": { "dex": 0.0104, "int": 0.0039 },
     "attackSpeed": { "dex": 0.0012 }
   },
   "basicAttack": { "name": "Arcane Bolt", "stat": "magPower", "power": 0.85, "school": "magical" },
@@ -23,7 +23,7 @@
   "tiers": [
     { "level": 1, "title": "Apprentice" },
     { "level": 10, "title": "Magus", "bonus": { "intPct": 0.05 } },
-    { "level": 25, "title": "Archmage", "bonus": { "intPct": 0.06, "critChance": 0.03 } },
+    { "level": 25, "title": "Archmage", "bonus": { "intPct": 0.06, "critChance": 0.39 } },
     { "level": 40, "title": "Ashen Sage", "mainOnly": true, "bonus": { "allPct": 0.06 } }
   ],
   "order": 20

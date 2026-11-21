@@ -1,1 +1,1 @@
-{ "name": "Keen Eye", "description": "+3% Critical Chance", "bonus": { "critChance": 0.03 }, "order": 50 }
+{ "name": "Keen Eye", "description": "+3% Critical Chance", "bonus": { "critChance": 0.39 }, "order": 50 }

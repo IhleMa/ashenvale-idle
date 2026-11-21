@@ -358,7 +358,7 @@ export function enchant(p, { itemUid, charId, stat }) {
   if (!ENCHANT_STATS_BY_LEVEL(L).includes(stat)) fail('That enchantment needs a higher level Enchanter\'s Study');
   const { item } = findItemRef(p, String(itemUid), charId);
   pay(p, T.enchantCost(item.level, item.rarity));
-  item.enchant = { stat, value: T.enchantValue(stat, item.level, L, w.profession.level) };
+  item.enchant = { stat, value: T.enchantValue(stat, item.level, L, w.profession.level), ...(stat === 'critChance' ? { critInc: true } : {}) };
   const msg = gainProfessionXp(w, 10 + item.level / 4);
   return { item, msg };
 }

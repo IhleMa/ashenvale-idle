@@ -6,7 +6,7 @@
   "description": "A silent killer who picks off the weakest enemy with devastating critical strikes.",
   "title": "Assassin",
   "bonus": {
-    "critChance": 0.04,
+    "critChance": 0.52,
     "critDamage": 0.15
   },
   "branches": [
@@ -24,7 +24,7 @@
         "4": {
           "name": "Killer Instinct",
           "stats": {
-            "critChance": 0.04,
+            "critChance": 0.52,
             "critDamage": 0.2
           }
         },
@@ -42,7 +42,7 @@
           "ability": "backstab",
           "description": "Backstab crits far more often and hits harder.",
           "changes": {
-            "bonusCrit": 0.25,
+            "bonusCrit": 0.05,
             "power": 0.15
           }
         },

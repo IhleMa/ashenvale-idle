@@ -22,7 +22,7 @@
         "4": {
           "name": "Grim Focus",
           "stats": {
-            "critChance": 0.08
+            "critChance": 1.04
           }
         },
         "8": {
@@ -54,7 +54,7 @@
           "ability": "drain_life",
           "description": "Drain Life crits far more often.",
           "changes": {
-            "bonusCrit": 0.25
+            "bonusCrit": 0.05
           }
         }
       }

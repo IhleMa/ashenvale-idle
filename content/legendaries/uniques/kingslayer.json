@@ -5,8 +5,8 @@
   "flavor": "Worn by those who end dynasties.",
   "stats": {
     "critChance": [
-      0.01,
-      0.0003
+      0.13,
+      0.0039
     ],
     "physPower": [
       1,

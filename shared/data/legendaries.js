@@ -65,6 +65,8 @@ export function syncUniqueItem(item) {
 // Items from before tiered affixes: re-roll their affixes in the new system, keeping base, level, rarity, sockets,
 // gems, enchantment, unique/set identity and soulbinding. Gear scaled down by ascension rolls at its original level.
 export function migrateLegacyItem(item, rng = Math.random) {
+  // crit became "% increased" (Path of Exile style, ×13): enchantments made before keep their old flat value otherwise
+  for (const e of [item?.enchant, item?.statRef?.enchant]) if (e?.stat === 'critChance' && !e.critInc) { e.value = Math.round(e.value * 13 * 1000) / 1000; e.critInc = true; }
   if (!item || item.affixes || !ITEM_BASES[item.baseId]) return false;
   const level = item.level;
   item.level = item.statRef?.level || level;
