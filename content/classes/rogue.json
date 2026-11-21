@@ -15,8 +15,8 @@
     "magPower": { "int": 1 },
     "healPower": { "int": 0.4 },
     "defense": { "str": 0.25, "vit": 0.4, "dex": 0.15 },
-    "critChance": { "dex": 0.0208 },
-    "attackSpeed": { "dex": 0.0022 }
+    "critChance": { "dex": 0.0104 },
+    "attackSpeed": { "dex": 0.0011 }
   },
   "basicAttack": { "name": "Slash", "stat": "physPower", "power": 0.9, "school": "physical" },
   "critDamageBonus": 0.25,

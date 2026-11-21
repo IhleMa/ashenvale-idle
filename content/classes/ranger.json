@@ -15,8 +15,8 @@
     "magPower": { "int": 1 },
     "healPower": { "int": 0.5 },
     "defense": { "str": 0.25, "vit": 0.45 },
-    "critChance": { "dex": 0.0143 },
-    "attackSpeed": { "dex": 0.0026 }
+    "critChance": { "dex": 0.0104 },
+    "attackSpeed": { "dex": 0.0013 }
   },
   "basicAttack": { "name": "Shoot", "stat": "physPower", "power": 1, "school": "physical" },
   "threatMult": 1,
