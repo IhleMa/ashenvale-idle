@@ -43,13 +43,15 @@ ok('6 new classes, each with 7+ base abilities, a 4-branch tree and 3 ascendanci
 {
   const { b, me, foes } = battle('sentinel');
   assert.equal(me.resource, 0);
-  C.__test.applyEffect(b, foes[0], me, { kind: 'damage', stat: 'physPower', power: 0 }, null); // warm-up, no damage
+  const per = me.resourceDef.perHitTaken;
+  // a tiny hit and a hit worth 10% of max health (fully absorbed by a shield) give the same Retribution
+  C.__test.applyEffect(b, foes[0], me, { kind: 'damage', stat: 'physPower', power: 0.001, school: 'physical' }, null);
+  assert.equal(me.resource, per, 'a tiny hit fills the full amount');
   me.statuses.push({ id: 'barrier', remaining: 10, duration: 10, value: me.maxHp * 0.1, stacks: 1, src: me.uid, tickTimer: 1 });
-  // a hit worth 10% of max health, fully absorbed by the shield, still fills Retribution
   const hit = me.maxHp * 0.1;
   C.__test.applyEffect(b, foes[0], me, { kind: 'damage', stat: 'physPower', power: hit / foes[0].stats.physPower, school: 'physical' }, null);
-  assert.ok(me.resource > 5, `retribution from absorbed damage: ${me.resource}`);
-  ok(`Sentinel: Retribution fills from damage taken, shields included (${me.resource.toFixed(0)} from a fully absorbed hit)`);
+  assert.equal(me.resource, per * 2, 'a big, fully absorbed hit gives the same');
+  ok(`Sentinel: every enemy hit fills ${per} Retribution, however hard it lands (shields included)`);
 
   // Retaliate spends everything and scales with what it spent
   const dmgAt = res => { const t = battle('sentinel'); t.me.resource = res; t.me.cooldowns = {}; t.me.loadout = ['retaliate']; t.me.rules.retaliate = { enabled: true, conditions: [], target: { selector: 'enemy_current' } }; t.me.actionTimer = 0; C.drainEvents(t.b);

@@ -90,7 +90,7 @@ const MECH = {
     <p>Enemies attack whoever has the most <b>threat</b>. Damage and shields absorbed create threat; tanks create far more, taunts force enemies onto the taunter. At the start of a fight, the front party positions start with some threat.</p>
     <p>Parties with different classes get a synergy bonus (${signed(CONFIG.synergy.perDistinctClassPct)} per different class, ${signed(CONFIG.synergy.balancedBonusPct)} for a balanced party).</p>`],
   resources: ['Resources & statuses', () => `
-    <p>Every class has its own resource (see each class). Most regenerate every second; some fill in other ways, e.g. the Sentinel's Retribution fills from damage taken (shields included).</p>
+    <p>Every class has its own resource (see each class). Most regenerate every second; some fill in other ways, e.g. the Sentinel's Retribution fills by a fixed amount with every enemy hit it takes.</p>
     <p><b>Statuses</b> are buffs (good) and debuffs (bad) with a duration. Applying a status again refreshes it, unless it stacks. Some statuses belong to a group (Druid forms, Bard songs): only one of a group from the same caster at a time.</p>`],
   rules: ['Ability rules', () => `
     <p>Each equipped ability has a rule: <b>conditions</b> (when to use it), a <b>target</b>, and <b>target conditions</b>. Change them on the Abilities page. Conditions can be grouped with AND/OR and negated.</p>
@@ -118,7 +118,7 @@ function classPage(id) {
     <p>${esc(c.description)}</p>
     <div class="two-col"><div><h4>Strengths</h4><ul class="plus">${c.strengths.map(s => `<li>${esc(s)}</li>`).join('')}</ul></div><div><h4>Weaknesses</h4><ul class="minus">${c.weaknesses.map(s => `<li>${esc(s)}</li>`).join('')}</ul></div></div>
     <h3>Resource: ${esc(c.resource.name)}</h3>
-    <p>Maximum ${c.resource.max}, starts fights at ${c.resource.start}, regenerates ${c.resource.regen} per second${c.resource.fromDamage ? `, fills by ${c.resource.fromDamage} per 1% of maximum health lost (shields included)` : ''}${c.resource.onDamaged ? `, +${c.resource.onDamaged} when hit` : ''}${c.resource.onHit ? `, +${c.resource.onHit} per hit` : ''}${c.resource.onAlternate ? `, +${c.resource.onAlternate} when alternating weapon and spell` : ''}.</p>
+    <p>Maximum ${c.resource.max}, starts fights at ${c.resource.start}, regenerates ${c.resource.regen} per second${c.resource.fromDamage ? `, fills by ${c.resource.fromDamage} per 1% of maximum health lost (shields included)` : ''}${c.resource.perHitTaken ? `, +${c.resource.perHitTaken} for every enemy hit taken (however much damage it does)` : ''}${c.resource.onDamaged ? `, +${c.resource.onDamaged} when hit` : ''}${c.resource.onHit ? `, +${c.resource.onHit} per hit` : ''}${c.resource.onAlternate ? `, +${c.resource.onAlternate} when alternating weapon and spell` : ''}.</p>
     <h3>Attributes</h3>
     <table class="wiki-table"><tr><th>Attribute</th><th>Start</th><th>Per level</th></tr>${Object.entries(ATTRIBUTES).map(([k, a]) => `<tr><td>${a.label}</td><td>${c.baseAttributes[k]}</td><td>+${c.growth[k]}</td></tr>`).join('')}</table>
     <p class="small">Scaling: ${Object.entries(c.scaling).map(([stat, from]) => `<b>${esc(statName(stat))}</b> ${Object.entries(from).map(([k, v]) => `${v} per ${ATTRIBUTES[k]?.label || k}`).join(' + ')}`).join(' · ')}${c.powerBlend ? ` · the lower of physical and magic power gains ${pct(c.powerBlend)} of the higher one` : ''}.</p>

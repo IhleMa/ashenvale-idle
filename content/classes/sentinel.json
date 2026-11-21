@@ -3,7 +3,7 @@
   "role": "tank",
   "color": "#c9a227",
   "glyph": "⛨",
-  "description": "A shield-bearer who grows stronger the harder it is hit: every blow fills Retribution, which it spends on crushing counterattacks and shields for the whole party.",
+  "description": "A shield-bearer who grows stronger the harder it is hit: every blow it takes fills Retribution, however hard or soft it lands, which it spends on crushing counterattacks and shields for the whole party.",
   "strengths": [
     "Gets stronger the more damage it takes",
     "Shields the whole party",
@@ -20,7 +20,7 @@
     "max": 100,
     "start": 0,
     "regen": 0,
-    "fromDamage": 3
+    "perHitTaken": 12
   },
   "baseAttributes": {
     "str": 11,

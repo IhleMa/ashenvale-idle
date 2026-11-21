@@ -821,7 +821,9 @@ function dealDamage(b, src, tgt, raw, { school, ability, bonusCrit = 0, dot = nu
 
   if (tgt.threatTable && src.side !== tgt.side) tgt.threatTable[src.uid] = (tgt.threatTable[src.uid] || 0) + (amount + absorbed) * src.threatMult * Math.max(0.1, 1 + mod(src, 'threatPct'));
   if (tgt.resourceDef?.onDamaged) tgt.resource = Math.min(tgt.resourceMax, tgt.resource + tgt.resourceDef.onDamaged);
-  // Retribution (Sentinel): fills with damage taken, shields included — fromDamage points per 1% of max health
+  // Retribution (Sentinel): perHitTaken points for every direct enemy hit (blocked and shielded ones too) — the same however
+  // tanky the Sentinel is. fromDamage (points per 1% of max health lost) is the older damage-based option.
+  if (tgt.resourceDef?.perHitTaken && src.side !== tgt.side && !dot) tgt.resource = Math.min(tgt.resourceMax, tgt.resource + tgt.resourceDef.perHitTaken * (1 + mod(tgt, 'retributionPct')));
   if (tgt.resourceDef?.fromDamage && src.side !== tgt.side) tgt.resource = Math.min(tgt.resourceMax, tgt.resource + ((amount + absorbed) / tgt.maxHp) * 100 * tgt.resourceDef.fromDamage * (1 + mod(tgt, 'retributionPct')));
   // Thorns: part of a direct hit goes back to the attacker
   const thorns = !dot && !proc && src !== tgt && src.alive ? mod(tgt, 'thornsPct') : 0;

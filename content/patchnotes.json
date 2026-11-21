@@ -93,6 +93,12 @@
           ]
         },
         {
+          "heading": "Sentinel",
+          "items": [
+            "Retribution now fills by 12 for every enemy hit the Sentinel takes, however much damage it does (blocked and shielded hits count too). Before, it filled with the damage taken, so a very tanky Sentinel gained almost nothing."
+          ]
+        },
+        {
           "heading": "Spellblade",
           "items": [
             "Arcane Infusion reworked into Spellstrike: for 8 seconds every weapon ability also deals a magic hit, and every spell a physical hit, for 40% of its damage."
