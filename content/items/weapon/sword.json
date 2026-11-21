@@ -3,6 +3,7 @@
   "slot": "weapon",
   "classes": ["warrior", "rogue", "sentinel", "spellblade", "bard"],
   "baseCrit": 0.06,
+  "baseSpeed": 1.05,
   "stats": { "physPower": [4, 1.5] },
   "material": "metal",
   "order": 10

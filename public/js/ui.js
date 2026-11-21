@@ -144,6 +144,8 @@ export function itemTooltipHtml(item, compareTo = null, wearer = null) {
     lines = Object.entries(itemStats({ ...item, affixes: [] })).map(([k, v]) => statLine(k, v, 'implicit-line'));
     const bc = ITEM_BASES[item.baseId]?.baseCrit; // weapons: the base crit chance of attacks made with it
     if (bc) lines.unshift(`<div class="stat-line implicit-line"><span>Base Critical Chance</span><span>${pct(bc)}</span></div>`);
+    const bs = ITEM_BASES[item.baseId]?.baseSpeed; // weapons: the base attack speed (100% = normal)
+    if (bs) lines.unshift(`<div class="stat-line implicit-line"><span>Base Attack Speed</span><span>${pct(bs, 0)}</span></div>`);
     // prefixes and suffixes in their own groups, each with how many of the possible slots are used
     // socketed gems already applied: tier changes (Keystone), switched-off affixes (Sacrifice), bonuses and the Mirror copy
     const plan = affixPlan(item);

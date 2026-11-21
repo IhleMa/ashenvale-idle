@@ -3,6 +3,7 @@
   "slot": "weapon",
   "classes": ["warrior", "cleric", "sentinel", "druid"],
   "baseCrit": 0.055,
+  "baseSpeed": 0.95,
   "stats": { "physPower": [3, 1], "healPower": [2, 0.8], "magPower": [2, 0.6] },
   "material": "metal",
   "order": 30

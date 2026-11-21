@@ -3,6 +3,7 @@
   "slot": "weapon",
   "classes": ["warrior", "sentinel"],
   "baseCrit": 0.055,
+  "baseSpeed": 0.9,
   "stats": { "physPower": [5, 1.7], "critDamage": [0.05, 0.002] },
   "material": "metal",
   "order": 20

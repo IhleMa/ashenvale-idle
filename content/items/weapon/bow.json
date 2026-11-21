@@ -3,6 +3,7 @@
   "slot": "weapon",
   "classes": ["ranger"],
   "baseCrit": 0.065,
+  "baseSpeed": 1.0,
   "stats": { "physPower": [4, 1.5], "attackSpeed": [0.02, 0.0005] },
   "material": "leather",
   "order": 70

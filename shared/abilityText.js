@@ -10,14 +10,14 @@ import { ABILITIES } from './data/abilities.js';
 
 export const pct = (v, d = 0) => `${(Math.round(v * 100 * 10 ** d) / 10 ** d)}%`;
 export const signed = v => `${v > 0 ? '+' : ''}${pct(v)}`;
-const STAT = { physPower: 'physical power', magPower: 'magic power', healPower: 'healing power', maxHp: 'maximum health', defense: 'defense', hp: 'health', critChance: 'increased critical chance', attackSpeed: 'attack speed' };
+const STAT = { physPower: 'physical power', magPower: 'magic power', healPower: 'healing power', maxHp: 'maximum health', defense: 'defense', hp: 'health', critChance: 'increased critical chance', attackSpeed: 'increased attack speed' };
 export const statName = s => STAT[s] || s || 'power';
 export const sec = s => `${Math.round(s * 10) / 10} s`;
 const resourceName = classId => CLASSES[classId]?.resource?.name || 'resource';
 
 const MOD_TEXT = {
   damagePct: v => `${signed(v)} damage dealt`, damageTakenPct: v => `${signed(v)} damage taken`, defensePct: v => `${signed(v)} defense`,
-  attackSpeedPct: v => `${signed(v)} attack and cast speed`, healingTakenPct: v => `${signed(v)} healing received`, healingDonePct: v => `${signed(v)} healing done`,
+  attackSpeedPct: v => `${signed(v)} more attack speed`, healingTakenPct: v => `${signed(v)} healing received`, healingDonePct: v => `${signed(v)} healing done`,
   dotTakenPct: v => `${signed(v)} damage taken from damage over time`, dotSpeedPct: v => `own damage over time ticks ${signed(v)} faster`, dodge: v => `${pct(v)} chance to dodge physical hits`,
   thornsPct: v => `attackers take ${pct(v)} of their hit back`, invulnerable: () => 'takes no damage', undying: () => 'cannot drop below 1 health',
   cooldownRatePct: v => `cooldowns run ${signed(v)} faster`, resourceRegenPct: v => `${signed(v)} resource regeneration`, threatPct: v => `${signed(v)} threat`,

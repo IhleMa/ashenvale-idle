@@ -3,6 +3,7 @@
   "slot": "weapon",
   "classes": ["rogue"],
   "baseCrit": 0.08,
+  "baseSpeed": 1.15,
   "stats": { "physPower": [3, 1.3], "critChance": [0.26, 0.0052] },
   "material": "metal",
   "order": 40

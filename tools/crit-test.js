@@ -56,4 +56,13 @@ ok(`in combat basic attacks crit ${(crits / hits * 100).toFixed(1)}% of ${hits} 
   close(crit / all, d.crit, 0.03);
   ok(`Backstab preview ${d.hit} (crit ${(d.crit * 100).toFixed(1)}%) matches the engine: average ${(sum / cnt).toFixed(0)}, crit ${(crit / all * 100).toFixed(1)}%`);
 }
+{ // attack speed: weapon base × (1 + increased) × more, capped
+  const r = createCharacter({ id: 'r2', name: 'R', classId: 'rogue', isMain: true, level: 30 });
+  r.equipment.weapon = dagger;
+  const st = computeStats(r);
+  close(st.attackSpeed, Math.min(CONFIG.combat.attackSpeedCap, ITEM_BASES.dagger.baseSpeed * (1 + st.speedInc) * st.speedMore));
+  r.equipment.weapon = null;
+  close(computeStats(r).attackSpeed, Math.min(CONFIG.combat.attackSpeedCap, 1 * (1 + st.speedInc) * st.speedMore));
+  ok(`attack speed: weapon base × (1 + increased) — dagger ${ITEM_BASES.dagger.baseSpeed} × ${(1 + st.speedInc).toFixed(2)} = ${(st.attackSpeed * 100).toFixed(0)}%`);
+}
 console.log(`Crit: all ${n} checks passed.`);

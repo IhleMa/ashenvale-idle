@@ -74,11 +74,17 @@ export function computeStats(ch, dyn = null) {
   const weaponCrit = ITEM_BASES[ch.equipment?.weapon?.baseId]?.baseCrit ?? CONFIG.combat.unarmedCritBase ?? 0.05;
   const rawCrit = weaponCrit * (1 + critInc);
   // stats with a cap: the value before capping is kept so the interface can show how far over the cap you are
-  const rawSpeed = 1 + conv('attackSpeed') + (gear.attackSpeed || 0) + (bonus.attackSpeed || 0);
+  // Attack speed works like in Path of Exile too: the weapon has a base speed (1 = normal), every bonus is
+  // "% increased" and they add up; "more" bonuses (attackSpeedMore) each multiply. Casters use it as well — it sets the
+  // pace of basic attacks and the global cooldown between abilities. Haste buffs and slows in a fight multiply on top.
+  const speedInc = conv('attackSpeed') + (gear.attackSpeed || 0) + (bonus.attackSpeed || 0);
+  const speedMore = 1 + (bonus.attackSpeedMore || 0);
+  const weaponSpeed = ITEM_BASES[ch.equipment?.weapon?.baseId]?.baseSpeed ?? 1;
+  const rawSpeed = weaponSpeed * (1 + speedInc) * speedMore;
   const s = {
     attributes,
     uncapped: { critChance: rawCrit, attackSpeed: rawSpeed },
-    critInc, weaponCrit,
+    critInc, weaponCrit, speedInc, speedMore, weaponSpeed,
     maxHp: Math.round((40 + 8 * ch.level + conv('hp') + (gear.hp || 0)) * (1 + allPct + (bonus.hpPct || 0))),
     physPower: Math.round((conv('physPower') + (gear.physPower || 0)) * pctMul('physPower')),
     magPower: Math.round((conv('magPower') + (gear.magPower || 0)) * pctMul('magPower')),
