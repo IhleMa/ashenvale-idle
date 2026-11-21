@@ -132,7 +132,8 @@
             "Pop-up messages now appear centered at the bottom of the screen instead of the bottom right.",
             "Inventory highlight: type a name or stat (e.g. \"crit fire\") or add stat rows with a minimum value and affix tier, and every matching item lights up. Optionally show only the matches. Your highlight is remembered in this browser.",
             "Fixed dead enemies staying on the battlefield after a new wave started.",
-            "Minion stats: summon abilities in the skill tree and on the Abilities page now show what the minion would have if summoned right now (health, damage per hit, attack speed, defense, crit, duration and how many you can have), including your gear, skill tree bonuses and the ability's rank. Rank nodes show the change to the next rank, and minion nodes like Thick Bones show each of your minions before and after."
+            "Minion stats: summon abilities in the skill tree and on the Abilities page now show what the minion would have if summoned right now (health, damage per hit, attack speed, defense, crit, duration and how many you can have), including your gear, skill tree bonuses and the ability's rank. Rank nodes show the change to the next rank, and minion nodes like Thick Bones show each of your minions before and after.",
+            "New 💡 button next to the announcements: send the admins a suggestion (feature idea, balance, bug report, interface or other). You see your own suggestions with their status (Sent, Read, Planned, Done, Declined) and any reply from the admins."
           ]
         }
       ]

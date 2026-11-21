@@ -284,6 +284,17 @@ export function adminActions(game) {
       admins.audit(s.player.name, 'announce', '-', `${hours ? hours + 'h' : 'until deleted'}: ${text}`);
       return a;
     },
+    admin_suggestions() { return { list: game.suggestions.all(), counts: game.suggestions.counts() }; },
+    admin_suggestion_update(s, d) {
+      const sg = game.suggestions.update(String(d.id), { status: d.status, reply: d.reply });
+      if (!sg) fail('Suggestion not found');
+      admins.audit(s.player.name, 'suggestion', sg.name, `${sg.status}${d.reply !== undefined ? ' + reply' : ''}`);
+      return { suggestion: sg };
+    },
+    admin_suggestion_delete(s, d) {
+      if (!game.suggestions.remove(String(d.id))) fail('Suggestion not found');
+      admins.audit(s.player.name, 'delete_suggestion', '-', String(d.id));
+    },
     admin_announcement_delete(s, d) {
       if (!game.announcements.remove(String(d.id))) fail('Announcement not found');
       game.broadcast({ t: 'announcement_removed', id: String(d.id) });

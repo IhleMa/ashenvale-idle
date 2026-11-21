@@ -1496,3 +1496,16 @@ html.standalone body { padding-bottom: env(safe-area-inset-bottom); padding-left
 .cos-border-mini.cos-bfx-embers::before, .cos-border-mini.cos-bfx-embers::after, .cos-border-mini.cos-bfx-frost::before, .cos-border-mini.cos-bfx-frost::after { scale: .8; }
 .cos-border-mini.cos-bfx-runes::before { inset: -6px; border-radius: 20px; }
 @media (prefers-reduced-motion: reduce) { .cos-border, .cos-border::before, .cos-border::after { animation: none !important; } }
+
+/* suggestions */
+#topbar-suggest { font-size: 1.05em; }
+.suggest-form { display: flex; flex-direction: column; gap: 8px; }
+.suggest-form textarea { width: 100%; resize: vertical; }
+.suggest-mine { display: flex; flex-direction: column; gap: 6px; max-height: 260px; overflow-y: auto; }
+.suggest-item .ann-text, .admin-sugg .ann-text { white-space: pre-wrap; }
+.suggest-reply { margin-top: 6px; padding: 6px 8px; border-left: 2px solid var(--accent2); background: rgba(255, 179, 92, .06); border-radius: 4px; }
+.sugg-list { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+.admin-sugg { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; background: rgba(255, 255, 255, .02); }
+.admin-sugg.is-new { border-color: var(--accent); }
+.sugg-reply-row input { flex: 1; }
+.tab .tab-count { margin-left: 4px; background: var(--accent); color: #fff; border-radius: 9px; padding: 0 6px; font-size: .75em; }

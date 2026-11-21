@@ -5,7 +5,7 @@ import { classLabel, subclassesOf } from '/shared/data/subclasses.js';
 import { bus, state, hero } from './state.js';
 import { connect, disconnect, apiPost, getToken, setToken, act } from './net.js';
 import { loadAssets, portrait } from './assets.js';
-import { esc, fmt, toast, modal, initTooltips, duration, bar, framed, heroNameHtml } from './ui.js';
+import { esc, fmt, toast, modal, run, initTooltips, duration, bar, framed, heroNameHtml } from './ui.js';
 import { xpToNext, CONFIG } from '/shared/config.js';
 import { initPwa } from './pwa.js';
 import { initTutorial, renderTutorial, isViewVisible, visibleKey } from './tutorial.js';
@@ -318,6 +318,37 @@ bus.on('msg:announcement_removed', m => {
   updateAnnBadge();
   if (current?.id === 'admin') requestRender();
 });
+// ---- 💡 suggestions: players send ideas / bug reports; admins read and answer them in the admin panel
+const SUGG_STATUS = { new: ['Sent', ''], read: ['Read', 'tag'], planned: ['Planned', 'tag hero'], done: ['Done ✓', 'tag hero'], declined: ['Declined', 'tag'] };
+async function showSuggestions() {
+  const m = modal(`<h2>💡 Suggestions</h2>
+    <p class="muted small">Ideas, balance feedback or bugs — the admins read every suggestion.</p>
+    <form class="suggest-form">
+      <select name="category">${[['feature', 'Feature idea'], ['balance', 'Balance'], ['bug', 'Bug report'], ['ui', 'Interface'], ['other', 'Other']].map(([v, l]) => `<option value="${v}">${l}</option>`).join('')}</select>
+      <textarea name="text" rows="6" maxlength="1500" placeholder="What would you like to see? The more detail, the better." required></textarea>
+      <div class="row between"><span class="muted small" data-count>0 / 1500</span><button class="btn primary" type="submit">Send suggestion</button></div>
+    </form>
+    <h3 class="small" style="margin-top:14px">Your suggestions</h3><div class="suggest-mine muted small">Loading…</div>`, { wide: true });
+  const loadMine = async () => {
+    const host = m.el.querySelector('.suggest-mine');
+    try {
+      const r = await act('my_suggestions');
+      host.classList.toggle('muted', !r.list.length);
+      host.innerHTML = r.list.length ? r.list.map(s => `<div class="ann suggest-item"><div class="ann-meta"><span class="${SUGG_STATUS[s.status]?.[1] || ''}">${SUGG_STATUS[s.status]?.[0] || esc(s.status)}</span> <span class="muted">${esc(r.categories[s.category] || s.category)} · ${new Date(s.at).toLocaleString()}</span></div>
+        <div class="ann-text">${esc(s.text)}</div>${s.reply ? `<div class="suggest-reply"><b>Admin:</b> ${esc(s.reply)}</div>` : ''}</div>`).join('') : 'Nothing sent yet.';
+    } catch (e) { host.textContent = e.message; }
+  };
+  const form = m.el.querySelector('.suggest-form'), ta = form.elements.text;
+  ta.addEventListener('input', () => { m.el.querySelector('[data-count]').textContent = `${ta.value.length} / 1500`; });
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    if (await run(act('suggest', { category: form.elements.category.value, text: ta.value }), 'Thank you! Your suggestion was sent.') !== undefined) { ta.value = ''; ta.dispatchEvent(new Event('input')); loadMine(); }
+  });
+  loadMine();
+  setTimeout(() => ta.focus(), 50);
+}
+document.getElementById('topbar-suggest').addEventListener('click', showSuggestions);
+
 // ---- patch notes (content/patchnotes.json, newest first); "seen" is remembered per browser
 const NOTES_KEY = 'ashenvale.patchnotesSeen';
 const patchEntries = () => CONTENT.patchnotes?.entries || [];

@@ -16,6 +16,7 @@ import { Arena } from './arena.js';
 import { AuctionHouse } from './auction.js';
 import { adminActions } from './admin.js';
 import { Announcements } from './announcements.js';
+import { Suggestions, SUGGESTION_CATEGORIES } from './suggestions.js';
 import * as TL from './townLogic.js';
 import * as XL from './expeditionLogic.js';
 import * as TU from './tutorialLogic.js';
@@ -32,7 +33,7 @@ import { RIFT, riftWaves, riftScale, riftHooks, affixesFor, maxStartTier, riftTh
 
 const { GameError } = L;
 const SAVE_NOW = new Set(['ascend', 'ah_list', 'ah_buy', 'ah_cancel', 'collect_mail', 'town_speedup', 'expedition_speedup']);
-const READ_ONLY = new Set(['get_rankings', 'inspect_player', 'ah_search', 'ah_mine', 'arena_view']);
+const READ_ONLY = new Set(['get_rankings', 'inspect_player', 'ah_search', 'ah_mine', 'arena_view', 'my_suggestions']);
 const fail = m => { throw new GameError(m); };
 
 export class Game {
@@ -58,6 +59,7 @@ export class Game {
     this.arena = new Arena(this);
     this.auction = new AuctionHouse(this);
     this.announcements = new Announcements(store);
+    this.suggestions = new Suggestions(store);
     this.adminActions = adminActions(this);
   }
 
@@ -400,6 +402,14 @@ export class Game {
       if (['off', 'repeat', 'push'].includes(d.auto)) s.player.rift.auto = d.auto;
     },
 
+    // 💡 player suggestions (read in the admin panel); online admins get a toast
+    suggest(s, d) {
+      let sg;
+      try { sg = this.suggestions.add(s.player, d || {}); } catch (e) { fail(e.message); }
+      for (const o of this.sessions.values()) if (o.player.id !== s.player.id && this.admins?.has(o.player.name)) this.toast(o.player.id, `💡 New suggestion from ${s.player.name}`);
+      return { id: sg.id };
+    },
+    my_suggestions(s) { return { list: this.suggestions.mine(s.player.id), categories: SUGGESTION_CATEGORIES }; },
     ack_announcements(s, d) {
       const upTo = Math.min(Date.now(), Number(d.upTo) || Date.now());
       s.player.announcementsSeenAt = Math.max(s.player.announcementsSeenAt || 0, upTo);

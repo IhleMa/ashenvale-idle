@@ -13,7 +13,33 @@ import { mountContentEditor, contentEditorDirty } from './admin-content.js';
 import { mountCurveEditor, curveEditorDirty } from './admin-curve.js';
 import { mountBalance } from './admin-balance.js';
 
-const ui = { tab: 'dashboard', query: '', sort: 'online' };
+const ui = { tab: 'dashboard', query: '', sort: 'online', suggFilter: 'open', suggCat: 'all' };
+let sugg = null; // { list, counts }
+const SUGG_STATUSES = [['new', 'New'], ['read', 'Read'], ['planned', 'Planned'], ['done', 'Done'], ['declined', 'Declined']];
+const SUGG_CATS = { feature: '✨ Feature', balance: '⚖ Balance', bug: '🐞 Bug', ui: '🖥 Interface', other: '💬 Other' };
+async function loadSuggestions(root) {
+  try { sugg = await act('admin_suggestions'); } catch (e) { return toast(e.message, 'error'); }
+  render(root);
+  const b = root.querySelector('[data-tab=suggestions] .tab-count');
+  if (b) { b.textContent = sugg.counts.new || ''; b.hidden = !sugg.counts.new; }
+}
+function suggestionsHtml() {
+  if (!sugg) return '<p class="muted">Loading…</p>';
+  const open = s => s.status === 'new' || s.status === 'read' || s.status === 'planned';
+  const rows = sugg.list.filter(s => (ui.suggFilter === 'all' || (ui.suggFilter === 'open' ? open(s) : s.status === ui.suggFilter)) && (ui.suggCat === 'all' || s.category === ui.suggCat));
+  const c = sugg.counts;
+  return `<div class="row gap wrap">
+      <select data-sugg-filter>${[['open', `Open (${(c.new || 0) + (c.read || 0) + (c.planned || 0)})`], ['all', `All (${sugg.list.length})`], ...SUGG_STATUSES.map(([v, l]) => [v, `${l} (${c[v] || 0})`])].map(([v, l]) => `<option value="${v}" ${ui.suggFilter === v ? 'selected' : ''}>${l}</option>`).join('')}</select>
+      <select data-sugg-cat><option value="all">All categories</option>${Object.entries(SUGG_CATS).map(([v, l]) => `<option value="${v}" ${ui.suggCat === v ? 'selected' : ''}>${l}</option>`).join('')}</select>
+      <button class="btn tiny ghost" data-sugg-refresh>↻ Refresh</button>
+    </div>
+    <div class="sugg-list">${rows.map(s => `<div class="admin-sugg ${s.status === 'new' ? 'is-new' : ''}" data-sugg="${esc(s.id)}">
+      <div class="row between wrap"><div class="small"><b>${esc(s.name)}</b> <span class="muted">${SUGG_CATS[s.category] || esc(s.category)} · ${new Date(s.at).toLocaleString()}</span></div>
+        <div class="row gap">${SUGG_STATUSES.map(([v, l]) => `<button class="btn tiny ${s.status === v ? 'primary' : 'ghost'}" data-sugg-status="${v}">${l}</button>`).join('')}<button class="btn tiny danger" data-sugg-del>✕</button></div></div>
+      <div class="ann-text">${esc(s.text)}</div>
+      <div class="row gap sugg-reply-row"><input data-sugg-reply value="${esc(s.reply || '')}" maxlength="500" placeholder="Reply to the player (they see it under their suggestion)"><button class="btn tiny" data-sugg-save-reply>Save reply</button></div>
+    </div>`).join('') || '<p class="muted">No suggestions here.</p>'}</div>`;
+}
 let overview = null;
 let players = null;
 let timer = null;
@@ -116,7 +142,7 @@ function render(root) {
   if (!host) return;
   if (ui.tab === 'content' || ui.tab === 'curve' || ui.tab === 'balance') return; // these draw themselves
   if (host.contains(document.activeElement) && /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) return;
-  host.innerHTML = ui.tab === 'dashboard' ? dashboardHtml() : ui.tab === 'bots' ? botsHtml() : playersHtml();
+  host.innerHTML = ui.tab === 'dashboard' ? dashboardHtml() : ui.tab === 'bots' ? botsHtml() : ui.tab === 'suggestions' ? suggestionsHtml() : playersHtml();
 }
 
 async function openPlayer(id, root) {
@@ -220,7 +246,7 @@ export const adminView = {
   id: 'admin', label: 'Admin', icon: '🛡', adminOnly: true,
   mount(root) {
     root.innerHTML = `<section class="panel"><div class="panel-head"><h3>🛡 Admin</h3><span class="muted small">Only visible to admins. All actions are logged.</span></div>
-      <div class="tabs">${[['dashboard', 'Dashboard'], ['players', 'Players'], ['bots', '🤖 Bots'], ['balance', '⚖ Balance'], ['content', '📦 Content'], ['curve', '📈 XP curve'], ['assets', '🖼 Assets']].map(([id, l]) => `<button class="tab ${ui.tab === id ? 'active' : ''}" data-tab="${id}">${l}</button>`).join('')}</div>
+      <div class="tabs">${[['dashboard', 'Dashboard'], ['players', 'Players'], ['suggestions', '💡 Suggestions <span class="tab-count" hidden></span>'], ['bots', '🤖 Bots'], ['balance', '⚖ Balance'], ['content', '📦 Content'], ['curve', '📈 XP curve'], ['assets', '🖼 Assets']].map(([id, l]) => `<button class="tab ${ui.tab === id ? 'active' : ''}" data-tab="${id}">${l}</button>`).join('')}</div>
       <div class="admin-body"></div></section>`;
     const reload = () => {
       root.querySelector('.admin-body').classList.toggle('wide', ui.tab === 'content');
@@ -228,8 +254,10 @@ export const adminView = {
       if (ui.tab === 'curve') return mountCurveEditor(root.querySelector('.admin-body'));
       if (ui.tab === 'balance') return mountBalance(root.querySelector('.admin-body'));
       if (ui.tab === 'assets') return mountAssets(root.querySelector('.admin-body'));
-      return ui.tab === 'dashboard' ? loadOverview(root) : ui.tab === 'bots' ? loadBots(root) : loadPlayers(root);
+      return ui.tab === 'dashboard' ? loadOverview(root) : ui.tab === 'bots' ? loadBots(root) : ui.tab === 'suggestions' ? loadSuggestions(root) : loadPlayers(root);
     };
+    // badge with the number of new suggestions on the tab, also before it is opened
+    act('admin_suggestions').then(r => { sugg = r; const bd = root.querySelector('[data-tab=suggestions] .tab-count'); if (bd) { bd.textContent = r.counts.new || ''; bd.hidden = !r.counts.new; } }).catch(() => {});
     clearInterval(botTimer);
     botTimer = setInterval(() => { if (ui.tab === 'bots' && root.isConnected && !root.contains(document.activeElement?.closest?.('select, input'))) loadBots(root); }, 8000);
     root.addEventListener('click', async e => {
@@ -238,6 +266,15 @@ export const adminView = {
       if (t.dataset.tab && t.dataset.tab !== ui.tab && (contentEditorDirty() || curveEditorDirty()) && !(await confirmBox('Discard your unsaved content changes?', 'Discard'))) return;
       if (t.dataset.tab) { ui.tab = t.dataset.tab; root.querySelectorAll('[data-tab]').forEach(b => b.classList.toggle('active', b === t)); reload(); return; }
       if (t.dataset.player) { openPlayer(t.dataset.player, root); return; }
+      const sg = t.closest('[data-sugg]')?.dataset.sugg;
+      if ('suggRefresh' in t.dataset) { loadSuggestions(root); return; }
+      if (sg && t.dataset.suggStatus) { if (await run(act('admin_suggestion_update', { id: sg, status: t.dataset.suggStatus })) !== undefined) loadSuggestions(root); return; }
+      if (sg && 'suggSaveReply' in t.dataset) {
+        const reply = t.closest('[data-sugg]').querySelector('[data-sugg-reply]').value;
+        if (await run(act('admin_suggestion_update', { id: sg, reply, status: undefined }), 'Reply saved — the player sees it under their suggestion.') !== undefined) { document.activeElement?.blur(); loadSuggestions(root); }
+        return;
+      }
+      if (sg && 'suggDel' in t.dataset) { if (await confirmBox('Delete this suggestion?', 'Delete') && await run(act('admin_suggestion_delete', { id: sg })) !== undefined) loadSuggestions(root); return; }
       if ('sendBroadcast' in t.dataset) {
         const ta = root.querySelector('[data-broadcast]');
         const hours = Number(root.querySelector('[data-ann-hours]').value);
@@ -270,7 +307,11 @@ export const adminView = {
       for (const el of e.target.elements) if (el.name) changes[el.name] = el.type === 'checkbox' ? el.checked : el.value;
       if (await run(act('admin_settings', { changes }), 'Settings saved.') !== undefined) { document.activeElement?.blur(); loadOverview(root); }
     });
-    root.addEventListener('change', e => { if (e.target.matches('[data-player-sort]')) { ui.sort = e.target.value; loadPlayers(root); } });
+    root.addEventListener('change', e => {
+      if (e.target.matches('[data-player-sort]')) { ui.sort = e.target.value; loadPlayers(root); }
+      if (e.target.matches('[data-sugg-filter]')) { ui.suggFilter = e.target.value; e.target.blur(); render(root); }
+      if (e.target.matches('[data-sugg-cat]')) { ui.suggCat = e.target.value; e.target.blur(); render(root); }
+    });
     root.addEventListener('input', e => {
       if (!e.target.matches('[data-player-search]')) return;
       ui.query = e.target.value;
