@@ -215,6 +215,14 @@ export class Game {
 
   markDirty(s) { s.stateDirty = true; this.store.savePlayerSoon(s.player); }
 
+  // after a content change: uniques of everyone online and in the auction house follow their new definition
+  // (offline players are updated when they next log in)
+  syncUniquesEverywhere() {
+    let n = 0;
+    for (const s of this.sessions.values()) { const c = L.syncUniques(s.player); if (c) { n += c; this.markDirty(s); } }
+    return n + (this.auction?.syncUniques() || 0);
+  }
+
   // ------------------------------------------------------------------ actions
   handleMessage(s, ws, raw) {
     let msg;

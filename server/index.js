@@ -68,6 +68,8 @@ function applyContent(fresh) {
   replaceContent(fresh);
   contentJson = JSON.stringify(CONTENT);
   game.buildId = buildId();
+  const synced = game.syncUniquesEverywhere();
+  if (synced) log(`Updated ${synced} existing unique item(s) to the changed content.`);
   // open pages fetch the new content and redraw — no reload needed
   game.broadcast({ t: 'content_update', buildId: game.buildId, hash: CONTENT._meta.hash });
   log(`Content updated live (${CONTENT._meta.hash}).`);

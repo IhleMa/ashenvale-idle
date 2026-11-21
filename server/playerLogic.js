@@ -9,8 +9,8 @@ import { masteryLevel } from '../shared/bestiary.js';
 import { track as trackQuest } from './questLogic.js';
 import { evaluateItem, makeContext, sanitizeFilter, filterFromLegacy } from '../shared/lootfilter.js';
 import { ACHIEVEMENTS } from '../shared/data/achievements.js';
-import { migrateLegacyItem } from '../shared/data/legendaries.js';
-import { SLOT_IDS, generateItem, canEquip, itemSellValue, ITEM_BASES } from '../shared/data/items.js';
+import { migrateLegacyItem, syncUniqueItem } from '../shared/data/legendaries.js';
+import { SLOTS, SLOT_IDS, generateItem, canEquip, itemSellValue, ITEM_BASES } from '../shared/data/items.js';
 import { createCharacter, addXp, autoDevelop, autoLoadout, syncTree, abilitySlots, cloneRule, treeRefundCost, treeResetCost } from '../shared/character.js';
 import { allocateNode as treeAllocate, refundNode as treeRefund, resetTree as treeReset, availablePoints, cleanPlan, followPlan } from '../shared/skilltree.js';
 import { sanitizeRule } from '../shared/rules.js';
@@ -71,6 +71,7 @@ export function migratePlayer(p) {
   for (const it of p.inventory || []) migrateLegacyItem(it);
   for (const ch of Object.values(p.characters || {})) for (const it of Object.values(ch.equipment || {})) migrateLegacyItem(it);
   for (const m of p.mailbox || []) migrateLegacyItem(m.item);
+  syncUniques(p); // uniques follow their current definition in the content
   // zones inserted into the chain later: a player who reached a zone also has every zone before it
   const chain = Object.values(ZONES).sort((x, y) => (x.order ?? 0) - (y.order ?? 0));
   const furthest = Math.max(-1, ...chain.map((z, i) => (p.unlockedZones.includes(z.id) ? i : -1)));
@@ -399,6 +400,27 @@ export function applyLootFilter(p, { dryRun = false } = {}) {
 
 // --------------------------------------------------------------------------- mailbox
 // Mail carries items, gold or materials (auction sales, expired listings, overflow loot, admin gifts).
+// Updates every unique the player has to its current definition. An equipped unique that moved to another slot
+// (or that its wearer can no longer use) is taken off and sent by mail. Returns how many items changed.
+export function syncUniques(p) {
+  let n = 0;
+  for (const it of p.inventory || []) if (syncUniqueItem(it)) n++;
+  for (const m of p.mailbox || []) if (m.item && syncUniqueItem(m.item)) n++;
+  for (const ch of Object.values(p.characters || {})) {
+    for (const [slot, it] of Object.entries(ch.equipment || {})) {
+      const r = it && syncUniqueItem(it);
+      if (!r) continue;
+      n++;
+      const wrongClass = it.classes && !it.classes.includes(ch.classId);
+      if (it.slot === slot && !wrongClass) continue;
+      ch.equipment[slot] = null;
+      const now = SLOTS[it.slot]?.label || it.slot;
+      sendMail(p, { item: it, from: 'Ashenvale', note: `${it.name} was changed${r.slotChanged ? ` and is now worn as ${/^[aeiou]/i.test(now) ? 'an' : 'a'} ${now.toLowerCase()}` : ` and can no longer be used by ${ch.name}`}, so it was taken off ${ch.name} and sent to you.` });
+    }
+  }
+  return n;
+}
+
 export function sendMail(p, { item = null, gold = 0, premium = 0, materials = null, from = 'System', note = '' }) {
   p.mailbox ||= [];
   p.mailbox.push({ id: uid(), item, gold: Math.max(0, Math.floor(gold)), premium: Math.max(0, Math.floor(premium)), materials, from, note, at: Date.now() });

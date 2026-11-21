@@ -40,6 +40,28 @@ export function generateUnique(rng, level, uniqueId = null, zoneId = null) {
   return item;
 }
 
+// Brings an existing unique up to its current definition (base, slot, who can use it, fixed stats, name), so changes
+// in the content editor reach items that dropped before. Random affixes, level, sockets, gems, enchantment and
+// soulbinding stay. Returns null if nothing changed, else { slotChanged, oldSlot }.
+export function syncUniqueItem(item) {
+  const u = item?.unique ? UNIQUES[item.unique] : null;
+  const base = u && ITEM_BASES[u.baseId];
+  if (!base) return null;
+  const oldSlot = item.slot;
+  let changed = false;
+  const set = (k, v) => { if (JSON.stringify(item[k] ?? null) !== JSON.stringify(v ?? null)) { item[k] = v === undefined ? undefined : JSON.parse(JSON.stringify(v)); changed = true; } };
+  set('baseId', base.id);
+  set('slot', base.slot);
+  set('classes', base.classes);
+  set('uniqueStats', u.stats || {});
+  set('name', u.name);
+  if (!changed) return null;
+  if (item.classes === undefined) delete item.classes;
+  item.stats = itemStats(item);
+  if (item.statRef) item.statRef.stats = itemStats({ ...item, level: item.statRef.level });
+  return { slotChanged: item.slot !== oldSlot, oldSlot };
+}
+
 // Items from before tiered affixes: re-roll their affixes in the new system, keeping base, level, rarity, sockets,
 // gems, enchantment, unique/set identity and soulbinding. Gear scaled down by ascension rolls at its original level.
 export function migrateLegacyItem(item, rng = Math.random) {

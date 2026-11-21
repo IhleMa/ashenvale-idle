@@ -29,7 +29,8 @@
             "Gear scaled down by ascension is soulbound: it can't be sold on the Auction House until you reforge it back to its original item level.",
             "Loot filter: new conditions for the best affix tier on an item (\"has a tier 2 or better affix\", \"no affix better than tier 5\").",
             "Mythic items are much rarer: loot boosts from bosses, rifts and crafting no longer raise the chance for Legendary and Mythic beyond Epic's. A boss drop is now Mythic about 1% of the time instead of 9–18%.",
-            "Juggernaut's Bulwark (4 pieces): Shield Wall now triggers from any ability that taunts — e.g. the Sentinel's Shield Slam, Challenging Shout or Guardian's Oath — not just the Warrior's Taunt. It can trigger at most once every 10 seconds (the same as Taunt's cooldown)."
+            "Juggernaut's Bulwark (4 pieces): Shield Wall now triggers from any ability that taunts — e.g. the Sentinel's Shield Slam, Challenging Shout or Guardian's Oath — not just the Warrior's Taunt. It can trigger at most once every 10 seconds (the same as Taunt's cooldown).",
+            "Uniques that already dropped now follow changes to their definition: base item, slot, fixed stats and name are updated (their random affixes, level, socket, gem, enchantment and soulbinding stay). If a worn unique moves to another slot or its wearer's class can no longer use it, it is taken off and sent to you by mail."
           ]
         },
         {

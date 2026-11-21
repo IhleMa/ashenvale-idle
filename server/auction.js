@@ -3,7 +3,7 @@ import crypto from 'node:crypto';
 import { CONFIG, rarityIndex } from '../shared/config.js';
 import { MATERIALS } from '../shared/data/town.js';
 import { SLOTS, AFFIXES, canEquip, isSoulbound } from '../shared/data/items.js';
-import { UNIQUES, SETS, migrateLegacyItem } from '../shared/data/legendaries.js';
+import { UNIQUES, SETS, migrateLegacyItem, syncUniqueItem } from '../shared/data/legendaries.js';
 import { parseGemKey, trimSockets, gearItemStats, GEM_KINDS } from '../shared/gems.js';
 import { GameError, sendMail } from './playerLogic.js';
 
@@ -62,6 +62,15 @@ export class AuctionHouse {
     for (const l of this.data.listings) if (l.item && migrateLegacyItem(l.item)) this.dirty = true; // tiered affixes
     for (const l of this.data.listings) if (l.item?.sockets?.some(g => g && !parseGemKey(g))) { l.item.sockets = l.item.sockets.map(g => (g && parseGemKey(g) ? g : null)); this.dirty = true; } // old stat gems
     for (const l of this.data.listings) if (l.item?.sockets?.length > 1) { trimSockets(l.item); this.dirty = true; } // one socket per item
+    this.syncUniques();
+  }
+
+  // listed uniques follow their current definition in the content (see syncUniqueItem)
+  syncUniques() {
+    let n = 0;
+    for (const l of this.data.listings) if (l.item && syncUniqueItem(l.item)) n++;
+    if (n) { this.dirty = true; this.save?.(); }
+    return n;
   }
 
   // queues the auction house for the next database flush (written together with the players involved)
