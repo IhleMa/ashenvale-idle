@@ -1,5 +1,6 @@
 // Town (garrison): buildings, construction, workers, salvage, crafting, enchanting, alchemy.
 // Gathering happens through expeditions (views/expeditions.js).
+import { morphed } from '../morph.js';
 import { classLabel } from '/shared/data/subclasses.js';
 import { state, hero } from '../state.js';
 import { act } from '../net.js';
@@ -420,7 +421,7 @@ export const townView = {
       ['Arcane', BUILDING_IDS.filter(id => BUILDINGS[id].kind === 'special')],
     ];
     const builds = Object.values(p.town.buildings).filter(b => b.upgrade).length;
-    root.innerHTML = `
+    morphed(root).innerHTML = `
       ${resourcesHtml(p)}
       <div class="town-layout">
         <div class="town-buildings">

@@ -1,4 +1,5 @@
 // Daily & weekly quests.
+import { morphed } from '../morph.js';
 import { state } from '../state.js';
 import { act } from '../net.js';
 import { esc, fmt, bar, run, duration, toast, tipAttr, confirmBox } from '../ui.js';
@@ -99,5 +100,5 @@ export const questsView = {
     }, 1000);
   },
   unmount() { clearInterval(timer); },
-  render(root) { root.innerHTML = html(); },
+  render(root) { morphed(root).innerHTML = html(); },
 };

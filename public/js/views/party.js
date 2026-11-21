@@ -1,4 +1,5 @@
 // Party management: presets, member order (position), roles and combined statistics.
+import { morphed } from '../morph.js';
 import { partySyncLevel, syncedCharacter } from '/shared/levelsync.js';
 import { classLabel } from '/shared/data/subclasses.js';
 import { state, chars } from '../state.js';
@@ -66,7 +67,7 @@ export const partyView = {
     const stats = fighting.map(c => computeStats(c));
     const roles = new Set(members.map(m => m.role));
     const bench = chars().filter(c => !party.members.includes(c.id));
-    root.innerHTML = `
+    morphed(root).innerHTML = `
       <div class="tabs">${p.parties.map((pt, i) => `<button class="tab ${i === idx ? 'active' : ''}" data-tab="${i}">${esc(pt.name)}${i === p.activeParty ? ' <span class="live-dot" title="Active">●</span>' : ''}</button>`).join('')}</div>
       <div class="party-layout">
         <section class="panel">

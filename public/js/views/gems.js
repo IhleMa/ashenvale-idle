@@ -1,4 +1,5 @@
 // Jewelcrafting: resonance gems (cut, fuse) and sockets.
+import { morphed } from '../morph.js';
 import { state } from '../state.js';
 import { act } from '../net.js';
 import { esc, fmt, bar, run, toast, tipAttr, confirmBox, itemTooltipHtml } from '../ui.js';
@@ -164,6 +165,6 @@ export const gemsView = {
   },
   render(root) {
     if (document.activeElement?.tagName === 'SELECT' && root.contains(document.activeElement)) return;
-    root.innerHTML = html();
+    morphed(root).innerHTML = html();
   },
 };

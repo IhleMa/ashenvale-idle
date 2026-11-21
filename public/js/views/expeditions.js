@@ -1,4 +1,5 @@
 // Expeditions: send recruits out to gather materials.
+import { morphed } from '../morph.js';
 import { classLabel } from '/shared/data/subclasses.js';
 import { state } from '../state.js';
 import { act } from '../net.js';
@@ -142,7 +143,7 @@ export const expeditionsView = {
     if (!p?.town) return;
     const camp = bLevel(p, 'expedition_camp');
     const ready = (p.expeditions || []).filter(x => x.endsAt <= now()).length;
-    root.innerHTML = `
+    morphed(root).innerHTML = `
       <section class="panel">
         <div class="panel-head"><h3>Expeditions <span class="muted small">${(p.expeditions || []).length}/${campSlots(p)} underway</span></h3>
           <div class="row gap"><span class="small">${premiumTxt(p.premium || 0)}</span>${ready > 1 ? `<button class="btn small primary" data-claim-all>Claim all (${ready})</button>` : ''}<a class="small" href="#/town">Expedition Camp: level ${camp}${camp < 5 ? ` → ${CAMP_SLOTS[camp + 1]} slots at level ${camp + 1}` : ''}</a></div></div>

@@ -1,4 +1,5 @@
 // Recruitment: tavern offers and roster management.
+import { morphed } from '../morph.js';
 import { state, chars } from '../state.js';
 import { act } from '../net.js';
 import { esc, fmt, run, tipAttr, duration, confirmBox } from '../ui.js';
@@ -42,7 +43,7 @@ export const recruitmentView = {
     const h = p.characters[p.heroId];
     const roster = chars().filter(c => !c.isMain);
     const refreshCost = CONFIG.recruitment.refreshCostPerLevel * h.level;
-    root.innerHTML = `
+    morphed(root).innerHTML = `
       <section class="panel">
         <div class="panel-head"><h3>The Ashen Tankard — Recruits for hire</h3>
           <div class="row gap"><span class="muted small" data-refresh-timer>${refreshText()}</span><button class="btn small" data-refresh>Refresh now (${fmt(refreshCost)}g)</button></div></div>

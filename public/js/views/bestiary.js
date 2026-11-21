@@ -1,4 +1,5 @@
 // Bestiary: every enemy with its abilities, boss phases, where it lives, tips and kill mastery.
+import { morphed } from '../morph.js';
 import { state, hero } from '../state.js';
 import { esc, fmt, bar, modal, tipAttr } from '../ui.js';
 import { enemyArt, statusIcon } from '../assets.js';
@@ -154,7 +155,6 @@ export const bestiaryView = {
     });
   },
   render(root) {
-    if (document.activeElement?.matches?.('[data-best-search], [data-best-level]')) return; // don't steal focus while typing
     if (!ui.selected) {
       const z = ZONES[state.player.zone];
       ui.selected = z?.boss || 'wolf';
@@ -167,10 +167,8 @@ export const bestiaryView = {
       </div>`;
       return;
     }
-    // live update (kill counts) without losing scroll positions
-    const scroll = list.scrollTop;
-    list.innerHTML = listHtml();
-    list.scrollTop = scroll;
-    root.querySelector('.best-detail-host').innerHTML = enemyDetailHtml(ui.selected, ui.level);
+    // live update (kill counts): morphing keeps scroll positions and focus
+    morphed(list).innerHTML = listHtml();
+    morphed(root.querySelector('.best-detail-host')).innerHTML = enemyDetailHtml(ui.selected, ui.level);
   },
 };

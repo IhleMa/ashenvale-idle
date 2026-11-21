@@ -1,4 +1,5 @@
 // Abilities: unlock/upgrade, loadout priority and the per-ability behaviour (rule) editor.
+import { morphed } from '../morph.js';
 import { abilityNow } from '/shared/abilityText.js';
 import { computeStats } from '/shared/stats.js';
 import { classLabel } from '/shared/data/subclasses.js';
@@ -275,7 +276,7 @@ export const abilitiesView = {
     if (!selectedAbility || !ch.abilities[selectedAbility]) selectedAbility = ch.loadout[0] || Object.keys(ch.abilities)[0] || null;
     const slots = abilitySlots(ch);
     const unequipped = Object.keys(ch.abilities).filter(a => !ch.loadout.includes(a) && !ABILITIES[a]?.passive);
-    root.innerHTML = `
+    morphed(root).innerHTML = `
       ${charPicker(ch.id)}
       ${buildsBar(ch)}
       <div class="abilities-layout">

@@ -1,4 +1,5 @@
 // Hero creation screen.
+import { morphed } from '../morph.js';
 import { act } from '../net.js';
 import { esc, run } from '../ui.js';
 import { classIcon, assetKeys, assetUrl } from '../assets.js';
@@ -30,7 +31,7 @@ export const createView = {
     const cls = CLASSES[draft.classId];
     const preview = computeStats(createCharacter({ id: 'x', name: 'x', classId: draft.classId, isMain: true, autoTree: false }));
     const portraits = assetKeys('portraits/').map(k => k.slice(10)).filter(k => k.startsWith(draft.classId) || k.startsWith('any') || !CLASS_IDS.some(c => k.startsWith(c)));
-    root.innerHTML = `
+    morphed(root).innerHTML = `
     <div class="create-screen">
       <h1 class="title">Create your Hero</h1>
       <p class="muted">Your hero is your permanent main character: slightly stronger than any recruit, with an extra ability slot, bonus attribute points and a unique hero-only class title at level 40.</p>

@@ -1,4 +1,5 @@
 // Character sheet: attributes, stats, equipment, role.
+import { morphed } from '../morph.js';
 import { state, selectedChar } from '../state.js';
 import { act } from '../net.js';
 import { esc, fmt, pct, bar, run, modal, itemTooltipHtml, tipAttr, confirmBox, framed, heroNameHtml } from '../ui.js';
@@ -54,7 +55,7 @@ export const characterView = {
     const cls = CLASSES[ch.classId];
     const s = computeStats(ch);
     const p = state.player;
-    root.innerHTML = `
+    morphed(root).innerHTML = `
       ${charPicker(ch.id)}
       <div class="char-sheet">
         <section class="panel char-head">

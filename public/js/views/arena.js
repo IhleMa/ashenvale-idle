@@ -1,5 +1,6 @@
 // Arena: pick a party setup as your arena team, attack other players' teams, rating and fight log.
 // Both teams fight at the average level of the two heroes; the fight plays live on the Combat page.
+import { morphed } from '../morph.js';
 import { state } from '../state.js';
 import { act } from '../net.js';
 import { esc, fmt, run, duration, botTag, nameHtml, framed, heroNameHtml } from '../ui.js';
@@ -65,7 +66,7 @@ export const arenaView = {
     root.dataset.sig = sig;
     const party = a.party != null ? p.parties[a.party] : null;
     const teamChars = party ? party.members.map(id => p.characters[id]).filter(Boolean) : [];
-    root.innerHTML = `
+    morphed(root).innerHTML = `
       <div class="arena-layout">
         <div class="arena-main">
           <section class="panel arena-head">

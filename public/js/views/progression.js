@@ -1,4 +1,5 @@
 // Progression: levels, class titles, zones, achievements, statistics and settings.
+import { morphed } from '../morph.js';
 import { classLabel } from '/shared/data/subclasses.js';
 import { state, chars } from '../state.js';
 import { act } from '../net.js';
@@ -29,7 +30,7 @@ export const progressionView = {
   render(root) {
     const p = state.player;
     const zones = Object.values(ZONES).sort((a, b) => a.order - b.order);
-    root.innerHTML = `
+    morphed(root).innerHTML = `
       <div class="prog-layout">
         <section class="panel">
           <h3>Characters & class progression</h3>

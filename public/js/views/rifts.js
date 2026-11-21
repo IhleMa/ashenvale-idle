@@ -1,4 +1,5 @@
 // Rifts: timed, endlessly scaling dungeon runs with weekly affixes and a leaderboard.
+import { morphed } from '../morph.js';
 import { state, hero } from '../state.js';
 import { act } from '../net.js';
 import { esc, fmt, run, duration, toast, tipAttr, botTag, nameHtml, heroNameHtml } from '../ui.js';
@@ -21,7 +22,7 @@ async function loadBoard(root) {
   boardAt = Date.now();
   try { board = await act('get_rankings', { category: 'rift', limit: 10 }); } catch { /* ignore */ }
   const el = root.querySelector('.rift-board');
-  if (el) el.innerHTML = boardHtml();
+  if (el) morphed(el).innerHTML = boardHtml();
 }
 
 function boardHtml() {
@@ -135,8 +136,7 @@ export const riftsView = {
   },
   unmount() { clearInterval(timer); },
   render(root) {
-    if (document.activeElement?.tagName === 'SELECT' && root.contains(document.activeElement)) return;
-    root.innerHTML = html();
+    morphed(root).innerHTML = html();
     loadBoard(root);
   },
 };

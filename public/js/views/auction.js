@@ -1,4 +1,5 @@
 // Auction House: browse/buy, sell, manage listings, mailbox.
+import { morphed } from '../morph.js';
 import { featureLock } from '/shared/unlocks.js';
 import { state, chars } from '../state.js';
 import { act } from '../net.js';
@@ -159,14 +160,9 @@ function renderBody(root) {
   const host = root.querySelector('.ah-body');
   if (!host) return;
   const lock = ui.tab !== 'mail' && featureLock(state.player, 'auction');
-  // keep the cursor in the text field being typed in (search results re-render the filters)
-  const ae = document.activeElement, keep = ae && host.contains(ae) && ae.tagName === 'INPUT' ? { q: ae.dataset.q, af: ae.dataset.af, i: ae.dataset.i, pos: ae.selectionStart } : null;
-  host.innerHTML = (lock ? `<div class="sync-note">🔒 Buying and selling on the Auction House unlocks at <b>hero level ${lock}</b>. Your mailbox works already.</div>` : '')
+  // morphing keeps the cursor in the field being typed in (search results re-render the filters)
+  morphed(host).innerHTML = (lock ? `<div class="sync-note">🔒 Buying and selling on the Auction House unlocks at <b>hero level ${lock}</b>. Your mailbox works already.</div>` : '')
     + (ui.tab === 'browse' ? browseHtml() : ui.tab === 'sell' ? sellHtml() : ui.tab === 'mine' ? mineHtml() : mailHtml());
-  if (keep) {
-    const el = host.querySelector(keep.q ? `[data-q="${keep.q}"]` : `[data-af="${keep.af}"][data-i="${keep.i}"]`);
-    if (el) { el.focus(); try { if (keep.pos != null) el.setSelectionRange(keep.pos, keep.pos); } catch {} }
-  }
 }
 
 export const auctionView = {

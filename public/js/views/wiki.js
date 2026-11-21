@@ -1,5 +1,6 @@
 // Wiki: game mechanics, classes, abilities, skill trees, ascendancies, statuses, items, town, expeditions and
 // zones — built live from the content files, so it always matches the game (including admin overrides).
+import { morphed } from '../morph.js';
 import { esc } from '../ui.js';
 import { classIcon, abilityIcon } from '../assets.js';
 import { CONFIG } from '/shared/config.js';
@@ -260,7 +261,7 @@ export const wikiView = {
   render(root) {
     if (root.querySelector('.wiki') && root.dataset.wikiPage === ui.page) return; // nothing changed (live state updates)
     root.dataset.wikiPage = ui.page;
-    root.innerHTML = `<div class="wiki">
+    morphed(root).innerHTML = `<div class="wiki">
       <aside class="wiki-nav panel"><input data-wiki-search placeholder="Search abilities, statuses…" value="${esc(ui.search)}">${nav()}</aside>
       <article class="wiki-page panel">${pageHtml()}</article>
     </div>`;

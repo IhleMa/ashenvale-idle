@@ -1,4 +1,5 @@
 // Combat view: live, server-driven battle display (presentation only — all math happens on the server).
+import { morphed } from '../morph.js';
 import { parseGemKey, gemName } from '/shared/gems.js';
 import { UNIQUES, SETS } from '/shared/data/legendaries.js';
 import { MATERIALS } from '/shared/data/town.js';
@@ -552,7 +553,7 @@ export const combatView = {
   render() {
     // Only the header depends on player state; units update via battle ticks.
     const h = root?.querySelector('.combat-header');
-    if (h && document.activeElement?.tagName !== 'SELECT') h.innerHTML = headerHtml(shown(), battles[shown()]);
+    if (h) morphed(h).innerHTML = headerHtml(shown(), battles[shown()]);
     renderResults();
   },
 };

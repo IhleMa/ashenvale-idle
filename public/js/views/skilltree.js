@@ -1,4 +1,5 @@
 // Passive skill tree: pan/zoom SVG web, path preview, multi-node allocation, refunds, search.
+import { morphed } from '../morph.js';
 import { describeChanges, mutatorAbilityName } from '/shared/mutators.js';
 import { SUBCLASSES } from '/shared/data/subclasses.js';
 import { state, selectedChar } from '../state.js';
@@ -362,9 +363,9 @@ export const skilltreeView = {
           <div class="panel tree-side"></div>
         </div>`;
     }
-    root.querySelector('.tree-picker').innerHTML = charPicker(ch.id) + buildsBar(ch);
+    morphed(root.querySelector('.tree-picker')).innerHTML = charPicker(ch.id) + buildsBar(ch);
     const side = root.querySelector('.tree-side');
-    if (!(side.contains(document.activeElement) && document.activeElement.tagName === 'INPUT')) side.innerHTML = sidebarHtml(ch);
+    morphed(side).innerHTML = sidebarHtml(ch);
     if (sig !== lastSig) {
       lastSig = sig;
       const host = root.querySelector('.tree-svg-host');

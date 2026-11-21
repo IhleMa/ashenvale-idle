@@ -1,5 +1,6 @@
 // Wardrobe: cosmetics bought with gold (no power) — name colours, titles and portrait frames.
 // Hovering a card tries it on in the preview; everything worn is shown to other players.
+import { morphed } from '../morph.js';
 import { state, hero } from '../state.js';
 import { act } from '../net.js';
 import { esc, fmt, run, toast, tipAttr, confirmBox, nameHtml, nameStyle, framed, borderStyle } from '../ui.js';
@@ -76,7 +77,7 @@ export const wardrobeView = {
     const p = state.player;
     const list = Object.values(COSMETICS[tab] || {}).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
     const owned = k => Object.values(COSMETICS[k] || {}).filter(c => ownsCosmetic(p, k, c.id)).length;
-    root.innerHTML = `<div class="wardrobe-layout">
+    morphed(root).innerHTML = `<div class="wardrobe-layout">
       <section class="panel wardrobe-preview">
         <h3>👑 Wardrobe</h3>
         <div data-preview>${previewHtml(trying ? { [trying.kind]: trying.id } : {})}</div>

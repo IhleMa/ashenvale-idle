@@ -1,4 +1,5 @@
 // Multiplayer: groups, invitations, co-op team selection, encounters and group chat.
+import { morphed } from '../morph.js';
 import { classLabel } from '/shared/data/subclasses.js';
 import { state, chars, bus } from '../state.js';
 import { act } from '../net.js';
@@ -77,7 +78,7 @@ export const multiplayerView = {
     const me = p.id;
     const isLeader = g?.leaderId === me;
     const chatFocused = document.activeElement?.closest?.('#chat-form');
-    root.innerHTML = `
+    morphed(root).innerHTML = `
       <div class="mp-layout">
         <div class="mp-left">
           ${state.invites.length ? `<section class="panel highlight"><h3>Invitations</h3>${state.invites.map(i => `<div class="bench-row"><div class="grow"><b>${esc(i.leader)}</b> invited you <span class="muted small">(${i.members} member${i.members > 1 ? 's' : ''})</span></div>
