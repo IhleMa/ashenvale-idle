@@ -3,7 +3,7 @@ import { describeChanges } from '/shared/mutators.js';
 import { classLabel } from '/shared/data/subclasses.js';
 import { state } from './state.js';
 import { act } from './net.js';
-import { esc, fmt, pct, modal, run, tipAttr, itemTooltipHtml, duration, botTag, nameHtml, framed, heroNameHtml, borderStyle, borderOf } from './ui.js';
+import { esc, fmt, pct, modal, run, tipAttr, itemTooltipHtml, duration, botTag, nameHtml, framed, heroNameHtml, borderStyle, borderOf, cappedPct } from './ui.js';
 import { portrait, classIcon, itemIcon, slotIcon, abilityIcon } from './assets.js';
 import { classBadge, roleBadge } from './components.js';
 import { CLASSES, TRAITS } from '/shared/data/classes.js';
@@ -133,7 +133,7 @@ function charDetailHtml(c, owner) {
       <div class="row gap">${c.isMain ? framed(portrait(c, 'md'), owner) : portrait(c, 'md')}<div><b>${c.isMain ? '★ ' + heroNameHtml(c.name, owner) : esc(c.name)}</b> <span class="muted small">Lv ${c.level} · ${esc(c.title || '')}</span><div>${classBadge(c.classId, c.subclass)} ${roleBadge(c.role)}${c.trait ? ` <span class="trait">${esc(TRAITS[c.trait]?.name || '')}</span>` : ''}</div></div></div>
       <div class="attr-preview" style="margin-top:10px">${Object.entries(ATTRIBUTES).map(([k, a]) => `<div><span>${a.label}</span><b>${s.attributes[k]}</b></div>`).join('')}</div>
       <div class="stat-grid">
-        ${[['Health', fmt(s.maxHp)], ['Physical Power', fmt(s.physPower)], ['Magic Power', fmt(s.magPower)], ['Healing Power', fmt(s.healPower)], ['Defense', fmt(s.defense)], ['Crit Chance', pct(s.critChance)], ['Crit Damage', pct(s.critDamage, 0)], ['Attack Speed', pct(s.attackSpeed, 0)], ['Power rating', fmt(c.power)]]
+        ${[['Health', fmt(s.maxHp)], ['Physical Power', fmt(s.physPower)], ['Magic Power', fmt(s.magPower)], ['Healing Power', fmt(s.healPower)], ['Defense', fmt(s.defense)], ['Crit Chance', cappedPct(s.critChance, s.uncapped?.critChance)], ['Crit Damage', pct(s.critDamage, 0)], ['Attack Speed', cappedPct(s.attackSpeed, s.uncapped?.attackSpeed, 0)], ['Power rating', fmt(c.power)]]
           .map(([l, v]) => `<div class="stat-row"><span>${l}</span><b>${v}</b></div>`).join('')}
       </div>
       <h4>Equipment</h4>

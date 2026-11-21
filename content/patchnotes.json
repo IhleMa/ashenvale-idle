@@ -143,7 +143,8 @@
             "New 💡 button next to the announcements: send the admins a suggestion (feature idea, balance, bug report, interface or other). You see your own suggestions with their status (Sent, Read, Planned, Done, Declined) and any reply from the admins.",
             "Tooltips always stay fully inside the window: they flip to the other side of the cursor when there's no room and are pushed back from the edges, also on small screens and for very tall item comparisons.",
             "Pages no longer reset when a fight ends or your gold changes: instead of redrawing everything, only the parts that changed are updated. Scroll positions (e.g. in the inventory), text you're typing, open dropdowns, hovered tooltips and animations all stay as they are.",
-            "Wiki: class scaling for critical chance and attack speed is now shown in percent (e.g. \"+0.16% per Dexterity\"). It used to show the raw value (0.0016), which looked 100× smaller than what the character screen shows. The game itself was always using the right values."
+            "Wiki: class scaling for critical chance and attack speed is now shown in percent (e.g. \"+0.16% per Dexterity\"). It used to show the raw value (0.0016), which looked 100× smaller than what the character screen shows. The game itself was always using the right values.",
+            "Capped stats show how far over the cap you are: critical chance and attack speed display the uncapped value in brackets, e.g. \"75.0% (102.3%)\", on the Character page and when inspecting players. The tooltip says how much is wasted."
           ]
         }
       ]

@@ -1509,3 +1509,4 @@ html.standalone body { padding-bottom: env(safe-area-inset-bottom); padding-left
 .admin-sugg.is-new { border-color: var(--accent); }
 .sugg-reply-row input { flex: 1; }
 .tab .tab-count { margin-left: 4px; background: var(--accent); color: #fff; border-radius: 9px; padding: 0 6px; font-size: .75em; }
+.overcap { color: #ff9b6b; font-weight: 600; font-size: .9em; }

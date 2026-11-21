@@ -2,7 +2,7 @@
 import { morphed } from '../morph.js';
 import { state, selectedChar } from '../state.js';
 import { act } from '../net.js';
-import { esc, fmt, pct, bar, run, modal, itemTooltipHtml, tipAttr, confirmBox, framed, heroNameHtml } from '../ui.js';
+import { esc, fmt, pct, bar, run, modal, itemTooltipHtml, tipAttr, confirmBox, framed, heroNameHtml, cappedPct, capTip } from '../ui.js';
 import { portrait, itemIcon, slotIcon } from '../assets.js';
 import { charPicker, bindPicker, charTitle, roleBadge, classBadge } from '../components.js';
 import { CONFIG, xpToNext } from '/shared/config.js';
@@ -95,9 +95,9 @@ export const characterView = {
             ${statRow('Magic Power', fmt(s.magPower))}
             ${statRow('Healing Power', fmt(s.healPower))}
             ${statRow('Defense', fmt(s.defense), 'Reduces physical damage (half effect vs. magic).')}
-            ${statRow('Critical Chance', pct(s.critChance))}
+            ${statRow('Critical Chance', cappedPct(s.critChance, s.uncapped?.critChance), capTip(CONFIG.combat.critCap, s.uncapped?.critChance))}
             ${statRow('Critical Damage', pct(s.critDamage, 0))}
-            ${statRow('Attack Speed', pct(s.attackSpeed, 0))}
+            ${statRow('Attack Speed', cappedPct(s.attackSpeed, s.uncapped?.attackSpeed, 0), capTip(CONFIG.combat.attackSpeedCap, s.uncapped?.attackSpeed, 0))}
             ${statRow(cls.resource.name, `${s.resourceMax} (+${cls.resource.regen}/s)`)}
           </div>
         </section>

@@ -66,16 +66,20 @@ export function computeStats(ch, dyn = null) {
   };
   const pctMul = key => 1 + (bonus[key + 'Pct'] || 0);
 
+  // stats with a cap: the value before capping is kept so the interface can show how far over the cap you are
+  const rawCrit = 0.05 + conv('critChance') + (gear.critChance || 0) + (bonus.critChance || 0);
+  const rawSpeed = 1 + conv('attackSpeed') + (gear.attackSpeed || 0) + (bonus.attackSpeed || 0);
   const s = {
     attributes,
+    uncapped: { critChance: rawCrit, attackSpeed: rawSpeed },
     maxHp: Math.round((40 + 8 * ch.level + conv('hp') + (gear.hp || 0)) * (1 + allPct + (bonus.hpPct || 0))),
     physPower: Math.round((conv('physPower') + (gear.physPower || 0)) * pctMul('physPower')),
     magPower: Math.round((conv('magPower') + (gear.magPower || 0)) * pctMul('magPower')),
     healPower: Math.round((conv('healPower') + (gear.healPower || 0)) * pctMul('healPower')),
     defense: Math.round((conv('defense') + (gear.defense || 0)) * pctMul('defense')),
-    critChance: Math.min(CONFIG.combat.critCap, 0.05 + conv('critChance') + (gear.critChance || 0) + (bonus.critChance || 0)),
+    critChance: Math.min(CONFIG.combat.critCap, rawCrit),
     critDamage: 1.5 + (cls.critDamageBonus || 0) + (gear.critDamage || 0) + (bonus.critDamage || 0),
-    attackSpeed: Math.min(CONFIG.combat.attackSpeedCap, 1 + conv('attackSpeed') + (gear.attackSpeed || 0) + (bonus.attackSpeed || 0)),
+    attackSpeed: Math.min(CONFIG.combat.attackSpeedCap, rawSpeed),
     dodge: bonus.dodge || 0,
     resourceMax: cls.resource.max,
     xpBonus: (bonus.xpPct || 0) + (ch.isMain ? CONFIG.mainCharacter.xpBonus : 0),

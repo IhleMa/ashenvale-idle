@@ -232,6 +232,12 @@ export function initTooltips() {
   addEventListener('resize', placeTip);
   document.addEventListener('click', () => { tipEl.style.display = 'none'; }, true);
 }
+// a capped stat in percent; when over the cap, the uncapped value follows in brackets: "75% (92%)"
+export function cappedPct(value, raw, digits = 1) {
+  if (!(raw > value + 1e-9)) return pct(value, digits);
+  return `${pct(value, digits)} <span class="overcap">(${pct(raw, digits)})</span>`;
+}
+export const capTip = (cap, raw, digits = 1) => `Capped at ${pct(cap, digits)}.${raw > cap + 1e-9 ? ` You have ${pct(raw, digits)}: ${pct(raw - cap, digits)} over the cap is wasted.` : ''}`;
 export const tipAttr = html => `data-tip="${esc(html)}"`;
 
 // ---- premium currency helpers
