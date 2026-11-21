@@ -142,7 +142,8 @@
             "Minion stats: summon abilities in the skill tree and on the Abilities page now show what the minion would have if summoned right now (health, damage per hit, attack speed, defense, crit, duration and how many you can have), including your gear, skill tree bonuses and the ability's rank. Rank nodes show the change to the next rank, and minion nodes like Thick Bones show each of your minions before and after.",
             "New 💡 button next to the announcements: send the admins a suggestion (feature idea, balance, bug report, interface or other). You see your own suggestions with their status (Sent, Read, Planned, Done, Declined) and any reply from the admins.",
             "Tooltips always stay fully inside the window: they flip to the other side of the cursor when there's no room and are pushed back from the edges, also on small screens and for very tall item comparisons.",
-            "Pages no longer reset when a fight ends or your gold changes: instead of redrawing everything, only the parts that changed are updated. Scroll positions (e.g. in the inventory), text you're typing, open dropdowns, hovered tooltips and animations all stay as they are."
+            "Pages no longer reset when a fight ends or your gold changes: instead of redrawing everything, only the parts that changed are updated. Scroll positions (e.g. in the inventory), text you're typing, open dropdowns, hovered tooltips and animations all stay as they are.",
+            "Wiki: class scaling for critical chance and attack speed is now shown in percent (e.g. \"+0.16% per Dexterity\"). It used to show the raw value (0.0016), which looked 100× smaller than what the character screen shows. The game itself was always using the right values."
           ]
         }
       ]
