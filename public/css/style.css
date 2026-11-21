@@ -1510,3 +1510,5 @@ html.standalone body { padding-bottom: env(safe-area-inset-bottom); padding-left
 .sugg-reply-row input { flex: 1; }
 .tab .tab-count { margin-left: 4px; background: var(--accent); color: #fff; border-radius: 9px; padding: 0 6px; font-size: .75em; }
 .overcap { color: #ff9b6b; font-weight: 600; font-size: .9em; }
+.ability-stats { margin-top: 4px; padding: 4px 6px; border-left: 2px solid #7fb8ff; background: rgba(127, 184, 255, .06); border-radius: 4px; line-height: 1.45; }
+.ability-stats-head { color: #a9cdff; font-weight: 600; }

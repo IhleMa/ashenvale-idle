@@ -353,7 +353,7 @@ function act(b, u) {
   u.actionTimer = C.baseAttackInterval / effAttackSpeed(u);
   if (!target) return;
   const ba = u.basicAttack;
-  dealDamage(b, u, target, effPower(u, ba.stat) * ba.power, { school: ba.school, ability: null, spell: false });
+  dealDamage(b, u, target, effPower(u, ba.stat) * ba.power, { school: ba.school, ability: null });
   if (u.resourceDef?.onHit) u.resource = Math.min(u.resourceMax, u.resource + u.resourceDef.onHit);
 }
 
@@ -404,7 +404,7 @@ function applyEffect(b, src, tgt, eff, abilityId) {
         const marked = eff.onHitIfStatus && tgt.statuses.some(s => s.id === eff.onHitIfStatus.status); // e.g. Shadow Flurry on a poisoned target
         src.lastHitCrit = false;
         const sure = eff.critIfStatus && tgt.statuses.some(s => s.id === eff.critIfStatus) ? 1 : 0; // Aimed Shot rank 3 on a marked target
-        const dealt = dealDamage(b, src, tgt, amount, { school: eff.school, ability: abilityId, bonusCrit: eff.bonusCrit, proc: eff.proc, forceCrit: !!sure, spell: eff.stat === 'magPower' || eff.stat === 'healPower' });
+        const dealt = dealDamage(b, src, tgt, amount, { school: eff.school, ability: abilityId, bonusCrit: eff.bonusCrit, proc: eff.proc, forceCrit: !!sure });
         // Spellstrike (Arcane Infusion): blade abilities also hit with the other half — weapon → magic, spell → physical
         if (tgt.alive && !eff.proc && ABILITIES[abilityId]?.blade) {
           const ss = src.statuses.find(s => STATUSES[s.id]?.spellstrike);
@@ -651,7 +651,7 @@ function consumeDots(b, src, tgt, eff, abilityId, rm) {
     tgt.statuses = tgt.statuses.filter(s => s !== mark);
     if (eff.markExecute && !tgt.boss && hpPct(tgt) < eff.markExecute * 100) amount = Math.max(amount, tgt.hp * 10);
   }
-  const dealt = dealDamage(b, src, tgt, amount, { school: eff.school || 'magical', ability: abilityId, bonusCrit: eff.bonusCrit, spell: true });
+  const dealt = dealDamage(b, src, tgt, amount, { school: eff.school || 'magical', ability: abilityId, bonusCrit: eff.bonusCrit });
   if (eff.splash) for (const e of enemiesOf(b, src)) if (e !== tgt) dealDamage(b, src, e, dealt * eff.splash, { school: eff.school || 'magical', ability: abilityId, noCrit: true });
   if (eff.refundPerStack && src.resourceDef) src.resource = Math.min(src.resourceMax, src.resource + eff.refundPerStack * dots.length);
 }
@@ -752,21 +752,16 @@ function tickStatuses(b, u) {
 }
 
 // Crit chance of one hit (Path of Exile style): (base + added) × (1 + % increased), capped.
-//   base: a character's weapon base crit for attacks, the spell's (ability baseCrit, else the spell default) for spells;
-//   enemies and minions use their crit chance as the base. added: the ability's bonusCrit. increased: the character's
-//   critInc plus buffs (statuses with a critChance mod).
-//   spell: true/false from the caller; otherwise magic damage counts as a spell.
-function critChanceOf(src, { school, ability, bonusCrit = 0, spell = null } = {}) {
+//   base: a character's weapon base crit (every hit: basic attacks, weapon abilities and spells alike); enemies and
+//   minions use their crit chance as the base. added: the ability's bonusCrit. increased: the character's critInc
+//   plus buffs (statuses with a critChance mod).
+function critChanceOf(src, { bonusCrit = 0 } = {}) {
   const st = src.stats;
-  let base = st.critChance || 0;
-  if (st.critInc != null) {
-    const isSpell = spell ?? school === 'magical';
-    base = isSpell ? (ABILITIES[ability]?.baseCrit ?? C.spellCritBase ?? 0.07) : (st.weaponCrit ?? C.unarmedCritBase ?? 0.05);
-  }
+  const base = st.critInc != null ? (st.weaponCrit ?? C.unarmedCritBase ?? 0.05) : (st.critChance || 0);
   return Math.min(C.critCap, (base + (bonusCrit || 0)) * Math.max(0, 1 + (st.critInc || 0) + mod(src, 'critChance')));
 }
 
-function dealDamage(b, src, tgt, raw, { school, ability, bonusCrit = 0, dot = null, ignoreArmor = false, noCrit = false, proc = null, exact = false, forceCrit = false, spell = null }) {
+function dealDamage(b, src, tgt, raw, { school, ability, bonusCrit = 0, dot = null, ignoreArmor = false, noCrit = false, proc = null, exact = false, forceCrit = false }) {
   if (!tgt.alive) return 0;
   if (mod(tgt, 'invulnerable') > 0) return 0; // Stasis
   if (!dot && !exact && school === 'physical' && mod(tgt, 'dodge') > 0 && b.rng() < mod(tgt, 'dodge')) {
@@ -787,7 +782,7 @@ function dealDamage(b, src, tgt, raw, { school, ability, bonusCrit = 0, dot = nu
   if (src.vsEnemy && tgt.defId in src.vsEnemy) amount *= 1 + src.vsEnemy[tgt.defId];
   if (b.hooks?.damageMult) amount *= b.hooks.damageMult(src, tgt, school);
   if (b.pvp && src.side !== tgt.side) amount *= b.pvp.damageMult ?? 1; // Arena: players hit each other softer
-  if (!noCrit && (forceCrit || b.rng() < critChanceOf(src, { school, ability, bonusCrit, spell }))) { crit = true; amount *= src.stats.critDamage; src.lastHitCrit = true; }
+  if (!noCrit && (forceCrit || b.rng() < critChanceOf(src, { bonusCrit }))) { crit = true; amount *= src.stats.critDamage; src.lastHitCrit = true; }
   if (!ignoreArmor) {
     const def = effDefense(tgt) * (school === 'magical' ? C.magicArmorFactor : 1);
     const red = Math.min(C.armorCap, def / (def + C.armorK + 12 * src.level));
@@ -912,7 +907,7 @@ function healUnit(b, src, tgt, raw, ability, hot = null, proc = null) {
   if (!tgt.alive) return 0;
   let amount = raw * (1 + src.bonuses.healingPct) * Math.max(0, 1 + mod(tgt, 'healingTakenPct')) * Math.max(0, 1 + mod(src, 'healingDonePct')) * (b.pvp?.healingMult ?? 1);
   let crit = false;
-  if (!hot && b.rng() < critChanceOf(src, { ability, spell: true }) * 0.5) { crit = true; amount *= 1.5; }
+  if (!hot && b.rng() < critChanceOf(src) * 0.5) { crit = true; amount *= 1.5; }
   amount = Math.round(amount);
   const effective = Math.min(amount, tgt.maxHp - tgt.hp);
   tgt.hp += effective;
@@ -1052,5 +1047,64 @@ export function runToEnd(b, maxTicks = 100000) {
 
 export { DT as TICK_SECONDS };
 // internals for tests
+// ---------------------------------------------------------------- ability preview (abilities page, skill tree)
+// What an ability does for this unit right now, with the same math as a fight: power, rank, skill-tree mutators, gear
+// and tree damage/healing bonuses, crit and cooldown/cost modifiers. Numbers are before the target's defense, damage
+// taken modifiers and shields, and before the ±8% spread of every hit. rank: show it at another rank (rank nodes).
+export function previewAbility(u, abilityId, { rank = null } = {}) {
+  const ab = u.abilityDefs?.[abilityId] || ABILITIES[abilityId];
+  if (!ab) return null;
+  const r = rank ?? (u.ranks?.[abilityId] || 1);
+  const rm = 1 + CONFIG.abilityRankBonus * (r - 1);
+  const out = school => 1 + u.bonuses.damagePct + mod(u, 'damagePct') + mod(u, school === 'magical' ? 'magDamagePct' : 'physDamagePct');
+  const healMult = 1 + u.bonuses.healingPct + mod(u, 'healingDonePct');
+  const lines = [];
+  for (const eff of ab.effects || []) {
+    const st = STATUSES[eff.status];
+    switch (eff.kind) {
+      case 'damage': case 'consume_dots': {
+        if (eff.kind === 'consume_dots') { lines.push({ kind: 'consume', perSecondLeft: Math.round(effPower(u, eff.stat || 'magPower') * (eff.power || 0.15) * rm * (1 + (u.bonuses.dotDamagePct || 0)) * out(eff.school || 'magical')), school: eff.school || 'magical' }); break; }
+        const school = eff.school || 'physical';
+        const hit = effPower(u, eff.stat) * eff.power * rm * out(school);
+        const chance = eff.critIfStatus ? null : critChanceOf(u, { bonusCrit: eff.bonusCrit });
+        lines.push({ kind: 'damage', school, hit: Math.round(hit), hits: eff.hits || 1, perSpent: !!eff.perSpent, crit: chance, critHit: Math.round(hit * u.stats.critDamage), bonusCrit: eff.bonusCrit || 0, aoe: !!(eff.allEnemies || ab.area) });
+        break;
+      }
+      case 'heal': {
+        const h = effPower(u, eff.stat) * eff.power * rm * healMult;
+        lines.push({ kind: 'heal', amount: Math.round(h), crit: critChanceOf(u) * 0.5, critAmount: Math.round(h * 1.5), allies: !!eff.allies });
+        break;
+      }
+      case 'shield': {
+        lines.push({ kind: 'shield', amount: Math.round(effPower(u, eff.stat) * eff.power * rm * (1 + u.bonuses.healingPct + mod(u, 'shieldPct'))), duration: eff.duration });
+        break;
+      }
+      case 'status': {
+        if (!st) break;
+        let dur = eff.duration;
+        let v = eff.stat ? effPower(u, eff.stat) * (eff.power || 0) * rm : 0;
+        if (st.type === 'buff') dur *= 1 + (u.bonuses.buffDurationPct || 0);
+        if (st.tick === 'damage') {
+          dur *= 1 + (u.bonuses.dotDurationPct || 0);
+          v *= (1 + (u.bonuses.dotDamagePct || 0)) * out(st.school || 'physical') * (1 + Math.max(0, mod(u, 'dotSpeedPct')));
+          lines.push({ kind: 'dot', status: eff.status, perSecond: Math.round(v), duration: dur, total: Math.round(v * dur), stacks: eff.stacks || 1, canCrit: !!st.canCrit, crit: st.canCrit ? critChanceOf(u) : 0 });
+        } else if (st.tick === 'heal') {
+          v *= healMult;
+          lines.push({ kind: 'hot', status: eff.status, perSecond: Math.round(v), duration: dur, total: Math.round(v * dur) });
+        } else lines.push({ kind: 'status', status: eff.status, duration: dur, self: !!eff.self, chance: eff.chance || 1 });
+        break;
+      }
+      default: break;
+    }
+  }
+  const cdRate = Math.max(0.01, 1 + mod(u, 'cooldownRatePct'));
+  return {
+    rank: r, lines,
+    cooldown: ab.cooldown ? ab.cooldown / cdRate : 0, baseCooldown: ab.cooldown || 0,
+    cost: ab.cost ? Math.ceil(ab.cost * Math.max(0, 1 + (u.passives?.costPct || 0))) : 0,
+    resource: u.resourceDef?.name || '',
+  };
+}
+
 export const __test = { applyEffect };
 export { alliesOf, enemiesOf };

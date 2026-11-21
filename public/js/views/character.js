@@ -95,8 +95,7 @@ export const characterView = {
             ${statRow('Magic Power', fmt(s.magPower))}
             ${statRow('Healing Power', fmt(s.healPower))}
             ${statRow('Defense', fmt(s.defense), 'Reduces physical damage (half effect vs. magic).')}
-            ${statRow('Crit Chance (attacks)', cappedPct(s.critChance, s.uncapped?.critChance), `Basic attacks and weapon abilities: weapon base ${pct(s.weaponCrit)} × (1 + ${pct(s.critInc, 0)} increased critical chance). Some abilities add base crit chance. ${capTip(CONFIG.combat.critCap, s.uncapped?.critChance)}`)}
-            ${statRow('Crit Chance (spells)', cappedPct(s.spellCrit, s.uncapped?.spellCrit), `Spells (magic power abilities): spell base ${pct(CONFIG.combat.spellCritBase ?? 0.07)} × (1 + ${pct(s.critInc, 0)} increased critical chance). Heals crit with half of it. ${capTip(CONFIG.combat.critCap, s.uncapped?.spellCrit)}`)}
+            ${statRow('Critical Chance', cappedPct(s.critChance, s.uncapped?.critChance), `Every hit (attacks and spells): weapon base ${pct(s.weaponCrit)} × (1 + ${pct(s.critInc, 0)} increased critical chance). Some abilities add base crit chance. Heals crit with half of it. ${capTip(CONFIG.combat.critCap, s.uncapped?.critChance)}`)}
             ${statRow('Critical Damage', pct(s.critDamage, 0))}
             ${statRow('Attack Speed', cappedPct(s.attackSpeed, s.uncapped?.attackSpeed, 0), capTip(CONFIG.combat.attackSpeedCap, s.uncapped?.attackSpeed, 0))}
             ${statRow(cls.resource.name, `${s.resourceMax} (+${cls.resource.regen}/s)`)}

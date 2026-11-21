@@ -9,10 +9,10 @@
           "heading": "Critical hits (reworked)",
           "items": [
             "Critical chance now works like in Path of Exile: crit = (base + added) × (1 + % increased), capped at 95% (was 75%).",
-            "Base crit: attacks (basic attacks and weapon abilities) use your weapon — Dagger 8%, Wand and Crossbow 7%, Bow and Staff 6.5%, Sword 6%, Axe and Mace 5.5%, unarmed 5%. Spells use 7%. Weapon tooltips show their base critical chance.",
+            "Base crit comes from your weapon and counts for every hit — basic attacks, weapon abilities and spells alike: Dagger 8%, Wand and Crossbow 7%, Bow and Staff 6.5%, Sword 6%, Axe and Mace 5.5%, unarmed 5%. Weapon tooltips show their base critical chance.",
             "Added base crit: a few abilities add to the base (Backstab +4%, Assassinate +6%, Deadeye Shot +8%, Pounce +10%, and some ascendancy upgrades).",
             "Everything else is now \"% increased critical chance\": attributes (e.g. Rogue +2.08% increased per Dexterity), the Precision affix, item implicits, uniques, sets, skill tree, ascendancies, the Keen Eye trait, War Chant and Cat Form. All values were converted so a typical build ends up close to its old crit chance; existing items and enchantments convert automatically.",
-            "The Character page shows two crit chances: attacks and spells, with the calculation in the tooltip. Heals crit with half of your spell crit chance; minions keep half of their owner's attack crit chance. Critical damage is unchanged."
+            "The Character page shows your crit chance with the calculation in the tooltip. Heals crit with half of it; minions keep half of their owner's. Critical damage is unchanged."
           ]
         },
         {
@@ -154,7 +154,8 @@
             "Tooltips always stay fully inside the window: they flip to the other side of the cursor when there's no room and are pushed back from the edges, also on small screens and for very tall item comparisons.",
             "Pages no longer reset when a fight ends or your gold changes: instead of redrawing everything, only the parts that changed are updated. Scroll positions (e.g. in the inventory), text you're typing, open dropdowns, hovered tooltips and animations all stay as they are.",
             "Wiki: class scaling for critical chance and attack speed is now shown in percent (e.g. \"+0.16% per Dexterity\"). It used to show the raw value (0.0016), which looked 100× smaller than what the character screen shows. The game itself was always using the right values.",
-            "Capped stats show how far over the cap you are: critical chance and attack speed display the uncapped value in brackets, e.g. \"75.0% (102.3%)\", on the Character page and when inspecting players. The tooltip says how much is wasted."
+            "Capped stats show how far over the cap you are: critical chance and attack speed display the uncapped value in brackets, e.g. \"75.0% (102.3%)\", on the Character page and when inspecting players. The tooltip says how much is wasted.",
+            "Abilities show their exact numbers with your current stats — like minions do: damage per hit and total, crit chance and crit damage, damage over time per second and in total, heals, shields, effect durations, cooldown (after cooldown speed) and cost. On the Abilities page, in the behaviour editor and in the skill tree (unlearned abilities show their rank 1 numbers, rank nodes the change to the next rank)."
           ]
         }
       ]

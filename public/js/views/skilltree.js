@@ -14,6 +14,7 @@ import { availablePoints, totalSkillPoints, spentPoints, pathTo, planPathTo, can
 import { treeRefundCost, treeResetCost } from '/shared/character.js';
 import { CONFIG } from '/shared/config.js';
 import { minionStatsHtml, minionRankHtml, minionNodeHtml, isMinionAbility } from '../minions.js';
+import { abilityStatsHtml, abilityRankHtml } from '../abilityStats.js';
 
 const SIZE = { start: 30, ability: 21, keystone: 25, notable: 16, mutator: 17, rank: 12, small: 9 };
 const GLYPH = { keystone: '✹', notable: '◆', mutator: '✦', rank: '▲', small: '' };
@@ -64,10 +65,10 @@ function nodeTip(ch, n, set) {
   }
   if (ab) html += `<br>${esc(ab.description)}<br><span class="muted">${ab.cost ? `${ab.cost} ${esc(CLASSES[ch.classId].resource.name)} · ` : ''}${ab.cooldown}s cooldown</span>`;
   if (lines.length) html += `<br>${lines.map(esc).join('<br>')}`;
-  // minions: their stats as if summoned now (with your gear, tree and the ability's rank)
+  // exact ability numbers and minion stats as they would be right now (gear, tree, rank)
   try {
-    if (n.type === 'ability' && isMinionAbility(ch, n.ability)) html += minionStatsHtml(ch, n.ability);
-    else if (n.type === 'rank' && isMinionAbility(ch, n.rankFor)) html += minionRankHtml(ch, n.rankFor);
+    if (n.type === 'ability') { html += abilityStatsHtml(ch, n.ability); if (isMinionAbility(ch, n.ability)) html += minionStatsHtml(ch, n.ability); }
+    else if (n.type === 'rank') { html += abilityRankHtml(ch, n.rankFor); if (isMinionAbility(ch, n.rankFor)) html += minionRankHtml(ch, n.rankFor); }
     else if (Object.keys(n.stats || {}).some(k => k.startsWith('minion'))) html += minionNodeHtml(ch, n.id, set.has(n.id));
   } catch (e) { console.warn('minion preview', e); }
   // abilities with extra effects at higher ranks

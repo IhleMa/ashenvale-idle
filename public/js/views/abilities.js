@@ -21,6 +21,7 @@ import { pathTo, availablePoints, mutatedAbilities, getTree } from '/shared/skil
 import { describeChanges } from '/shared/mutators.js';
 import { focusTreeNode } from './skilltree.js';
 import { minionStatsHtml, isMinionAbility } from '../minions.js';
+import { abilityStatsHtml } from '../abilityStats.js';
 
 let selectedAbility = null;
 const drafts = new Map(); // `${charId}:${abilityId}` -> rule draft
@@ -148,6 +149,7 @@ function editorHtml(ch, abilityId) {
       <label class="switch"><input type="checkbox" data-rule-enabled ${rule.enabled ? 'checked' : ''}><span></span> Enabled</label>
     </div>
     ${equipped ? '' : '<div class="notice">This ability is not in the loadout, so it will not be used in combat.</div>'}
+    <div class="small">${abilityStatsHtml(ch, abilityId)}</div>
     ${isMinionAbility(ch, abilityId) ? `<div class="small">${minionStatsHtml(ch, abilityId)}</div>` : ''}
     <div class="small ability-now"><b>Right now${ch.abilities[abilityId] > 1 ? ` (rank ${ch.abilities[abilityId]})` : ''}:</b> ${esc(abilityNow(ch, abilityId, nowCtx(ch)))}</div>
     <div class="rule-summary">${summary(a, rule)}</div>
@@ -319,7 +321,8 @@ function mutatorNodes(ch, abilityId) {
 // stats and mutated ability definitions for the "Now" lines (cached per render pass)
 let nowCache = null;
 function nowCtx(ch) {
-  if (nowCache?.ch !== ch || Date.now() - nowCache.at > 500) nowCache = { ch, at: Date.now(), stats: computeStats(ch), defs: mutatedAbilities(ch) };
+  // the text keeps percentages only; the exact amounts are in the numbers block below it (abilityStats.js)
+  if (nowCache?.ch !== ch || Date.now() - nowCache.at > 500) nowCache = { ch, at: Date.now(), stats: null, defs: mutatedAbilities(ch) };
   return nowCache;
 }
 
@@ -342,6 +345,7 @@ function abilityCard(ch, base) {
     <div class="grow"><b>${esc(a.name)}</b> <span class="type-tag t-${a.type}">${a.type}</span>${a.subclass && SUBCLASSES[a.subclass] ? ` <span class="sub-tag" style="--sub-color:${esc(SUBCLASSES[a.subclass].color || '#c9a24a')}">${esc(SUBCLASSES[a.subclass].glyph || '')} ${esc(SUBCLASSES[a.subclass].name)}</span>` : ''}
       <div class="small muted">${esc(a.description)}</div>
       ${unlocked ? `<div class="small ability-now"><b>Now${rank > 1 ? ` (rank ${rank})` : ''}:</b> ${esc(abilityNow(ch, a.id, nowCtx(ch)))}</div>` : ''}
+      ${unlocked ? `<div class="small">${abilityStatsHtml(ch, a.id)}</div>` : ''}
       ${isMinionAbility(ch, a.id) ? `<div class="small">${minionStatsHtml(ch, a.id)}</div>` : ''}
       <div class="small faint">${esc(meta)}</div>
       ${mutHtml}
