@@ -189,6 +189,13 @@ export function adminActions(game) {
         } : null,
       };
     },
+    // the player's full game data as JSON (for debugging balance with real characters); no login data in it
+    admin_player_export(s, d) {
+      const { acc, p } = loadById(d.id);
+      if (!p) fail('No game data yet');
+      admins.audit(s.player.name, 'export_player', acc.username, '');
+      return { username: acc.username, exportedAt: Date.now(), buildId: game.buildId, player: p };
+    },
     admin_kick(s, d) {
       const { acc } = loadById(d.id);
       kick(acc.id, 'You were disconnected by an admin.');

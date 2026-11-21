@@ -149,7 +149,7 @@ async function openPlayer(id, root) {
   let d;
   try { d = await act('admin_player', { id }); } catch (e) { return toast(e.message, 'error'); }
   const pl = d.player;
-  const m = modal(`<h2>${esc(d.username)} ${d.online ? '<span class="tag live">ONLINE</span>' : ''} ${d.banned ? '<span class="tag boss">BANNED</span>' : ''}</h2>
+  const m = modal(`<h2>${esc(d.username)} ${d.online ? '<span class="tag live">ONLINE</span>' : ''} ${d.banned ? '<span class="tag boss">BANNED</span>' : ''} ${pl ? `<button class="btn tiny ghost" data-export title="Download this player's game data as a JSON file">⬇ Export data</button>` : ''}</h2>
     <div class="muted small">Account created ${new Date(d.createdAt).toLocaleString()} · last seen ${d.online ? 'now' : ago(d.lastActive)}${d.banned ? ` · banned: ${esc(d.banned.reason)}${d.banned.until ? ` (until ${new Date(d.banned.until).toLocaleString()})` : ' (permanent)'}` : ''}</div>
     ${pl ? `<div class="admin-cards small-cards">
       ${[['Gold', fmt(pl.gold)], ['💠 Crystals', fmt(pl.premium)], ['Kills', fmt(pl.stats.kills || 0)], ['Characters', pl.characters.length], ['Inventory', `${pl.inventory.length}/${CONFIG.inventory.limit}`], ['Mailbox', pl.mailbox], ['Auctions', pl.auctions], ['Expeditions', pl.expeditions], ['Zone', pl.zone]].map(([l, v]) => `<div class="admin-card"><small>${l}</small><b>${esc(String(v))}</b></div>`).join('')}
@@ -199,6 +199,15 @@ async function openPlayer(id, root) {
     inp.value = mode === 'xp' ? 1000 : mode === 'levels' ? 1 : CONFIG.levelCap;
   });
   m.el.addEventListener('click', async e => {
+    if (e.target.closest('[data-export]')) {
+      try {
+        const data = await act('admin_player_export', { id });
+        const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 1)], { type: 'application/json' }));
+        const a = Object.assign(document.createElement('a'), { href: url, download: `ashenvale-${d.username}-${new Date().toISOString().slice(0, 10)}.json` });
+        document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+      } catch (err) { toast(err.message, 'error'); }
+      return;
+    }
     const t = e.target.closest('button');
     if (!t) return;
     const q = sel => m.el.querySelector(sel);

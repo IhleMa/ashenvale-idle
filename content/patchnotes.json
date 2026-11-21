@@ -159,6 +159,12 @@
             "Capped stats show how far over the cap you are: critical chance and attack speed display the uncapped value in brackets, e.g. \"75.0% (102.3%)\", on the Character page and when inspecting players. The tooltip says how much is wasted.",
             "Abilities show their exact numbers with your current stats — like minions do: damage per hit and total, crit chance and crit damage, damage over time per second and in total, heals, shields, effect durations, cooldown (after cooldown speed) and cost. On the Abilities page, in the behaviour editor and in the skill tree (unlearned abilities show their rank 1 numbers, rank nodes the change to the next rank)."
           ]
+        },
+        {
+          "heading": "Admin",
+          "items": [
+            "Admin panel: \"⬇ Export data\" in a player's details downloads their game data as a JSON file (no login data), e.g. to check balance with real characters."
+          ]
         }
       ]
     },

@@ -15,7 +15,7 @@ export const ATTRIBUTES = {
 };
 export const ATTR_IDS = Object.keys(ATTRIBUTES);
 
-function collectBonuses(ch) {
+export function collectBonuses(ch) {
   const bonus = {};
   const add = obj => { for (const [k, v] of Object.entries(obj || {})) bonus[k] = (bonus[k] || 0) + v; };
   const cls = CLASSES[ch.classId];
