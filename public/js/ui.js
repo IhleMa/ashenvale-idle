@@ -197,27 +197,39 @@ export function itemTooltipHtml(item, compareTo = null, wearer = null) {
   </div>`;
 }
 
-// Generic hover tooltip: elements with data-tip="html" get a floating tooltip
+// Generic hover tooltip: elements with data-tip="html" get a floating tooltip.
+// It is always kept fully inside the window: placed next to the cursor, flipped to the other side when there is no
+// room, then clamped to the edges (also when its content or size changes while it is shown).
 let tipEl = null;
+const tipPos = { x: 0, y: 0 };
+function placeTip() {
+  if (!tipEl || tipEl.style.display !== 'block') return;
+  const pad = 14, m = 8;
+  const vw = document.documentElement.clientWidth, vh = document.documentElement.clientHeight;
+  const w = tipEl.offsetWidth, h = tipEl.offsetHeight;
+  let x = tipPos.x + pad, y = tipPos.y + pad;
+  if (x + w > vw - m) x = tipPos.x - w - pad; // no room on the right: left of the cursor
+  if (y + h > vh - m) y = tipPos.y - h - pad; // no room below: above the cursor
+  x = Math.max(m, Math.min(x, vw - w - m));
+  y = Math.max(m, Math.min(y, vh - h - m));
+  tipEl.style.left = x + 'px'; tipEl.style.top = y + 'px';
+}
 export function initTooltips() {
   tipEl = document.createElement('div');
   tipEl.id = 'tooltip';
   document.body.appendChild(tipEl);
   document.addEventListener('mouseover', e => {
+    tipPos.x = e.clientX; tipPos.y = e.clientY;
     const t = e.target.closest('[data-tip]');
     if (!t) { tipEl.style.display = 'none'; return; }
     tipEl.innerHTML = t.dataset.tip;
     tipEl.style.display = 'block';
+    placeTip();
   });
-  document.addEventListener('mousemove', e => {
-    if (tipEl.style.display !== 'block') return;
-    const pad = 14;
-    let x = e.clientX + pad, y = e.clientY + pad;
-    const r = tipEl.getBoundingClientRect();
-    if (x + r.width > innerWidth - 8) x = e.clientX - r.width - pad;
-    if (y + r.height > innerHeight - 8) y = e.clientY - r.height - pad;
-    tipEl.style.left = x + 'px'; tipEl.style.top = y + 'px';
-  });
+  document.addEventListener('mousemove', e => { tipPos.x = e.clientX; tipPos.y = e.clientY; placeTip(); });
+  // content that grows after showing (images, live updates) or a resized window
+  new ResizeObserver(placeTip).observe(tipEl);
+  addEventListener('resize', placeTip);
   document.addEventListener('click', () => { tipEl.style.display = 'none'; }, true);
 }
 export const tipAttr = html => `data-tip="${esc(html)}"`;
