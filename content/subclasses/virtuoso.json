@@ -6,8 +6,8 @@
   "title": "Virtuoso",
   "description": "Plays faster and harder: more Finales and damaging notes.",
   "bonus": {
-    "attackSpeed": 0.05,
-    "critChance": 0.39
+    "attackSpeed": 0.1,
+    "critChance": 0.78
   },
   "branches": [
     {
@@ -24,7 +24,7 @@
         "4": {
           "name": "Nimble Fingers",
           "stats": {
-            "attackSpeed": 0.06
+            "attackSpeed": 0.12
           }
         },
         "8": {

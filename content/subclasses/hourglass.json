@@ -6,7 +6,7 @@
   "title": "Master of Tempo",
   "description": "Makes the party faster: more Haste, more Time Dilation, more abilities.",
   "bonus": {
-    "attackSpeed": 0.05
+    "attackSpeed": 0.1
   },
   "branches": [
     {
@@ -23,13 +23,13 @@
         "4": {
           "name": "Quick Sand",
           "stats": {
-            "attackSpeed": 0.06
+            "attackSpeed": 0.12
           }
         },
         "8": {
           "name": "Perpetual Motion",
           "stats": {
-            "attackSpeed": 0.08,
+            "attackSpeed": 0.16,
             "damagePct": 0.08
           }
         }

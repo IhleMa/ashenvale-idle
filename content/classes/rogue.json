@@ -9,14 +9,13 @@
   "resource": { "id": "energy", "name": "Energy", "color": "#f2d33a", "max": 100, "start": 100, "regen": 9 },
   "baseAttributes": { "str": 7, "int": 4, "dex": 15, "vit": 9 },
   "growth": { "str": 1, "int": 0.4, "dex": 3, "vit": 1.7 },
+  "levelBonus": {"critChance": 0.0312, "attackSpeed": 0.0033},
   "scaling": {
     "hp": { "vit": 11 },
     "physPower": { "dex": 2, "str": 0.6 },
     "magPower": { "int": 1 },
     "healPower": { "int": 0.4 },
-    "defense": { "str": 0.25, "vit": 0.4, "dex": 0.15 },
-    "critChance": { "dex": 0.0104 },
-    "attackSpeed": { "dex": 0.0011 }
+    "defense": { "str": 0.25, "vit": 0.4, "dex": 0.15 }
   },
   "basicAttack": { "name": "Slash", "stat": "physPower", "power": 0.9, "school": "physical" },
   "critDamageBonus": 0.25,

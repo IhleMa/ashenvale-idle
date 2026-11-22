@@ -30,7 +30,7 @@
           "name": "Archmage Blade",
           "stats": {
             "damagePct": 0.12,
-            "critChance": 0.39
+            "critChance": 0.78
           }
         }
       },

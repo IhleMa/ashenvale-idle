@@ -33,8 +33,8 @@
       "attrs": ["int", "dex"],
       "abilities": {},
       "notables": {
-        "4": { "name": "Clarity", "stats": { "attackSpeed": 0.06 } },
-        "8": { "name": "Divine Favor", "stats": { "critChance": 0.65, "healingPct": 0.06 } }
+        "4": { "name": "Clarity", "stats": { "attackSpeed": 0.12 } },
+        "8": { "name": "Divine Favor", "stats": { "critChance": 1.3, "healingPct": 0.06 } }
       }
     }
   ],

@@ -70,21 +70,24 @@ export function computeStats(ch, dyn = null) {
   // Critical chance works like in Path of Exile: every hit (attacks and spells alike) has the weapon's base crit chance,
   // and all crit bonuses are "% increased" that multiply it: crit = base × (1 + increased). critInc is that sum
   // (attributes, gear, skill tree, …).
-  const critInc = conv('critChance') + (gear.critChance || 0) + (bonus.critChance || 0);
+  // Attributes give no crit or attack speed: the class grows them per level (levelBonus), the rest comes from gear,
+  // the skill tree and buffs — so crit gear matters and stacking an attribute can't cap them.
+  const lvlBonus = k => (cls.levelBonus?.[k] || 0) * ch.level;
+  const critInc = lvlBonus('critChance') + conv('critChance') + (gear.critChance || 0) + (bonus.critChance || 0);
   const weaponCrit = ITEM_BASES[ch.equipment?.weapon?.baseId]?.baseCrit ?? CONFIG.combat.unarmedCritBase ?? 0.05;
   const rawCrit = weaponCrit * (1 + critInc);
   // stats with a cap: the value before capping is kept so the interface can show how far over the cap you are
   // Attack speed works like in Path of Exile too: the weapon has a base speed (1 = normal), every bonus is
   // "% increased" and they add up; "more" bonuses (attackSpeedMore) each multiply. Casters use it as well — it sets the
   // pace of basic attacks and the global cooldown between abilities. Haste buffs and slows in a fight multiply on top.
-  const speedInc = conv('attackSpeed') + (gear.attackSpeed || 0) + (bonus.attackSpeed || 0);
+  const speedInc = lvlBonus('attackSpeed') + conv('attackSpeed') + (gear.attackSpeed || 0) + (bonus.attackSpeed || 0);
   const speedMore = 1 + (bonus.attackSpeedMore || 0);
   const weaponSpeed = ITEM_BASES[ch.equipment?.weapon?.baseId]?.baseSpeed ?? 1;
   const rawSpeed = weaponSpeed * (1 + speedInc) * speedMore;
   const s = {
     attributes,
     uncapped: { critChance: rawCrit, attackSpeed: rawSpeed },
-    critInc, weaponCrit, speedInc, speedMore, weaponSpeed,
+    critInc, weaponCrit, speedInc, speedMore, weaponSpeed, levelCrit: lvlBonus('critChance'), levelSpeed: lvlBonus('attackSpeed'),
     maxHp: Math.round((40 + 8 * ch.level + conv('hp') + (gear.hp || 0)) * (1 + allPct + (bonus.hpPct || 0))),
     physPower: Math.round((conv('physPower') + (gear.physPower || 0)) * pctMul('physPower')),
     magPower: Math.round((conv('magPower') + (gear.magPower || 0)) * pctMul('magPower')),

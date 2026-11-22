@@ -30,7 +30,7 @@
           "name": "Event Horizon",
           "stats": {
             "damagePct": 0.12,
-            "critChance": 0.52
+            "critChance": 1.04
           }
         }
       },

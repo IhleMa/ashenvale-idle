@@ -7,7 +7,7 @@
   "title": "Trickster",
   "bonus": {
     "damagePct": 0.05,
-    "attackSpeed": 0.04
+    "attackSpeed": 0.08
   },
   "branches": [
     {
@@ -24,7 +24,7 @@
         "4": {
           "name": "Sleight of Hand",
           "stats": {
-            "attackSpeed": 0.06,
+            "attackSpeed": 0.12,
             "damagePct": 0.05
           }
         },

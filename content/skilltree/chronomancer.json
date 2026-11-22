@@ -41,14 +41,14 @@
         "4": {
           "name": "Quickening",
           "stats": {
-            "attackSpeed": 0.06
+            "attackSpeed": 0.12
           }
         },
         "8": {
           "name": "Momentum",
           "stats": {
-            "attackSpeed": 0.08,
-            "critChance": 0.39
+            "attackSpeed": 0.16,
+            "critChance": 0.78
           }
         }
       }

@@ -22,7 +22,10 @@ rogue.equipment.weapon = dagger;
 s = computeStats(rogue);
 close(s.weaponCrit, ITEM_BASES.dagger.baseCrit);
 close(s.critChance, Math.min(CONFIG.combat.critCap, ITEM_BASES.dagger.baseCrit * (1 + s.critInc)));
-assert.ok(s.critInc > 1, 'Dexterity gives % increased crit');
+assert.ok(s.levelCrit > 0.5, 'the class gives % increased crit per level');
+{ const c2 = JSON.parse(JSON.stringify(rogue)); c2.equipment.amulet = { ...dagger, slot: 'amulet', baseId: 'amulet', affixes: [{ stat: 'dex', tier: 1, roll: 1 }], uniqueStats: undefined, unique: undefined, enchant: undefined, sockets: [] };
+  const s2 = computeStats(c2); assert.ok(s2.attributes.dex > s.attributes.dex); close(s2.critInc, s.critInc, 1e-9); close(s2.speedInc, s.speedInc, 1e-9); }
+ok('attributes give no crit or attack speed: more Dexterity changes neither');
 ok(`every hit: weapon base × (1 + increased) — dagger ${(ITEM_BASES.dagger.baseCrit * 100)}% × ${(1 + s.critInc).toFixed(2)} = ${(s.critChance * 100).toFixed(1)}%`);
 
 // the real crit rate of basic attacks over many swings

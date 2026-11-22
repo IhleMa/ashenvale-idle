@@ -42,14 +42,14 @@
         "4": {
           "name": "Feral Instinct",
           "stats": {
-            "critChance": 0.52
+            "critChance": 1.04
           }
         },
         "8": {
           "name": "Predator",
           "stats": {
             "physPowerPct": 0.12,
-            "attackSpeed": 0.05
+            "attackSpeed": 0.1
           }
         }
       }

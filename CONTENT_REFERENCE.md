@@ -603,7 +603,7 @@ Building effect template values: `{level}`, `{concurrentBuilds}`, `{innRoster}`,
 | [`dragonscale_aegis`](content/legendaries/uniques/dragonscale_aegis.json) | Dragonscale Aegis | shield |
 | [`voidwalkers`](content/legendaries/uniques/voidwalkers.json) | Voidwalkers | cloth_boots |
 | [`heart_of_the_void`](content/legendaries/uniques/heart_of_the_void.json) | Heart of the Void | ring |
-| [`titans_cleaver`](content/legendaries/uniques/titans_cleaver.json) | Titan's Cleaver | axe |
+| [`titans_cleaver`](content/legendaries/uniques/titans_cleaver.json) | Titan's Cleaver | sword |
 
 | set id | name | pieces |
 | --- | --- | --- |

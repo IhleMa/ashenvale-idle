@@ -29,7 +29,7 @@
         "8": {
           "name": "Saga",
           "stats": {
-            "critChance": 0.65,
+            "critChance": 1.3,
             "critDamage": 0.2
           }
         }

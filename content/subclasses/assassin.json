@@ -6,7 +6,7 @@
   "description": "A silent killer who picks off the weakest enemy with devastating critical strikes.",
   "title": "Assassin",
   "bonus": {
-    "critChance": 0.52,
+    "critChance": 1.04,
     "critDamage": 0.15
   },
   "branches": [
@@ -24,7 +24,7 @@
         "4": {
           "name": "Killer Instinct",
           "stats": {
-            "critChance": 0.52,
+            "critChance": 1.04,
             "critDamage": 0.2
           }
         },

@@ -7,7 +7,7 @@
   "title": "Berserker",
   "bonus": {
     "damagePct": 0.08,
-    "attackSpeed": 0.05
+    "attackSpeed": 0.1
   },
   "branches": [
     {
@@ -25,14 +25,14 @@
           "name": "Blood Frenzy",
           "stats": {
             "damagePct": 0.1,
-            "critChance": 0.39
+            "critChance": 0.78
           }
         },
         "8": {
           "name": "Undying Rage",
           "stats": {
             "damagePct": 0.15,
-            "attackSpeed": 0.08,
+            "attackSpeed": 0.16,
             "critDamage": 0.2
           }
         }

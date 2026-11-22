@@ -30,7 +30,7 @@
           "name": "Thousand Cuts",
           "stats": {
             "critDamage": 0.25,
-            "attackSpeed": 0.05
+            "attackSpeed": 0.1
           }
         }
       },

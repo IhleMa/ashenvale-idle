@@ -6,7 +6,7 @@
   "description": "Never misses. Huge critical shots that take down the toughest targets.",
   "title": "Sharpshooter",
   "bonus": {
-    "critChance": 0.52,
+    "critChance": 1.04,
     "physPowerPct": 0.05
   },
   "branches": [
@@ -24,7 +24,7 @@
         "4": {
           "name": "Eagle Eye",
           "stats": {
-            "critChance": 0.65,
+            "critChance": 1.3,
             "critDamage": 0.15
           }
         },

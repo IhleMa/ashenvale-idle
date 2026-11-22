@@ -95,9 +95,9 @@ export const characterView = {
             ${statRow('Magic Power', fmt(s.magPower))}
             ${statRow('Healing Power', fmt(s.healPower))}
             ${statRow('Defense', fmt(s.defense), 'Reduces physical damage (half effect vs. magic).')}
-            ${statRow('Critical Chance', cappedPct(s.critChance, s.uncapped?.critChance), `Every hit (attacks and spells): weapon base ${pct(s.weaponCrit)} × (1 + ${pct(s.critInc, 0)} increased critical chance). Some abilities add base crit chance. Heals crit with half of it. ${capTip(CONFIG.combat.critCap, s.uncapped?.critChance)}`)}
+            ${statRow('Critical Chance', cappedPct(s.critChance, s.uncapped?.critChance), `Every hit (attacks and spells): weapon base ${pct(s.weaponCrit)} × (1 + ${pct(s.critInc, 0)} increased critical chance — ${pct(s.levelCrit || 0, 0)} from your class level, the rest from gear, skill tree and bonuses). Some abilities add base crit chance. Heals crit with half of it. ${capTip(CONFIG.combat.critCap, s.uncapped?.critChance)}`)}
             ${statRow('Critical Damage', pct(s.critDamage, 0))}
-            ${statRow('Attack Speed', cappedPct(s.attackSpeed, s.uncapped?.attackSpeed, 0), `Weapon base ${pct(s.weaponSpeed ?? 1, 0)} × (1 + ${pct(s.speedInc || 0, 1)} increased attack speed)${(s.speedMore ?? 1) !== 1 ? ` × ${pct(s.speedMore, 0)} (more)` : ''}. Sets the pace of basic attacks and the pause between abilities, for casters too; haste buffs and slows multiply on top in a fight. ${capTip(CONFIG.combat.attackSpeedCap, s.uncapped?.attackSpeed, 0)}`)}
+            ${statRow('Attack Speed', cappedPct(s.attackSpeed, s.uncapped?.attackSpeed, 0), `Weapon base ${pct(s.weaponSpeed ?? 1, 0)} × (1 + ${pct(s.speedInc || 0, 1)} increased attack speed — ${pct(s.levelSpeed || 0, 1)} from your class level, the rest from gear, skill tree and bonuses)${(s.speedMore ?? 1) !== 1 ? ` × ${pct(s.speedMore, 0)} (more)` : ''}. Sets the pace of basic attacks and the pause between abilities, for casters too; haste buffs and slows multiply on top in a fight. ${capTip(CONFIG.combat.attackSpeedCap, s.uncapped?.attackSpeed, 0)}`)}
             ${statRow(cls.resource.name, `${s.resourceMax} (+${cls.resource.regen}/s)`)}
           </div>
         </section>

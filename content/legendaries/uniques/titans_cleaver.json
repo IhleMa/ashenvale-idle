@@ -1,6 +1,6 @@
 {
   "name": "Titan's Cleaver",
-  "baseId": "axe",
+  "baseId": "sword",
   "minLevel": 50,
   "flavor": "The first blow decides everything.",
   "stats": {

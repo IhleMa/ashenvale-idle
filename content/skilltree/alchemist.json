@@ -65,7 +65,7 @@
         "4": {
           "name": "Precise Measures",
           "stats": {
-            "critChance": 0.65
+            "critChance": 1.3
           }
         },
         "8": {
@@ -87,7 +87,7 @@
         "4": {
           "name": "Steady Hands",
           "stats": {
-            "attackSpeed": 0.06
+            "attackSpeed": 0.12
           }
         },
         "8": {

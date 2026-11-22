@@ -12,14 +12,13 @@
   "resource": { "id": "soul", "name": "Soul Energy", "color": "#9b6bff", "max": 100, "start": 60, "regen": 5 },
   "baseAttributes": { "str": 4, "int": 14, "dex": 6, "vit": 10 },
   "growth": { "str": 0.4, "int": 2.8, "dex": 0.9, "vit": 2 },
+  "levelBonus": {"critChance": 0.0166, "attackSpeed": 0.0011},
   "scaling": {
     "hp": { "vit": 10 },
     "physPower": { "str": 1, "dex": 0.3 },
     "magPower": { "int": 2.2 },
     "healPower": { "int": 0.6 },
-    "defense": { "str": 0.2, "vit": 0.4 },
-    "critChance": { "dex": 0.0104, "int": 0.0026 },
-    "attackSpeed": { "dex": 0.0012 }
+    "defense": { "str": 0.2, "vit": 0.4 }
   },
   "basicAttack": { "name": "Soul Bolt", "stat": "magPower", "power": 0.8, "school": "magical" },
   "threatMult": 0.9,

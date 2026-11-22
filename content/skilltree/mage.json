@@ -15,8 +15,8 @@
       "attrs": ["int", "dex"],
       "abilities": { "1": "frost_bolt", "5": "frost_nova" },
       "notables": {
-        "4": { "name": "Cold Precision", "stats": { "critChance": 0.52 } },
-        "8": { "name": "Absolute Zero", "stats": { "critDamage": 0.3, "critChance": 0.26 } }
+        "4": { "name": "Cold Precision", "stats": { "critChance": 1.04 } },
+        "8": { "name": "Absolute Zero", "stats": { "critDamage": 0.3, "critChance": 0.52 } }
       }
     },
     {
@@ -24,7 +24,7 @@
       "attrs": ["int", "dex"],
       "abilities": { "3": "arcane_missiles", "6": "arcane_power" },
       "notables": {
-        "4": { "name": "Arcane Flow", "stats": { "attackSpeed": 0.06 } },
+        "4": { "name": "Arcane Flow", "stats": { "attackSpeed": 0.12 } },
         "8": { "name": "Archmage", "stats": { "magPowerPct": 0.15 } }
       }
     },

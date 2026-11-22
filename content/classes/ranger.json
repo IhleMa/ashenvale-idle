@@ -9,14 +9,13 @@
   "resource": { "id": "focus", "name": "Focus", "color": "#f08a3a", "max": 100, "start": 60, "regen": 6 },
   "baseAttributes": { "str": 6, "int": 5, "dex": 14, "vit": 10 },
   "growth": { "str": 0.8, "int": 0.5, "dex": 2.8, "vit": 1.9 },
+  "levelBonus": {"critChance": 0.0291, "attackSpeed": 0.0036},
   "scaling": {
     "hp": { "vit": 11 },
     "physPower": { "dex": 2.1, "str": 0.4 },
     "magPower": { "int": 1 },
     "healPower": { "int": 0.5 },
-    "defense": { "str": 0.25, "vit": 0.45 },
-    "critChance": { "dex": 0.0104 },
-    "attackSpeed": { "dex": 0.0013 }
+    "defense": { "str": 0.25, "vit": 0.45 }
   },
   "basicAttack": { "name": "Shoot", "stat": "physPower", "power": 1, "school": "physical" },
   "threatMult": 1,

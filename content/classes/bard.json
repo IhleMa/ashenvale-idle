@@ -33,6 +33,7 @@
     "dex": 2,
     "vit": 1.7
   },
+  "levelBonus": {"critChance": 0.026, "attackSpeed": 0.003},
   "scaling": {
     "hp": {
       "vit": 11
@@ -51,12 +52,6 @@
     "defense": {
       "str": 0.25,
       "vit": 0.4
-    },
-    "critChance": {
-      "dex": 0.013
-    },
-    "attackSpeed": {
-      "dex": 0.0015
     }
   },
   "basicAttack": {

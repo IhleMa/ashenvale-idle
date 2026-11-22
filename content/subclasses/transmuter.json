@@ -7,7 +7,7 @@
   "description": "Combos on demand: instant reactions and stronger catalysts.",
   "bonus": {
     "damagePct": 0.06,
-    "critChance": 0.39
+    "critChance": 0.78
   },
   "branches": [
     {
@@ -31,7 +31,7 @@
           "name": "Great Work",
           "stats": {
             "damagePct": 0.12,
-            "attackSpeed": 0.05
+            "attackSpeed": 0.1
           }
         }
       },

@@ -9,14 +9,13 @@
   "resource": { "id": "rage", "name": "Rage", "color": "#d9452b", "max": 100, "start": 20, "regen": 1, "onHit": 7, "onDamaged": 4 },
   "baseAttributes": { "str": 12, "int": 4, "dex": 6, "vit": 15 },
   "growth": { "str": 2.3, "int": 0.5, "dex": 1, "vit": 2.9 },
+  "levelBonus": {"critChance": 0.0091, "attackSpeed": 0.0012},
   "scaling": {
     "hp": { "vit": 13 },
     "physPower": { "str": 2, "dex": 0.4 },
     "magPower": { "int": 1 },
     "healPower": { "int": 0.5, "vit": 0.2 },
-    "defense": { "str": 0.45, "vit": 0.7 },
-    "critChance": { "dex": 0.0091 },
-    "attackSpeed": { "dex": 0.0012 }
+    "defense": { "str": 0.45, "vit": 0.7 }
   },
   "basicAttack": { "name": "Strike", "stat": "physPower", "power": 1, "school": "physical" },
   "threatMult": 1.5,

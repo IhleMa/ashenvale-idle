@@ -30,7 +30,7 @@
           "name": "Avenging Wrath",
           "stats": {
             "damagePct": 0.15,
-            "critChance": 0.52
+            "critChance": 1.04
           }
         }
       },
