@@ -1,0 +1,24 @@
+{
+  "name": "Twinfang",
+  "baseId": "parrying_dagger",
+  "minLevel": 40,
+  "flavor": "The second cut is the one they never see.",
+  "stats": {
+    "dex": [
+      3,
+      0.8
+    ],
+    "attackSpeed": [
+      0.06,
+      0.002
+    ]
+  },
+  "passive": {
+    "doubleStrike": 0.25
+  },
+  "description": "Your basic attacks have a 25% chance to hit twice.",
+  "order": 125,
+  "zones": [
+    "crimson_keep"
+  ]
+}

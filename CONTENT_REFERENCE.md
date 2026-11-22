@@ -604,6 +604,7 @@ Building effect template values: `{level}`, `{concurrentBuilds}`, `{innRoster}`,
 | [`voidwalkers`](content/legendaries/uniques/voidwalkers.json) | Voidwalkers | cloth_boots |
 | [`heart_of_the_void`](content/legendaries/uniques/heart_of_the_void.json) | Heart of the Void | ring |
 | [`titans_cleaver`](content/legendaries/uniques/titans_cleaver.json) | Titan's Cleaver | sword |
+| [`twinfang`](content/legendaries/uniques/twinfang.json) | Twinfang | parrying_dagger |
 
 | set id | name | pieces |
 | --- | --- | --- |

@@ -355,6 +355,14 @@ function act(b, u) {
   const ba = u.basicAttack;
   dealDamage(b, u, target, effPower(u, ba.stat) * ba.power, { school: ba.school, ability: null });
   if (u.resourceDef?.onHit) u.resource = Math.min(u.resourceMax, u.resource + u.resourceDef.onHit);
+  // doubleStrike (unique passive, e.g. Twinfang): a chance that the basic attack hits a second time — a full basic
+  // attack of its own (can crit, counts as a hit)
+  const ds = u.passives?.doubleStrike || 0;
+  if (ds > 0 && target.alive && b.rng() < ds) {
+    emit(b, { type: 'proc', src: u.uid, tgt: target.uid, name: 'Double Strike' });
+    dealDamage(b, u, target, effPower(u, ba.stat) * ba.power, { school: ba.school, ability: null });
+    if (u.resourceDef?.onHit) u.resource = Math.min(u.resourceMax, u.resource + u.resourceDef.onHit);
+  }
 }
 
 function basicTarget(b, u) {

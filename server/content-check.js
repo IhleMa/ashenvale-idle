@@ -15,7 +15,7 @@ const ATTRS = ['str', 'int', 'dex', 'vit'];
 const AFFIX_MECHANICS = ['enemyStats', 'enemyDamageTaken', 'onEnemyDeath', 'enemyLowHealth', 'onEnemyHit', 'periodic'];
 const TIP_CONDITIONS = ['anyOf', 'healsAllies', 'hasAbility', 'phaseStatus', 'appliesStatus', 'appliesStatuses', 'areaDamage', 'minHitPower', 'targetsSelectors', 'basicSchool', 'phaseSummons', 'enrages', 'hasTag'];
 const QUEST_REQUIRES = ['rift', 'expedition', 'town', 'workers'];
-const PASSIVES = ['damageVsBossPct', 'damageVsHighHpPct', 'costPct'];
+const PASSIVES = ['damageVsBossPct', 'damageVsHighHpPct', 'costPct', 'doubleStrike'];
 
 const CFG_ASC_ON = C => C.config?.ascension?.enabled !== false;
 

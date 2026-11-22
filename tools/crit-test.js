@@ -68,4 +68,24 @@ ok(`in combat basic attacks crit ${(crits / hits * 100).toFixed(1)}% of ${hits} 
   close(computeStats(r).attackSpeed, Math.min(CONFIG.combat.attackSpeedCap, 1 * (1 + st.speedInc) * st.speedMore));
   ok(`attack speed: weapon base × (1 + increased) — dagger ${ITEM_BASES.dagger.baseSpeed} × ${(1 + st.speedInc).toFixed(2)} = ${(st.attackSpeed * 100).toFixed(0)}%`);
 }
+{ // Twinfang (unique Rogue off-hand): basic attacks have a 25% chance to hit twice
+  const { generateUnique } = await import('../shared/data/legendaries.js');
+  const r = createCharacter({ id: 'r3', name: 'R', classId: 'rogue', isMain: true, level: 45 });
+  r.equipment.offhand = generateUnique(createRng(1), 45, 'twinfang');
+  assert.equal(r.equipment.offhand.slot, 'offhand');
+  let swings = 0, doubles = 0;
+  for (let f = 0; f < 30; f++) {
+    const b = C.createBattle({ seed: 70 + f, allies: buildPartyUnits([r], { ownerId: 'p', ownerName: 'p' }), waves: [[{ enemyId: 'swamp_troll', level: 45 }]] });
+    const me = b.units.find(u => u.side === 'A'), foe = b.units.find(u => u.side === 'B');
+    foe.hp = foe.maxHp = 1e12; me.loadout = [];
+    while (b.state === 'running') {
+      C.stepBattle(b);
+      for (const e of C.drainEvents(b)) { if (e.type === 'damage' && e.src === me.uid && e.ability == null && !e.dot && !e.proc) swings++; if (e.type === 'proc' && e.name === 'Double Strike') doubles++; }
+      me.hp = me.maxHp;
+    }
+  }
+  const attacks = swings - doubles;
+  close(doubles / attacks, 0.25, 0.03);
+  ok(`Twinfang: ${doubles} of ${attacks} basic attacks hit twice (${(doubles / attacks * 100).toFixed(1)}%, expected 25%)`);
+}
 console.log(`Crit: all ${n} checks passed.`);
