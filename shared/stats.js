@@ -87,6 +87,7 @@ export function computeStats(ch, dyn = null) {
   const s = {
     attributes,
     uncapped: { critChance: rawCrit, attackSpeed: rawSpeed },
+    level: ch.level,
     critInc, weaponCrit, speedInc, speedMore, weaponSpeed, levelCrit: lvlBonus('critChance'), levelSpeed: lvlBonus('attackSpeed'),
     maxHp: Math.round((40 + 8 * ch.level + conv('hp') + (gear.hp || 0)) * (1 + allPct + (bonus.hpPct || 0))),
     physPower: Math.round((conv('physPower') + (gear.physPower || 0)) * pctMul('physPower')),
@@ -133,7 +134,11 @@ export function powerRating(stats) {
   const mult = 1 + (heal ? 0 : g('damagePct')) + school + 0.5 * (g('dotDamagePct') + g('minionDamagePct')) + 0.25 * (g('damageVsBossPct') + g('executeDamagePct'))
     + g('cooldownPct') + 0.3 * g('resourceRegenPct') + 0.2 * g('buffDurationPct');
   const offense = Math.max(stats.physPower, stats.magPower, stats.healPower * 0.9) * (1 + stats.critChance * (stats.critDamage - 1)) * stats.attackSpeed * mult;
-  const defense = stats.maxHp * (1 + stats.defense / 100) / Math.max(0.25, 1 + g('damageTakenPct')) * (1 + g('dodge') + g('blockChance') * 0.5)
+  // effective health: armor reduces damage like in a fight against an attacker of your level (capped), so
+  // defense counts for what it really blocks instead of +100% health per 100 defense
+  const C = CONFIG.combat, lvl = stats.level || 1;
+  const armorRed = Math.min(C.armorCap, stats.defense / (stats.defense + C.armorK + 12 * lvl));
+  const defense = stats.maxHp / (1 - armorRed) / Math.max(0.25, 1 + g('damageTakenPct')) * (1 + g('dodge') + g('blockChance') * 0.5)
     * (1 + 0.3 * g('healingReceivedPct') + 2 * g('lifeSteal')) + g('hpRegen') * 30;
-  return Math.round(offense * 2 + defense * 0.25);
+  return Math.round(offense * 2 + defense * 0.4);
 }
