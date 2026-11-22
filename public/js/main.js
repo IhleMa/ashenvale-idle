@@ -172,8 +172,13 @@ export { requestRender };
 function renderTopbar() {
   const p = state.player;
   if (!p) return;
-  document.getElementById('topbar-gold').textContent = fmt(p.gold);
-  document.getElementById('topbar-premium').textContent = fmt(p.premium || 0);
+  // short form in the bar ("1.2M"), the exact amount in the tooltip
+  const exact = n => Math.floor(n || 0).toLocaleString('en-US');
+  const g = document.getElementById('topbar-gold'), c = document.getElementById('topbar-premium');
+  g.textContent = fmt(p.gold);
+  g.dataset.tip = `<b>${exact(p.gold)}</b> gold`;
+  c.textContent = fmt(p.premium || 0);
+  c.dataset.tip = `<b>${exact(p.premium)}</b> Ashen Crystals<br><span class="muted small">Finish constructions and expeditions instantly</span>`;
   const h = hero();
   const el = document.getElementById('topbar-hero');
   if (!h) { el.innerHTML = ''; return; }

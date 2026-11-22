@@ -159,7 +159,8 @@
             "Pages no longer reset when a fight ends or your gold changes: instead of redrawing everything, only the parts that changed are updated. Scroll positions (e.g. in the inventory), text you're typing, open dropdowns, hovered tooltips and animations all stay as they are.",
             "Wiki: class scaling for critical chance and attack speed is now shown in percent (e.g. \"+0.16% per Dexterity\"). It used to show the raw value (0.0016), which looked 100× smaller than what the character screen shows. The game itself was always using the right values.",
             "Capped stats show how far over the cap you are: critical chance and attack speed display the uncapped value in brackets, e.g. \"75.0% (102.3%)\", on the Character page and when inspecting players. The tooltip says how much is wasted.",
-            "Abilities show their exact numbers with your current stats — like minions do: damage per hit and total, crit chance and crit damage, damage over time per second and in total, heals, shields, effect durations, cooldown (after cooldown speed) and cost. On the Abilities page, in the behaviour editor and in the skill tree (unlearned abilities show their rank 1 numbers, rank nodes the change to the next rank)."
+            "Abilities show their exact numbers with your current stats — like minions do: damage per hit and total, crit chance and crit damage, damage over time per second and in total, heals, shields, effect durations, cooldown (after cooldown speed) and cost. On the Abilities page, in the behaviour editor and in the skill tree (unlearned abilities show their rank 1 numbers, rank nodes the change to the next rank).",
+            "Hover your gold or Ashen Crystals in the top bar to see the exact amount (e.g. 165,256 instead of 165k)."
           ]
         },
         {
