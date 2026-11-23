@@ -28,10 +28,49 @@ export const multiplayerView = {
       lines.innerHTML = m.group.chat.map(c => `<div class="chat-line ${c.from ? '' : 'system'}">${c.from ? `<b>${nameHtml(c.from, { title: false })}:</b> ` : ''}${esc(c.text)}</div>`).join('');
       lines.scrollTop = lines.scrollHeight;
     });
+    // battle order: the leader drags characters (or uses ▲ / ▼)
+    const sendOrder = keys => run(act('group_positions', { order: keys }));
+    const keys = () => [...root.querySelectorAll('[data-pos-key]')].map(el => el.dataset.posKey);
+    root.addEventListener('dragstart', e => {
+      const row = e.target.closest('[data-pos-key][draggable="true"]');
+      if (!row) return;
+      dragKey = row.dataset.posKey;
+      row.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', dragKey);
+    });
+    root.addEventListener('dragend', () => { dragKey = null; root.querySelectorAll('.pos-row').forEach(r => r.classList.remove('dragging', 'drop-before', 'drop-after')); });
+    root.addEventListener('dragover', e => {
+      const row = e.target.closest('[data-pos-key]');
+      if (!dragKey || !row) return;
+      e.preventDefault();
+      const after = e.clientY > row.getBoundingClientRect().top + row.offsetHeight / 2;
+      root.querySelectorAll('.pos-row').forEach(r => r.classList.remove('drop-before', 'drop-after'));
+      if (row.dataset.posKey !== dragKey) row.classList.add(after ? 'drop-after' : 'drop-before');
+    });
+    root.addEventListener('drop', e => {
+      const row = e.target.closest('[data-pos-key]');
+      if (!dragKey || !row) return;
+      e.preventDefault();
+      const after = row.classList.contains('drop-after');
+      const list = keys().filter(k => k !== dragKey);
+      const at = list.indexOf(row.dataset.posKey);
+      if (at < 0) return;
+      list.splice(after ? at + 1 : at, 0, dragKey);
+      dragKey = null;
+      sendOrder(list);
+    });
     root.addEventListener('click', async e => {
       const t = e.target.closest('button');
       if (!t) return;
       const d = t.dataset;
+      if (d.posMove) {
+        const list = keys(), i = list.indexOf(d.posKeyBtn), j = i + Number(d.posMove);
+        if (i < 0 || j < 0 || j >= list.length) return;
+        [list[i], list[j]] = [list[j], list[i]];
+        return sendOrder(list);
+      }
+      if ('posReset' in d) return sendOrder([]);
       if ('create' in d) await run(act('group_create'), 'Group created.');
       if ('leave' in d) await run(act('group_leave'));
       if (d.invite) await run(act('group_invite', { name: d.invite }), `Invitation sent to ${d.invite}.`);
@@ -153,6 +192,24 @@ function recruitButton(g, m, isLeader) {
   return `<button class="btn tiny ghost" data-recruit-toggle="${m.id}" ${full ? 'disabled' : ''} ${tipAttr(full ? 'No recruit place left: leave another recruit out first' : `Let ${esc(offered.name)} fight in the next fight`)}>Let fight</button>`;
 }
 
+let dragKey = null;
+// the next fight's characters in battle order — position 1 stands in front and draws the enemies first
+function orderHtml(g, isLeader) {
+  const slots = g.order || [];
+  if (slots.length < 2) return '';
+  const owner = id => g.members.find(m => m.id === id)?.name || '?';
+  return `<div class="battle-order">
+    <div class="row gap"><b>Battle order</b><span class="muted small">${isLeader ? 'Drag to reorder — position 1 stands in front, enemies go for the front first.' : 'Set by the leader — position 1 stands in front.'}</span>
+      <span class="grow"></span>${isLeader ? `<button class="btn tiny ghost" data-pos-reset ${tipAttr('Back to the default order (players in turn)')}>Default</button>` : ''}</div>
+    <ol class="pos-list">${slots.map((c, i) => `<li class="pos-row ${isLeader ? 'can-drag' : ''}" data-pos-key="${esc(c.key)}" ${isLeader ? 'draggable="true"' : ''}>
+      <span class="pos-no">${i + 1}</span>${isLeader ? '<span class="pos-grip" aria-hidden="true">⠿</span>' : ''}
+      ${portrait(c, 'xs')}<span class="grow">${c.isMain ? '★ ' : ''}${esc(c.name)} <small class="muted">Lv ${c.level} · ${esc(owner(c.playerId))}</small> ${classBadge(c.classId)}</span>
+      ${i === 0 ? '<span class="tag small">front</span>' : ''}
+      ${isLeader ? `<button class="btn tiny ghost" data-pos-move="-1" data-pos-key-btn="${esc(c.key)}" ${i === 0 ? 'disabled' : ''} aria-label="Move up">▲</button><button class="btn tiny ghost" data-pos-move="1" data-pos-key-btn="${esc(c.key)}" ${i === slots.length - 1 ? 'disabled' : ''} aria-label="Move down">▼</button>` : ''}
+    </li>`).join('')}</ol>
+  </div>`;
+}
+
 function groupHtml(g, me, isLeader) {
   return `<div class="group-members">${g.members.map(m => `<div class="group-member">
       <div class="row gap"><b>${m.id === g.leaderId ? '👑 ' : ''}${nameHtml(m.name)}</b>${botTag(m)}<span class="conn-dot ${m.online ? 'on' : ''}" title="${m.online ? 'Online' : 'Offline'}"></span>
@@ -163,6 +220,7 @@ function groupHtml(g, me, isLeader) {
     </div>`).join('')}
     ${isLeader && g.members.length > 1 ? `<div class="row gap small"><span class="muted">Recruits: ${g.leaderRecruits ? '<b>chosen by you</b>' : 'automatic (missing roles first, then in turn)'} · ${g.freeSlots} place${g.freeSlots === 1 ? '' : 's'}</span>${g.leaderRecruits ? `<button class="btn tiny ghost" data-recruit-auto ${tipAttr('Let the game choose again: missing roles first, then in turn')}>Automatic</button>` : ''}</div>`
       : g.leaderRecruits && g.members.length > 1 ? '<div class="muted small">The leader chose which recruits fight.</div>' : ''}
+    ${orderHtml(g, isLeader)}
     ${g.invites.length ? `<div class="muted small">Pending: ${g.invites.map(esc).join(', ')}</div>` : ''}
     <div class="muted small">Next fight: ${g.members.reduce((n, m) => n + m.characters.length, 0)} / ${CONFIG.coop.partySize} characters.${g.members.length < CONFIG.coop.maxPlayers ? '' : ' Group is full.'}</div>
     ${g.together ? `<div class="notice good">🤝 Your group fights together${g.fight ? `: <b>${esc(g.fight.title)}</b>` : ''}. ${isLeader ? 'You decide: your zone, zone bosses, rifts, encounters and pinnacle bosses.' : 'The leader decides what you fight.'} <a href="#/combat">Watch →</a></div>`

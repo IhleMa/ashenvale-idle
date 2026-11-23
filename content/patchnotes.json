@@ -52,7 +52,8 @@
           "heading": "Multiplayer",
           "items": [
             "In a group, every fight is now fought together: as soon as two members are online, the group fights the leader's zone, and the leader's zone boss challenges, rifts, co-op encounters and pinnacle bosses are group fights too. Only the Arena stays solo.",
-            "The leader decides: changing the zone takes the group along, and only the leader can start boss challenges, rifts, encounters and pinnacle bosses. Every member gets their own loot, XP and rift progress."
+            "The leader decides: changing the zone takes the group along, and only the leader can start boss challenges, rifts, encounters and pinnacle bosses. Every member gets their own loot, XP and rift progress.",
+            "Battle order: the group leader orders the group's characters on the Multiplayer page by drag and drop (or ▲ / ▼). Position 1 stands in front, and enemies go for the front first. Every group fight uses it."
           ]
         },
         {

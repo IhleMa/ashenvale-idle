@@ -249,6 +249,18 @@ const freeze = b => { for (const u of allies(b)) { u.loadout = []; u.actionTimer
   assert.ok(!A.s.solo.battle && !B.s.solo.battle, 'no solo fights while grouped');
   assert.deepEqual(new Set(g.fight.participants.map(x => x.id)), new Set([A.p.id, B.p.id]));
   ok('two online members in a group fight the leader\'s zone together; nobody fights alone meanwhile');
+  // battle order: only the leader; position 1 stands in front
+  const keyB = `${B.p.id}:${L.hero(B.p).id}`, keyA = `${A.p.id}:${L.hero(A.p).id}`;
+  assert.deepEqual(game.publicGroup(g).order.map(x => x.key).slice(0, 2), [keyA, keyB], 'default: leader first');
+  r = act(B, 'group_positions', { order: [keyB, keyA] });
+  assert.equal(r.ok, false);
+  r = act(A, 'group_positions', { order: [keyB, keyA] });
+  assert.equal(r.ok, true, r.error);
+  assert.equal(game.publicGroup(g).order[0].key, keyB);
+  game.abortGroupFight(g); g.restUntil = 0; game.tick();
+  const front = g.battle.units.filter(u => u.side === 'A' && u.kind === 'character').sort((x, y) => x.position - y.position)[0];
+  assert.equal(front.ownerId, B.p.id, 'the member stands in front now');
+  ok('the leader sets the battle order; the next group fight uses it');
   r = act(B, 'challenge_boss', { zoneId: B.p.zone });
   assert.equal(r.ok, false); assert.match(r.error, /leader/);
   r = act(A, 'challenge_boss', { zoneId: A.p.zone });

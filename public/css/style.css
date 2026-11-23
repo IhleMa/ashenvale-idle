@@ -1574,3 +1574,14 @@ html.standalone body { padding-bottom: env(safe-area-inset-bottom); padding-left
 .pin-intro .bad { color: #ff8a73; }
 
 .xp-boost { font-weight: 700; color: #ffe066; padding: 2px 8px; border-radius: 999px; background: rgba(255, 224, 102, .12); border: 1px solid rgba(255, 224, 102, .4); font-size: 13px; }
+
+/* group battle order (multiplayer) */
+.battle-order { margin: 10px 0; padding: 10px; border: 1px solid var(--border, rgba(255,255,255,.1)); border-radius: 8px; background: rgba(255,255,255,.02); }
+.pos-list { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.pos-row { display: flex; align-items: center; gap: 8px; padding: 4px 8px; border-radius: 6px; background: rgba(255,255,255,.04); border: 1px solid transparent; }
+.pos-row.can-drag { cursor: grab; }
+.pos-row.dragging { opacity: .45; }
+.pos-row.drop-before { box-shadow: inset 0 2px 0 var(--accent, #e8913a); }
+.pos-row.drop-after { box-shadow: inset 0 -2px 0 var(--accent, #e8913a); }
+.pos-no { width: 20px; text-align: center; font-weight: 700; color: var(--accent, #e8913a); }
+.pos-grip { color: var(--muted, #888); }

@@ -38,6 +38,17 @@ const SAVE_NOW = new Set(['ascend', 'ah_list', 'ah_buy', 'ah_cancel', 'collect_m
 const READ_ONLY = new Set(['get_rankings', 'inspect_player', 'ah_search', 'ah_mine', 'arena_view', 'my_suggestions']);
 const fail = m => { throw new GameError(m); };
 
+// group battle order: items whose key is in `order` come first (in that order), the rest keep their place after them
+function sortByOrder(items, order, keyOf) {
+  const idx = new Map((order || []).map((k, i) => [k, i]));
+  return items.map((x, i) => ({ x, i, o: idx.has(keyOf(x)) ? idx.get(keyOf(x)) : 1000 + i })).sort((a, b) => a.o - b.o).map(e => e.x);
+}
+function orderAllies(allies, order) {
+  const sorted = sortByOrder(allies, order, u => `${u.ownerId}:${u.charId}`);
+  sorted.forEach((u, i) => { u.position = i; u.actionTimer = 0.3 + i * 0.25; });
+  return sorted;
+}
+
 export class Game {
   constructor({ store, assets, settings, admins = null, buildId = 'dev', log = console.log }) {
     this.buildId = buildId;
@@ -549,6 +560,14 @@ export class Game {
       this.sendInvites(s.player.id);
     },
     group_leave(s) { this.leaveGroup(s.player.id); },
+    // the leader orders the group's characters for its fights: position 1 stands in front (enemies go for it first)
+    group_positions(s, d) {
+      const g = this.groupOf(s.player.id) || fail('You are not in a group');
+      if (g.leaderId !== s.player.id) fail('Only the group leader can change the order');
+      if (!Array.isArray(d.order)) fail('Invalid order');
+      g.positions = d.order.slice(0, 12).map(String).filter(k => /^[\w-]+:[\w-]+$/.test(k));
+      this.broadcastGroup(g);
+    },
     group_kick(s, d) {
       const g = this.groupOf(s.player.id) || fail('Not in a group');
       if (g.leaderId !== s.player.id) fail('Only the leader can remove members');
@@ -653,18 +672,19 @@ export class Game {
   // Every fight except the Arena is built here: alone (session.solo, the player's active party) or as a group
   // (group.battle: every online member's line-up together — zones, zone bosses, rifts, co-op encounters and
   // pinnacle bosses alike). players[0] decides (the leader). lineup: { playerId: [characters] }.
-  buildFight(next, players, lineup, { group = false } = {}) {
+  buildFight(next, players, lineup, { group = false, order = null } = {}) {
     players = players.filter(p => lineup[p.id]?.length);
     const allChars = players.flatMap(p => lineup[p.id]);
     if (!allChars.length) return null;
     const leader = players[0];
     const bonuses = group ? partyBonuses(allChars) : null;
-    const allies = [];
+    let allies = [];
     let offset = 0;
     for (const p of players) {
       allies.push(...buildPartyUnits(lineup[p.id], { ownerId: p.id, ownerName: p.name, positionOffset: offset, extraBonuses: bonuses, buffs: elixirBonuses(p), vsEnemy: masteryMap(p) }));
       offset += lineup[p.id].length;
     }
+    if (order?.length) allies = orderAllies(allies, order); // the group leader's battle order
     const heroLevel = Math.round(players.reduce((n, p) => n + (L.hero(p)?.level || 1), 0) / players.length);
     const rng = createRng(randomSeed());
     const fight = { kind: next.kind, group, participants: players.map(p => ({ id: p.id, name: p.name, chars: lineup[p.id].map(c => c.id) })) };
@@ -1001,8 +1021,10 @@ export class Game {
     const now = Date.now();
     const players = g.members.map(id => this.sessions.get(id)?.player || this.store.loadPlayer(id)).filter(Boolean);
     const lineup = this.coopLineupOf(g, players);
+    // the next fight's characters in battle order (the leader's order first, the rest as they come)
+    const slots = sortByOrder(players.flatMap(p => (lineup.byPlayer[p.id] || []).map(c => ({ key: `${p.id}:${c.id}`, playerId: p.id, name: c.name, classId: c.classId, level: c.level, isMain: c.isMain, portrait: c.portrait, role: c.role }))), g.positions, x => x.key);
     return {
-      id: g.id, leaderId: g.leaderId, leaderRecruits: g.leaderRecruits || null,
+      id: g.id, leaderId: g.leaderId, leaderRecruits: g.leaderRecruits || null, order: slots,
       freeSlots: Math.max(0, (CONFIG.coop.partySize || 4) - players.filter(p => L.hero(p)).length),
       members: g.members.map(id => {
         const p = players.find(x => x.id === id);
@@ -1086,7 +1108,7 @@ export class Game {
     let fight = null;
     try {
       if (next.kind === 'pinnacle') { this.pinnacle.check(players[0], players.filter(p => lineup[p.id]?.length), next.bossId); this.pinnacle.pay(players[0]); this.markDirty(this.sessions.get(players[0].id)); }
-      fight = this.buildFight(next, players, lineup, { group: true });
+      fight = this.buildFight(next, players, lineup, { group: true, order: g.positions });
     } catch (e) {
       this.groupMessage(g, `Could not start: ${e.message}`);
       g.next = null; g.restUntil = Date.now() + 5000;
