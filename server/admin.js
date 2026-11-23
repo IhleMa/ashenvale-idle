@@ -2,6 +2,7 @@
 // Admins come from the ADMIN_USERS environment variable (comma separated usernames)
 // plus data/admins.json (managed with the console command "admin add <name>").
 import { pinnacleState } from '../shared/pinnacle.js';
+import { xpBoostMult } from './playerLogic.js';
 import { assetReport, missingMarkdown } from './asset-report.js';
 import crypto from 'node:crypto';
 import { ARCHETYPES } from './bots.js';
@@ -186,6 +187,7 @@ export function adminActions(game) {
           gold: p.gold, premium: p.premium || 0, materials: p.town?.materials || {}, inventory: p.inventory, mailbox: (p.mailbox || []).length,
           characters: Object.values(p.characters).map(c => ({ id: c.id, name: c.name, classId: c.classId, level: c.level, isMain: c.isMain, profession: c.profession || null })),
           stats: p.stats, zone: p.zone, unlockedZones: p.unlockedZones, town: Object.fromEntries(Object.entries(p.town?.buildings || {}).map(([k, b]) => [k, b.level])),
+          xpBoost: xpBoostMult(p) > 1 ? p.xpBoost : null,
           expeditions: (p.expeditions || []).length, auctions: game.auction.data.listings.filter(l => l.sellerId === acc.id).length,
         } : null,
       };
@@ -261,6 +263,23 @@ export function adminActions(game) {
       const detail = res.map(r => `${r.name} ${r.from}→${r.to}`).join(', ');
       admins.audit(s.player.name, 'give_xp', acc.username, `${d.mode} ${d.amount} (${d.target}): ${detail}`);
       return { results: res };
+    },
+    // XP multiplier for one player (e.g. to try out classes): mult 1 removes it; hours 0 = until removed
+    admin_xp_boost(s, d) {
+      const { acc, p } = loadById(d.id);
+      if (!p) fail('This account has no game data yet');
+      const mult = Math.max(1, Math.min(100, Number(d.mult) || 1));
+      const hours = Math.max(0, Math.min(24 * 90, Number(d.hours) || 0));
+      if (mult <= 1) delete p.xpBoost;
+      else p.xpBoost = { mult, until: hours ? Date.now() + hours * 3600e3 : null, by: s.player.name };
+      store.savePlayerSoon(p);
+      const ses = game.sessions.get(acc.id);
+      if (ses) {
+        ses.stateDirty = true;
+        game.toast(acc.id, mult > 1 ? `⚡ The admins boosted your experience gain: ×${mult}${hours ? ` for ${hours} h` : ''}.` : 'Your experience boost has ended.', 'success');
+      }
+      admins.audit(s.player.name, 'xp_boost', acc.username, mult > 1 ? `×${mult}${hours ? ` for ${hours} h` : ' until removed'}` : 'removed');
+      return { xpBoost: p.xpBoost || null };
     },
     admin_reset_password(s, d) {
       const { acc } = loadById(d.id);

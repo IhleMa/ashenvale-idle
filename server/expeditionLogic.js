@@ -1,4 +1,5 @@
 // Expeditions: send recruits away to gather materials (server-authoritative, server clock).
+import { xpBoostMult } from './playerLogic.js';
 import crypto from 'node:crypto';
 import { EXPEDITIONS, EXPEDITION_DURATIONS } from '../shared/data/expeditions.js';
 import { PROFESSIONS, PROFESSION_MAX, professionXpToNext } from '../shared/data/town.js';
@@ -70,7 +71,7 @@ export function claimExpedition(p, { id }) {
     if (n > 0) got[m] = (got[m] || 0) + n;
   }
   addMaterials(p, got);
-  const xp = expeditionXp(dest, ex.hours);
+  const xp = expeditionXp(dest, ex.hours) * xpBoostMult(p); // admin XP boost
   const messages = [];
   const levelUps = [];
   for (const ch of chars) {

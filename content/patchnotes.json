@@ -195,7 +195,8 @@
         {
           "heading": "Admin",
           "items": [
-            "Admin panel: \"⬇ Export data\" in a player's details downloads their game data as a JSON file (no login data), e.g. to check balance with real characters."
+            "Admin panel: \"⬇ Export data\" in a player's details downloads their game data as a JSON file (no login data), e.g. to check balance with real characters.",
+            "XP boost per player: in the admin player window, multiply a player's experience gain (×1–100) for 1 hour up to 7 days or until removed — for trying out classes. It covers fights (also offline) and expeditions; the player sees an ⚡ XP badge in the top bar."
           ]
         }
       ]

@@ -184,6 +184,14 @@ async function openPlayer(id, root) {
       <input type="number" data-x-amount min="1" value="1000" style="width:130px">
       <button class="btn primary small" data-give-xp>Give</button>
       <span class="muted small" data-x-hint>Raw XP, no hero/trait bonus. Applied immediately.</span>
+    </div>
+    <div class="admin-give">
+      <span>⚡ XP boost: ${pl.xpBoost ? `<b>×${pl.xpBoost.mult}</b> ${pl.xpBoost.until ? `until ${new Date(pl.xpBoost.until).toLocaleString()}` : 'until removed'} <span class="muted small">(by ${esc(pl.xpBoost.by || '?')})</span>` : '<span class="muted">none</span>'}</span>
+      <label class="inline">×<input type="number" data-b-mult min="1" max="100" step="0.5" value="${pl.xpBoost?.mult || 10}" style="width:80px"></label>
+      <label class="inline">for <select data-b-hours><option value="1">1 hour</option><option value="6">6 hours</option><option value="24" selected>24 hours</option><option value="168">7 days</option><option value="0">until removed</option></select></label>
+      <button class="btn primary small" data-boost>Set boost</button>
+      ${pl.xpBoost ? '<button class="btn small ghost danger" data-unboost>Remove</button>' : ''}
+      <span class="muted small">Multiplies all XP from fights (also offline) and expeditions — for trying out classes.</span>
     </div>` : ''}
 
     <h3>Moderation</h3>
@@ -232,6 +240,11 @@ async function openPlayer(id, root) {
         toast(r.results.map(x => `${x.name}: Lv ${x.from} → ${x.to}`).join(' · ') || 'Done.', 'success', 5000);
         m.close(); openPlayer(id, root); loadPlayers(root);
       }
+      return;
+    }
+    if ('boost' in t.dataset || 'unboost' in t.dataset) {
+      const r = await run(act('admin_xp_boost', { id, mult: 'unboost' in t.dataset ? 1 : Number(q('[data-b-mult]').value) || 1, hours: Number(q('[data-b-hours]').value) }), 'unboost' in t.dataset ? 'XP boost removed.' : 'XP boost set.');
+      if (r !== undefined) { m.close(); openPlayer(id, root); loadPlayers(root); }
       return;
     }
     if ('kick' in t.dataset) { await run(act('admin_kick', { id }), 'Player kicked.'); done(); }

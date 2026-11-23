@@ -759,6 +759,14 @@ export function checkAchievements(p) {
 }
 
 // --------------------------------------------------------------------------- client view
+// admin XP boost for one player (testing classes): { mult, until (ms, null = until removed), by }
+export function xpBoostMult(p, at = Date.now()) {
+  const b = p.xpBoost;
+  if (!b || !(b.mult > 1)) return 1;
+  if (b.until && at >= b.until) { delete p.xpBoost; return 1; }
+  return b.mult;
+}
+
 export function publicPlayer(p) {
   return {
     id: p.id, name: p.name, heroId: p.heroId, characters: p.characters, gold: p.gold, premium: p.premium || 0, inventory: p.inventory,
@@ -767,7 +775,7 @@ export function publicPlayer(p) {
     stats: p.stats, achievements: p.achievements, settings: p.settings, coopChars: p.coopChars,
     town: p.town, expeditions: p.expeditions || [], mailbox: p.mailbox || [], serverTime: Date.now(),
     bestiary: p.bestiary || {}, quests: p.quests, rift: p.rift, lootFilter: p.lootFilter, lootLog: p.lootLog || [],
-    tutorial: p.tutorial || null, cosmetics: p.cosmetics || { owned: [], equipped: {} }, pinnacle: pinnacleState(p),
+    tutorial: p.tutorial || null, cosmetics: p.cosmetics || { owned: [], equipped: {} }, pinnacle: pinnacleState(p), xpBoost: xpBoostMult(p) > 1 ? p.xpBoost : null,
     arena: p.arena ? (refillAttacks(p.arena), { ...p.arena, recent: undefined, nextAttackAt: refillAttacks(p.arena) }) : null,
   };
 }

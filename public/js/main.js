@@ -180,6 +180,10 @@ function renderTopbar() {
   g.dataset.tip = `<b>${exact(p.gold)}</b> gold`;
   c.textContent = fmt(p.premium || 0);
   c.dataset.tip = `<b>${exact(p.premium)}</b> Ashen Crystals<br><span class="muted small">Finish constructions and expeditions instantly</span>`;
+  // admin XP boost
+  const xb = document.getElementById('topbar-xpboost'), boost = p.xpBoost && (!p.xpBoost.until || p.xpBoost.until > Date.now()) ? p.xpBoost : null;
+  xb.hidden = !boost;
+  if (boost) { xb.textContent = `⚡ XP ×${boost.mult}`; xb.dataset.tip = `<b>Experience boost ×${boost.mult}</b><br>Given by the admins${boost.until ? `<br>Ends ${new Date(boost.until).toLocaleString()}` : ''}`; }
   const h = hero();
   const el = document.getElementById('topbar-hero');
   if (!h) { el.innerHTML = ''; return; }

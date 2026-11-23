@@ -1,0 +1,45 @@
+// Admin XP boost: multiplies a player's fight XP while it lasts, then ends on its own.
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import assert from 'node:assert/strict';
+import { Store } from '../server/store.js';
+import { Settings } from '../server/settings.js';
+import { AdminManager } from '../server/admin.js';
+import { Game } from '../server/game.js';
+import * as L from '../server/playerLogic.js';
+
+const DATA = fs.mkdtempSync(path.join(os.tmpdir(), 'ashen-xpb-'));
+const store = new Store(DATA, { log: () => {} });
+const game = new Game({ store, assets: { get: () => ({}) }, log: () => {}, settings: new Settings(store), admins: new AdminManager(store, 'boss'), buildId: 'test' });
+const join = (id, name) => {
+  const msgs = [];
+  store.setAccount({ id, username: name, tokens: [] });
+  const ws = { readyState: 1, send: d => msgs.push(JSON.parse(d)) };
+  const s = game.connect(ws, store.getAccount(name));
+  game.handleMessage(s, ws, JSON.stringify({ t: 'action', id: 1, type: 'create_hero', payload: { name: name + 'h', classId: 'warrior' } }));
+  return { s, ws, msgs, p: s.player };
+};
+let aid = 10;
+const act = (u, type, payload = {}) => { u.msgs.length = 0; game.handleMessage(u.s, u.ws, JSON.stringify({ t: 'action', id: ++aid, type, payload })); return u.msgs.find(m => m.t === 'result' && m.id === aid); };
+const admin = join('a1', 'boss'), pl = join('p1', 'tester');
+const xp = () => game.applyElixirRewards(pl.p, { xp: 100, gold: 100 }).xp;
+assert.equal(xp(), 100);
+let r = act(pl, 'admin_xp_boost', { id: pl.p.id, mult: 10, hours: 1 });
+assert.equal(r.ok, false, 'players cannot boost themselves');
+r = act(admin, 'admin_xp_boost', { id: pl.p.id, mult: 10, hours: 1 });
+assert.equal(r.ok, true, r.error);
+assert.equal(xp(), 1000);
+assert.equal(game.applyElixirRewards(pl.p, { xp: 100, gold: 100 }).gold, 100, 'gold untouched');
+assert.equal(L.publicPlayer(pl.p).xpBoost.mult, 10);
+console.log('  ✔ an admin boost multiplies fight XP (not gold) and the player sees it');
+assert.equal(game.applyElixirRewards(pl.p, { xp: 100, gold: 0 }, Date.now() + 2 * 3600e3).xp, 100);
+assert.equal(pl.p.xpBoost, undefined);
+console.log('  ✔ the boost ends on its own when its time is up');
+act(admin, 'admin_xp_boost', { id: pl.p.id, mult: 5, hours: 0 });
+assert.equal(xp(), 500);
+act(admin, 'admin_xp_boost', { id: pl.p.id, mult: 1 });
+assert.equal(xp(), 100);
+console.log('  ✔ "until removed" boosts last until an admin removes them');
+console.log('XP boost: all checks passed.');
+process.exit(0);

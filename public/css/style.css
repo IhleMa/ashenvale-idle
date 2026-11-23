@@ -1572,3 +1572,5 @@ html.standalone body { padding-bottom: env(safe-area-inset-bottom); padding-left
 @media (max-width: 800px) { .pin-body { grid-template-columns: 1fr; } }
 .tag.good { background: rgba(90, 200, 120, .18); color: var(--good); border-color: rgba(90, 200, 120, .45); }
 .pin-intro .bad { color: #ff8a73; }
+
+.xp-boost { font-weight: 700; color: #ffe066; padding: 2px 8px; border-radius: 999px; background: rgba(255, 224, 102, .12); border: 1px solid rgba(255, 224, 102, .4); font-size: 13px; }

@@ -877,7 +877,7 @@ export class Game {
 
   applyElixirRewards(p, rewards, at = Date.now()) {
     const eb = elixirBonuses(p, at);
-    rewards.xp = Math.round(rewards.xp * (1 + eb.xpPct) * this.settings.get('xpRate'));
+    rewards.xp = Math.round(rewards.xp * (1 + eb.xpPct) * this.settings.get('xpRate') * L.xpBoostMult(p, at)); // admin XP boost
     rewards.gold = Math.round(rewards.gold * (1 + eb.goldPct) * this.settings.get('goldRate'));
     return rewards;
   }
