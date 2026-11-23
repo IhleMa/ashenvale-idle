@@ -1,4 +1,5 @@
 // Player state model and all validated player actions (pure game logic, no networking).
+import { cleanGroups } from '../shared/statFilter.js';
 import crypto from 'node:crypto';
 import { CONFIG, rarityIndex, xpToNext } from '../shared/config.js';
 import { CLASSES, CLASS_IDS, TRAITS } from '../shared/data/classes.js';
@@ -334,10 +335,7 @@ function cleanInvPresets(list) {
   return list.slice(0, 12).map(x => ({
     name: str(x?.name, 24).trim() || 'Filter',
     slot: str(x?.slot, 20) || 'all', rarity: str(x?.rarity, 20) || 'all', sort: ['rarity', 'level', 'slot'].includes(x?.sort) ? x.sort : 'rarity',
-    hl: {
-      text: str(x?.hl?.text, 60), mode: x?.hl?.mode === 'any' ? 'any' : 'all', only: !!x?.hl?.only,
-      rows: (Array.isArray(x?.hl?.rows) ? x.hl.rows : []).slice(0, 6).map(r => ({ stat: str(r?.stat, 30), min: r?.min === '' || r?.min == null || !Number.isFinite(+r.min) ? '' : +r.min, tier: /^[1-7]?$/.test(String(r?.tier ?? '')) ? String(r?.tier ?? '') : '' })),
-    },
+    hl: { text: str(x?.hl?.text, 60), only: !!x?.hl?.only, groups: cleanGroups(x?.hl?.groups, x?.hl) },
   }));
 }
 

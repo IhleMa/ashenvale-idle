@@ -13,6 +13,7 @@ import { openSockets } from './gems.js';
 import { statOptions, tierOptions } from './auction.js';
 import { AFFIXES, PCT_STATS } from '/shared/data/items.js';
 import { gearItemStats } from '/shared/gems.js';
+import { GROUP_TYPES, matchStatGroups, cleanGroups, groupsActive } from '/shared/statFilter.js';
 import { FILTER_ACTIONS } from '/shared/lootfilter.js';
 import { filterHtml, logHtml, inventoryVerdicts, handleFilterClick, handleFilterChange, filterIsDirty } from './lootfilter.js';
 
@@ -22,13 +23,19 @@ let sortBy = 'rarity';
 let selectedUid = null;
 let compareCharId = null;
 
-// ---- Highlight: mark every item that has a stat (with a minimum value and/or affix tier) or matches a text search.
-// Kept in this browser between visits. Typing only toggles classes on the cells, so the input never loses focus.
+// ---- Highlight: mark every item that matches a text search and/or stat filter groups (And / Not / Count / Weighted
+// sum, like the Path of Exile trade site — see shared/statFilter.js). Kept in this browser between visits. Typing only
+// toggles classes on the cells, so the input never loses focus.
 const HL_KEY = 'ashenvale.invHighlight';
-const hl = (() => { try { return { text: '', rows: [], mode: 'all', only: false, ...JSON.parse(localStorage.getItem(HL_KEY) || '{}') }; } catch { return { text: '', rows: [], mode: 'all', only: false }; } })();
+const emptyHl = () => ({ text: '', groups: [], only: false });
+const hl = (() => {
+  try {
+    const saved = JSON.parse(localStorage.getItem(HL_KEY) || '{}');
+    return { ...emptyHl(), text: saved.text || '', only: !!saved.only, groups: cleanGroups(saved.groups, saved) };
+  } catch { return emptyHl(); }
+})();
 const saveHl = () => { try { localStorage.setItem(HL_KEY, JSON.stringify(hl)); } catch {} };
-const hlRows = () => hl.rows.filter(r => r.stat);
-const hlActive = () => !!(hl.text.trim() || hlRows().length);
+const hlActive = () => !!(hl.text.trim() || groupsActive(hl.groups));
 const statLabel = k => AFFIXES[k]?.label || k;
 // every word must appear in the item's name, rarity, slot or one of its stats (also used by the salvage yard)
 export function itemTextMatch(it, text, stats = gearItemStats(it)) {
@@ -39,17 +46,7 @@ export function itemTextMatch(it, text, stats = gearItemStats(it)) {
 }
 export function hlMatch(it) {
   const stats = gearItemStats(it);
-  if (!itemTextMatch(it, hl.text, stats)) return false;
-  const rows = hlRows();
-  if (!rows.length) return true;
-  const ok = r => {
-    const v = stats[r.stat] || 0;
-    if (!v) return false;
-    if (r.min !== '' && r.min != null && v < (PCT_STATS.has(r.stat) ? Number(r.min) / 100 : Number(r.min)) - 1e-9) return false;
-    if (r.tier && !(it.affixes || []).some(a => a.stat === r.stat && a.tier <= Number(r.tier))) return false;
-    return true;
-  };
-  return hl.mode === 'any' ? rows.some(ok) : rows.every(ok);
+  return itemTextMatch(it, hl.text, stats) && matchStatGroups(it, hl.groups, stats);
 }
 const hlClass = it => !hlActive() ? '' : hlMatch(it) ? 'hl' : hl.only ? 'hl-dim hl-hide' : 'hl-dim';
 // re-mark the cells in place (no re-render)
@@ -68,8 +65,8 @@ function applyHighlight(root) {
   if (cnt) cnt.textContent = hlActive() ? `${n} match${n === 1 ? '' : 'es'}` : '';
 }
 // ---- saved filters: slot/rarity/sort + highlight under a name, applied with one click (kept on the account)
-const filterState = () => ({ slot: filterSlot, rarity: filterRarity, sort: sortBy, hl: { text: hl.text, rows: hl.rows.filter(r => r.stat).map(r => ({ ...r })), mode: hl.mode, only: hl.only } });
-const normFilter = f => JSON.stringify([f.slot, f.rarity, f.sort, f.hl.text, f.hl.mode, !!f.hl.only, f.hl.rows.map(r => [r.stat, String(r.min ?? ''), String(r.tier ?? '')])]);
+const filterState = () => ({ slot: filterSlot, rarity: filterRarity, sort: sortBy, hl: { text: hl.text, groups: cleanGroups(hl.groups), only: hl.only } });
+const normFilter = f => JSON.stringify([f.slot, f.rarity, f.sort, f.hl.text, !!f.hl.only, cleanGroups(f.hl.groups, f.hl)]);
 const sameFilter = (a, b) => normFilter(a) === normFilter(b);
 function presetsHtml(p) {
   const list = p.settings.invPresets || [];
@@ -85,27 +82,44 @@ function presetTip(f) {
   if (f.slot !== 'all') parts.push(f.slot === 'usable' ? 'usable by the selected character' : SLOTS[f.slot]?.label || f.slot);
   if (f.rarity !== 'all') parts.push(f.rarity === 'special' ? 'uniques & sets' : CONFIG.rarities.find(r => r.id === f.rarity)?.label || f.rarity);
   if (f.hl.text) parts.push(`“${f.hl.text}”`);
-  for (const r of f.hl.rows) parts.push(`${statLabel(r.stat)}${r.min !== '' ? ` ≥ ${r.min}${PCT_STATS.has(r.stat) ? '%' : ''}` : ''}${r.tier ? ` (T${r.tier}+)` : ''}`);
-  return esc(parts.join(' · ') || 'everything') + (f.hl.only ? '<br><span class="muted">only matches shown</span>' : '');
+  const rowTxt = r => `${statLabel(r.stat)}${r.min !== '' ? ` ≥ ${r.min}` : ''}${r.max !== '' ? ` ≤ ${r.max}` : ''}${r.weight !== '' && r.weight != null ? ` ×${r.weight}` : ''}${r.tier ? ` (T${r.tier}+)` : ''}`;
+  const groups = cleanGroups(f.hl.groups, f.hl).filter(g => g.rows.some(r => r.stat && !r.off));
+  return esc(parts.join(' · ') || (groups.length ? '' : 'everything'))
+    + groups.map(g => `<br><b>${esc(GROUP_TYPES[g.type].label)}${g.min !== '' || g.max !== '' ? ` ${g.min !== '' ? g.min : '0'}–${g.max !== '' ? g.max : '∞'}` : ''}:</b> ${esc(g.rows.filter(r => r.stat && !r.off).map(rowTxt).join(', '))}`).join('')
+    + (f.hl.only ? '<br><span class="muted">only matches shown</span>' : '');
 }
 async function savePresets(list) { await run(act('set_settings', { invPresets: list })); }
 
 function highlightHtml(items) {
   const n = hlActive() ? items.filter(hlMatch).length : 0;
+  const v = x => esc(x ?? '');
+  const groupHtml = (g, gi) => `<div class="hl-group hl-g-${g.type}">
+    <div class="row gap wrap small">
+      <select data-g="${gi}" data-gf="type" ${tipAttr(esc(GROUP_TYPES[g.type].hint))}>${Object.entries(GROUP_TYPES).map(([k, t]) => `<option value="${k}" ${g.type === k ? 'selected' : ''}>${t.label}</option>`).join('')}</select>
+      ${g.type === 'count' || g.type === 'weight' ? `<label class="inline">min <input type="number" step="any" class="af-min" data-g="${gi}" data-gf="min" value="${v(g.min)}" placeholder="${g.type === 'count' ? '1' : 'any'}"></label>
+        <label class="inline">max <input type="number" step="any" class="af-min" data-g="${gi}" data-gf="max" value="${v(g.max)}" placeholder="any"></label>` : ''}
+      <span class="grow"></span>
+      <button class="btn tiny" data-g-addrow="${gi}">＋ Stat</button>
+      <button class="btn tiny ghost danger" data-g-del="${gi}" title="Remove group">✕</button>
+    </div>
+    ${g.rows.map((r, ri) => `<div class="row gap wrap small hl-row ${r.off ? 'off' : ''}">
+      <input type="checkbox" data-g="${gi}" data-r="${ri}" data-rf="on" ${r.off ? '' : 'checked'} title="Use this stat">
+      <select data-g="${gi}" data-r="${ri}" data-rf="stat"><option value="">Choose a stat…</option>${statOptions(r.stat)}</select>
+      <input type="number" step="any" class="af-min" data-g="${gi}" data-r="${ri}" data-rf="min" value="${v(r.min)}" placeholder="min" title="Minimum${r.stat && PCT_STATS.has(r.stat) ? ' (in %)' : ''}">
+      <input type="number" step="any" class="af-min" data-g="${gi}" data-r="${ri}" data-rf="max" value="${v(r.max)}" placeholder="max" title="Maximum${r.stat && PCT_STATS.has(r.stat) ? ' (in %)' : ''}">
+      ${g.type === 'weight' ? `<input type="number" step="any" class="af-min" data-g="${gi}" data-r="${ri}" data-rf="weight" value="${v(r.weight)}" placeholder="×1" title="Weight: the value counts this many times">` : ''}
+      <select data-g="${gi}" data-r="${ri}" data-rf="tier">${tierOptions(r.tier, 'Any tier')}</select>
+      <button class="btn tiny ghost danger" data-g="${gi}" data-r-del="${ri}" title="Remove">✕</button></div>`).join('')}
+  </div>`;
   return `<div class="hl-bar">
     <div class="row gap wrap small">
       <input type="search" class="hl-text" data-hl-text value="${esc(hl.text)}" placeholder="✨ Highlight: name or stat, e.g. crit fire">
-      <button class="btn tiny" data-hl-add title="Highlight items with a stat, optionally with a minimum value or affix tier">＋ Stat</button>
-      ${hl.rows.length > 1 ? `<label class="inline">must have <select data-hl-mode><option value="all" ${hl.mode !== 'any' ? 'selected' : ''}>all</option><option value="any" ${hl.mode === 'any' ? 'selected' : ''}>any</option></select></label>` : ''}
+      <select data-hl-addgroup ${tipAttr('Add a group of stat filters, like on the Path of Exile trade site')}><option value="">＋ Stat group…</option>${Object.entries(GROUP_TYPES).map(([k, t]) => `<option value="${k}">${t.label} — ${esc(t.hint.toLowerCase())}</option>`).join('')}</select>
       <label class="inline"><input type="checkbox" data-hl-only ${hl.only ? 'checked' : ''}> only show matches</label>
       <span class="muted" data-hl-count>${hlActive() ? `${n} match${n === 1 ? '' : 'es'}` : ''}</span>
-      ${hlActive() || hl.rows.length ? '<button class="btn tiny ghost" data-hl-clear>Clear</button>' : ''}
+      ${hlActive() || hl.groups.length ? '<button class="btn tiny ghost" data-hl-clear>Clear</button>' : ''}
     </div>
-    ${hl.rows.map((r, i) => `<div class="row gap wrap small hl-row">
-      <select data-hl="stat" data-i="${i}"><option value="">Choose a stat…</option>${statOptions(r.stat)}</select>
-      <label class="inline">at least <input type="number" step="any" min="0" class="af-min" data-hl="min" data-i="${i}" value="${esc(r.min ?? '')}" placeholder="any">${r.stat && PCT_STATS.has(r.stat) ? ' %' : ''}</label>
-      <select data-hl="tier" data-i="${i}">${tierOptions(r.tier, 'Any tier')}</select>
-      <button class="btn tiny ghost danger" data-hl-del="${i}" title="Remove">✕</button></div>`).join('')}
+    ${hl.groups.map(groupHtml).join('')}
   </div>`;
 }
 
@@ -209,7 +223,7 @@ export function bindInventory(root, rerender, getChar) {
       const f = state.player.settings.invPresets?.[Number(d.preset)];
       if (!f) return;
       filterSlot = f.slot; filterRarity = f.rarity; sortBy = f.sort;
-      Object.assign(hl, { text: f.hl.text, rows: f.hl.rows.map(r => ({ ...r })), mode: f.hl.mode, only: f.hl.only });
+      Object.assign(hl, { text: f.hl.text || '', groups: cleanGroups(f.hl.groups, f.hl), only: !!f.hl.only });
       saveHl(); rerender(); return;
     }
     if (d.presetDel) {
@@ -228,10 +242,11 @@ export function bindInventory(root, rerender, getChar) {
       await savePresets(list);
       return;
     }
-    if ('presetReset' in d) { filterSlot = 'all'; filterRarity = 'all'; Object.assign(hl, { text: '', rows: [], mode: 'all', only: false }); saveHl(); rerender(); return; }
-    if ('hlAdd' in d) { if (hl.rows.length < 6) hl.rows.push({ stat: '', min: '', tier: '' }); saveHl(); rerender(); return; }
-    if (d.hlDel) { hl.rows.splice(Number(d.hlDel), 1); saveHl(); rerender(); return; }
-    if ('hlClear' in d) { Object.assign(hl, { text: '', rows: [], mode: 'all' }); saveHl(); rerender(); return; }
+    if ('presetReset' in d) { filterSlot = 'all'; filterRarity = 'all'; Object.assign(hl, emptyHl()); saveHl(); rerender(); return; }
+    if (d.gAddrow) { const g = hl.groups[Number(d.gAddrow)]; if (g && g.rows.length < 10) g.rows.push({ stat: '', min: '', max: '', tier: '', weight: '', off: false }); saveHl(); rerender(); return; }
+    if (d.gDel) { hl.groups.splice(Number(d.gDel), 1); saveHl(); rerender(); return; }
+    if (d.rDel) { hl.groups[Number(d.g)]?.rows.splice(Number(d.rDel), 1); saveHl(); rerender(); return; }
+    if ('hlClear' in d) { Object.assign(hl, { ...emptyHl(), only: hl.only }); saveHl(); rerender(); return; }
     if (d.item) { selectedUid = selectedUid === d.item ? null : d.item; rerender(); return; }
     if (d.equipTo) { await run(act('equip', { charId: d.equipTo, itemUid: selectedUid }), 'Equipped.'); selectedUid = null; return; }
     if ('sell' in d) { const r = await run(act('sell_item', { itemUid: selectedUid })); if (r) { selectedUid = null; } return; }
@@ -256,10 +271,15 @@ export function bindInventory(root, rerender, getChar) {
     else if (t.matches('[data-f-rarity]')) filterRarity = t.value;
     else if (t.matches('[data-f-sort]')) sortBy = t.value;
     else if (t.matches('[data-compare]')) compareCharId = t.value;
-    else if (t.matches('[data-hl-mode]')) { hl.mode = t.value; saveHl(); applyHighlight(root); return; }
     else if (t.matches('[data-hl-only]')) { hl.only = t.checked; saveHl(); applyHighlight(root); return; }
-    else if (t.matches('[data-hl="stat"]')) { hl.rows[Number(t.dataset.i)].stat = t.value; saveHl(); rerender(); return; }
-    else if (t.matches('[data-hl="tier"]')) { hl.rows[Number(t.dataset.i)].tier = t.value; saveHl(); applyHighlight(root); return; }
+    else if (t.matches('[data-hl-addgroup]')) {
+      if (t.value && hl.groups.length < 8) hl.groups.push({ type: t.value, min: '', max: '', rows: [{ stat: '', min: '', max: '', tier: '', weight: '', off: false }] });
+      t.value = ''; saveHl(); rerender(); return;
+    }
+    else if (t.matches('[data-gf="type"]')) { hl.groups[Number(t.dataset.g)].type = t.value; saveHl(); rerender(); return; }
+    else if (t.matches('[data-rf="stat"]')) { hl.groups[Number(t.dataset.g)].rows[Number(t.dataset.r)].stat = t.value; saveHl(); rerender(); return; }
+    else if (t.matches('[data-rf="tier"]')) { hl.groups[Number(t.dataset.g)].rows[Number(t.dataset.r)].tier = t.value; saveHl(); applyHighlight(root); return; }
+    else if (t.matches('[data-rf="on"]')) { hl.groups[Number(t.dataset.g)].rows[Number(t.dataset.r)].off = !t.checked; saveHl(); rerender(); return; }
     else return;
     rerender();
   });
@@ -269,7 +289,8 @@ export function bindInventory(root, rerender, getChar) {
     const t = e.target;
     if (!t.closest?.('.inv-panel')) return;
     if (t.matches('[data-hl-text]')) hl.text = t.value;
-    else if (t.matches('[data-hl="min"]')) hl.rows[Number(t.dataset.i)].min = t.value;
+    else if (t.matches('[data-gf="min"], [data-gf="max"]')) hl.groups[Number(t.dataset.g)][t.dataset.gf] = t.value;
+    else if (t.matches('[data-rf="min"], [data-rf="max"], [data-rf="weight"]')) hl.groups[Number(t.dataset.g)].rows[Number(t.dataset.r)][t.dataset.rf] = t.value;
     else return;
     saveHl(); applyHighlight(root);
   });
