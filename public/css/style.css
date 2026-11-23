@@ -1534,3 +1534,13 @@ html.standalone body { padding-bottom: env(safe-area-inset-bottom); padding-left
 .hl-group .row { flex-wrap: nowrap; }
 .hl-group .hl-row { flex-wrap: wrap; }
 .hl-bar .af-min { width: 62px !important; }
+/* combat: collapsible Recent fights (above the damage meter) */
+.panel.results { margin: 10px 0; }
+.results-toggle { display: flex; align-items: center; gap: 10px; width: 100%; background: none; border: 0; padding: 0; color: inherit; cursor: pointer; text-align: left; font: inherit; }
+.results-toggle h3 { margin: 0; }
+.results-toggle .caret { display: inline-block; transition: transform .15s; }
+.panel.results.collapsed .caret { transform: rotate(-90deg); }
+.panel.results.collapsed .results-list { display: none; }
+.panel.results:not(.collapsed) .results-summary { display: none; }
+.results-summary .good { color: var(--good, #6fdc6f); } .results-summary .bad { color: var(--bad, #ff6b6b); }
+.panel.results:not(.collapsed) .results-toggle { margin-bottom: 8px; }

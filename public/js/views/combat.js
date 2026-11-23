@@ -299,11 +299,11 @@ function build() {
     root.innerHTML = `
       <div class="combat-header"></div>
       <div class="battlefield"></div>
+      <div class="panel results ${resultsOpen() ? '' : 'collapsed'}"><button class="panel-head results-toggle" data-results-toggle title="Show or hide recent fights"><h3><span class="caret">▾</span> Recent fights</h3><span class="results-summary muted small"></span></button><div class="results-list"></div></div>
       <div class="combat-bottom">
         <div class="panel meter-panel"><div class="meter-host"></div></div>
         ${logPanelHtml(b)}
-      </div>
-      <div class="panel results"><div class="panel-head"><h3>Recent fights</h3></div><div class="results-list"></div></div>`;
+      </div>`;
   }
   buildField();
   refreshSources();
@@ -480,10 +480,24 @@ function showBanner(s) {
   setTimeout(() => { if (el.isConnected) el.hidden = true; }, s.kind === 'rift' ? 5000 : 2200);
 }
 
+// the Recent fights panel can be collapsed (remembered in this browser); collapsed, its header shows a summary
+const RESULTS_KEY = 'ashenvale.resultsOpen';
+const resultsOpen = () => { try { return localStorage.getItem(RESULTS_KEY) !== '0'; } catch { return true; } };
+function toggleResults() {
+  const open = !resultsOpen();
+  try { localStorage.setItem(RESULTS_KEY, open ? '1' : '0'); } catch {}
+  root?.querySelector('.panel.results')?.classList.toggle('collapsed', !open);
+}
+
 function renderResults() {
   const el = root?.querySelector('.results-list');
   if (!el) return;
   const list = [...results.coop, ...results.solo].sort((a, b) => b.at - a.at).slice(0, 8);
+  const sum = root.querySelector('.results-summary');
+  if (sum) {
+    const won = list.filter(r => r.result === 'victory').length, last = list[0];
+    sum.innerHTML = list.length ? `last: <b class="${last.result === 'victory' ? 'good' : 'bad'}">${last.result === 'victory' ? 'Victory' : 'Defeat'}</b>${last.result === 'victory' && last.kind !== 'arena' ? ` · <span class="xp-text">+${fmt(last.xp)} XP</span> · <span class="gold-text">+${fmt(last.gold)}g</span>` : ''} · ${won}/${list.length} won` : '';
+  }
   el.innerHTML = list.length ? list.map(r => `<div class="result-row ${r.result}">
       <div><b>${r.result === 'victory' ? 'Victory' : 'Defeat'}</b> <span class="muted small">${esc(r.title || '')}</span></div>
       ${r.kind === 'arena' ? `<div class="small">${r.delta >= 0 ? '+' : ''}${r.delta} arena rating${r.gold ? ` · <span class="gold-text">+${fmt(r.gold)}g</span>` : ''}</div>` : r.result === 'victory' ? `<div class="small"><span class="xp-text">+${fmt(r.xp)} XP</span> · <span class="gold-text">+${fmt(r.gold)}g</span>
@@ -513,6 +527,7 @@ export const combatView = {
       if (e.target.matches('[data-log-search]')) { filter.search = e.target.value.trim().toLowerCase(); rebuildLog(); }
     });
     el.addEventListener('click', async e => {
+      if (e.target.closest('[data-results-toggle]')) { toggleResults(); return; }
       if (e.target.closest('[data-boss]')) { await run(act('challenge_boss', { zoneId: state.player.zone }), 'Boss challenge accepted!'); return; }
       if (e.target.closest('[data-rift-stop]')) { await run(act('rift_stop'), 'Rift abandoned.'); return; }
       const foe = e.target.closest('.unit.foe');
