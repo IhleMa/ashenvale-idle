@@ -27,7 +27,7 @@ const has = (u, id) => u.statuses.some(s => s.id === id);
   const nodes = Object.values(getTree('rogue').nodes);
   assert.ok(nodes.some(x => x.type === 'ability' && x.ability === 'assassins_mark'));
   const pb = nodes.find(x => x.name === 'Venom Rush');
-  assert.ok(describeNodeStats(pb.stats).some(t => /faster Poison ticks/.test(t)));
+  assert.ok(describeNodeStats(pb.stats).some(t => /faster Poison ticks/.test(t)) && describeNodeStats(pb.stats).some(t => /at least 10 Poison stacks/.test(t)));
   ok('tree: Assassin\'s Mark ability node, Venom Rush describes the faster poison');
 }
 
@@ -63,9 +63,20 @@ const has = (u, id) => u.statuses.some(s => s.id === id);
     while (b.time < 4) { C.stepBattle(b); n += C.drainEvents(b).filter(e => e.type === 'damage' && e.dot === 'poison' && e.tgt === foes[0].uid).length; }
     return { n, b, foes };
   };
-  const slow = ticks({}), fast = ticks({ poisonSpeedPct: 1 });
+  const slow = ticks({}), few = ticks({ poisonSpeedPct: 1, poisonSpeedAt: 10 }), fast = ticks({ poisonSpeedPct: 1, poisonSpeedAt: 1 });
+  assert.equal(few.n, slow.n, 'below 10 stacks: normal speed');
   assert.ok(fast.n >= slow.n * 2 - 1 && slow.n >= 3, `ticks ${slow.n} → ${fast.n}`);
-  ok(`Venom Rush: poison ticks twice as fast (${slow.n} → ${fast.n} ticks in 4 s)`);
+  ok(`Venom Rush: poison ticks twice as fast (${slow.n} → ${fast.n} ticks in 4 s), but only from the 10th stack on`);
+  {
+    const { b, me, foes } = battle({ poisonSpeedPct: 1, poisonSpeedAt: 10 });
+    me.loadout = []; me.actionTimer = 1e9;
+    for (const f of foes) { f.loadout = []; f.actionTimer = 1e9; }
+    for (let i = 0; i < 10; i++) cast(b, me, 'poison_blade', foes[0]);
+    C.drainEvents(b);
+    let n = 0;
+    while (b.time < 4) { C.stepBattle(b); n += C.drainEvents(b).filter(e => e.type === 'damage' && e.dot === 'poison' && e.tgt === foes[0].uid).length; }
+    assert.ok(n >= slow.n * 10 * 2 - 10, `10 stacks tick twice as fast (${n})`);
+  }
   assert.equal(ABILITIES.poison_blade.effects.find(e => e.status === 'poison').stat, 'magPower');
   ok('poison scales with Magic Power and deals magic damage');
 }

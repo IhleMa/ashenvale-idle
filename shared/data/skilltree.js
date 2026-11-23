@@ -179,7 +179,7 @@ export function describeNodeStats(stats) {
   for (const [k, v] of Object.entries(stats || {})) {
     if (k === 'rank') { for (const [a, n] of Object.entries(v)) out.push(`+${n} rank to ${ABILITIES[a]?.name || a}`); continue; }
     const [label, kind] = TREE_STAT_LABELS[k] || [k, 'flat'];
-    if (kind === 'text') { if (v) out.push(label); continue; } // a mechanic flag, not a number
+    if (kind === 'text') { if (v) out.push(label.replace('{v}', v)); continue; } // a mechanic flag, not a number ({v}: its value)
     out.push(kind === 'pct' ? `${v > 0 ? '+' : ''}${Math.round(v * 100)}% ${label}` : `+${v} ${label}`);
   }
   return out;

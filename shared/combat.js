@@ -41,7 +41,8 @@ export function makeCharacterUnit(ch, { ownerId, ownerName, position, bonuses = 
       allStatsPct: bonuses.allStatsPct || 0,
       dotDamagePct: s.dotDamagePct || 0,
       dotDurationPct: s.dotDurationPct || 0,
-      poisonSpeedPct: s.poisonSpeedPct || 0, // Venom Rush (rogue keystone): your poison ticks faster
+      poisonSpeedPct: s.poisonSpeedPct || 0, // Venom Rush (rogue keystone): your poison ticks faster…
+      poisonSpeedAt: s.poisonSpeedAt || 0, // …once the target has this many poison stacks
     },
     actionTimer: 0.3 + position * 0.25,
     danger: 0,
@@ -231,7 +232,12 @@ function mod(u, key) {
   return v;
 }
 const srcMod = (b, uid, key) => { const u = b.units.find(x => x.uid === uid); return u ? mod(u, key) : 0; };
-const srcBonus = (b, uid, key) => b.units.find(x => x.uid === uid)?.bonuses?.[key] || 0;
+// Venom Rush: the source's poison ticks faster once the target carries enough poison stacks (any caster's)
+const venomRush = (b, uid, tgt) => {
+  const bon = b.units.find(x => x.uid === uid)?.bonuses;
+  if (!bon?.poisonSpeedPct) return 0;
+  return tgt.statuses.filter(s => s.id === 'poison').length >= (bon.poisonSpeedAt || 0) ? bon.poisonSpeedPct : 0;
+};
 // how many different debuffs this caster has on a unit (Drain Life, the warlock's AI conditions)
 export function ownDebuffKinds(src, tgt) {
   return new Set(tgt.statuses.filter(s => s.src === src.uid && STATUSES[s.id]?.type === 'debuff').map(s => s.id)).size;
@@ -771,7 +777,7 @@ function tickStatuses(b, u) {
     const def = STATUSES[s.id];
     if (def.tick) {
       // the source's own "dotSpeedPct" buff (Dark Pact) makes its damage over time tick faster; Venom Rush its poison
-      const speed = def.tick === 'damage' ? 1 + Math.max(0, srcMod(b, s.src, 'dotSpeedPct')) + (s.id === 'poison' ? srcBonus(b, s.src, 'poisonSpeedPct') : 0) : 1;
+      const speed = def.tick === 'damage' ? 1 + Math.max(0, srcMod(b, s.src, 'dotSpeedPct')) + (s.id === 'poison' ? venomRush(b, s.src, u) : 0) : 1;
       s.tickTimer -= DT * speed;
       if (s.tickTimer <= 0) {
         s.tickTimer += C.statusTickInterval;
