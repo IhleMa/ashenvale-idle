@@ -131,5 +131,14 @@ const rng = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647
   assert.ok(m({ bestTier: 2 }) && !m({ bestTier: 1 }) && m({ minAffixes: 3 }) && !m({ minAffixes: 4 }));
   assert.ok(m({ socket: 'empty' }) && !m({ socket: 'gem' }) && !m({ socket: 'ladder' }));
   ok('auction search: stat, minimum value, tier, all/any, best tier, affix count and socket filters');
+  // stat groups (Path of Exile trade style), values in display units (% stats in percent)
+  const row = (stat, x = {}) => ({ stat, min: '', max: '', tier: '', weight: '', off: false, ...x });
+  const ls = it.stats.lifeSteal * 100;
+  assert.ok(m({ groups: [{ type: 'and', rows: [row('lifeSteal', { min: ls }), row('str')] }] }) && !m({ groups: [{ type: 'and', rows: [row('lifeSteal', { min: ls + 0.1 })] }] }));
+  assert.ok(m({ groups: [{ type: 'not', rows: [row('dodge')] }] }) && !m({ groups: [{ type: 'not', rows: [row('str')] }] }));
+  assert.ok(m({ groups: [{ type: 'count', min: 2, rows: [row('lifeSteal'), row('dodge'), row('critChance')] }] }) && !m({ groups: [{ type: 'count', min: 3, rows: [row('lifeSteal'), row('dodge'), row('critChance')] }] }));
+  assert.ok(m({ groups: [{ type: 'weight', min: ls * 2, rows: [row('lifeSteal', { weight: 2 })] }] }) && !m({ groups: [{ type: 'weight', min: ls * 2 + 1, rows: [row('lifeSteal', { weight: 2 })] }] }));
+  assert.ok(m({ groups: [{ type: 'and', rows: [row('str')] }], socket: 'empty' }) && !m({ groups: [{ type: 'and', rows: [row('str')] }], socket: 'gem' }));
+  ok('auction search: stat groups (And, Not, Count, Weighted sum) together with the other filters');
 }
 console.log(`affix-test: ${n} checks passed`);

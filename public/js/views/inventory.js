@@ -10,10 +10,10 @@ import { MATERIALS } from '/shared/data/town.js';
 import { salvageYield } from '/shared/town.js';
 import { maxSockets } from '/shared/data/items.js';
 import { openSockets } from './gems.js';
-import { statOptions, tierOptions } from './auction.js';
 import { AFFIXES, PCT_STATS } from '/shared/data/items.js';
 import { gearItemStats } from '/shared/gems.js';
 import { GROUP_TYPES, matchStatGroups, cleanGroups, groupsActive } from '/shared/statFilter.js';
+import { statGroupsHtml, addGroupSelect, onGroupsClick, onGroupsChange, onGroupsInput } from '../statGroups.js';
 import { FILTER_ACTIONS } from '/shared/lootfilter.js';
 import { filterHtml, logHtml, inventoryVerdicts, handleFilterClick, handleFilterChange, filterIsDirty } from './lootfilter.js';
 
@@ -92,34 +92,15 @@ async function savePresets(list) { await run(act('set_settings', { invPresets: l
 
 function highlightHtml(items) {
   const n = hlActive() ? items.filter(hlMatch).length : 0;
-  const v = x => esc(x ?? '');
-  const groupHtml = (g, gi) => `<div class="hl-group hl-g-${g.type}">
-    <div class="row gap wrap small">
-      <select data-g="${gi}" data-gf="type" ${tipAttr(esc(GROUP_TYPES[g.type].hint))}>${Object.entries(GROUP_TYPES).map(([k, t]) => `<option value="${k}" ${g.type === k ? 'selected' : ''}>${t.label}</option>`).join('')}</select>
-      ${g.type === 'count' || g.type === 'weight' ? `<label class="inline">min <input type="number" step="any" class="af-min" data-g="${gi}" data-gf="min" value="${v(g.min)}" placeholder="${g.type === 'count' ? '1' : 'any'}"></label>
-        <label class="inline">max <input type="number" step="any" class="af-min" data-g="${gi}" data-gf="max" value="${v(g.max)}" placeholder="any"></label>` : ''}
-      <span class="grow"></span>
-      <button class="btn tiny" data-g-addrow="${gi}">＋ Stat</button>
-      <button class="btn tiny ghost danger" data-g-del="${gi}" title="Remove group">✕</button>
-    </div>
-    ${g.rows.map((r, ri) => `<div class="row gap wrap small hl-row ${r.off ? 'off' : ''}">
-      <input type="checkbox" data-g="${gi}" data-r="${ri}" data-rf="on" ${r.off ? '' : 'checked'} title="Use this stat">
-      <select data-g="${gi}" data-r="${ri}" data-rf="stat"><option value="">Choose a stat…</option>${statOptions(r.stat)}</select>
-      <input type="number" step="any" class="af-min" data-g="${gi}" data-r="${ri}" data-rf="min" value="${v(r.min)}" placeholder="min" title="Minimum${r.stat && PCT_STATS.has(r.stat) ? ' (in %)' : ''}">
-      <input type="number" step="any" class="af-min" data-g="${gi}" data-r="${ri}" data-rf="max" value="${v(r.max)}" placeholder="max" title="Maximum${r.stat && PCT_STATS.has(r.stat) ? ' (in %)' : ''}">
-      ${g.type === 'weight' ? `<input type="number" step="any" class="af-min" data-g="${gi}" data-r="${ri}" data-rf="weight" value="${v(r.weight)}" placeholder="×1" title="Weight: the value counts this many times">` : ''}
-      <select data-g="${gi}" data-r="${ri}" data-rf="tier">${tierOptions(r.tier, 'Any tier')}</select>
-      <button class="btn tiny ghost danger" data-g="${gi}" data-r-del="${ri}" title="Remove">✕</button></div>`).join('')}
-  </div>`;
   return `<div class="hl-bar">
     <div class="row gap wrap small">
       <input type="search" class="hl-text" data-hl-text value="${esc(hl.text)}" placeholder="✨ Highlight: name or stat, e.g. crit fire">
-      <select data-hl-addgroup ${tipAttr('Add a group of stat filters, like on the Path of Exile trade site')}><option value="">＋ Stat group…</option>${Object.entries(GROUP_TYPES).map(([k, t]) => `<option value="${k}">${t.label} — ${esc(t.hint.toLowerCase())}</option>`).join('')}</select>
+      ${addGroupSelect()}
       <label class="inline"><input type="checkbox" data-hl-only ${hl.only ? 'checked' : ''}> only show matches</label>
       <span class="muted" data-hl-count>${hlActive() ? `${n} match${n === 1 ? '' : 'es'}` : ''}</span>
       ${hlActive() || hl.groups.length ? '<button class="btn tiny ghost" data-hl-clear>Clear</button>' : ''}
     </div>
-    ${hl.groups.map(groupHtml).join('')}
+    ${statGroupsHtml(hl.groups)}
   </div>`;
 }
 
@@ -243,9 +224,7 @@ export function bindInventory(root, rerender, getChar) {
       return;
     }
     if ('presetReset' in d) { filterSlot = 'all'; filterRarity = 'all'; Object.assign(hl, emptyHl()); saveHl(); rerender(); return; }
-    if (d.gAddrow) { const g = hl.groups[Number(d.gAddrow)]; if (g && g.rows.length < 10) g.rows.push({ stat: '', min: '', max: '', tier: '', weight: '', off: false }); saveHl(); rerender(); return; }
-    if (d.gDel) { hl.groups.splice(Number(d.gDel), 1); saveHl(); rerender(); return; }
-    if (d.rDel) { hl.groups[Number(d.g)]?.rows.splice(Number(d.rDel), 1); saveHl(); rerender(); return; }
+    if (t.closest('.hl-bar') && onGroupsClick(hl.groups, t)) { saveHl(); rerender(); return; }
     if ('hlClear' in d) { Object.assign(hl, { ...emptyHl(), only: hl.only }); saveHl(); rerender(); return; }
     if (d.item) { selectedUid = selectedUid === d.item ? null : d.item; rerender(); return; }
     if (d.equipTo) { await run(act('equip', { charId: d.equipTo, itemUid: selectedUid }), 'Equipped.'); selectedUid = null; return; }
@@ -272,14 +251,11 @@ export function bindInventory(root, rerender, getChar) {
     else if (t.matches('[data-f-sort]')) sortBy = t.value;
     else if (t.matches('[data-compare]')) compareCharId = t.value;
     else if (t.matches('[data-hl-only]')) { hl.only = t.checked; saveHl(); applyHighlight(root); return; }
-    else if (t.matches('[data-hl-addgroup]')) {
-      if (t.value && hl.groups.length < 8) hl.groups.push({ type: t.value, min: '', max: '', rows: [{ stat: '', min: '', max: '', tier: '', weight: '', off: false }] });
-      t.value = ''; saveHl(); rerender(); return;
+    else if (t.closest('.hl-bar') && (t.matches('[data-sg-add], [data-gf="type"], [data-rf]'))) {
+      const what = onGroupsChange(hl.groups, t);
+      if (!what) return;
+      saveHl(); if (what === 'structure') rerender(); else applyHighlight(root); return;
     }
-    else if (t.matches('[data-gf="type"]')) { hl.groups[Number(t.dataset.g)].type = t.value; saveHl(); rerender(); return; }
-    else if (t.matches('[data-rf="stat"]')) { hl.groups[Number(t.dataset.g)].rows[Number(t.dataset.r)].stat = t.value; saveHl(); rerender(); return; }
-    else if (t.matches('[data-rf="tier"]')) { hl.groups[Number(t.dataset.g)].rows[Number(t.dataset.r)].tier = t.value; saveHl(); applyHighlight(root); return; }
-    else if (t.matches('[data-rf="on"]')) { hl.groups[Number(t.dataset.g)].rows[Number(t.dataset.r)].off = !t.checked; saveHl(); rerender(); return; }
     else return;
     rerender();
   });
@@ -289,8 +265,7 @@ export function bindInventory(root, rerender, getChar) {
     const t = e.target;
     if (!t.closest?.('.inv-panel')) return;
     if (t.matches('[data-hl-text]')) hl.text = t.value;
-    else if (t.matches('[data-gf="min"], [data-gf="max"]')) hl.groups[Number(t.dataset.g)][t.dataset.gf] = t.value;
-    else if (t.matches('[data-rf="min"], [data-rf="max"], [data-rf="weight"]')) hl.groups[Number(t.dataset.g)].rows[Number(t.dataset.r)][t.dataset.rf] = t.value;
+    else if (t.closest('.hl-bar') && onGroupsInput(hl.groups, t)) { /* value typed: re-mark below */ }
     else return;
     saveHl(); applyHighlight(root);
   });

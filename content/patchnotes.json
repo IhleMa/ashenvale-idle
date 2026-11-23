@@ -90,7 +90,8 @@
           "heading": "Auction House",
           "items": [
             "New affix filter: search for up to 6 stats, each with a minimum value and/or a minimum affix tier, and choose whether an item needs all or any of them.",
-            "Also filter by the best affix tier on an item, the number of affixes and its socket (empty, has a gem, or a specific gem). Results show the filtered stats with their tiers, and you can sort by the first filtered stat."
+            "Also filter by the best affix tier on an item, the number of affixes and its socket (empty, has a gem, or a specific gem). Results show the filtered stats with their tiers, and you can sort by the first filtered stat.",
+            "The Auction House stat filter uses the same groups as the inventory (Path of Exile trade style): And, Not, Count and Weighted sum groups with min/max per stat (in % for % stats), minimum tier and on/off rows — together with best affix tier, number of affixes and socket. \"Most …\" sorting uses the first stat you filter for."
           ]
         },
         {

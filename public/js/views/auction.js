@@ -10,8 +10,11 @@ import { SLOTS, AFFIXES, AFFIX_TIERS, PCT_STATS, itemSellValue } from '/shared/d
 import { GEM_IDS, GEM_KINDS, gearItemStats } from '/shared/gems.js';
 import { MATERIALS, MATERIAL_IDS } from '/shared/data/town.js';
 import { CLASSES } from '/shared/data/classes.js';
+import { cleanGroups } from '/shared/statFilter.js';
+import { statGroupsHtml, addGroupSelect, onGroupsClick, onGroupsChange, onGroupsInput, statOptions, tierOptions } from '../statGroups.js';
+export { statOptions, tierOptions }; // used to live here
 
-const ui = { tab: 'browse', q: { kind: 'all', query: '', slot: '', rarity: '', usableBy: '', sort: 'newest', page: 0, minLevel: '', maxLevel: '', affixes: [], affixMode: 'all', bestTier: '', minAffixes: '', socket: '' }, affixOpen: false, sellItem: null, sellMat: 'ore', sellQty: 10, price: '', hours: 24 };
+const ui = { tab: 'browse', q: { kind: 'all', query: '', slot: '', rarity: '', usableBy: '', sort: 'newest', page: 0, minLevel: '', maxLevel: '', groups: [], bestTier: '', minAffixes: '', socket: '' }, affixOpen: false, sellItem: null, sellMat: 'ore', sellQty: 10, price: '', hours: 24 };
 let results = null;
 let mine = null;
 let searchTimer = null;
@@ -19,11 +22,9 @@ const now = () => Date.now() + (state.timeOffset || 0);
 
 const goldTxt = n => `<span class="gold-text">◉ ${fmt(n)}</span>`;
 
-// the query as the server wants it: percentage stats are typed as percent (5 = 5%)
-function queryPayload() {
-  const q = ui.q;
-  return { ...q, affixes: q.affixes.filter(r => r.stat).map(r => ({ stat: r.stat, tier: r.tier || null, min: r.min === '' || r.min == null ? null : PCT_STATS.has(r.stat) ? Number(r.min) / 100 : Number(r.min) })) };
-}
+// the query as the server wants it (stat groups: values in the stat's display unit, % stats in percent)
+function queryPayload() { return { ...ui.q, groups: cleanGroups(ui.q.groups) }; }
+const liveStats = () => ui.q.groups.filter(g => g.type !== 'not').flatMap(g => g.rows.filter(r => r.stat && !r.off).map(r => r.stat));
 async function search(root) {
   try { results = await act('ah_search', queryPayload()); } catch (e) { toast(e.message, 'error'); }
   renderBody(root);
@@ -41,7 +42,7 @@ function listingName(l) {
 
 // the filtered stats on a found item: value and the affix tier
 function matchedChips(it) {
-  const rows = ui.q.affixes.filter(r => r.stat);
+  const rows = [...new Set(liveStats())].map(stat => ({ stat }));
   if (!rows.length) return '';
   const stats = gearItemStats(it);
   return `<span class="af-chips">${rows.map(r => {
@@ -52,29 +53,22 @@ function matchedChips(it) {
   }).join('')}</span>`;
 }
 
-export const statOptions = sel => ['prefix', 'suffix'].map(type => `<optgroup label="${type === 'prefix' ? 'Prefixes' : 'Suffixes'}">${Object.entries(AFFIXES).filter(([, a]) => a.type === type).sort((x, y) => x[1].label.localeCompare(y[1].label) || (x[1].pct ? 1 : -1)).map(([k, a]) => `<option value="${k}" ${sel === k ? 'selected' : ''}>${esc(a.label)}${a.pct && ['str', 'int', 'dex', 'vit', 'defense'].some(f => k === f + 'Pct') ? ' %' : ''}</option>`).join('')}</optgroup>`).join('');
-export const tierOptions = (sel, any = 'Any tier') => `<option value="">${any}</option>${AFFIX_TIERS.map(t => `<option value="${t.tier}" ${String(sel) === String(t.tier) ? 'selected' : ''}>T${t.tier}${t.tier > 1 ? ' or better' : ''}</option>`).join('')}`;
 
 function affixFilterHtml() {
   const q = ui.q;
-  const active = q.affixes.length || q.bestTier || q.minAffixes || q.socket;
-  if (!ui.affixOpen) return `<div class="row gap"><button class="btn small ${active ? 'primary' : 'ghost'}" data-af-open>🔎 Affix filter${active ? ` (${q.affixes.length + (q.bestTier ? 1 : 0) + (q.minAffixes ? 1 : 0) + (q.socket ? 1 : 0)} active)` : ''}</button></div>`;
-  return `<div class="af-panel">
-    <div class="row gap wrap"><b>🔎 Affix filter</b><span class="grow"></span>
-      ${q.affixes.length > 1 ? `<label class="inline small">Item must have <select data-qq="affixMode"><option value="all" ${q.affixMode !== 'any' ? 'selected' : ''}>all</option><option value="any" ${q.affixMode === 'any' ? 'selected' : ''}>any</option></select> of these</label>` : ''}
+  const nGroups = q.groups.filter(g => g.rows.some(r => r.stat && !r.off)).length;
+  const active = nGroups || q.bestTier || q.minAffixes || q.socket;
+  if (!ui.affixOpen) return `<div class="row gap"><button class="btn small ${active ? 'primary' : 'ghost'}" data-af-open>🔎 Stat filter${active ? ` (${nGroups + (q.bestTier ? 1 : 0) + (q.minAffixes ? 1 : 0) + (q.socket ? 1 : 0)} active)` : ''}</button></div>`;
+  return `<div class="af-panel hl-bar">
+    <div class="row gap wrap"><b>🔎 Stat filter</b>${addGroupSelect()}<span class="grow"></span>
       <button class="btn tiny ghost" data-af-clear>Clear</button><button class="btn tiny ghost" data-af-close>Hide</button></div>
-    ${q.affixes.map((r, i) => `<div class="af-row row gap wrap">
-      <select data-af="stat" data-i="${i}"><option value="">Choose a stat…</option>${statOptions(r.stat)}</select>
-      <label class="inline small">at least <input type="number" step="any" min="0" class="af-min" data-af="min" data-i="${i}" value="${esc(r.min ?? '')}" placeholder="any">${r.stat && PCT_STATS.has(r.stat) ? ' %' : ''}</label>
-      <select data-af="tier" data-i="${i}">${tierOptions(r.tier, 'Any tier')}</select>
-      <button class="btn tiny ghost danger" data-af-del="${i}" title="Remove">✕</button></div>`).join('')}
-    ${q.affixes.length < 6 ? '<button class="btn tiny" data-af-add>＋ Add stat</button>' : ''}
+    ${statGroupsHtml(q.groups)}
     <div class="row gap wrap small af-extra">
       <label class="inline">Best affix <select data-qq="bestTier">${tierOptions(q.bestTier, 'any')}</select></label>
       <label class="inline">At least <select data-qq="minAffixes"><option value="">any</option>${[1, 2, 3, 4, 5, 6].map(n => `<option value="${n}" ${String(q.minAffixes) === String(n) ? 'selected' : ''}>${n}</option>`).join('')}</select> affixes</label>
       <label class="inline">Socket <select data-qq="socket"><option value="">any</option><option value="empty" ${q.socket === 'empty' ? 'selected' : ''}>empty socket</option><option value="gem" ${q.socket === 'gem' ? 'selected' : ''}>has a gem</option>${GEM_IDS.map(k => `<option value="${k}" ${q.socket === k ? 'selected' : ''}>has ${esc(GEM_KINDS[k].name)}</option>`).join('')}</select></label>
     </div>
-    <div class="faint small">Values are the item's total for that stat (base, affixes and gems). A tier means the stat must be an affix of that tier or better.</div>
+    <div class="faint small">Groups work like on the Path of Exile trade site: <b>And</b> = all of these, <b>Not</b> = none, <b>Count</b> = at least min of these, <b>Weighted sum</b> = value × weight added up. Every group must match. Values are the item's total for that stat (base, affixes and gems), % stats in percent; a tier means the stat must be an affix of that tier or better.</div>
   </div>`;
 }
 
@@ -91,7 +85,7 @@ function browseHtml() {
       <select data-q="usableBy"><option value="">Usable by anyone</option>${chars().map(c => `<option value="${c.id}" ${q.usableBy === c.id ? 'selected' : ''}>Usable by ${esc(c.name)}</option>`).join('')}</select>
       <input data-q="minLevel" type="number" min="1" max="60" placeholder="min lvl" value="${esc(q.minLevel)}">
       <input data-q="maxLevel" type="number" min="1" max="60" placeholder="max lvl" value="${esc(q.maxLevel)}">
-      <select data-q="sort">${[['newest', 'Newest'], ['price', 'Price ↑'], ['priceDesc', 'Price ↓'], ['level', 'Item level'], ['ending', 'Ending soon'], ...(q.affixes.some(r => r.stat) ? [['stat', `Most ${AFFIXES[q.affixes.find(r => r.stat).stat].label}`]] : [])].map(([v, l]) => `<option value="${v}" ${q.sort === v ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select>
+      <select data-q="sort">${[['newest', 'Newest'], ['price', 'Price ↑'], ['priceDesc', 'Price ↓'], ['level', 'Item level'], ['ending', 'Ending soon'], ...(liveStats().length ? [['stat', `Most ${AFFIXES[liveStats()[0]].label}`]] : [])].map(([v, l]) => `<option value="${v}" ${q.sort === v ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select>
     </div>
     ${affixFilterHtml()}
     ${results ? `<div class="muted small">${results.total} listing${results.total === 1 ? '' : 's'}</div>` : '<p class="muted">Loading…</p>'}
@@ -179,11 +173,10 @@ export const auctionView = {
       const d = t.dataset;
       if (d.tab) { ui.tab = d.tab; root.querySelectorAll('[data-tab]').forEach(b => b.classList.toggle('active', b === t)); reload(); return; }
       if (d.page) { ui.q.page = Math.max(0, ui.q.page + Number(d.page)); search(root); return; }
-      if ('afOpen' in d) { ui.affixOpen = true; if (!ui.q.affixes.length) ui.q.affixes.push({ stat: '', min: '', tier: '' }); renderBody(root); return; }
+      if ('afOpen' in d) { ui.affixOpen = true; if (!ui.q.groups.length) ui.q.groups.push({ type: 'and', min: '', max: '', rows: [{ stat: '', min: '', max: '', tier: '', weight: '', off: false }] }); renderBody(root); return; }
       if ('afClose' in d) { ui.affixOpen = false; renderBody(root); return; }
-      if ('afAdd' in d) { ui.q.affixes.push({ stat: '', min: '', tier: '' }); renderBody(root); return; }
-      if (d.afDel) { ui.q.affixes.splice(Number(d.afDel), 1); ui.q.page = 0; search(root); return; }
-      if ('afClear' in d) { Object.assign(ui.q, { affixes: [{ stat: '', min: '', tier: '' }], affixMode: 'all', bestTier: '', minAffixes: '', socket: '', page: 0 }); if (ui.q.sort === 'stat') ui.q.sort = 'newest'; search(root); return; }
+      if (t.closest('.af-panel') && onGroupsClick(ui.q.groups, t)) { ui.q.page = 0; if (!liveStats().length && ui.q.sort === 'stat') ui.q.sort = 'newest'; search(root); return; }
+      if ('afClear' in d) { Object.assign(ui.q, { groups: [], bestTier: '', minAffixes: '', socket: '', page: 0 }); if (ui.q.sort === 'stat') ui.q.sort = 'newest'; search(root); return; }
       if (d.buy) {
         const l = results.rows.find(x => x.id === d.buy);
         const name = l.kind === 'material' ? `${l.qty}× ${MATERIALS[l.material].name}` : l.item.name;
@@ -207,9 +200,8 @@ export const auctionView = {
       const t = e.target;
       if (t.dataset.q) { ui.q[t.dataset.q] = t.value; ui.q.page = 0; if (t.dataset.q !== 'query') search(root); return; }
       if (t.dataset.qq) { ui.q[t.dataset.qq] = t.value; ui.q.page = 0; search(root); return; }
-      if (t.dataset.af && t.dataset.af !== 'min') {
-        const r = ui.q.affixes[Number(t.dataset.i)];
-        if (r) { r[t.dataset.af] = t.value; ui.q.page = 0; if (!ui.q.affixes.some(x => x.stat) && ui.q.sort === 'stat') ui.q.sort = 'newest'; search(root); }
+      if (t.closest('.af-panel') && t.matches('[data-sg-add], [data-gf="type"], [data-rf]')) {
+        if (onGroupsChange(ui.q.groups, t)) { ui.q.page = 0; if (!liveStats().length && ui.q.sort === 'stat') ui.q.sort = 'newest'; search(root); }
         return;
       }
       if (t.matches('[data-sell-mat]')) { ui.sellMat = t.value; ui.sellItem = null; renderBody(root); }
@@ -218,7 +210,7 @@ export const auctionView = {
     root.addEventListener('input', e => {
       const t = e.target;
       if (t.dataset.q === 'query') { ui.q.query = t.value; ui.q.page = 0; clearTimeout(searchTimer); searchTimer = setTimeout(() => search(root), 300); }
-      if (t.dataset.af === 'min') { const r = ui.q.affixes[Number(t.dataset.i)]; if (r) { r.min = t.value; ui.q.page = 0; clearTimeout(searchTimer); searchTimer = setTimeout(() => search(root), 400); } }
+      if (t.closest('.af-panel') && onGroupsInput(ui.q.groups, t)) { ui.q.page = 0; clearTimeout(searchTimer); searchTimer = setTimeout(() => search(root), 400); }
       if (t.matches('[data-price]')) { ui.price = t.value; const b = root.querySelector('[data-list]'); if (b) { b.disabled = !(Number(t.value) >= 1); b.innerHTML = `List for <span class="gold-text">◉ ${fmt(Number(t.value) || 0)}</span>`; } }
       if (t.matches('[data-sell-qty]')) ui.sellQty = Math.max(1, Number(t.value) || 1);
     });

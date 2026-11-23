@@ -1,4 +1,5 @@
 // Auction house: player-to-player trading of items and materials for gold (server-authoritative).
+import { cleanGroups, groupsActive, matchStatGroups } from '../shared/statFilter.js';
 import crypto from 'node:crypto';
 import { CONFIG, rarityIndex } from '../shared/config.js';
 import { MATERIALS } from '../shared/data/town.js';
@@ -12,17 +13,21 @@ const DURATIONS = [12, 24, 48];
 const MAX_PRICE = 100_000_000;
 
 // ---------------------------------------------------------------- affix search
-// q.affixes: [{ stat, min, tier }] (min in the stat's own units: 0.05 = 5%), q.affixMode: 'all' | 'any',
+// q.groups: stat filter groups like the Path of Exile trade site (shared/statFilter.js; values in display units, % stats
+// in percent). Older clients: q.affixes [{ stat, min, tier }] (min in the stat's own units: 0.05 = 5%), q.affixMode.
 // q.bestTier: the item needs some affix at this tier or better, q.minAffixes, q.socket: '' | 'empty' | 'gem' | <gem kind>
 function affixQuery(q) {
+  const groups = cleanGroups(q.groups).map(g => ({ ...g, rows: g.rows.filter(r => !r.stat || AFFIXES[r.stat]) }));
   const rows = (Array.isArray(q.affixes) ? q.affixes : []).slice(0, 8)
     .filter(r => r && AFFIXES[r.stat])
     .map(r => ({ stat: r.stat, min: r.min !== '' && r.min != null && Number.isFinite(Number(r.min)) ? Number(r.min) : null, tier: Number(r.tier) >= 1 ? Math.floor(Number(r.tier)) : null }));
   const bestTier = Number(q.bestTier) >= 1 ? Math.floor(Number(q.bestTier)) : null;
   const minAffixes = Number(q.minAffixes) >= 1 ? Math.floor(Number(q.minAffixes)) : null;
   const socket = typeof q.socket === 'string' && (['empty', 'gem'].includes(q.socket) || GEM_KINDS[q.socket]) ? q.socket : '';
-  if (!rows.length && !bestTier && !minAffixes && !socket) return null;
-  return { rows, mode: q.affixMode === 'any' ? 'any' : 'all', bestTier, minAffixes, socket };
+  if (!rows.length && !groupsActive(groups) && !bestTier && !minAffixes && !socket) return null;
+  // the stat to sort "most …" by: the first used stat that isn't in a Not group
+  const sortStat = groups.filter(g => g.type !== 'not').flatMap(g => g.rows.filter(r => r.stat && !r.off).map(r => r.stat))[0] || rows[0]?.stat || null;
+  return { rows, mode: q.affixMode === 'any' ? 'any' : 'all', groups, bestTier, minAffixes, socket, sortStat };
 }
 export function matchesAffixQuery(item, af) {
   const affixes = item.affixes || [];
@@ -34,8 +39,9 @@ export function matchesAffixQuery(item, af) {
     if (af.socket === 'gem' && !sockets.some(Boolean)) return false;
     if (GEM_KINDS[af.socket] && !sockets.some(g => g && parseGemKey(g)?.kind === af.socket)) return false;
   }
-  if (!af.rows.length) return true;
   const stats = gearItemStats(item);
+  if (!matchStatGroups(item, af.groups, stats)) return false;
+  if (!af.rows.length) return true;
   const ok = r => {
     if (r.tier && !affixes.some(a => a.stat === r.stat && a.tier <= r.tier)) return false;
     if (r.min != null) return (stats[r.stat] || 0) >= r.min - 1e-9;
@@ -43,7 +49,7 @@ export function matchesAffixQuery(item, af) {
   };
   return af.mode === 'any' ? af.rows.some(ok) : af.rows.every(ok);
 }
-const statOf = (l, af) => (l.kind === 'item' && af?.rows[0] ? gearItemStats(l.item)[af.rows[0].stat] || 0 : -1);
+const statOf = (l, af) => (l.kind === 'item' && af?.sortStat ? gearItemStats(l.item)[af.sortStat] || 0 : -1);
 export { affixQuery };
 
 export function priceKey(l) {

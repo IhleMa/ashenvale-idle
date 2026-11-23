@@ -1529,7 +1529,7 @@ html.standalone body { padding-bottom: env(safe-area-inset-bottom); padding-left
 .hl-bar input, .hl-bar select { font-size: .85em; padding: 2px 6px; min-height: 0; height: 26px; }
 .hl-bar input[type=checkbox] { height: auto; }
 .hl-bar .hl-text { height: 28px; }
-.hl-bar [data-hl-addgroup] { width: auto; flex: none; }
+.hl-bar [data-sg-add] { width: auto; flex: none; }
 .hl-group [data-rf="stat"] { max-width: 190px; }
 .hl-group .row { flex-wrap: nowrap; }
 .hl-group .hl-row { flex-wrap: wrap; }
