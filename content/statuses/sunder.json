@@ -1,0 +1,15 @@
+{
+  "name": "Sunder",
+  "type": "debuff",
+  "maxStacks": 5,
+  "mods": {
+    "defensePct": -0.08
+  },
+  "lethalAt": 5,
+  "lethalPct": 3,
+  "lethalName": "Execution",
+  "lethalMessage": "executed by the Iron Tyrant",
+  "resetOnTaunt": true,
+  "description": "The Iron Tyrant's armour-breaking blows: -8% defense per stack. At 5 stacks the next blow executes. Falls off when another ally taunts the Tyrant.",
+  "order": 300
+}

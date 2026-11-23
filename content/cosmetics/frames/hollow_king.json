@@ -1,0 +1,16 @@
+{
+  "name": "Hollow Crown",
+  "tier": "earned",
+  "price": 0,
+  "colors": [
+    "#0d0b10",
+    "#e0b54a",
+    "#2a2233",
+    "#e0b54a"
+  ],
+  "glow": "#f0c75a",
+  "animated": true,
+  "order": 204,
+  "fx": "void",
+  "pinnacle": "hollow_king"
+}

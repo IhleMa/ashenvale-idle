@@ -22,7 +22,7 @@
     {
       "name": "Tactician",
       "attrs": ["dex", "str"],
-      "abilities": { "3": "shield_bash" },
+      "abilities": { "3": "shield_bash", "2": "pummel" },
       "notables": {
         "4": { "name": "Precision", "stats": { "critChance": 1.04 } },
         "8": { "name": "Relentless", "stats": { "attackSpeed": 0.2, "critChance": 0.52 } }

@@ -6,6 +6,7 @@ import { ZONES, COOP_ENCOUNTERS, bossWave } from './data/zones.js';
 import { generateItem } from './data/items.js';
 import { DROP_CHANCE, generateUnique, generateSetItem } from './data/legendaries.js';
 import { rollGemDrop } from './gems.js';
+import { rollSigils } from './pinnacle.js';
 
 export function zoneLevel(zone, heroLevel) {
   return Math.max(zone.levelRange[0], Math.min(zone.levelRange[1], heroLevel));
@@ -56,7 +57,8 @@ export function killGold(kill, rng) {
 
 // Returns { xp, gold, items[] } for a finished (won) battle
 // zoneId: where the fight happened — zone-exclusive uniques/sets and the zone's material can drop
-export function computeRewards(kills, rng, { rewardMult = 1, lootBoost = 0, lootMult = 1, zoneId = null } = {}) {
+// noSigils: no Pinnacle Sigils (rifts)
+export function computeRewards(kills, rng, { rewardMult = 1, lootBoost = 0, lootMult = 1, zoneId = null, noSigils = false } = {}) {
   let xp = 0, gold = 0;
   const items = [];
   const materials = {};
@@ -90,5 +92,6 @@ export function computeRewards(kills, rng, { rewardMult = 1, lootBoost = 0, loot
     }
   }
   // killList: lets XP be adjusted per character (ascended heroes, see applyRewards)
-  return { xp: Math.round(xp * rewardMult), gold: Math.round(gold * rewardMult), items, materials, gems, killList: kills };
+  const sigils = noSigils ? 0 : rollSigils(kills, rng);
+  return { xp: Math.round(xp * rewardMult), gold: Math.round(gold * rewardMult), items, materials, gems, sigils, killList: kills };
 }

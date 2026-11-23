@@ -1,0 +1,26 @@
+{
+  "name": "Hush",
+  "baseId": "amulet",
+  "minLevel": 60,
+  "flavor": "The last note of the Choir, kept on a silver chain.",
+  "stats": {
+    "cooldownPct": [
+      0.05,
+      0.0008
+    ],
+    "critDamage": [
+      0.1,
+      0.003
+    ],
+    "allPct": [
+      0.02,
+      0.0004
+    ]
+  },
+  "passive": {
+    "costPct": -0.15
+  },
+  "description": "Your abilities cost 15% less.",
+  "order": 204,
+  "pinnacle": "silent_choir"
+}

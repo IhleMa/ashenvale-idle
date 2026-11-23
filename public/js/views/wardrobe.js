@@ -1,5 +1,6 @@
 // Wardrobe: cosmetics bought with gold (no power) — name colours, titles and portrait frames.
 // Hovering a card tries it on in the preview; everything worn is shown to other players.
+import { PINNACLE_BOSSES } from '/shared/pinnacle.js';
 import { morphed } from '../morph.js';
 import { state, hero } from '../state.js';
 import { act } from '../net.js';
@@ -37,6 +38,7 @@ function cardHtml(kind, c) {
   if (on) btn = `<button class="btn tiny" data-unwear="${kind}" ${tipAttr('Click to take it off')}>✓ Worn</button>`;
   else if (own) btn = `<button class="btn tiny primary" data-wear="${kind}" data-id="${c.id}">Wear</button>`;
   else if (c.achievement) btn = `<span class="muted small">🏆 Earn “${esc(ach?.name || c.achievement)}”</span>`;
+  else if (c.pinnacle) btn = `<a class="muted small" href="#/pinnacle">⚔ Defeat ${esc(PINNACLE_BOSSES[c.pinnacle]?.name || c.pinnacle)}</a>`;
   else btn = `<button class="btn tiny ${p.gold >= c.price ? 'primary' : ''}" data-buy="${kind}" data-id="${c.id}" ${p.gold >= c.price ? '' : 'disabled'}>Buy · ◉ ${fmt(c.price)}</button>`;
   return `<div class="cos-card ${on ? 'worn' : ''}" data-try="${kind}" data-id="${c.id}" ${ach && !own ? tipAttr(esc(ach.description || '')) : ''}>
     <div class="row between"><b>${esc(c.name)}</b><span class="cos-tier cos-tier-${esc(c.tier || 'basic')}">${esc(COSMETIC_TIERS[c.tier] || c.tier || '')}</span></div>

@@ -32,15 +32,19 @@ function boardHtml() {
     : '<p class="muted small">Nobody has timed a rift yet — be the first!</p>';
 }
 
+const riftBattle = () => [state.battles.coop, state.battles.solo].find(b => b?.meta?.kind === 'rift' && b.state === 'running') || null;
+// in a group that fights together, the leader opens rifts for everyone
+const groupRole = () => (state.group?.together ? (state.group.leaderId === state.player.id ? 'leader' : 'member') : null);
+
 function liveHtml() {
-  const b = state.battles.solo;
+  const b = riftBattle();
   if (!b || b.meta?.kind !== 'rift' || b.state !== 'running') return '';
   const over = b.time > b.meta.timeLimit;
   return `<div class="rift-live ${over ? 'over' : ''}">
     <div><b>${esc(b.meta.title)}</b> <span class="muted">· wave ${b.wave}/${b.waves}</span></div>
     <div class="rift-clock" data-rift-clock>${mmss(b.time)} <span class="muted">/ ${mmss(b.meta.timeLimit)}</span></div>
     <div class="bar thin"><div class="fill" style="width:${Math.min(100, b.time / b.meta.timeLimit * 100)}%"></div></div>
-    <div class="row gap"><a class="btn small" href="#/combat">Watch the fight</a><button class="btn small ghost danger" data-rift-stop>Abandon</button></div>
+    <div class="row gap"><a class="btn small" href="#/combat">Watch the fight</a>${groupRole() === 'member' ? '' : '<button class="btn small ghost danger" data-rift-stop>Abandon</button>'}</div>
   </div>`;
 }
 
@@ -57,7 +61,8 @@ function html() {
   const sc = riftScale(ui.tier);
   const chest = riftChest(ui.tier);
   const opts = riftRewardOptions(ui.tier, true);
-  const running = state.battles.solo?.meta?.kind === 'rift' && state.battles.solo.state === 'running';
+  const running = !!riftBattle();
+  const role = groupRole();
   const locked = h.level < RIFT.minLevel;
   const firstClear = ui.tier > (r.best || 0);
   return `<div class="rift-layout">
@@ -81,7 +86,7 @@ function html() {
         ${firstClear ? `<div class="stat-row"><span>First timed clear</span><b class="premium-text">+${firstClearCrystals(ui.tier)} 💠</b></div>` : ''}
         <div class="stat-row"><span>Affixes</span><b>${active.length ? active.map(a => `<span ${tipAttr(`<b>${esc(AFFIXES[a].name)}</b><br>${esc(AFFIXES[a].description)}`)}>${AFFIXES[a].icon} ${esc(AFFIXES[a].name)}</span>`).join(', ') : 'none'}</b></div>
       </div>
-      <div class="row end gap">${running ? '<button class="btn danger" data-rift-stop>Abandon run</button>' : `<button class="btn primary" data-rift-start>Enter Rift (Tier ${ui.tier})</button>`}</div>`}
+      <div class="row end gap">${role === 'member' ? '<span class="muted small">🤝 You are in a group: the leader opens rifts, and you fight them together.</span>' : running ? '<button class="btn danger" data-rift-stop>Abandon run</button>' : `<button class="btn primary" data-rift-start>${role === 'leader' ? `Enter Rift with your group (Tier ${ui.tier})` : `Enter Rift (Tier ${ui.tier})`}</button>`}</div>`}
       <div data-rift-live>${liveHtml()}</div>
       <p class="faint small">XP and gold are paid <b>once per tier</b>, the first time you clear it (in full, even over time); repeating a tier only gives loot. Not timed? No chest and no tier unlock. A wipe ends the run with no rewards.</p>
     </section>

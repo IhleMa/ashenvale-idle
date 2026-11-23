@@ -83,7 +83,7 @@
         "dex",
         "str"
       ],
-      "abilities": {},
+      "abilities": { "2": "counterspell" },
       "notables": {
         "4": {
           "name": "Rhythm of Blades",

@@ -1,0 +1,14 @@
+{
+  "name": "Mother's Plague",
+  "type": "debuff",
+  "tick": "damage",
+  "school": "magical",
+  "ignoreArmor": true,
+  "maxStacks": 30,
+  "mods": {
+    "healingTakenPct": -0.03
+  },
+  "cleansePriority": 10,
+  "description": "Magic damage every second per stack and -3% healing received per stack. Never wears off — only a cleanse removes it.",
+  "order": 301
+}

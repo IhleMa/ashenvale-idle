@@ -1,0 +1,32 @@
+{
+  "name": "Plague Wave",
+  "classId": "enemy",
+  "type": "damage",
+  "cost": 0,
+  "cooldown": 8,
+  "target": "enemy",
+  "area": true,
+  "effects": [
+    {
+      "kind": "status",
+      "status": "plague",
+      "duration": 999,
+      "stat": "magPower",
+      "power": 0.06
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "always"
+      }
+    ],
+    "target": {
+      "selector": "all_enemies"
+    },
+    "targetConditions": []
+  },
+  "order": 601
+}

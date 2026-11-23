@@ -13,6 +13,8 @@ import { ABILITIES } from '../shared/data/abilities.js';
 import { Rankings } from './rankings.js';
 import { COSMETICS, COSMETIC_KINDS, cosmetic, ownsCosmetic, publicCosmetics } from '../shared/data/cosmetics.js';
 import { Arena } from './arena.js';
+import { Pinnacle } from './pinnacle.js';
+import { PINNACLE, PINNACLE_BOSSES, pinnacleWaves, pinnacleScale, pinnacleState } from '../shared/pinnacle.js';
 import { AuctionHouse } from './auction.js';
 import { adminActions } from './admin.js';
 import { Announcements } from './announcements.js';
@@ -57,6 +59,7 @@ export class Game {
     this.onlineDirty = true;
     this.rankings = new Rankings(this);
     this.arena = new Arena(this);
+    this.pinnacle = new Pinnacle(this);
     this.auction = new AuctionHouse(this);
     this.announcements = new Announcements(store);
     this.suggestions = new Suggestions(store);
@@ -301,6 +304,7 @@ export class Game {
       const c = COSMETIC_KINDS[kind] && cosmetic(kind, id);
       if (!c) fail('Unknown cosmetic');
       if (c.achievement) fail('This title is earned through an achievement');
+      if (c.pinnacle) fail('This is earned by defeating a pinnacle boss');
       if (ownsCosmetic(p, kind, id)) fail('You already own this');
       const price = Math.max(0, Math.round(c.price || 0));
       if (p.gold < price) fail(`You need ${price.toLocaleString('en')} gold`);
@@ -396,15 +400,45 @@ export class Game {
       const tier = Math.floor(Number(d.tier));
       if (!(tier >= 1 && tier <= maxStartTier(p))) fail(`You can start tiers 1–${maxStartTier(p)} (time a tier to unlock the next)`);
       const theme = riftTheme(tier); // every tier has a fixed theme
+      const g = this.leaderGroup(p);
+      if (g) {
+        for (const m of this.groupPlayers(g)) if (unlockHeroLevel(m) < RIFT.minLevel) fail(`${m.name}'s hero must be level ${RIFT.minLevel} for rifts`);
+        this.setGroupNext(g, { kind: 'rift', tier, theme });
+        this.groupMessage(g, `${p.name} opens Rift Tier ${tier}.`);
+        return { tier, theme, group: true };
+      }
       if (!L.activePartyChars(p).length) fail('Your active party is empty');
-      this.ensureNotInCoop(p.id);
       this.abortSolo(s);
       s.solo = { next: { kind: 'rift', tier, theme }, restUntil: 0 };
       return { tier, theme };
     },
     rift_stop(s) {
+      const g = this.leaderGroup(s.player);
+      if (g) {
+        if (g.fight?.kind !== 'rift' && g.next?.kind !== 'rift') fail('No rift running');
+        this.setGroupNext(g, null);
+        return;
+      }
       if (s.solo?.kind !== 'rift' && s.solo?.next?.kind !== 'rift') fail('No rift running');
       this.abortSolo(s);
+    },
+    // ---- pinnacle bosses
+    pinnacle_view(s) { return this.pinnacle.view(s.player); },
+    pinnacle_start(s, d) {
+      const p = s.player;
+      const bossId = String(d.bossId || '');
+      const g = this.leaderGroup(p);
+      if (g) {
+        this.pinnacle.check(p, this.groupPlayers(g), bossId); // the sigil is used when the fight starts
+        this.setGroupNext(g, { kind: 'pinnacle', bossId });
+        this.groupMessage(g, `${p.name} uses a Pinnacle Sigil: ${PINNACLE_BOSSES[bossId].name}!`);
+        return { group: true };
+      }
+      this.pinnacle.check(p, [p], bossId);
+      if (!L.activePartyChars(p).length) fail('Your active party is empty');
+      this.abortSolo(s);
+      s.solo = { next: { kind: 'pinnacle', bossId }, restUntil: 0 };
+      return {};
     },
     rift_settings(s, d) {
       if (['off', 'repeat', 'push'].includes(d.auto)) s.player.rift.auto = d.auto;
@@ -450,11 +484,18 @@ export class Game {
     set_party(s, d) { L.setParty(s.player, d); },
     rename_party(s, d) { L.renameParty(s.player, d); },
     activate_party(s, d) { L.activateParty(s.player, d); this.abortSolo(s); },
-    set_zone(s, d) { L.setZone(s.player, d); this.abortSolo(s); },
+    set_zone(s, d) {
+      L.setZone(s.player, d);
+      // the group leader takes the group along; members only change where they fight alone
+      const g = this.groupOf(s.player.id);
+      if (g && this.groupActive(g) && g.leaderId === s.player.id) { if (!g.fight || g.fight.kind === 'idle' || g.fight.kind === 'boss') this.setGroupNext(g, null); this.groupMessage(g, `${s.player.name} leads the group to ${ZONES[s.player.zone]?.name}.`); this.broadcastGroup(g); return; }
+      if (!this.inGroupFight(s.player.id)) this.abortSolo(s);
+    },
     challenge_boss(s, d) {
       const zoneId = d.zoneId;
       if (!ZONES[zoneId] || !s.player.unlockedZones.includes(zoneId)) fail('Zone locked');
-      this.ensureNotInCoop(s.player.id);
+      const g = this.leaderGroup(s.player);
+      if (g) { this.setGroupNext(g, { kind: 'boss', zoneId }); return; }
       this.abortSolo(s);
       s.solo = { next: { kind: 'boss', zoneId }, restUntil: 0 };
     },
@@ -546,7 +587,14 @@ export class Game {
       if (g.chat.length > 50) g.chat.shift();
       this.broadcastGroup(g);
     },
-    group_start(s, d) { this.startCoop(s, d.encounterId); },
+    group_start(s, d) {
+      const g = this.groupOf(s.player.id) || fail('Create a group first (you can also go alone)');
+      if (g.leaderId !== s.player.id) fail('Only the group leader can start encounters');
+      const enc = COOP_ENCOUNTERS[d.encounterId] || fail('Unknown encounter');
+      for (const p of this.groupPlayers(g)) if (L.hero(p).level < enc.minLevel) fail(`${p.name}'s hero must be level ${enc.minLevel}+`);
+      if (g.fight && g.fight.kind !== 'idle') fail('The group is in the middle of something — stop it first');
+      this.setGroupNext(g, { kind: 'coop', encounterId: enc.id });
+    },
     // the client lost track of its fight (e.g. a race between two co-op fights): send the current snapshot again
     battle_resync(s) {
       const g = this.groupOf(s.player.id);
@@ -564,8 +612,17 @@ export class Game {
     for (const m of [].concat(msg || [])) if (m) this.toast(s.player.id, m, 'success');
   }
 
+  // during a group encounter, rift or pinnacle fight the line-up can't change (zone fights don't mind)
   ensureNotInCoop(playerId) {
-    if (this.groupOf(playerId)?.battle) fail('Not possible during a co-op encounter');
+    const g = this.groupOf(playerId);
+    if (g?.battle && g.fight?.kind !== 'idle' && g.fight?.participants.some(x => x.id === playerId)) fail('Not possible during a group encounter');
+  }
+  // the group this player leads, if it fights together — leader actions then steer the group
+  leaderGroup(p) {
+    const g = this.groupOf(p.id);
+    if (!g || !this.groupActive(g)) return null;
+    if (g.leaderId !== p.id) fail('In a group, the leader decides what the group fights');
+    return g;
   }
 
   nameOf(playerId) { return this.store.findAccountById(playerId)?.username || '???'; }
@@ -592,91 +649,132 @@ export class Game {
     s.solo = { restUntil: Date.now() + 500 };
   }
 
-  startSoloBattle(s) {
-    const p = s.player;
-    const chars = L.activePartyChars(p);
-    if (!chars.length) return;
-    const h = L.hero(p);
-    const next = s.solo?.next || { kind: 'idle', zoneId: p.zone };
+  // ------------------------------------------------------------------ fights
+  // Every fight except the Arena is built here: alone (session.solo, the player's active party) or as a group
+  // (group.battle: every online member's line-up together — zones, zone bosses, rifts, co-op encounters and
+  // pinnacle bosses alike). players[0] decides (the leader). lineup: { playerId: [characters] }.
+  buildFight(next, players, lineup, { group = false } = {}) {
+    players = players.filter(p => lineup[p.id]?.length);
+    const allChars = players.flatMap(p => lineup[p.id]);
+    if (!allChars.length) return null;
+    const leader = players[0];
+    const bonuses = group ? partyBonuses(allChars) : null;
+    const allies = [];
+    let offset = 0;
+    for (const p of players) {
+      allies.push(...buildPartyUnits(lineup[p.id], { ownerId: p.id, ownerName: p.name, positionOffset: offset, extraBonuses: bonuses, buffs: elixirBonuses(p), vsEnemy: masteryMap(p) }));
+      offset += lineup[p.id].length;
+    }
+    const heroLevel = Math.round(players.reduce((n, p) => n + (L.hero(p)?.level || 1), 0) / players.length);
     const rng = createRng(randomSeed());
-    const allies = buildPartyUnits(chars, { ownerId: p.id, ownerName: p.name, buffs: elixirBonuses(p), vsEnemy: masteryMap(p) });
-    let battle, zone;
+    const fight = { kind: next.kind, group, participants: players.map(p => ({ id: p.id, name: p.name, chars: lineup[p.id].map(c => c.id) })) };
     if (next.kind === 'rift') {
-      zone = ZONES[next.theme] || ZONES[p.zone];
+      const zone = ZONES[next.theme] || ZONES[leader.zone];
       const affixes = affixesFor(next.tier);
-      battle = createBattle({
-        seed: randomSeed(), allies, waves: riftWaves(zone.id, next.tier, rng, chars.length), scale: riftScale(next.tier), hooks: riftHooks(affixes),
-        meta: { kind: 'rift', zoneId: zone.id, tier: next.tier, affixes, timeLimit: RIFT.timeLimit, title: `Rift Tier ${next.tier} · ${zone.name}`, level: riftLevel(next.tier) },
+      fight.zoneId = zone.id; fight.rift = next;
+      fight.battle = createBattle({
+        seed: randomSeed(), allies, waves: riftWaves(zone.id, next.tier, rng, allChars.length), scale: riftScale(next.tier), hooks: riftHooks(affixes),
+        meta: { kind: 'rift', zoneId: zone.id, tier: next.tier, affixes, timeLimit: RIFT.timeLimit, title: `Rift Tier ${next.tier} · ${zone.name}`, level: riftLevel(next.tier), group },
+      });
+    } else if (next.kind === 'pinnacle') {
+      const def = PINNACLE_BOSSES[next.bossId];
+      fight.bossId = def.id;
+      fight.battle = createBattle({
+        seed: randomSeed(), allies, waves: pinnacleWaves(def.id), scale: pinnacleScale(def.id),
+        meta: { kind: 'pinnacle', bossId: def.id, title: `Pinnacle: ${def.name}`, level: PINNACLE.level, group },
+      });
+    } else if (next.kind === 'coop') {
+      const enc = COOP_ENCOUNTERS[next.encounterId];
+      fight.encounterId = enc.id;
+      fight.battle = createBattle({
+        seed: randomSeed(), allies, waves: coopWaves(enc.id, heroLevel), scale: coopScale(allChars.length),
+        meta: { kind: 'coop', encounterId: enc.id, title: enc.name, level: Math.max(enc.minLevel, heroLevel), players: players.length, group },
       });
     } else {
-      zone = ZONES[next.zoneId] || ZONES.whispering_woods;
-      const waves = next.kind === 'boss' ? bossWaves(zone.id, h.level) : idleWaves(zone.id, h.level, rng, chars.length);
-      battle = createBattle({
-        seed: randomSeed(), allies, waves,
-        scale: (next.kind === 'boss' ? zone.bossScale : zone.scale) || { hp: 1, damage: 1 },
-        meta: { kind: next.kind, zoneId: zone.id, title: next.kind === 'boss' ? `Boss: ${zone.name}` : zone.name, level: zoneLevel(zone, h.level) },
+      const zone = ZONES[next.zoneId] || ZONES[leader.zone] || ZONES.whispering_woods;
+      const boss = next.kind === 'boss';
+      fight.kind = boss ? 'boss' : 'idle';
+      fight.zoneId = zone.id;
+      fight.battle = createBattle({
+        seed: randomSeed(), allies, waves: boss ? bossWaves(zone.id, heroLevel) : idleWaves(zone.id, heroLevel, rng, allChars.length),
+        scale: (boss ? zone.bossScale : zone.scale) || { hp: 1, damage: 1 },
+        meta: { kind: fight.kind, zoneId: zone.id, title: boss ? `Boss: ${zone.name}` : zone.name, level: zoneLevel(zone, heroLevel), group, players: players.length },
       });
     }
-    // the first tutorial fights can't be lost: the party never drops below 1 health (tutorial.json "protectedSteps")
-    const step = currentStep(p);
-    if (step && (TUTORIAL.protectedSteps || []).includes(step.id) && next.kind === 'idle') { battle.protected = true; for (const u of battle.units) if (u.side === 'A') u.undying = true; }
-    s.solo = { battle, kind: next.kind, zoneId: zone.id, chars: chars.map(c => c.id), rift: next.kind === 'rift' ? next : null };
-    L.recordBestiary(p, { seen: battle.waves.flat().map(w => w.enemyId) });
-    drainEvents(battle);
-    this.sendTo(p.id, { t: 'battle_start', k: 'solo', battle: battleSnapshot(battle) });
+    for (const p of players) L.recordBestiary(p, { seen: fight.battle.waves.flat().map(w => w.enemyId).filter(Boolean) });
+    drainEvents(fight.battle);
+    return fight;
   }
 
-  finishSoloBattle(s) {
-    if (s.solo.kind === 'rift') return this.finishRift(s);
-    if (s.solo.kind === 'arena') return this.arena.finish(s);
-    const p = s.player;
-    const { battle, kind, zoneId } = s.solo;
-    const rest = battle.state === 'victory' ? CONFIG.combat.restBetweenFights : CONFIG.combat.reviveDelay;
-    const summary = { result: battle.state, kind, zoneId };
-    p.stats.fights++;
-    if (battle.state === 'victory') {
-      const rewards = this.applyElixirRewards(p, computeRewards(battle.kills, createRng(randomSeed()), { lootMult: this.settings.get('lootRate'), zoneId }));
-      rewards.kills = battle.kills.length;
-      const chars = s.solo.chars.map(id => p.characters[id]).filter(Boolean);
-      if (kind === 'boss') {
-        p.stats.bossKills++;
-        const unlocked = L.onBossDefeated(p, zoneId);
-        for (const z of unlocked) this.toast(p.id, `New zone unlocked: ${z.name}!`, 'success');
-        summary.unlocked = unlocked.map(z => z.id);
+  // Hands out every participant's rewards and tells them how it went. Returns { playerId: summary }.
+  settleFight(fight) {
+    const b = fight.battle;
+    const won = b.state === 'victory';
+    const out = {};
+    const k = fight.group ? 'coop' : 'solo';
+    const players = fight.participants.map(part => ({ part, ss: this.sessions.get(part.id) })).map(x => ({ ...x, p: x.ss?.player || this.store.loadPlayer(x.part.id) })).filter(x => x.p);
+    // pinnacle: one leaderboard entry for the whole party
+    let rank = false;
+    if (fight.kind === 'pinnacle' && won) rank = this.pinnacle.record(fight.bossId, b, players.map(x => ({ id: x.p.id, name: x.p.name })));
+    for (const { part, ss, p } of players) {
+      const chars = part.chars.map(id => p.characters[id]).filter(Boolean);
+      const summary = { result: b.state, kind: fight.kind, zoneId: fight.zoneId || null, group: fight.group };
+      if (fight.kind !== 'coop') p.stats.fights++;
+      if (fight.kind === 'rift') this.riftRewards(p, chars, fight, summary);
+      else if (won) {
+        let rewards;
+        const lootMult = this.settings.get('lootRate');
+        if (fight.kind === 'pinnacle') {
+          const r = this.pinnacle.reward(p, b, fight.bossId, lootMult);
+          rewards = r.rewards;
+          Object.assign(summary, r.out, rank ? { rank } : {});
+          const def = PINNACLE_BOSSES[fight.bossId];
+          if (r.out.firstKill) this.toast(p.id, `🏔 First victory over ${def.name}! You earned a new title and portrait frame (Wardrobe).`, 'achievement');
+          if (r.out.weekly) this.toast(p.id, `🏔 Weekly bonus for ${def.name}: ${r.out.crystals ? `+${r.out.crystals} 💠 and ` : ''}an extra pinnacle unique.`, 'achievement');
+          for (const u of r.out.uniques) this.toast(p.id, `✦ ${u} — a pinnacle unique!`, 'achievement');
+          if (rank) this.toast(p.id, `🏆 Your group is #${rank} on the ${def.name} leaderboard (${r.out.time} s)!`, 'achievement');
+          p.stats.bossKills += b.kills.filter(x => x.boss).length;
+        } else if (fight.kind === 'coop') {
+          const enc = COOP_ENCOUNTERS[fight.encounterId];
+          rewards = computeRewards(b.kills, createRng(randomSeed()), { rewardMult: enc.rewardMult, lootBoost: 0.5, lootMult });
+          summary.encounterId = enc.id;
+          p.stats.coopWins++;
+          p.stats.bossKills += b.kills.filter(x => x.boss).length;
+          this.questDone(p, Q.track(p, 'coop', 1));
+        } else {
+          rewards = computeRewards(b.kills, createRng(randomSeed()), { lootMult, zoneId: fight.zoneId });
+          if (fight.kind === 'boss') {
+            p.stats.bossKills++;
+            const unlocked = L.onBossDefeated(p, fight.zoneId);
+            for (const z of unlocked) this.toast(p.id, `New zone unlocked: ${z.name}!`, 'success');
+            summary.unlocked = unlocked.map(z => z.id);
+          }
+        }
+        rewards = this.applyElixirRewards(p, rewards);
+        rewards.kills = b.kills.length;
+        const res = L.applyRewards(p, chars, rewards);
+        Object.assign(summary, this.rewardSummary(rewards, res));
+        for (const lu of res.levelUps) this.toast(p.id, `${lu.name} reached level ${lu.level}!`, 'success');
+        if (rewards.sigils) this.toast(p.id, `✨ A Pinnacle Sigil dropped! (${pinnacleState(p).sigils} owned) — challenge a pinnacle boss on the Pinnacle page.`, 'achievement');
       }
-      const res = L.applyRewards(p, chars, rewards);
-      Object.assign(summary, this.rewardSummary(rewards, res));
-      for (const lu of res.levelUps) this.toast(p.id, `${lu.name} reached level ${lu.level}!`, 'success');
+      this.afterBattle(p, b, summary.gold || 0, summary.xp || 0);
+      for (const a of L.checkAchievements(p)) this.toast(p.id, `Achievement unlocked: ${a.name} (+${a.reward.gold} gold)`, 'achievement');
+      this.sendTo(p.id, { t: 'battle_end', k, summary });
+      L.maybeAutoRefreshRecruits(p, this.assets.get());
+      if (ss) this.markDirty(ss); else this.store.savePlayerSoon(p);
+      out[p.id] = summary;
     }
-    this.afterBattle(p, battle, summary.gold || 0, summary.xp || 0);
-    for (const a of L.checkAchievements(p)) this.toast(p.id, `Achievement unlocked: ${a.name} (+${a.reward.gold} gold)`, 'achievement');
-    this.sendTo(p.id, { t: 'battle_end', k: 'solo', summary });
-    L.maybeAutoRefreshRecruits(p, this.assets.get());
-    s.solo = { restUntil: Date.now() + rest * 1000 };
-    this.markDirty(s);
+    return out;
   }
 
-  // bestiary kills + quest progress after any finished battle
-  afterBattle(p, b, gold = 0, xp = 0) {
-    try { this.balance.recordBattle(p, b, { gold, xp }); } catch (e) { this.log(`balance stats: ${e.message}`); }
-    for (const m of L.recordBestiary(p, { kills: b.kills })) this.toast(p.id, `📖 Bestiary mastery ${'★'.repeat(m.level)} — ${m.name}: you now deal more damage to it.`, 'achievement');
-    this.questDone(p, Q.onBattle(p, { won: b.state === 'victory', kills: b.kills, gold }));
-  }
-
-  questDone(p, titles) {
-    for (const t of titles || []) this.toast(p.id, `📜 Quest complete: ${t} — claim your reward on the Quests page.`, 'achievement');
-  }
-
-  // ------------------------------------------------------------------ rifts
-  finishRift(s) {
-    const p = s.player;
-    const { battle: b, rift } = s.solo;
-    const tier = rift.tier;
+  // rift rewards of one participant (won or lost: the history always counts)
+  riftRewards(p, chars, fight, summary) {
+    const b = fight.battle;
+    const tier = fight.rift.tier;
     const won = b.state === 'victory';
     const timed = won && b.time <= RIFT.timeLimit;
-    const summary = { result: b.state, kind: 'rift', zoneId: s.solo.zoneId, tier, time: Math.round(b.time), timeLimit: RIFT.timeLimit, timed };
+    Object.assign(summary, { tier, time: Math.round(b.time), timeLimit: RIFT.timeLimit, timed });
     const r = p.rift;
-    p.stats.fights++;
     r.runs = (r.runs || 0) + 1;
     if (won) {
       const rng = createRng(randomSeed());
@@ -684,7 +782,7 @@ export class Game {
       const firstClear = !riftCleared(p, tier);
       // enemies above the level cap still drop items (and give XP) of the level cap
       const rewardKills = b.kills.map(k => (k.level > CONFIG.levelCap ? { ...k, level: CONFIG.levelCap } : k));
-      const rewards = this.applyElixirRewards(p, computeRewards(rewardKills, rng, { ...riftRewardOptions(tier, timed), lootMult: this.settings.get('lootRate'), zoneId: s.solo.zoneId }));
+      const rewards = this.applyElixirRewards(p, computeRewards(rewardKills, rng, { ...riftRewardOptions(tier, timed), lootMult: this.settings.get('lootRate'), zoneId: fight.zoneId, noSigils: true }));
       if (firstClear) {
         if (!timed && RIFT.untimedRewardMult > 0) { rewards.xp = Math.round(rewards.xp / RIFT.untimedRewardMult); rewards.gold = Math.round(rewards.gold / RIFT.untimedRewardMult); }
         r.cleared = [...(r.cleared || []), tier].sort((a, c) => a - c);
@@ -712,7 +810,6 @@ export class Game {
         }
       }
       p.stats.bossKills += b.kills.filter(k => k.boss && !k.summoned).length;
-      const chars = s.solo.chars.map(id => p.characters[id]).filter(Boolean);
       const res = L.applyRewards(p, chars, rewards);
       Object.assign(summary, this.rewardSummary(rewards, res));
       for (const lu of res.levelUps) this.toast(p.id, `${lu.name} reached level ${lu.level}!`, 'success');
@@ -720,17 +817,62 @@ export class Game {
       if (timed) this.questDone(p, Q.track(p, 'rift_timed', 1));
     }
     p.stats.riftBest = r.best || 0;
-    r.history = [{ tier, theme: s.solo.zoneId, time: Math.round(b.time), timed, result: b.state, affixes: b.meta.affixes, at: Date.now() }, ...(r.history || [])].slice(0, 12);
-    this.afterBattle(p, b, summary.gold || 0, summary.xp || 0);
-    for (const a of L.checkAchievements(p)) this.toast(p.id, `Achievement unlocked: ${a.name} (+${a.reward.gold} gold)`, 'achievement');
-    this.sendTo(p.id, { t: 'battle_end', k: 'solo', summary });
-    // auto-continue
+    r.history = [{ tier, theme: fight.zoneId, time: Math.round(b.time), timed, result: b.state, affixes: b.meta.affixes, at: Date.now(), ...(fight.group ? { group: true } : {}) }, ...(r.history || [])].slice(0, 12);
+  }
+
+  // what comes after a finished fight: rifts continue as the leader set it (repeat / push), everything else goes
+  // back to the zone
+  nextAfter(fight, leader) {
+    if (fight.kind !== 'rift' || fight.battle.state !== 'victory') return null;
+    const tier = fight.rift.tier, timed = fight.battle.time <= RIFT.timeLimit, auto = leader.rift?.auto;
     let next = null;
-    if (won && r.auto === 'repeat') next = { kind: 'rift', tier };
-    if (won && r.auto === 'push') next = { kind: 'rift', tier: timed ? Math.min(maxStartTier(p), tier + 1) : tier };
+    if (auto === 'repeat') next = { kind: 'rift', tier };
+    if (auto === 'push') next = { kind: 'rift', tier: timed ? Math.min(maxStartTier(leader), tier + 1) : tier };
     if (next) next.theme = riftTheme(next.tier);
-    s.solo = { restUntil: Date.now() + (won ? 3000 : CONFIG.combat.reviveDelay * 1000), ...(next ? { next } : {}) };
+    return next;
+  }
+
+  // ------------------------------------------------------------------ solo
+  startSoloBattle(s) {
+    const p = s.player;
+    const chars = L.activePartyChars(p);
+    if (!chars.length) return;
+    const next = s.solo?.next || { kind: 'idle', zoneId: p.zone };
+    let fight;
+    try {
+      if (next.kind === 'pinnacle') { this.pinnacle.check(p, [p], next.bossId); this.pinnacle.pay(p); }
+      fight = this.buildFight(next, [p], { [p.id]: chars });
+    } catch (e) { this.toast(p.id, e.message, 'error'); fight = null; }
+    if (!fight) { s.solo = { restUntil: Date.now() + 2000 }; return; }
+    const battle = fight.battle;
+    // the first tutorial fights can't be lost: the party never drops below 1 health (tutorial.json "protectedSteps")
+    const step = currentStep(p);
+    if (step && (TUTORIAL.protectedSteps || []).includes(step.id) && fight.kind === 'idle') { battle.protected = true; for (const u of battle.units) if (u.side === 'A') u.undying = true; }
+    s.solo = { battle, fight, kind: fight.kind, zoneId: fight.zoneId, chars: chars.map(c => c.id), rift: fight.rift || null };
+    this.sendTo(p.id, { t: 'battle_start', k: 'solo', battle: battleSnapshot(battle) });
+  }
+
+  finishSoloBattle(s) {
+    if (s.solo.kind === 'arena') return this.arena.finish(s);
+    const p = s.player;
+    const fight = s.solo.fight;
+    const won = fight.battle.state === 'victory';
+    this.settleFight(fight);
+    const next = this.nextAfter(fight, p);
+    const rest = fight.kind === 'rift' ? (won ? 3 : CONFIG.combat.reviveDelay) : won ? CONFIG.combat.restBetweenFights : CONFIG.combat.reviveDelay;
+    s.solo = { restUntil: Date.now() + rest * 1000, ...(next ? { next } : {}) };
     this.markDirty(s);
+  }
+
+  // bestiary kills + quest progress after any finished battle
+  afterBattle(p, b, gold = 0, xp = 0) {
+    try { this.balance.recordBattle(p, b, { gold, xp }); } catch (e) { this.log(`balance stats: ${e.message}`); }
+    for (const m of L.recordBestiary(p, { kills: b.kills })) this.toast(p.id, `📖 Bestiary mastery ${'★'.repeat(m.level)} — ${m.name}: you now deal more damage to it.`, 'achievement');
+    this.questDone(p, Q.onBattle(p, { won: b.state === 'victory', kills: b.kills, gold }));
+  }
+
+  questDone(p, titles) {
+    for (const t of titles || []) this.toast(p.id, `📜 Quest complete: ${t} — claim your reward on the Quests page.`, 'achievement');
   }
 
   applyElixirRewards(p, rewards, at = Date.now()) {
@@ -763,7 +905,8 @@ export class Game {
     }
     for (const s of this.sessions.values()) {
       const p = s.player;
-      if (!p.heroId || this.groupOf(p.id)?.battle) { this.flushState(s); continue; }
+      // in a group every fight is fought together (tickGroups) — only an Arena fight runs on its own
+      if (!p.heroId || (this.inGroupFight(p.id) && !(s.solo?.kind === 'arena' && s.solo.battle))) { this.flushState(s); continue; }
       if (!s.solo) s.solo = { restUntil: 0 };
       if (!s.solo.battle) {
         if (now >= (s.solo.restUntil || 0)) this.startSoloBattle(s);
@@ -776,7 +919,7 @@ export class Game {
       }
       this.flushState(s);
     }
-    for (const g of this.groups.values()) if (g.battle) this.tickCoop(g);
+    this.tickGroups(now);
     if (this.onlineDirty && (!this.lastOnlineSent || now - this.lastOnlineSent > 2000)) this.broadcastOnline();
   }
 
@@ -873,6 +1016,7 @@ export class Game {
       }),
       invites: [...g.invites.entries()].filter(([, exp]) => exp > now).map(([id]) => this.nameOf(id)),
       inBattle: !!g.battle, encounterId: g.encounterId || null, chat: g.chat.slice(-30),
+      together: this.groupActive(g), fight: g.fight ? { kind: g.fight.kind, title: g.battle?.meta?.title || '' } : null, next: g.next || null,
     };
   }
 
@@ -911,81 +1055,85 @@ export class Game {
     this.broadcastGroup(g);
   }
 
-  startCoop(s, encounterId) {
-    const g = this.groupOf(s.player.id) || fail('Create a group first (you can also go alone)');
-    if (g.leaderId !== s.player.id) fail('Only the group leader can start encounters');
-    if (g.battle) fail('Already in an encounter');
-    const enc = COOP_ENCOUNTERS[encounterId] || fail('Unknown encounter');
-    const players = g.members.map(id => this.sessions.get(id)?.player);
-    if (players.some(p => !p)) fail('All group members must be online');
-    for (const p of players) {
-      const h = L.hero(p);
-      if (!h) fail(`${p.name} has no hero yet`);
-      if (h.level < enc.minLevel) fail(`${p.name}'s hero must be level ${enc.minLevel}+`);
-    }
-    const lineup = this.coopLineupOf(g, players).byPlayer;
-    const allChars = players.flatMap(p => lineup[p.id]);
-    const bonuses = partyBonuses(allChars);
-    let offset = 0;
-    const allies = [];
-    for (const p of players) {
-      const chars = lineup[p.id];
-      allies.push(...buildPartyUnits(chars, { ownerId: p.id, ownerName: p.name, positionOffset: offset, extraBonuses: bonuses, buffs: elixirBonuses(p), vsEnemy: masteryMap(p) }));
-      offset += chars.length;
-    }
-    const groupLevel = Math.round(players.reduce((sum, p) => sum + L.hero(p).level, 0) / players.length);
-    g.battle = createBattle({
-      seed: randomSeed(), allies, waves: coopWaves(enc.id, groupLevel), scale: coopScale(allChars.length),
-      meta: { kind: 'coop', encounterId: enc.id, title: enc.name, level: Math.max(enc.minLevel, groupLevel), players: players.length },
-    });
-    drainEvents(g.battle);
-    g.encounterId = enc.id;
-    g.participants = players.map(p => ({ id: p.id, chars: lineup[p.id].map(c => c.id) }));
-    g.recruitTurn = ((g.recruitTurn || 0) + 1) % players.length; // next fight, the next player goes first for the recruit slots
-    for (const p of players) {
-      const ss = this.sessions.get(p.id);
-      if (ss?.solo?.battle) this.sendTo(p.id, { t: 'battle_abort', k: 'solo' });
-      if (ss) ss.solo = { restUntil: 0 };
-      this.sendTo(p.id, { t: 'battle_start', k: 'coop', battle: battleSnapshot(g.battle) });
-    }
-    this.groupMessage(g, `The group engages: ${enc.name}!`);
+  // ------------------------------------------------------------------ group fights
+  // the members fighting together: online, with a hero (the leader first)
+  groupPlayers(g) {
+    const ids = [g.leaderId, ...g.members.filter(id => id !== g.leaderId)];
+    return ids.map(id => this.sessions.get(id)?.player).filter(p => p && L.hero(p));
+  }
+  // a group fights together when at least two members are online — or when the leader picked an encounter
+  groupActive(g) { return !!g && (this.groupPlayers(g).length >= 2 || !!g.battle || !!g.next); }
+  inGroupFight(playerId) { const g = this.groupOf(playerId); return !!g && this.groupActive(g); }
+
+  // leader only: what the group fights next (starts right away; the running fight is dropped)
+  setGroupNext(g, next) {
+    if (g.battle) this.abortGroupFight(g);
+    g.next = next;
+    g.restUntil = 0;
+  }
+  abortGroupFight(g) {
+    if (!g.battle) return;
+    for (const id of g.members) this.sendTo(id, { t: 'battle_abort', k: 'coop' });
+    g.battle = null; g.fight = null; g.encounterId = null;
     this.broadcastGroup(g);
   }
 
-  tickCoop(g) {
+  startGroupFight(g) {
+    const players = this.groupPlayers(g);
+    if (!players.length) { g.next = null; return; }
+    const next = g.next || { kind: 'idle', zoneId: players[0].zone };
+    const lineup = this.coopLineupOf(g, players).byPlayer;
+    let fight = null;
+    try {
+      if (next.kind === 'pinnacle') { this.pinnacle.check(players[0], players.filter(p => lineup[p.id]?.length), next.bossId); this.pinnacle.pay(players[0]); this.markDirty(this.sessions.get(players[0].id)); }
+      fight = this.buildFight(next, players, lineup, { group: true });
+    } catch (e) {
+      this.groupMessage(g, `Could not start: ${e.message}`);
+      g.next = null; g.restUntil = Date.now() + 5000;
+      this.broadcastGroup(g);
+      return;
+    }
+    if (!fight) { g.next = null; g.restUntil = Date.now() + 5000; return; }
+    // the next fight is the zone again unless a rift continues (nextAfter) — encounters and pinnacle bosses are one-offs
+    g.next = next.kind === 'rift' ? next : null;
+    g.battle = fight.battle;
+    g.fight = fight;
+    g.encounterId = fight.encounterId || null;
+    g.participants = fight.participants;
+    if (players.length > 1) g.recruitTurn = ((g.recruitTurn || 0) + 1) % players.length; // next fight, the next player goes first for the recruit slots
+    for (const p of players) {
+      const ss = this.sessions.get(p.id);
+      if (ss?.solo?.battle && ss.solo.kind !== 'arena') { this.sendTo(p.id, { t: 'battle_abort', k: 'solo' }); ss.solo = { restUntil: 0 }; }
+      this.sendTo(p.id, { t: 'battle_start', k: 'coop', battle: battleSnapshot(g.battle) });
+    }
+    if (next.kind !== 'idle') this.groupMessage(g, `The group engages: ${fight.battle.meta.title}!`);
+    this.broadcastGroup(g);
+  }
+
+  tickGroup(g) {
     const b = g.battle;
     stepBattle(b);
     const msg = { t: 'bt', k: 'coop', time: Math.round(b.time * 10) / 10, wave: b.waveIndex + 1, u: b.units.map(u => dynamicUnit(u, b)), e: drainEvents(b) };
-    for (const id of g.members) this.sendTo(id, msg);
+    if (!this.headless) for (const id of g.members) this.sendTo(id, msg);
     if (b.state === 'running') return;
-
-    const enc = COOP_ENCOUNTERS[g.encounterId];
-    for (const part of g.participants) {
-      if (!g.members.includes(part.id)) continue;
-      const p = this.sessions.get(part.id)?.player || this.store.loadPlayer(part.id);
-      if (!p) continue;
-      const summary = { result: b.state, kind: 'coop', encounterId: enc.id };
-      if (b.state === 'victory') {
-        const rewards = this.applyElixirRewards(p, computeRewards(b.kills, createRng(randomSeed()), { rewardMult: enc.rewardMult, lootBoost: 0.5, lootMult: this.settings.get('lootRate') }));
-        rewards.kills = b.kills.length;
-        p.stats.coopWins++;
-        p.stats.bossKills += b.kills.filter(k => k.boss).length;
-        const res = L.applyRewards(p, part.chars.map(id => p.characters[id]).filter(Boolean), rewards);
-        Object.assign(summary, this.rewardSummary(rewards, res));
-        for (const lu of res.levelUps) this.toast(p.id, `${lu.name} reached level ${lu.level}!`, 'success');
-        this.questDone(p, Q.track(p, 'coop', 1));
-      }
-      L.recordBestiary(p, { seen: b.waves.flat().map(w => w.enemyId) });
-      this.afterBattle(p, b, summary.gold || 0, summary.xp || 0);
-      for (const a of L.checkAchievements(p)) this.toast(p.id, `Achievement unlocked: ${a.name} (+${a.reward.gold} gold)`, 'achievement');
-      this.sendTo(p.id, { t: 'battle_end', k: 'coop', summary });
-      const ss = this.sessions.get(p.id);
-      if (ss) { ss.solo = { restUntil: Date.now() + 4000 }; this.markDirty(ss); } else this.store.savePlayerSoon(p);
-    }
-    this.groupMessage(g, b.state === 'victory' ? `Victory! ${enc.name} has been conquered.` : `The group was defeated by ${enc.name}.`);
-    g.battle = null;
-    g.encounterId = null;
+    const fight = g.fight;
+    const won = b.state === 'victory';
+    this.settleFight(fight);
+    const leader = this.sessions.get(g.leaderId)?.player;
+    const after = leader ? this.nextAfter(fight, leader) : null;
+    g.next = after; // a rift continues as the leader set it; everything else goes back to the leader's zone
+    if (fight.kind !== 'idle') this.groupMessage(g, won ? `Victory! ${b.meta.title} has been conquered.` : `The group was defeated by ${b.meta.title}.`);
+    g.battle = null; g.fight = null; g.encounterId = null;
+    g.restUntil = Date.now() + (won ? (fight.kind === 'idle' ? CONFIG.combat.restBetweenFights : 3) : CONFIG.combat.reviveDelay) * 1000;
     this.broadcastGroup(g);
+  }
+
+  tickGroups(now) {
+    for (const g of this.groups.values()) {
+      if (g.battle) { this.tickGroup(g); continue; }
+      if (!this.groupActive(g) || now < (g.restUntil || 0)) continue;
+      this.startGroupFight(g);
+    }
   }
 
   // bot players are marked with 🤖 unless the admin turned the tag off

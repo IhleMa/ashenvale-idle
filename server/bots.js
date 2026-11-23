@@ -537,10 +537,10 @@ export class BotManager {
     b.doing = `in a group with ${g.members.filter(id => id !== p.id).map(id => this.game.nameOf(id)).join(', ') || 'nobody yet'}`;
     const tired = Date.now() - (b.groupSince || 0) > (20 + b.persona.social * 40) * MIN;
     if (g.leaderId !== p.id) {
-      if (tired && !g.battle && chance(0.3)) { this.say(b, pick(CHAT.bye)); this.act(b, 'group_leave'); }
+      if (tired && g.fight?.kind !== 'coop' && chance(0.3)) { this.say(b, pick(CHAT.bye)); this.act(b, 'group_leave'); }
       return;
     }
-    if (g.battle) return;
+    if (g.battle && g.fight?.kind !== 'idle') return; // between encounters the group fights the leader's zone together
     const alone = g.members.length < 2;
     if ((alone && g.invites.size === 0 && Date.now() - (b.groupSince || 0) > 3 * MIN) || tired) { this.act(b, 'group_leave'); return; }
     if (alone) return;

@@ -1,0 +1,37 @@
+{
+  "name": "The Iron Tyrant",
+  "tags": [
+    "giant",
+    "boss",
+    "pinnacle"
+  ],
+  "boss": true,
+  "xp": 1500,
+  "gold": [
+    500,
+    800
+  ],
+  "loot": {
+    "chance": 1,
+    "count": 5,
+    "boost": 4,
+    "minRarity": "epic"
+  },
+  "enrageAfter": 300,
+  "enrageStatus": "pinnacle_enrage",
+  "pinnacle": true,
+  "stats": {
+    "hp": 5600,
+    "physPower": 34,
+    "magPower": 18,
+    "defense": 26,
+    "critChance": 0.1,
+    "attackSpeed": 0.7
+  },
+  "abilities": [
+    "b_sundering_blow",
+    "b_war_stomp"
+  ],
+  "description": "Its blows Sunder the target; the fifth stack executes. A taunt from another ally makes it let go of the previous target.",
+  "order": 903
+}

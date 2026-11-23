@@ -28,9 +28,10 @@ const zone = Object.values(ZONES)[0];
 const kills = zone.enemies.slice(0, 3).map(enemyId => ({ enemyId, level: 20, boss: false, elite: false, summoned: false }));
 const run = (tier, time = 100) => {
   const before = { xp: hero.xp, level: hero.level, gold: p.gold };
-  s.solo = { kind: 'rift', zoneId: zone.id, chars: [hero.id], rift: { tier, theme: zone.id }, battle: { state: 'victory', time, kills, meta: { affixes: [] } } };
+  const battle = { state: 'victory', time, kills, units: [], meta: { affixes: [] } };
+  s.solo = { kind: 'rift', battle, fight: { kind: 'rift', group: false, zoneId: zone.id, rift: { tier, theme: zone.id }, participants: [{ id: p.id, chars: [hero.id] }], battle } };
   msgs.length = 0;
-  game.finishRift(s);
+  game.finishSoloBattle(s);
   const summary = msgs.find(m => m.t === 'battle_end').summary;
   return { summary, gained: p.gold - before.gold };
 };

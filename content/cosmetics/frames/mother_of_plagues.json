@@ -1,0 +1,16 @@
+{
+  "name": "Plaguebloom",
+  "tier": "earned",
+  "price": 0,
+  "colors": [
+    "#3d1f4a",
+    "#7dff4d",
+    "#b04dff",
+    "#7dff4d"
+  ],
+  "glow": "#8dff5a",
+  "animated": true,
+  "order": 201,
+  "fx": "embers",
+  "pinnacle": "mother_of_plagues"
+}

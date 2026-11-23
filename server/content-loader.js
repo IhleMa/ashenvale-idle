@@ -24,7 +24,7 @@ export const SETTINGS_FILES = {
   legendaries: 'legendaries/_settings.json', skilltree: 'skilltree/_settings.json', town: 'town/_settings.json',
   expeditions: 'expeditions/_settings.json', quests: 'quests/_settings.json', rifts: 'rifts/_settings.json',
   gems: 'gems/_settings.json', bestiary: 'bestiary.json', lootfilter: 'lootfilter/_settings.json', bots: 'bots/_settings.json',
-  tutorial: 'tutorial.json', patchnotes: 'patchnotes.json',
+  tutorial: 'tutorial.json', patchnotes: 'patchnotes.json', pinnacle: 'pinnacle/_settings.json',
 };
 // [system, key] ← folder with one file per entry
 export const COLLECTIONS = [
@@ -57,6 +57,7 @@ export const COLLECTIONS = [
   ['cosmetics', 'titles', 'cosmetics/titles'],
   ['cosmetics', 'frames', 'cosmetics/frames'],
   ['cosmetics', 'borders', 'cosmetics/borders'],
+  ['pinnacle', 'bosses', 'pinnacle'],
 ];
 export const SYSTEMS = [...new Set([...Object.keys(SETTINGS_FILES), ...COLLECTIONS.map(c => c[0])])];
 // kept for tools that list the systems

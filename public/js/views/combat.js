@@ -1,4 +1,5 @@
 // Combat view: live, server-driven battle display (presentation only — all math happens on the server).
+import { PINNACLE_BOSSES } from '/shared/pinnacle.js';
 import { morphed } from '../morph.js';
 import { parseGemKey, gemName } from '/shared/gems.js';
 import { UNIQUES, SETS } from '/shared/data/legendaries.js';
@@ -36,7 +37,8 @@ function makeBattle(snapshot) {
   for (const u of snapshot.units) b.units.set(u.uid, u);
   return b;
 }
-const shown = () => (battles.coop ? 'coop' : 'solo');
+// an Arena fight the player started is shown while it runs (it is fought alone even in a group)
+const shown = () => (battles.solo?.meta?.kind === 'arena' && battles.solo.state === 'running' ? 'solo' : battles.coop ? 'coop' : 'solo');
 
 // ------------------------------------------------------------------ message handling (always active)
 bus.on('msg:battle_start', m => {
@@ -61,7 +63,7 @@ bus.on('msg:bt', m => {
   }
   b.time = m.time; b.wave = m.wave;
   let structural = false;
-  for (const d of m.u) { const u = b.units.get(d.uid); if (u) Object.assign(u, d); }
+  for (const d of m.u) { const u = b.units.get(d.uid); if (u) { delete u.cast; delete u.rev; Object.assign(u, d); } } // cast / rev are only sent while they apply
   const visible = root && shown() === m.k;
   const gone = [];
   for (const ev of m.e) {
@@ -103,14 +105,23 @@ bus.on('msg:battle_end', m => {
     if (s.kind === 'arena') addLog(b, { cat: 'event', t: b.time, html: `<span class="${s.result === 'victory' ? 'log-win' : 'log-loss'}">${s.result === 'victory' ? 'Arena victory' : 'Arena defeat'} against ${esc(s.opponent)}${s.byTime ? ' (on time)' : ''}: ${s.delta >= 0 ? '+' : ''}${s.delta} rating → ${fmt(s.rating)}${s.gold ? `, +${fmt(s.gold)} gold` : ''}</span>` });
     else if (s.result === 'victory') {
       const items = (s.items?.length ? ` · ${s.items.length} item${s.items.length > 1 ? 's' : ''}` : '') + Object.entries(s.materials || {}).map(([k, v]) => ` · <b>+${v} ${esc(MATERIALS[k]?.name || k)}</b>`).join('') + Object.entries(s.gems || {}).map(([k, v]) => { const g = parseGemKey(k); return g ? ` · <b>💎 ${v > 1 ? v + '× ' : ''}${esc(gemName(g.kind, g.tier))}</b>` : ''; }).join('');
-      addLog(b, { cat: 'event', t: b.time, html: `<span class="log-win">Victory! +${fmt(s.xp)} XP, +${fmt(s.gold)} gold${items}</span>` });
+      const extra = (s.sigils ? ` · <b>✨ ${s.sigils > 1 ? s.sigils + '× ' : ''}Pinnacle Sigil!</b>` : '') + (s.pinnacle ? ` · ⏱ ${s.time}s${s.rank ? ` (#${s.rank} on the leaderboard)` : s.personalBest ? ' (personal best)' : ''}` : '');
+      addLog(b, { cat: 'event', t: b.time, html: `<span class="log-win">Victory! +${fmt(s.xp)} XP, +${fmt(s.gold)} gold${items}${extra}</span>` });
     } else addLog(b, { cat: 'event', t: b.time, html: '<span class="log-loss">Defeat… your party regroups.</span>' });
   }
   // after a co-op fight, go back to the solo view — unless the next co-op fight already started in the meantime
-  if (m.k === 'coop') { const ended = b; setTimeout(() => { if (battles.coop !== ended) return; battles.coop = null; state.battles.coop = null; if (root) build(); updateActivity(); }, 4000); }
+  // a group that fights together keeps its battlefield between fights; otherwise go back to the solo view
+  if (m.k === 'coop') { const ended = b; setTimeout(() => { if (battles.coop !== ended || state.group?.together) return; clearCoop(); }, 4000); }
   if (root && shown() === m.k) { update(); renderResults(); showBanner(s); }
   updateActivity();
 });
+function clearCoop() {
+  battles.coop = null; state.battles.coop = null;
+  if (root) build();
+  updateActivity();
+}
+// left the group (or it stopped fighting together): drop its finished battlefield
+bus.on('msg:group', m => { if (!m.group?.together && battles.coop && battles.coop.state !== 'running') clearCoop(); });
 bus.on('msg:battle_abort', m => {
   battles[m.k] = null; state.battles[m.k] = null;
   if (root) build();
@@ -254,7 +265,7 @@ function unitCard(u, k, minions = []) {
       ${u.classId && Object.values(ABILITIES).some(a => a.classId === u.classId && a.note) ? '<div class="unit-notes" title="Notes for the next Finale"></div>' : ''}
       <div class="unit-statuses"></div>
       ${u.side === 'A' && u.kind !== 'minion' ? '<div class="unit-threat" title="Threat: your share of the highest threat on an enemy (100% = it attacks you). 🎯 = enemies attacking you."><div class="thr-bar"><div class="fill"></div></div><span class="thr-txt"></span></div>' : ''}
-      ${u.side === 'B' ? '<div class="unit-target"></div>' : ''}
+      ${u.side === 'B' ? '<div class="unit-cast"><div class="fill"></div><span></span></div><div class="unit-target"></div>' : ''}
       ${abilities}
     </div>
     ${minions.length ? `<div class="unit-minions">${minions.map(minionCard).join('')}</div>` : ''}
@@ -263,11 +274,21 @@ function unitCard(u, k, minions = []) {
 
 function headerHtml(k, b) {
   const p = state.player;
-  if (k === 'coop') {
-    return `<div class="combat-title"><h2>${esc(b?.meta?.title || 'Co-op encounter')}</h2><span class="muted">${b?.meta?.players || ''} player(s) · Level ${b?.meta?.level || ''}</span></div>`;
-  }
   const zone = ZONES[p.zone];
   const zones = Object.values(ZONES).sort((a, c) => a.order - c.order);
+  const zoneControls = () => `<select data-zone aria-label="Zone">${zones.map(z => `<option value="${z.id}" ${z.id === p.zone ? 'selected' : ''} ${p.unlockedZones.includes(z.id) ? '' : 'disabled'}>${esc(z.name)} (Lv ${z.levelRange[0]}–${z.levelRange[1]})${p.unlockedZones.includes(z.id) ? '' : ' 🔒'}</option>`).join('')}</select>
+      <button class="btn danger" data-boss ${tipAttr(`Challenge <b>${esc(ENEMIES[zone.boss].name)}</b>. Defeating the boss unlocks the next zone.`)}>☠ Challenge Boss</button>`;
+  if (b?.meta?.kind === 'pinnacle') {
+    const def = PINNACLE_BOSSES[b.meta.bossId];
+    return `<div class="combat-title"><h2>🏔 ${esc(b.meta.title)}</h2><span class="muted">${esc(def?.summary || '')}</span></div>
+      <div class="combat-controls"><a class="btn" href="#/pinnacle">Pinnacle page</a></div>`;
+  }
+  if (k === 'coop') {
+    const g = state.group, leader = g?.leaderId === p.id;
+    const zoneFight = b?.meta?.kind === 'idle' || b?.meta?.kind === 'boss';
+    return `<div class="combat-title"><h2>${b?.meta?.kind === 'rift' ? '🌀 ' : b?.meta?.kind === 'boss' ? '☠ ' : '🤝 '}${esc(b?.meta?.title || 'Group fight')}</h2><span class="muted">Your group fights together · ${b?.meta?.players || g?.members?.length || ''} player(s) · Level ${b?.meta?.level || ''}${zoneFight && !leader ? ' · the leader picks the zone' : ''}</span></div>
+      ${zoneFight && leader ? `<div class="combat-controls">${zoneControls()}</div>` : b?.meta?.kind === 'rift' && leader ? '<div class="combat-controls"><button class="btn ghost danger" data-rift-stop>Abandon rift</button></div>' : ''}`;
+  }
   if (b?.meta?.kind === 'arena') {
     return `<div class="combat-title"><h2>🏟 ${esc(b.meta.title)}</h2>
         <span class="muted">Both teams at level ${b.meta.level} · decided by remaining health after ${b.meta.timeLimit} s</span></div>
@@ -285,10 +306,7 @@ function headerHtml(k, b) {
       <span class="muted">${esc(zone.description)}</span>
       ${zoneDropsHtml(zone)}
     </div>
-    <div class="combat-controls">
-      <select data-zone aria-label="Zone">${zones.map(z => `<option value="${z.id}" ${z.id === p.zone ? 'selected' : ''} ${p.unlockedZones.includes(z.id) ? '' : 'disabled'}>${esc(z.name)} (Lv ${z.levelRange[0]}–${z.levelRange[1]})${p.unlockedZones.includes(z.id) ? '' : ' 🔒'}</option>`).join('')}</select>
-      <button class="btn danger" data-boss ${tipAttr(`Challenge <b>${esc(ENEMIES[zone.boss].name)}</b>. Defeating the boss unlocks the next zone.`)}>☠ Challenge Boss</button>
-    </div>`;
+    <div class="combat-controls">${zoneControls()}</div>`;
 }
 
 function build() {
@@ -419,7 +437,13 @@ function update() {
       thrEl.classList.toggle('high', !u.ag && u.thr >= 80);
     }
     const tgEl = el.querySelector('.unit-target');
-    if (tgEl) { const t = u.tg != null ? b.units.get(u.tg) : null; const txt = t && u.alive ? `→ ${t.name}` : ''; if (tgEl.textContent !== txt) tgEl.textContent = txt; }
+    if (tgEl) { const t = u.tg != null ? b.units.get(u.tg) : null; const txt = u.rev != null && !u.alive ? `⟲ rises in ${Math.max(0, Math.ceil(u.rev - b.time))}s` : t && u.alive ? `→ ${t.name}` : ''; if (tgEl.textContent !== txt) tgEl.textContent = txt; }
+    // pinnacle bosses: the spell being cast (interrupt it!)
+    const castEl = el.querySelector('.unit-cast');
+    if (castEl) {
+      castEl.classList.toggle('on', !!u.cast);
+      if (u.cast) { castEl.querySelector('.fill').style.width = `${Math.min(100, (1 - (u.cast.until - b.time) / u.cast.total) * 100)}%`; const t = `⚠ ${u.cast.name} ${Math.max(0, u.cast.until - b.time).toFixed(1)}s`; const sp = castEl.querySelector('span'); if (sp.textContent !== t) sp.textContent = t; }
+    }
     if (u.exp != null) { const x = el.querySelector('.minion-exp'); if (x) x.textContent = `${Math.max(0, Math.ceil(u.exp - b.time))}s`; }
     if (u.side === 'A' && u.cd) {
       for (const [ab, rem] of Object.entries(u.cd)) {
@@ -440,7 +464,7 @@ function floatEvent(ev) {
   let text = null, cls = '';
   if (ev.type === 'damage') { text = fmt(ev.amount) + (ev.crit ? '!' : ''); cls = `dmg ${ev.crit ? 'crit' : ''} ${ev.dot ? 'dot' : ''}`; }
   else if (ev.type === 'heal' && ev.amount > 0) { text = '+' + fmt(ev.amount); cls = `heal ${ev.crit ? 'crit' : ''}`; }
-  else if (ev.type === 'miss') { text = 'Dodge'; cls = 'miss'; }
+  else if (ev.type === 'miss') { text = ev.immune ? 'Immune' : 'Dodge'; cls = 'miss'; }
   else if (ev.type === 'ability') {
     const el = root.querySelector(`.unit[data-uid="${ev.src}"]`);
     if (el) { el.classList.remove('acting'); void el.offsetWidth; el.classList.add('acting'); }

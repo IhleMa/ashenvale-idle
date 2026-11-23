@@ -1,0 +1,37 @@
+{
+  "name": "Wardenstone Aegis",
+  "baseId": "shield",
+  "minLevel": 60,
+  "flavor": "Carved from a warden that would not stay dead.",
+  "stats": {
+    "vit": [
+      4,
+      1.0
+    ],
+    "defense": [
+      3,
+      0.8
+    ],
+    "damageReduction": [
+      0.03,
+      0.0005
+    ]
+  },
+  "procs": [
+    {
+      "name": "Wardenstone",
+      "trigger": "struck",
+      "chance": 0.2,
+      "icd": 5,
+      "target": "self",
+      "effect": {
+        "kind": "shieldPct",
+        "pct": 0.1,
+        "duration": 6
+      }
+    }
+  ],
+  "description": "When struck, 20% chance to gain a barrier absorbing 10% of your max health (5s cooldown).",
+  "order": 200,
+  "pinnacle": "twin_wardens"
+}

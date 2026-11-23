@@ -88,6 +88,7 @@ export function effText(eff, classId, opts = {}) {
       return t;
     }
     case 'shield': return `${eff.self ? 'shields the caster' : 'shields'} for ${pw(eff.power, eff.stat)} for ${sec(eff.duration)}`;
+    case 'interrupt': return 'interrupts the spell it is casting (a Requiem, for example)';
     case 'taunt': return `taunts enemies for ${sec(eff.duration || 0)}`;
     case 'cleanse': return (eff.count || 1) >= 99 ? 'removes all harmful effects' : `removes up to ${eff.count || 1} harmful effect${(eff.count || 1) > 1 ? 's' : ''}`;
     case 'counter': return `every ${['', '', 'second', 'third', 'fourth', 'fifth'][eff.every || 3] || `${eff.every}th`} use on the same target also ${(eff.effects || []).map(e => effText(e, classId, { ...opts, withStatus: false })).join(', ')}`;

@@ -1,0 +1,55 @@
+{
+  "name": "Soprano of the Silent Choir",
+  "tags": [
+    "undead",
+    "boss",
+    "pinnacle",
+    "choir"
+  ],
+  "boss": true,
+  "xp": 1500,
+  "gold": [
+    500,
+    800
+  ],
+  "loot": {
+    "chance": 1,
+    "count": 5,
+    "boost": 4,
+    "minRarity": "epic"
+  },
+  "enrageAfter": 300,
+  "enrageStatus": "pinnacle_enrage",
+  "pinnacle": true,
+  "stats": {
+    "hp": 1900,
+    "physPower": 18,
+    "magPower": 26,
+    "defense": 14,
+    "critChance": 0.1,
+    "attackSpeed": 0.8
+  },
+  "basicSchool": "magical",
+  "abilities": [
+    "b_dirge",
+    "e_curse"
+  ],
+  "channel": {
+    "name": "Requiem",
+    "every": 25,
+    "first": 6,
+    "castTime": 3.5,
+    "damagePct": 0.6,
+    "message": "begins to sing the Requiem",
+    "effects": [
+      {
+        "kind": "status",
+        "status": "crescendo",
+        "duration": 999,
+        "self": true
+      }
+    ]
+  },
+  "description": "Sings a Requiem every 25 seconds: 60% of every hero's maximum health unless interrupted (an interrupt or any stun).",
+  "order": 904
+}

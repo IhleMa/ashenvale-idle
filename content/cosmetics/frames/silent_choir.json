@@ -1,0 +1,16 @@
+{
+  "name": "Hushed Choir",
+  "tier": "earned",
+  "price": 0,
+  "colors": [
+    "#e6e9ff",
+    "#9b8cff",
+    "#ffffff",
+    "#9b8cff"
+  ],
+  "glow": "#c3b8ff",
+  "animated": true,
+  "order": 203,
+  "fx": "frost",
+  "pinnacle": "silent_choir"
+}

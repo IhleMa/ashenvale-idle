@@ -1,0 +1,38 @@
+{
+  "name": "The Hollow King",
+  "tags": [
+    "undead",
+    "boss",
+    "pinnacle"
+  ],
+  "boss": true,
+  "xp": 1500,
+  "gold": [
+    500,
+    800
+  ],
+  "loot": {
+    "chance": 1,
+    "count": 5,
+    "boost": 4,
+    "minRarity": "epic"
+  },
+  "enrageAfter": 300,
+  "enrageStatus": "pinnacle_enrage",
+  "pinnacle": true,
+  "stats": {
+    "hp": 4200,
+    "physPower": 28,
+    "magPower": 28,
+    "defense": 18,
+    "critChance": 0.1,
+    "attackSpeed": 0.8
+  },
+  "abilities": [
+    "b_raise_hollow",
+    "b_crushing_blow"
+  ],
+  "immuneWhileAdds": "hollow",
+  "description": "Immune while any Hollow Knight stands. Raises four more every 16 seconds.",
+  "order": 907
+}

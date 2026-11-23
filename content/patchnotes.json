@@ -30,6 +30,27 @@
           ]
         },
         {
+          "heading": "Pinnacle bosses (new)",
+          "items": [
+            "Five pinnacle bosses for level 60 heroes, on the new 🏔 Pinnacle page. Each has a mechanic that a party without the right answer cannot survive, and each enrages after five minutes.",
+            "The Twin Wardens: Stone is immune to physical damage, Storm to magic. If one falls and the other lives on for 10 seconds, the fallen one rises again — bring both kinds of damage and bring them down together.",
+            "Mother of Plagues: every Plague Wave adds a stack of a plague to the whole party. It never wears off, deals more damage with every stack and cuts healing received. Only cleansing removes it (Druid: Nature's Cure, Chronomancer: Rewind at rank 3). Cleanses now remove the most dangerous harmful effect first.",
+            "The Iron Tyrant: every blow adds Sunder to its target, and the fifth stack executes. When another ally taunts it, the Tyrant lets go and the Sunder on everyone else falls off — bring two characters that taunt.",
+            "The Silent Choir: three singers, each singing a Requiem every 25 seconds. A finished Requiem takes 60% of every hero's health and makes the Choir stronger. Interrupt it — any stun works too. A cast bar shows the spell on the enemy.",
+            "The Hollow King: immune while any Hollow Knight stands, and raises four more every 16 seconds. The knights reflect half of the damage over time they take back at the caster — bring area damage.",
+            "Entering costs a Pinnacle Sigil: a very rare drop from enemies of level 55 and up (most likely from bosses and elites, also offline). Sigils never drop in rifts.",
+            "Rewards: boss loot ×3, six pinnacle-only uniques (Wardenstone Aegis, Stormcall Codex, Mother's Embrace, Tyrant's Crown, Hush, Hollow Reaver), a title and an animated portrait frame for the first kill of each boss, a weekly bonus for the first kill each week (crystals and a guaranteed pinnacle unique) and a fastest-kill leaderboard for every boss.",
+            "Characters no longer waste attacks on enemies that are immune to them: they pick a target they can hurt."
+          ]
+        },
+        {
+          "heading": "Interrupts (new)",
+          "items": [
+            "New interrupt abilities: Pummel (Warrior, Tactician branch), Kick (Rogue, Survival branch), Counterspell (Spellblade, Flow branch) and Time Lock (Chronomancer, Constancy branch). By default they only fire while an enemy is casting.",
+            "New rule conditions: \"An enemy is casting\" and \"Target is casting\"."
+          ]
+        },
+        {
           "heading": "Items",
           "items": [
             "New affix system: items roll prefixes and suffixes (up to 3 of each) from 41 different stats. Uncommon items get 1 affix, Rare 2, Epic 3, Legendary 4 and Mythic now 6.",
@@ -136,6 +157,8 @@
         {
           "heading": "Multiplayer",
           "items": [
+            "In a group, every fight is now fought together: as soon as two members are online, the group fights the leader's zone, and the leader's zone boss challenges, rifts, co-op encounters and pinnacle bosses are group fights too. Only the Arena stays solo.",
+            "The leader decides: changing the zone takes the group along, and only the leader can start boss challenges, rifts, encounters and pinnacle bosses. Every member gets their own loot, XP and rift progress.",
             "The group leader can now choose which offered recruits fight: \"✓ Fights\" / \"Let fight\" next to each member's recruit, or \"Automatic\" to go back to the old choice (missing roles first, then in turn). Still at most one recruit per player. The choice resets when someone joins or leaves or the leader changes."
           ]
         },

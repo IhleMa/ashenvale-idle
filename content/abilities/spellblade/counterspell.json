@@ -1,0 +1,40 @@
+{
+  "name": "Counterspell",
+  "classId": "spellblade",
+  "unlockLevel": 10,
+  "type": "control",
+  "description": "Cut through a casting enemy's spell: 70% magic damage and interrupt it.",
+  "cost": 10,
+  "cooldown": 12,
+  "target": "enemy",
+  "effects": [
+    {
+      "kind": "damage",
+      "stat": "magPower",
+      "power": 0.7,
+      "school": "magical"
+    },
+    {
+      "kind": "interrupt"
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "enemy_casting"
+      }
+    ],
+    "target": {
+      "selector": "enemy_highest_threat"
+    },
+    "targetConditions": [
+      {
+        "type": "target_casting"
+      }
+    ]
+  },
+  "priority": 98,
+  "order": 25
+}

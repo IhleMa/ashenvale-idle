@@ -30,7 +30,7 @@
     {
       "name": "Survival",
       "attrs": ["vit", "str"],
-      "abilities": {},
+      "abilities": { "2": "kick" },
       "notables": {
         "4": { "name": "Thick Skin", "stats": { "hpPct": 0.1 } },
         "8": { "name": "Cheat Death", "stats": { "damageTakenPct": -0.08, "hpPct": 0.08 } }

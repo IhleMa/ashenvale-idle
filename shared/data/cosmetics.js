@@ -1,5 +1,5 @@
 // Cosmetics bought with gold (a gold sink with no power): name colours, titles, portrait frames and profile borders
-// (around the inspect window). Defined in content/cosmetics/{name_colors,titles,frames,borders}/. A title with "achievement" is earned, not bought.
+// (around the inspect window). Defined in content/cosmetics/{name_colors,titles,frames,borders}/. A title with "achievement" is earned, not bought; one with "pinnacle" comes with the first kill of that pinnacle boss.
 import { CONTENT, withIds, onContentReload } from '../content.js';
 
 export const COSMETIC_KINDS = {
@@ -20,6 +20,7 @@ export function ownsCosmetic(p, kind, id) {
   const c = cosmetic(kind, id);
   if (!c) return false;
   if (c.achievement) return !!p.achievements?.[c.achievement];
+  if (c.pinnacle) return !!p.pinnacle?.firstKill?.[c.pinnacle]; // first kill of a pinnacle boss
   return !!p.cosmetics?.owned?.includes(`${kind}:${id}`);
 }
 // what other players see: only ids that still exist and are owned

@@ -1,0 +1,20 @@
+{
+  "_about": "Pinnacle bosses: endgame fights for level 60 heroes. Entering costs one Pinnacle Sigil — a very rare drop from enemies of level sigilDrops.minLevel or higher (normal / elite / boss chance per kill; never from rifts). Every boss is its own file in this folder: waves (enemy ids, content/enemies), scale (health and damage multipliers), uniques (pinnacle-only uniques, \"pinnacle\": \"<boss id>\" in legendaries/uniques), uniqueChance (chance for one of them per kill), title and frame (cosmetics granted on the first kill). weekly: bonus for the first kill of each boss in a week (Monday 00:00 UTC).",
+  "config": {
+    "minLevel": 60,
+    "level": 60,
+    "sigilDrops": {
+      "minLevel": 55,
+      "normal": 0.0001,
+      "elite": 0.0015,
+      "boss": 0.01
+    },
+    "weekly": {
+      "crystals": 40,
+      "extraUnique": true
+    },
+    "leaderboardSize": 10,
+    "rewardMult": 3,
+    "lootBoost": 1.5
+  }
+}

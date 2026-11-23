@@ -1,0 +1,16 @@
+{
+  "name": "Ironclad",
+  "tier": "earned",
+  "price": 0,
+  "colors": [
+    "#4a4f57",
+    "#d7dde5",
+    "#c0392b",
+    "#d7dde5"
+  ],
+  "glow": "#ff5a45",
+  "animated": true,
+  "order": 202,
+  "fx": "shine",
+  "pinnacle": "iron_tyrant"
+}

@@ -1,0 +1,45 @@
+{
+  "name": "Time Lock",
+  "classId": "chronomancer",
+  "unlockLevel": 10,
+  "type": "control",
+  "description": "Freeze a casting enemy's moment: 60% magic damage, interrupt its spell and slow its time for 4 seconds.",
+  "cost": 10,
+  "cooldown": 14,
+  "target": "enemy",
+  "effects": [
+    {
+      "kind": "damage",
+      "stat": "magPower",
+      "power": 0.6,
+      "school": "magical"
+    },
+    {
+      "kind": "interrupt"
+    },
+    {
+      "kind": "status",
+      "status": "slowed_time",
+      "duration": 4
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "enemy_casting"
+      }
+    ],
+    "target": {
+      "selector": "enemy_highest_threat"
+    },
+    "targetConditions": [
+      {
+        "type": "target_casting"
+      }
+    ]
+  },
+  "priority": 98,
+  "order": 15
+}

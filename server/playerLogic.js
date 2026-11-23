@@ -1,4 +1,5 @@
 // Player state model and all validated player actions (pure game logic, no networking).
+import { pinnacleState } from '../shared/pinnacle.js';
 import { cleanGroups } from '../shared/statFilter.js';
 import crypto from 'node:crypto';
 import { CONFIG, rarityIndex, xpToNext } from '../shared/config.js';
@@ -59,6 +60,7 @@ export function migratePlayer(p) {
   for (const k of Object.keys(base)) if (p[k] === undefined) p[k] = base[k];
   p.stats = { ...base.stats, ...p.stats };
   p.settings = { ...base.settings, ...p.settings };
+  pinnacleState(p);
   // tiers whose XP & gold were already paid out; players from before this rule count every tier up to their best
   const hadCleared = Array.isArray(p.rift?.cleared);
   p.rift = { ...base.rift, ...p.rift };
@@ -718,6 +720,7 @@ export function applyRewards(p, chars, rewards) {
   p.gold += rewards.gold;
   if (rewards.materials && p.town) for (const [k, v] of Object.entries(rewards.materials)) p.town.materials[k] = (p.town.materials[k] || 0) + v;
   if (rewards.gems && p.town) for (const [k, v] of Object.entries(rewards.gems)) p.town.gems[k] = (p.town.gems[k] || 0) + v;
+  if (rewards.sigils) pinnacleState(p).sigils += rewards.sigils; // Pinnacle Sigils
   let sold = 0, kept = 0;
   for (const it of rewards.items) (receiveItem(p, it) === 'kept' ? kept++ : sold++);
   p.stats.kills += rewards.kills || 0;
@@ -764,7 +767,7 @@ export function publicPlayer(p) {
     stats: p.stats, achievements: p.achievements, settings: p.settings, coopChars: p.coopChars,
     town: p.town, expeditions: p.expeditions || [], mailbox: p.mailbox || [], serverTime: Date.now(),
     bestiary: p.bestiary || {}, quests: p.quests, rift: p.rift, lootFilter: p.lootFilter, lootLog: p.lootLog || [],
-    tutorial: p.tutorial || null, cosmetics: p.cosmetics || { owned: [], equipped: {} },
+    tutorial: p.tutorial || null, cosmetics: p.cosmetics || { owned: [], equipped: {} }, pinnacle: pinnacleState(p),
     arena: p.arena ? (refillAttacks(p.arena), { ...p.arena, recent: undefined, nextAttackAt: refillAttacks(p.arena) }) : null,
   };
 }

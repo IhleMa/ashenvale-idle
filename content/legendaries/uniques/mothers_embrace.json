@@ -1,0 +1,36 @@
+{
+  "name": "Mother's Embrace",
+  "baseId": "robe",
+  "minLevel": 60,
+  "flavor": "Whatever she touched, she kept.",
+  "stats": {
+    "int": [
+      4,
+      1.0
+    ],
+    "healPower": [
+      1.5,
+      0.45
+    ],
+    "healingPct": [
+      0.05,
+      0.001
+    ]
+  },
+  "procs": [
+    {
+      "name": "Mother's Embrace",
+      "trigger": "heal",
+      "chance": 0.25,
+      "icd": 4,
+      "target": "target",
+      "effect": {
+        "kind": "cleanse",
+        "count": 1
+      }
+    }
+  ],
+  "description": "Your heals have a 25% chance to also remove the most dangerous harmful effect from the target (4s cooldown).",
+  "order": 202,
+  "pinnacle": "mother_of_plagues"
+}

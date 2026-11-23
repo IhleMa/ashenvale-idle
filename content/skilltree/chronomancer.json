@@ -78,7 +78,7 @@
         "vit",
         "int"
       ],
-      "abilities": {},
+      "abilities": { "2": "time_lock" },
       "notables": {
         "4": {
           "name": "Anchor",

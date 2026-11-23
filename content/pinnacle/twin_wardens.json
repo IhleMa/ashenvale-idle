@@ -1,0 +1,23 @@
+{
+  "name": "The Twin Wardens",
+  "waves": [
+    [
+      "warden_of_stone",
+      "warden_of_storm"
+    ]
+  ],
+  "scale": {
+    "hp": 4.0,
+    "damage": 1.2
+  },
+  "summary": "Two linked guardians: Stone is immune to physical damage, Storm to magic. Kill them within 10 seconds of each other or the fallen one rises again.",
+  "counter": "Bring both physical and magic damage, and balance it so both fall together.",
+  "uniques": [
+    "wardenstone_aegis",
+    "stormcall_codex"
+  ],
+  "uniqueChance": 0.3,
+  "title": "wardenbreaker",
+  "frame": "twin_wardens",
+  "order": 10
+}

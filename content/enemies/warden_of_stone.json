@@ -1,0 +1,45 @@
+{
+  "name": "Warden of Stone",
+  "tags": [
+    "construct",
+    "boss",
+    "pinnacle"
+  ],
+  "boss": true,
+  "xp": 1500,
+  "gold": [
+    500,
+    800
+  ],
+  "loot": {
+    "chance": 1,
+    "count": 5,
+    "boost": 4,
+    "minRarity": "epic"
+  },
+  "enrageAfter": 300,
+  "enrageStatus": "pinnacle_enrage",
+  "pinnacle": true,
+  "stats": {
+    "hp": 2600,
+    "physPower": 30,
+    "magPower": 20,
+    "defense": 22,
+    "critChance": 0.1,
+    "attackSpeed": 0.8
+  },
+  "abilities": [
+    "b_stone_fist",
+    "b_war_stomp"
+  ],
+  "immune": [
+    "physical"
+  ],
+  "link": {
+    "group": "twin_wardens",
+    "window": 10,
+    "reviveHpPct": 0.5
+  },
+  "description": "Immune to physical damage. If its twin outlives it by 10 seconds, it rises again.",
+  "order": 900
+}

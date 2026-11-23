@@ -162,6 +162,7 @@ async function openPlayer(id, root) {
     <div class="admin-give">
       <label class="inline">Gold <input type="number" data-g-gold min="0" value="0"></label>
       <label class="inline">💠 Crystals <input type="number" data-g-premium min="0" value="0"></label>
+      <label class="inline">✨ Pinnacle Sigils <input type="number" data-g-sigils min="0" value="0"></label>
       <label class="inline">Material <select data-g-mat><option value="">—</option>${MATERIAL_IDS.map(k => `<option value="${k}">${esc(MATERIALS[k].name)}</option>`).join('')}</select> <input type="number" data-g-matqty min="0" value="0"></label>
       <label class="inline">Item <select data-g-type><option value="">—</option><option value="random">Random item</option><option value="unique">Unique</option><option value="set">Set piece</option></select></label>
       <select data-g-unique><option value="">random unique</option>${Object.values(UNIQUES).map(u => `<option value="${u.id}">${esc(u.name)}</option>`).join('')}</select>
@@ -216,7 +217,7 @@ async function openPlayer(id, root) {
       const mat = q('[data-g-mat]').value;
       const type = q('[data-g-type]').value;
       const r = await run(act('admin_give', {
-        id, gold: Number(q('[data-g-gold]').value) || 0, premium: Number(q('[data-g-premium]').value) || 0,
+        id, gold: Number(q('[data-g-gold]').value) || 0, premium: Number(q('[data-g-premium]').value) || 0, sigils: Number(q('[data-g-sigils]').value) || 0,
         materials: mat ? { [mat]: Number(q('[data-g-matqty]').value) || 0 } : {},
         item: type ? { type, uniqueId: q('[data-g-unique]').value, setId: q('[data-g-set]').value, baseId: q('[data-g-base]').value, rarity: q('[data-g-rarity]').value, level: Number(q('[data-g-level]').value) } : null,
         note: q('[data-g-note]').value || undefined,

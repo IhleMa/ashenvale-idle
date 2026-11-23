@@ -1,0 +1,21 @@
+{
+  "name": "The Iron Tyrant",
+  "waves": [
+    [
+      "iron_tyrant"
+    ]
+  ],
+  "scale": {
+    "hp": 6.0,
+    "damage": 3.0
+  },
+  "summary": "Every blow Sunders its target. The fifth stack executes. When another ally taunts it, the Tyrant lets go and the Sunder on everyone else falls off.",
+  "counter": "Bring two characters that can taunt and let them take turns.",
+  "uniques": [
+    "tyrants_crown"
+  ],
+  "uniqueChance": 0.3,
+  "title": "tyrantslayer",
+  "frame": "iron_tyrant",
+  "order": 30
+}

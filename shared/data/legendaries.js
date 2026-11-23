@@ -28,7 +28,7 @@ onContentReload(() => { withIds(UNIQUES); withIds(SETS); });
 export const dropsIn = (def, zoneId) => !zoneId || !def.zones?.length || def.zones.includes(zoneId);
 
 export function generateUnique(rng, level, uniqueId = null, zoneId = null) {
-  const pool = Object.values(UNIQUES).filter(u => u.minLevel <= Math.max(level, 1) && dropsIn(u, zoneId));
+  const pool = Object.values(UNIQUES).filter(u => !u.pinnacle && u.minLevel <= Math.max(level, 1) && dropsIn(u, zoneId)); // pinnacle uniques only drop from their boss
   const u = UNIQUES[uniqueId] || (pool.length ? pool[Math.floor(rng() * pool.length)] : null);
   if (!u) return null;
   const lvl = Math.max(u.minLevel, Math.round(level));

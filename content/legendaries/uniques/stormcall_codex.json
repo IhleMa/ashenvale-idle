@@ -1,0 +1,38 @@
+{
+  "name": "Stormcall Codex",
+  "baseId": "tome",
+  "minLevel": 60,
+  "flavor": "Its pages crackle in the hands of the unworthy.",
+  "stats": {
+    "int": [
+      4,
+      1.0
+    ],
+    "magPower": [
+      1.5,
+      0.45
+    ],
+    "magDamagePct": [
+      0.05,
+      0.001
+    ]
+  },
+  "procs": [
+    {
+      "name": "Stormcall",
+      "trigger": "hit",
+      "chance": 0.15,
+      "icd": 4,
+      "target": "randomEnemy",
+      "effect": {
+        "kind": "damage",
+        "stat": "magPower",
+        "power": 1.5,
+        "school": "magical"
+      }
+    }
+  ],
+  "description": "Your hits have a 15% chance to call lightning on a random enemy for 150% magic power (4s cooldown).",
+  "order": 201,
+  "pinnacle": "twin_wardens"
+}

@@ -86,7 +86,7 @@ export const multiplayerView = {
 
           <section class="panel">
             <div class="panel-head"><h3>Your group</h3>${g ? `<button class="btn small ghost danger" data-leave>Leave group</button>` : `<button class="btn small primary" data-create>Create group</button>`}</div>
-            ${g ? groupHtml(g, me, isLeader) : `<p class="muted">Create a group and invite other players to take on dungeons, elite hunts and world bosses together. Up to ${CONFIG.coop.partySize} characters fight: every player's hero plus ${MAX_PICKS === 1 ? 'one recruit' : `${MAX_PICKS} recruits`} each while places are left. Going alone is possible, but the encounters are made for groups.</p>`}
+            ${g ? groupHtml(g, me, isLeader) : `<p class="muted">Create a group and invite other players: <b>in a group you fight everything together</b> — the leader's zone, zone bosses, rifts, the co-op encounters below and pinnacle bosses (only the Arena stays solo). Up to ${CONFIG.coop.partySize} characters fight: every player's hero plus ${MAX_PICKS === 1 ? 'one recruit' : `${MAX_PICKS} recruits`} each while places are left. Everyone gets their own loot.</p>`}
           </section>
 
           <section class="panel">
@@ -106,11 +106,12 @@ export const multiplayerView = {
             <div class="encounter-list">${Object.values(COOP_ENCOUNTERS).map(enc => {
               const boss = ENEMIES[enc.waves[enc.waves.length - 1][0]];
               const can = !g || isLeader;
+              const busy = g?.fight && g.fight.kind !== 'idle';
               return `<div class="encounter" style="${backgroundStyle(`encounters/${enc.id}`)}">
                 <div class="grow"><span class="tag ${enc.type}">${enc.type.replace('_', ' ').toUpperCase()}</span>
                   <h4>${esc(enc.name)}</h4><p class="small muted">${esc(enc.description)}</p>
                   <div class="small faint">Min. level ${enc.minLevel} · ${enc.waves.length} wave${enc.waves.length > 1 ? 's' : ''} · Final foe: ${esc(boss.name)} · Rewards ×${enc.rewardMult}</div></div>
-                <button class="btn ${can ? 'primary' : ''}" data-start="${enc.id}" ${can && !g?.inBattle ? '' : 'disabled'} ${tipAttr(g ? (isLeader ? 'Start with your group' : 'Only the leader can start') : 'Start alone (creates a group of one)')}>${g?.inBattle ? 'In progress' : g ? 'Start' : 'Go alone'}</button>
+                <button class="btn ${can ? 'primary' : ''}" data-start="${enc.id}" ${can && !busy ? '' : 'disabled'} ${tipAttr(g ? (isLeader ? 'Start with your group (leaves the zone fight)' : 'Only the leader can start') : 'Start alone (creates a group of one)')}>${g?.encounterId === enc.id ? 'In progress' : g ? 'Start' : 'Go alone'}</button>
               </div>`;
             }).join('')}</div>
             <p class="muted small">Enemies gain +${Math.round(CONFIG.coop.hpScalePerExtraCharacter * 100)}% health and +${Math.round(CONFIG.coop.damageScalePerExtraCharacter * 100)}% damage for every character beyond 2 in the fight. Every participant receives their own loot.</p>
@@ -164,6 +165,7 @@ function groupHtml(g, me, isLeader) {
       : g.leaderRecruits && g.members.length > 1 ? '<div class="muted small">The leader chose which recruits fight.</div>' : ''}
     ${g.invites.length ? `<div class="muted small">Pending: ${g.invites.map(esc).join(', ')}</div>` : ''}
     <div class="muted small">Next fight: ${g.members.reduce((n, m) => n + m.characters.length, 0)} / ${CONFIG.coop.partySize} characters.${g.members.length < CONFIG.coop.maxPlayers ? '' : ' Group is full.'}</div>
-    ${g.inBattle ? '<div class="notice good">Your group is fighting! <a href="#/combat">Watch the battle →</a></div>' : ''}
+    ${g.together ? `<div class="notice good">🤝 Your group fights together${g.fight ? `: <b>${esc(g.fight.title)}</b>` : ''}. ${isLeader ? 'You decide: your zone, zone bosses, rifts, encounters and pinnacle bosses.' : 'The leader decides what you fight.'} <a href="#/combat">Watch →</a></div>`
+      : g.members.length > 1 ? '<div class="muted small">Fighting together starts as soon as two members are online.</div>' : ''}
   </div>`;
 }

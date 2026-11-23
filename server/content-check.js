@@ -6,7 +6,7 @@ import { MUTATOR_CHANGES } from '../shared/mutators.js';
 import { CONDITIONS, TARGET_CONDITIONS, SELECTORS } from '../shared/rules.js';
 import { VIEW_IDS as TUTORIAL_VIEWS, METRIC_NAMES as TUTORIAL_METRICS } from '../shared/tutorialDefs.js';
 
-const EFFECT_KINDS = ['damage', 'heal', 'status', 'shield', 'taunt', 'cleanse', 'resource', 'summon', 'sacrifice', 'extend', 'consume_dots', 'spread_dots', 'self_damage', 'revive', 'rewind', 'echo', 'reduce_cooldowns', 'prolong', 'finale', 'counter'];
+const EFFECT_KINDS = ['damage', 'heal', 'status', 'shield', 'taunt', 'cleanse', 'resource', 'summon', 'sacrifice', 'extend', 'consume_dots', 'spread_dots', 'self_damage', 'revive', 'rewind', 'echo', 'reduce_cooldowns', 'prolong', 'finale', 'counter', 'interrupt'];
 const PROC_EFFECT_KINDS = [...EFFECT_KINDS, 'reflect', 'healPct', 'shieldPct', 'cooldowns'];
 const PROC_TRIGGERS = ['hit', 'crit', 'struck', 'heal', 'kill', 'cast', 'lowHp'];
 const PROC_TARGETS = ['self', 'target', 'source', 'randomEnemy', 'lowestAlly', 'allAllies'];

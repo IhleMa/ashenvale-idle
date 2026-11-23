@@ -1,0 +1,40 @@
+{
+  "name": "Tyrant's Crown",
+  "baseId": "plate_helm",
+  "minLevel": 60,
+  "flavor": "Heavy is the head. Heavier is the hand.",
+  "stats": {
+    "str": [
+      4,
+      1.0
+    ],
+    "hpPct": [
+      0.04,
+      0.001
+    ],
+    "threatPct": [
+      0.1,
+      0.002
+    ]
+  },
+  "procs": [
+    {
+      "name": "Tyrant's Crown",
+      "trigger": "cast",
+      "filter": {
+        "taunt": true
+      },
+      "chance": 1,
+      "icd": 8,
+      "target": "self",
+      "effect": {
+        "kind": "shieldPct",
+        "pct": 0.15,
+        "duration": 6
+      }
+    }
+  ],
+  "description": "Taunting gives you a barrier absorbing 15% of your max health (8s cooldown).",
+  "order": 203,
+  "pinnacle": "iron_tyrant"
+}

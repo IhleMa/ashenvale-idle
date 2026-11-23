@@ -1,0 +1,10 @@
+{
+  "name": "Wrath of the Pinnacle",
+  "type": "buff",
+  "mods": {
+    "damagePct": 3,
+    "attackSpeedPct": 1
+  },
+  "description": "The enrage timer ran out: +300% damage and +100% attack speed.",
+  "order": 303
+}

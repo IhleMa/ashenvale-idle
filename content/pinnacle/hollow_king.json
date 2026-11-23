@@ -1,0 +1,24 @@
+{
+  "name": "The Hollow King",
+  "waves": [
+    [
+      "hollow_king",
+      "hollow_knight",
+      "hollow_knight",
+      "hollow_knight"
+    ]
+  ],
+  "scale": {
+    "hp": 3.5,
+    "damage": 1.5
+  },
+  "summary": "The King is immune while any Hollow Knight stands, and raises four more every 16 seconds. The knights reflect half of the damage over time they take.",
+  "counter": "Bring area damage to clear the knights quickly — and be careful with damage over time.",
+  "uniques": [
+    "hollow_reaver"
+  ],
+  "uniqueChance": 0.3,
+  "title": "hollowbane",
+  "frame": "hollow_king",
+  "order": 50
+}

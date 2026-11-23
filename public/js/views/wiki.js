@@ -1,5 +1,6 @@
 // Wiki: game mechanics, classes, abilities, skill trees, ascendancies, statuses, items, town, expeditions and
 // zones — built live from the content files, so it always matches the game (including admin overrides).
+import { PINNACLE_BOSSES } from '/shared/pinnacle.js';
 import { morphed } from '../morph.js';
 import { esc } from '../ui.js';
 import { classIcon, abilityIcon } from '../assets.js';
@@ -179,7 +180,7 @@ function itemsPage() {
     <h3>Gems</h3>
     <p>An item can have <b>one socket</b> (it drops with one more often on better rarities, and the Jeweler can drill one). A socketed <b>resonance gem</b> changes the affixes of its own item — one gem of each kind per item. Gems drop from enemies (bosses and rifts most often, better qualities from higher-level enemies) and the Jeweler cuts Chipped gems from Gem Fragments; ${GEM_CONFIG.fuseCount} gems fuse into one of the next quality.</p>
     <table class="wiki-table"><tr><th>Gem</th><th>Effect</th>${GEM_TIERS.slice(1).map(t => `<th>${esc(t.name)}</th>`).join('')}</tr>${GEM_IDS.map(k => `<tr><td><b>${esc(GEM_KINDS[k].name)}</b>${COMBAT_GEMS.has(GEM_KINDS[k].effect) ? '<div class="muted small">in combat</div>' : ''}</td><td class="small">${esc(gemText(k, 1)).replace(/\d+%/, 'X')}</td>${GEM_TIERS.slice(1).map((t, i) => { const v = gemValue(k, i + 1); return `<td>${GEM_KINDS[k].effect === 'keystone' ? v + ' tier' + (v > 1 ? 's' : '') : Math.round(v * 100) + '%'}</td>`; }).join('')}</tr>`).join('')}</table>
-    <h3>Uniques</h3><table class="wiki-table"><tr><th>Unique</th><th>Item</th><th>From level</th><th>Where</th><th>Effect</th></tr>${Object.values(UNIQUES).sort((a, b) => a.minLevel - b.minLevel).map(u => `<tr><td class="unique-name"><b>${esc(u.name)}</b></td><td>${esc(ITEM_BASES[u.baseId]?.name || u.baseId)}</td><td>${u.minLevel}</td><td class="small">${(u.zones || []).map(z => esc(ZONES[z]?.name || z)).join(', ') || 'anywhere'}</td><td class="small">${esc(u.description || '')}</td></tr>`).join('')}</table>
+    <h3>Uniques</h3><table class="wiki-table"><tr><th>Unique</th><th>Item</th><th>From level</th><th>Where</th><th>Effect</th></tr>${Object.values(UNIQUES).sort((a, b) => a.minLevel - b.minLevel).map(u => `<tr><td class="unique-name"><b>${esc(u.name)}</b></td><td>${esc(ITEM_BASES[u.baseId]?.name || u.baseId)}</td><td>${u.minLevel}</td><td class="small">${u.pinnacle ? `🏔 ${esc(PINNACLE_BOSSES[u.pinnacle]?.name || u.pinnacle)} only` : (u.zones || []).map(z => esc(ZONES[z]?.name || z)).join(', ') || 'anywhere'}</td><td class="small">${esc(u.description || '')}</td></tr>`).join('')}</table>
     <h3>Sets</h3>${Object.values(SETS).map(s => `<div class="wiki-sub" style="--sub-color:#3fbf6a"><h4 class="set-name">${esc(s.name)} <span class="muted small">from level ${s.minLevel}${s.zones?.length ? ` · ${s.zones.map(z => esc(ZONES[z]?.name || z)).join(', ')}` : ''}</span></h4><p class="small">${Object.values(s.pieces).map(esc).join(' · ')}</p><ul class="small">${Object.entries(s.bonuses).map(([n, b]) => `<li><b>${n} pieces:</b> ${esc(b.description)}</li>`).join('')}</ul></div>`).join('')}`;
 }
 

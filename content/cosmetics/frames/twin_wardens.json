@@ -1,0 +1,16 @@
+{
+  "name": "Twinbound",
+  "tier": "earned",
+  "price": 0,
+  "colors": [
+    "#9a8f7a",
+    "#5fb6ff",
+    "#e8e2d0",
+    "#5fb6ff"
+  ],
+  "glow": "#7fc4ff",
+  "animated": true,
+  "order": 200,
+  "fx": "orbit",
+  "pinnacle": "twin_wardens"
+}

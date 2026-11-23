@@ -1,0 +1,23 @@
+{
+  "name": "The Silent Choir",
+  "waves": [
+    [
+      "choir_soprano",
+      "choir_alto",
+      "choir_bass"
+    ]
+  ],
+  "scale": {
+    "hp": 4.0,
+    "damage": 3.0
+  },
+  "summary": "Three singers, each singing a Requiem every 25 seconds. A finished Requiem takes 60% of every hero's health and makes the Choir stronger.",
+  "counter": "Interrupt every Requiem: Pummel (Warrior), Kick (Rogue), Counterspell (Spellblade), Time Lock (Chronomancer) — any stun works too.",
+  "uniques": [
+    "hush"
+  ],
+  "uniqueChance": 0.3,
+  "title": "choirsilencer",
+  "frame": "silent_choir",
+  "order": 40
+}

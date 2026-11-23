@@ -1,0 +1,10 @@
+{
+  "name": "Crescendo",
+  "type": "buff",
+  "maxStacks": 10,
+  "mods": {
+    "damagePct": 0.25
+  },
+  "description": "A Requiem was sung to the end: +25% damage per stack.",
+  "order": 302
+}

@@ -1,0 +1,31 @@
+{
+  "name": "Dirge",
+  "classId": "enemy",
+  "type": "damage",
+  "cost": 0,
+  "cooldown": 9,
+  "target": "enemy",
+  "area": true,
+  "effects": [
+    {
+      "kind": "damage",
+      "stat": "magPower",
+      "power": 0.45,
+      "school": "magical"
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "always"
+      }
+    ],
+    "target": {
+      "selector": "all_enemies"
+    },
+    "targetConditions": []
+  },
+  "order": 605
+}

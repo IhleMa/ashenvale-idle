@@ -1,0 +1,46 @@
+{
+  "name": "Warden of Storm",
+  "tags": [
+    "elemental",
+    "boss",
+    "pinnacle"
+  ],
+  "boss": true,
+  "xp": 1500,
+  "gold": [
+    500,
+    800
+  ],
+  "loot": {
+    "chance": 1,
+    "count": 5,
+    "boost": 4,
+    "minRarity": "epic"
+  },
+  "enrageAfter": 300,
+  "enrageStatus": "pinnacle_enrage",
+  "pinnacle": true,
+  "stats": {
+    "hp": 2600,
+    "physPower": 20,
+    "magPower": 30,
+    "defense": 14,
+    "critChance": 0.1,
+    "attackSpeed": 0.8
+  },
+  "basicSchool": "magical",
+  "abilities": [
+    "b_storm_lash",
+    "e_chill"
+  ],
+  "immune": [
+    "magical"
+  ],
+  "link": {
+    "group": "twin_wardens",
+    "window": 10,
+    "reviveHpPct": 0.5
+  },
+  "description": "Immune to magic damage. If its twin outlives it by 10 seconds, it rises again.",
+  "order": 901
+}

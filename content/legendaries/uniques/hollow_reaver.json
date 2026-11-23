@@ -1,0 +1,27 @@
+{
+  "name": "Hollow Reaver",
+  "baseId": "axe",
+  "minLevel": 60,
+  "flavor": "It cuts twice: once for the living, once for what stands back up.",
+  "stats": {
+    "str": [
+      4,
+      1.0
+    ],
+    "physPower": [
+      2,
+      0.5
+    ],
+    "attackSpeed": [
+      0.06,
+      0.002
+    ]
+  },
+  "passive": {
+    "doubleStrike": 0.2,
+    "damageVsBossPct": 0.1
+  },
+  "description": "Your basic attacks have a 20% chance to hit twice, and you deal 10% more damage to bosses.",
+  "order": 205,
+  "pinnacle": "hollow_king"
+}

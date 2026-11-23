@@ -1,0 +1,21 @@
+{
+  "name": "Mother of Plagues",
+  "waves": [
+    [
+      "mother_of_plagues"
+    ]
+  ],
+  "scale": {
+    "hp": 6.0,
+    "damage": 3.0
+  },
+  "summary": "Every Plague Wave adds a stack of a plague to the whole party. It never wears off, cuts healing received and gets deadlier with every stack.",
+  "counter": "Only cleansing removes the plague — bring a Druid (Nature's Cure) or a Chronomancer (Rewind at rank 3).",
+  "uniques": [
+    "mothers_embrace"
+  ],
+  "uniqueChance": 0.3,
+  "title": "plaguebane",
+  "frame": "mother_of_plagues",
+  "order": 20
+}

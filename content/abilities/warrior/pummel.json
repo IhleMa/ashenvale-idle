@@ -1,0 +1,40 @@
+{
+  "name": "Pummel",
+  "classId": "warrior",
+  "unlockLevel": 10,
+  "type": "control",
+  "description": "Strike a casting enemy for 60% damage and interrupt its spell.",
+  "cost": 10,
+  "cooldown": 12,
+  "target": "enemy",
+  "effects": [
+    {
+      "kind": "damage",
+      "stat": "physPower",
+      "power": 0.6,
+      "school": "physical"
+    },
+    {
+      "kind": "interrupt"
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "enemy_casting"
+      }
+    ],
+    "target": {
+      "selector": "enemy_highest_threat"
+    },
+    "targetConditions": [
+      {
+        "type": "target_casting"
+      }
+    ]
+  },
+  "priority": 98,
+  "order": 55
+}

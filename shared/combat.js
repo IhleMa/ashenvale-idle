@@ -11,7 +11,7 @@ import { combatGems } from './gems.js';
 import { equipmentEffects } from './data/legendaries.js';
 import { createRng } from './rng.js';
 import { mutatedAbilities } from './skilltree.js';
-import { resolveRule, hpPct, hasStatus, enemiesOf, alliesOf, ownMinions, aggroTargetOf } from './rules.js';
+import { resolveRule, hpPct, hasStatus, enemiesOf, alliesOf, ownMinions, aggroTargetOf, isImmune } from './rules.js';
 
 const C = CONFIG.combat;
 const DT = C.tickMs / 1000;
@@ -163,7 +163,13 @@ export function makeEnemyUnit(enemyId, level, { position = 0, scale = { hp: 1, d
     bonuses: { damagePct: 0, healingPct: 0, damageTakenPct: 0, buffDurationPct: 0, allStatsPct: 0 },
     actionTimer: 0.8 + position * 0.3,
     danger: (s.physPower + s.magPower) * (def.boss ? 4 : def.tags.includes('elite') ? 2 : def.tags.includes('caster') ? 1.3 : 1),
-    phasesDone: [], enrageAfter: def.enrageAfter || 0, phases: def.phases || [],
+    phasesDone: [], enrageAfter: def.enrageAfter || 0, enrageStatus: def.enrageStatus || 'enrage', phases: def.phases || [],
+    // pinnacle mechanics (content/enemies: immune, link, immuneWhileAdds, reflectDotPct, channel)
+    ...(def.immune?.length ? { immune: [...def.immune] } : {}),
+    ...(def.link ? { link: { ...def.link } } : {}),
+    ...(def.immuneWhileAdds ? { immuneWhileAdds: def.immuneWhileAdds } : {}),
+    ...(def.reflectDotPct ? { reflectDotPct: def.reflectDotPct } : {}),
+    ...(def.channel ? { channel: { ...def.channel }, nextChannel: def.channel.first ?? def.channel.every } : {}),
   };
 }
 
@@ -260,12 +266,15 @@ export function stepBattle(b) {
     if (u.gemDyn && u.alive) updateGems(b, u); // combat gems
     // Health Regeneration (item affix)
     if (u.alive && u.gearMods?.hpRegen && u.hp < u.maxHp) u.hp = Math.min(u.maxHp, u.hp + u.gearMods.hpRegen * DT * (b.pvp?.healingMult ?? 1));
+    if (u.channel && u.alive) tickChannel(b, u);
     if (u.boss && u.enrageAfter && b.phaseTime >= u.enrageAfter && !u.enraged) {
       u.enraged = true;
-      applyStatus(b, u, u, 'enrage', 999, 0, 1);
+      applyStatus(b, u, u, u.enrageStatus || 'enrage', 999, 0, 1);
       emit(b, { type: 'phase', src: u.uid, message: `${u.name} becomes enraged!` });
     }
   }
+  // linked bosses (Twin Wardens): a fallen one rises again when its partner outlives the window
+  for (const u of b.units) if (!u.alive && u.reviveAt != null && b.time >= u.reviveAt) reviveLinked(b, u);
   if (b.hooks?.tick) { b.hooks.tick(b, HOOK_API); if (checkEnd(b)) return; }
   // Arena: at the time limit the side with more health left (share of maximum, characters only) wins
   if (b.pvp?.timeLimit && b.time >= b.pvp.timeLimit) { finish(b, healthShare(b, 'A') >= healthShare(b, 'B') ? 'victory' : 'defeat'); return; }
@@ -274,6 +283,7 @@ export function stepBattle(b) {
     u.actionTimer -= DT;
     if (u.actionTimer > 0) continue;
     if (u.statuses.some(s => STATUSES[s.id]?.control === 'stun')) { u.actionTimer = 0.1; continue; }
+    if (u.casting) { u.actionTimer = 0.1; continue; } // channelling
     act(b, u);
     if (checkEnd(b)) return;
   }
@@ -366,8 +376,10 @@ function act(b, u) {
 }
 
 function basicTarget(b, u) {
-  const foes = enemiesOf(b, u);
+  let foes = enemiesOf(b, u);
   if (!foes.length) return null;
+  // characters skip enemies their basic attack can't hurt (pinnacle immunities)
+  if (!u.threatTable && foes.some(f => f.immune || f.immuneWhileAdds)) { foes = foes.filter(f => !isImmune(b, f, u.basicAttack.school)); if (!foes.length) return null; }
   const taunter = foes.find(f => hasStatus(f, 'taunting'));
   if (taunter && (u.threatTable || b.pvp)) return taunter; // in the Arena taunts pull the other players' basic attacks too
   if (u.threatTable) {
@@ -471,17 +483,27 @@ function applyEffect(b, src, tgt, eff, abilityId) {
       applyStatus(b, src, src, 'taunting', eff.duration, 0, 1);
       for (const e of enemiesOf(b, src)) {
         if (!e.threatTable) continue;
+        // a taunt makes the enemy let go of everyone else: its "resetOnTaunt" debuffs (Sunder) fall off the others
+        for (const a of b.units) if (a !== src && a.side === src.side) {
+          const n = a.statuses.length;
+          a.statuses = a.statuses.filter(st => !(st.src === e.uid && STATUSES[st.id]?.resetOnTaunt));
+          if (a.statuses.length !== n) emit(b, { type: 'cleanse', src: src.uid, tgt: a.uid, status: 'sunder' });
+        }
         const top = Math.max(0, ...Object.values(e.threatTable));
         e.threatTable[src.uid] = top * 1.1 + 50;
       }
       break;
     }
     case 'cleanse': {
-      let n = eff.count || 1;
-      tgt.statuses = tgt.statuses.filter(s => {
-        if (n > 0 && STATUSES[s.id]?.type === 'debuff') { n--; emit(b, { type: 'cleanse', src: src.uid, tgt: tgt.uid, status: s.id }); return false; }
-        return true;
-      });
+      // the most dangerous debuffs go first ("cleansePriority", e.g. the Mother of Plagues' plague)
+      const order = tgt.statuses.filter(s => STATUSES[s.id]?.type === 'debuff').sort((x, y) => (STATUSES[y.id].cleansePriority || 0) - (STATUSES[x.id].cleansePriority || 0));
+      const gone = new Set(order.slice(0, eff.count || 1));
+      for (const s of gone) emit(b, { type: 'cleanse', src: src.uid, tgt: tgt.uid, status: s.id });
+      tgt.statuses = tgt.statuses.filter(s => !gone.has(s));
+      break;
+    }
+    case 'interrupt': {
+      if (tgt.alive) interruptCast(b, src, tgt);
       break;
     }
     case 'resource': {
@@ -721,6 +743,16 @@ function applyStatus(b, src, tgt, id, duration, value, stacks, extra = null) {
     tgt.statuses.push({ id, remaining: duration, duration, value, stacks: def.maxStacks ? Math.min(def.maxStacks, stacks) : 1, src: src.uid, tickTimer: def.tickOnApply ? 0.001 : C.statusTickInterval, ...(extra || {}) }); // tickOnApply: first tick right away
   }
   emit(b, { type: 'status', src: src.uid, tgt: tgt.uid, status: id });
+  if (def.control === 'stun' && tgt.casting) interruptCast(b, src, tgt); // a stun breaks a channel
+  // lethalAt: the hit that brings the stacks this high is fatal (the Iron Tyrant's Sunder)
+  if (def.lethalAt) {
+    const st = tgt.statuses.find(s => s.id === id);
+    if (st && st.stacks >= def.lethalAt) {
+      tgt.statuses = tgt.statuses.filter(s => s !== st);
+      emit(b, { type: 'phase', src: src.uid, message: `${tgt.name} is ${def.lethalMessage || 'crushed'}!` });
+      dealDamage(b, src, tgt, tgt.maxHp * (def.lethalPct ?? 3), { school: 'physical', ability: null, exact: true, proc: def.lethalName || def.name });
+    }
+  }
 }
 
 function tickStatuses(b, u) {
@@ -772,6 +804,8 @@ function critChanceOf(src, { bonusCrit = 0 } = {}) {
 function dealDamage(b, src, tgt, raw, { school, ability, bonusCrit = 0, dot = null, ignoreArmor = false, noCrit = false, proc = null, exact = false, forceCrit = false }) {
   if (!tgt.alive) return 0;
   if (mod(tgt, 'invulnerable') > 0) return 0; // Stasis
+  // pinnacle bosses: immune to a school (Twin Wardens) or while their adds live (Hollow King)
+  if (src.side !== tgt.side && isImmune(b, tgt, school)) { if (!dot) emit(b, { type: 'miss', src: src.uid, tgt: tgt.uid, ability, immune: true }); return 0; }
   if (!dot && !exact && school === 'physical' && mod(tgt, 'dodge') > 0 && b.rng() < mod(tgt, 'dodge')) {
     emit(b, { type: 'miss', src: src.uid, tgt: tgt.uid, ability });
     // dodgeResource (Evasion rank 2): every dodged hit restores resource
@@ -843,6 +877,8 @@ function dealDamage(b, src, tgt, raw, { school, ability, bonusCrit = 0, dot = nu
   // tanky the Sentinel is. fromDamage (points per 1% of max health lost) is the older damage-based option.
   if (tgt.resourceDef?.perHitTaken && src.side !== tgt.side && !dot) tgt.resource = Math.min(tgt.resourceMax, tgt.resource + tgt.resourceDef.perHitTaken * (1 + mod(tgt, 'retributionPct')));
   if (tgt.resourceDef?.fromDamage && src.side !== tgt.side) tgt.resource = Math.min(tgt.resourceMax, tgt.resource + ((amount + absorbed) / tgt.maxHp) * 100 * tgt.resourceDef.fromDamage * (1 + mod(tgt, 'retributionPct')));
+  // Hollow adds: damage over time on them hits its caster too
+  if (dot && tgt.reflectDotPct && src.side !== tgt.side && src.alive && amount > 0) dealDamage(b, tgt, src, amount * tgt.reflectDotPct, { school, ability: null, exact: true, proc: 'Hollow Echo' });
   // Thorns: part of a direct hit goes back to the attacker
   const thorns = !dot && !proc && src !== tgt && src.alive ? mod(tgt, 'thornsPct') : 0;
   if (thorns > 0) dealDamage(b, tgt, src, (amount + absorbed) * thorns, { school: 'physical', ability: null, ignoreArmor: true, noCrit: true, proc: 'Thorns' });
@@ -956,11 +992,65 @@ function kill(b, src, tgt) {
     if (tgt.onDeath.explode && owner) for (const e of b.units.filter(x => x.side !== tgt.side && x.alive)) dealDamage(b, owner, e, effPower(owner, tgt.onDeath.explode.stat || 'magPower') * tgt.onDeath.explode.power, { school: 'magical', ability: null, noCrit: true, proc: tgt.onDeath.explode.name || 'Explosion' });
   }
   tgt.statuses = [];
+  tgt.casting = null;
   emit(b, { type: 'death', src: src.uid, tgt: tgt.uid });
+  // linked enemies (Twin Wardens): while a partner lives, the fallen one rises again after the window; when the last
+  // one falls in time, they all stay down
+  if (tgt.link) {
+    const partners = b.units.filter(x => x !== tgt && x.side === tgt.side && x.link?.group === tgt.link.group);
+    if (partners.some(x => x.alive)) {
+      tgt.reviveAt = b.time + (tgt.link.window || 10);
+      emit(b, { type: 'phase', src: tgt.uid, message: `${tgt.name} falls — it rises again in ${tgt.link.window || 10} s unless its twin dies too!` });
+    } else for (const x of partners) x.reviveAt = null;
+  }
   if (tgt.stat && tgt.kind === 'character') tgt.stat.deaths++;
   if (tgt.side === 'B') b.kills.push({ enemyId: tgt.defId, level: tgt.level, boss: !!tgt.boss, elite: !!tgt.tags?.includes('elite'), summoned: !!tgt.summoned });
   if (src !== tgt) fireProcs(b, src, 'kill', { target: tgt });
   b.hooks?.kill?.(b, src, tgt, HOOK_API);
+}
+
+// ---------------------------------------------------------------- pinnacle mechanics
+// channel: { name, every, first, castTime, damagePct, message, effects } — every `every` seconds the enemy starts a
+// cast; if nobody interrupts it (an "interrupt" effect or any stun) within castTime, every foe takes damagePct of
+// its maximum health and the effects land on the caster.
+function tickChannel(b, u) {
+  const c = u.channel;
+  if (u.casting) {
+    if (b.time < u.casting.until) return;
+    u.casting = null;
+    u.channelTimer = c.every;
+    emit(b, { type: 'phase', src: u.uid, message: `${u.name} completes ${c.name}!` });
+    for (const f of enemiesOf(b, u)) {
+      if (c.damagePct) dealDamage(b, u, f, f.maxHp * c.damagePct, { school: c.school || 'magical', ability: null, exact: true, proc: c.name });
+    }
+    for (const eff of c.effects || []) applyEffect(b, u, u, eff, null);
+    return;
+  }
+  u.channelTimer = (u.channelTimer ?? c.first ?? c.every) - DT;
+  if (u.channelTimer > 0 || u.statuses.some(s => STATUSES[s.id]?.control === 'stun')) return;
+  u.casting = { name: c.name, until: b.time + (c.castTime || 4), total: c.castTime || 4 };
+  emit(b, { type: 'phase', src: u.uid, message: `${u.name} ${c.message || `begins to cast ${c.name}`} — interrupt it!` });
+  emit(b, { type: 'cast', src: u.uid, name: c.name, duration: c.castTime || 4 });
+}
+
+function interruptCast(b, src, tgt) {
+  if (!tgt.casting) return;
+  emit(b, { type: 'phase', src: src.uid, message: `${src.name} interrupts ${tgt.name}'s ${tgt.casting.name}!` });
+  emit(b, { type: 'interrupt', src: src.uid, tgt: tgt.uid });
+  tgt.casting = null;
+  tgt.channelTimer = tgt.channel?.every ?? 20;
+}
+
+function reviveLinked(b, u) {
+  u.reviveAt = null;
+  u.alive = true;
+  u.hp = Math.max(1, Math.round(u.maxHp * (u.link?.reviveHpPct ?? 0.5)));
+  u.statuses = [];
+  u.actionTimer = 1;
+  const i = b.kills.map(k => k.enemyId).lastIndexOf(u.defId); // it didn't stay dead: no reward for that kill
+  if (i >= 0) b.kills.splice(i, 1);
+  emit(b, { type: 'revive', src: u.uid, tgt: u.uid });
+  emit(b, { type: 'phase', src: u.uid, message: `${u.name} is raised by its twin!` });
 }
 
 function checkPhases(b, u) {
@@ -1035,6 +1125,8 @@ export function dynamicUnit(u, b = null) {
     st: statusView(u),
     ...(u.hadNotes ? { notes: [...u.notes] } : {}), // Bard: the notes waiting for the Finale
     ...(u.expiresAt != null ? { exp: Math.round(u.expiresAt * 10) / 10 } : {}), // battle time when a minion fades
+    ...(u.casting ? { cast: { name: u.casting.name, until: Math.round(u.casting.until * 10) / 10, total: u.casting.total } } : {}),
+    ...(u.reviveAt != null && !u.alive ? { rev: Math.round(u.reviveAt * 10) / 10 } : {}),
     ...(b && !b.pvp ? threatInfo(b, u) : {}),
   };
 }

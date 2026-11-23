@@ -1,0 +1,30 @@
+{
+  "name": "Raise the Hollow",
+  "classId": "enemy",
+  "type": "utility",
+  "cost": 0,
+  "cooldown": 16,
+  "target": "self",
+  "effects": [
+    {
+      "kind": "summon",
+      "enemyId": "hollow_knight",
+      "count": 4,
+      "max": 6
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "always"
+      }
+    ],
+    "target": {
+      "selector": "self"
+    },
+    "targetConditions": []
+  },
+  "order": 604
+}

@@ -1,0 +1,29 @@
+{
+  "name": "Hollow Knight",
+  "tags": [
+    "undead",
+    "hollow"
+  ],
+  "stats": {
+    "hp": 70,
+    "physPower": 9,
+    "magPower": 10,
+    "defense": 14,
+    "critChance": 0.05,
+    "attackSpeed": 0.9
+  },
+  "abilities": [
+    "e_cleave"
+  ],
+  "reflectDotPct": 0.5,
+  "xp": 0,
+  "gold": [
+    0,
+    0
+  ],
+  "loot": {
+    "chance": 0.0001
+  },
+  "description": "Reflects half of the damage over time it takes back at its caster.",
+  "order": 908
+}

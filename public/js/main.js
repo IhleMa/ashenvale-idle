@@ -29,13 +29,14 @@ import { auctionView } from './views/auction.js';
 import { adminView } from './views/admin.js';
 import { questsView, questsReady } from './views/quests.js';
 import { riftsView } from './views/rifts.js';
+import { pinnacleView } from './views/pinnacle.js';
 import { bestiaryView } from './views/bestiary.js';
 import { wikiView } from './views/wiki.js';
 import { arenaView } from './views/arena.js';
 import { gemsView } from './views/gems.js';
 import { createView } from './views/create.js';
 
-const VIEWS = [combatView, riftsView, questsView, characterView, skilltreeView, abilitiesView, partyView, recruitmentView, townView, expeditionsView, gemsView, auctionView, multiplayerView, arenaView, rankingsView, bestiaryView, wikiView, progressionView, wardrobeView, adminView];
+const VIEWS = [combatView, riftsView, pinnacleView, questsView, characterView, skilltreeView, abilitiesView, partyView, recruitmentView, townView, expeditionsView, gemsView, auctionView, multiplayerView, arenaView, rankingsView, bestiaryView, wikiView, progressionView, wardrobeView, adminView];
 const viewEl = () => document.getElementById('view');
 let current = null;
 let root = null; // per-view container (listeners attached to it die with it)

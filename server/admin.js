@@ -1,6 +1,7 @@
 // Admin tools: roles, player management, bans, gifts, settings, audit log.
 // Admins come from the ADMIN_USERS environment variable (comma separated usernames)
 // plus data/admins.json (managed with the console command "admin add <name>").
+import { pinnacleState } from '../shared/pinnacle.js';
 import { assetReport, missingMarkdown } from './asset-report.js';
 import crypto from 'node:crypto';
 import { ARCHETYPES } from './bots.js';
@@ -222,6 +223,7 @@ export function adminActions(game) {
       if (!p) fail('This account has no game data yet');
       const gold = Math.max(0, Math.min(1e9, Math.floor(Number(d.gold) || 0)));
       const premium = Math.max(0, Math.min(1e6, Math.floor(Number(d.premium) || 0)));
+      const sigils = Math.max(0, Math.min(1000, Math.floor(Number(d.sigils) || 0))); // Pinnacle Sigils (given right away)
       const materials = {};
       for (const [k, v] of Object.entries(d.materials || {})) { const n = Math.floor(Number(v) || 0); if (MATERIALS[k] && n > 0) materials[k] = Math.min(1e6, n); }
       let item = null;
@@ -232,14 +234,15 @@ export function adminActions(game) {
         else if (d.item.type === 'set') item = generateSetItem(rng, lvl, SETS[d.item.setId] ? d.item.setId : null, d.item.baseId || null);
         else item = generateItem(rng, lvl, { baseId: ITEM_BASES[d.item.baseId] ? d.item.baseId : null, rarity: CONFIG.rarities.some(r => r.id === d.item.rarity) ? d.item.rarity : null });
       }
-      if (!gold && !premium && !Object.keys(materials).length && !item) fail('Nothing to give');
+      if (!gold && !premium && !sigils && !Object.keys(materials).length && !item) fail('Nothing to give');
+      if (sigils) pinnacleState(p).sigils += sigils;
       const note = String(d.note || 'A gift from the server admins.').slice(0, 200);
       if (item) sendMail(p, { item, from: 'Server', note });
       if (gold || premium || Object.keys(materials).length) sendMail(p, { gold, premium, materials: Object.keys(materials).length ? materials : null, from: 'Server', note });
       store.savePlayerSoon(p);
       const ses = game.sessions.get(acc.id);
       if (ses) { ses.stateDirty = true; game.toast(acc.id, `🎁 You received a gift: ${note} Check your mailbox in the Auction House.`, 'success'); }
-      admins.audit(s.player.name, 'give', acc.username, [gold && `${gold} gold`, premium && `${premium} crystals`, ...Object.entries(materials).map(([k, v]) => `${v} ${k}`), item && item.name].filter(Boolean).join(', '));
+      admins.audit(s.player.name, 'give', acc.username, [gold && `${gold} gold`, premium && `${premium} crystals`, sigils && `${sigils} pinnacle sigils`, ...Object.entries(materials).map(([k, v]) => `${v} ${k}`), item && item.name].filter(Boolean).join(', '));
       return { item };
     },
     admin_give_xp(s, d) {

@@ -1,0 +1,35 @@
+{
+  "name": "Sundering Blow",
+  "classId": "enemy",
+  "type": "damage",
+  "cost": 0,
+  "cooldown": 3.5,
+  "target": "enemy",
+  "effects": [
+    {
+      "kind": "damage",
+      "stat": "physPower",
+      "power": 1.4,
+      "school": "physical"
+    },
+    {
+      "kind": "status",
+      "status": "sunder",
+      "duration": 14
+    }
+  ],
+  "defaultRule": {
+    "enabled": true,
+    "mode": "all",
+    "conditions": [
+      {
+        "type": "always"
+      }
+    ],
+    "target": {
+      "selector": "enemy_highest_threat"
+    },
+    "targetConditions": []
+  },
+  "order": 600
+}

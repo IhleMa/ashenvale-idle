@@ -20,6 +20,10 @@ export const alliesOf = (battle, u) => battle.units.filter(x => x.side === u.sid
 export const ownMinions = (battle, u, type = '') => battle.units.filter(x => x.kind === 'minion' && x.alive && x.ownerUid === u.uid && (!type || x.defId === type));
 export const fallenAllies = (battle, u) => battle.units.filter(x => x.side === u.side && !x.alive && x.kind === 'character');
 export const enemiesOf = (battle, u) => battle.units.filter(x => x.side !== u.side && x.alive);
+// pinnacle bosses: immune to a damage school (Twin Wardens) or while units with a tag live on their side (Hollow King)
+export const isImmune = (battle, u, school) => !!(u.immune?.includes(school) || (u.immuneWhileAdds && battle.units.some(x => x.alive && x !== u && x.side === u.side && x.tags?.includes(u.immuneWhileAdds))));
+// the damage schools of an ability (empty: it deals no direct damage)
+const damageSchools = ab => [...new Set((ab.effects || []).filter(e => e.kind === 'damage').map(e => e.school || 'physical'))];
 const cmp = (a, op, b) => (op === '<=' ? a <= b : op === '==' ? a === b : op === '<' ? a < b : op === '>' ? a > b : a >= b);
 
 const P = {
@@ -78,6 +82,7 @@ export const CONDITIONS = {
   loose_count:        { label: 'Number of enemies attacking someone else', params: [P.cmp(), P.count('value', 1)], test: (c, b, u) => cmp(looseCount(b, u), c.cmp, c.value), format: c => `enemies attacking someone else: ${c.cmp === '<=' ? 'at most' : c.cmp === '==' ? 'exactly' : 'at least'} ${c.value}` },
   aggro_count:        { label: 'Number of enemies attacking me', params: [P.cmp(), P.count('value', 1)], test: (c, b, u) => cmp(aggroCount(b, u), c.cmp, c.value), format: c => `enemies attacking me: ${c.cmp === '<=' ? 'at most' : c.cmp === '==' ? 'exactly' : 'at least'} ${c.value}` },
   last_note:          { label: 'My last note was (Bard)', params: [P.note()], test: (c, b, u) => lastNote(u) === c.note, format: c => `last note: ${c.note === 'none' ? 'none yet' : c.note}` },
+  enemy_casting:      { label: 'An enemy is casting (can be interrupted)', params: [], test: (c, b, u) => enemiesOf(b, u).some(e => e.casting), format: () => 'an enemy is casting' },
   own_minions:        { label: 'Number of my minions', params: [P.minion(), P.cmp(), P.count('value', 2)], test: (c, b, u) => cmp(ownMinions(b, u, c.minion).length, c.cmp, c.value), format: c => `my ${c.minion ? MINIONS[c.minion]?.name || c.minion : 'minions'}: ${c.cmp === '<=' ? 'at most' : c.cmp === '==' ? 'exactly' : 'at least'} ${c.value}` },
 };
 
@@ -96,6 +101,7 @@ export const TARGET_CONDITIONS = {
   target_is_type:        { label: 'Target is enemy type', params: [P.tag()], test: (c, t) => t.tags?.includes(c.param) || t.defId === c.param },
   target_own_debuffs:    { label: 'Number of my different debuffs on the target', params: [P.cmp(), P.count('value', 3)], test: (c, t, b, u) => cmp(new Set(t.statuses.filter(s => s.src === u?.uid && STATUSES[s.id]?.type === 'debuff').map(s => s.id)).size, c.cmp, c.value), format: c => `my different debuffs on target: ${c.cmp === '<=' ? 'at most' : c.cmp === '==' ? 'exactly' : 'at least'} ${c.value}` },
   target_own_debuff_stacks: { label: 'Number of my debuff stacks on the target (every stack counts)', params: [P.cmp(), P.count('value', 3)], test: (c, t, b, u) => cmp(t.statuses.reduce((n, s) => n + (s.src === u?.uid && STATUSES[s.id]?.type === 'debuff' ? (STATUSES[s.id].maxStacks ? s.stacks || 1 : 1) : 0), 0), c.cmp, c.value), format: c => `my debuff stacks on target: ${c.cmp === '<=' ? 'at most' : c.cmp === '==' ? 'exactly' : 'at least'} ${c.value}` },
+  target_casting:        { label: 'Target is casting (can be interrupted)', params: [], test: (c, t) => !!t.casting },
   target_is_minion:      { label: 'Target is a minion', params: [P.minion()], test: (c, t) => t.kind === 'minion' && (!c.minion || t.defId === c.minion) },
 };
 
@@ -184,6 +190,11 @@ export function resolveRule(rule, ability, battle, unit) {
   if (sel.side === 'enemy' && !sel.area && unit.threatTable) {
     const taunter = pool.find(p => hasStatus(p, 'taunting'));
     if (taunter && ability.effects.some(e => e.kind === 'damage')) pool = [taunter];
+  }
+  // characters don't waste damage on enemies immune to all of it (pinnacle bosses)
+  if (sel.side === 'enemy' && !unit.threatTable) {
+    const schools = damageSchools(ability);
+    if (schools.length) pool = pool.filter(t => !schools.every(sc => isImmune(battle, t, sc)));
   }
   pool = pool.filter(t => (rule.targetConditions || []).every(tc => {
     const def = TARGET_CONDITIONS[tc.type];

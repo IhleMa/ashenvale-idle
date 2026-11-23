@@ -1,0 +1,39 @@
+{
+  "name": "Mother of Plagues",
+  "tags": [
+    "beast",
+    "boss",
+    "pinnacle"
+  ],
+  "boss": true,
+  "xp": 1500,
+  "gold": [
+    500,
+    800
+  ],
+  "loot": {
+    "chance": 1,
+    "count": 5,
+    "boost": 4,
+    "minRarity": "epic"
+  },
+  "enrageAfter": 300,
+  "enrageStatus": "pinnacle_enrage",
+  "pinnacle": true,
+  "stats": {
+    "hp": 5600,
+    "physPower": 26,
+    "magPower": 30,
+    "defense": 16,
+    "critChance": 0.1,
+    "attackSpeed": 0.8
+  },
+  "basicSchool": "magical",
+  "abilities": [
+    "b_plague_wave",
+    "e_venom",
+    "b_void_rift"
+  ],
+  "description": "Every Plague Wave adds a stack of a plague that never wears off. Only cleansing removes it.",
+  "order": 902
+}
