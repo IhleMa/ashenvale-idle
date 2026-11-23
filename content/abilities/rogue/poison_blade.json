@@ -9,7 +9,7 @@
   "target": "enemy",
   "effects": [
     { "kind": "damage", "stat": "physPower", "power": 0.9, "school": "physical" },
-    { "kind": "status", "status": "poison", "duration": 8, "stat": "physPower", "power": 0.25 }
+    { "kind": "status", "status": "poison", "duration": 8, "stat": "magPower", "power": 0.875 }
   ],
   "defaultRule": {
     "enabled": true,

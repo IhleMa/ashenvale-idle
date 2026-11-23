@@ -43,8 +43,8 @@
             "kind": "status",
             "status": "poison",
             "duration": 12,
-            "stat": "physPower",
-            "power": 0.2,
+            "stat": "magPower",
+            "power": 0.7,
             "stacks": 1,
             "chance": 0.25
           }

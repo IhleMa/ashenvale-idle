@@ -3,24 +3,15 @@
   "classId": "rogue",
   "subclass": "venomancer",
   "unlockLevel": 20,
-  "type": "debuff",
-  "description": "Poison all enemies and expose them (15% more damage taken) for 8 seconds.",
-  "cost": 40,
-  "cooldown": 16,
+  "type": "utility",
+  "description": "Release the poison in an enemy as a cloud: every Poison stack on the target is copied onto all other enemies. Pick whose poison spreads in its behaviour (default: the enemy with the most poison stacks).",
+  "cost": 30,
+  "cooldown": 40,
   "target": "enemy",
-  "area": true,
   "effects": [
     {
-      "kind": "status",
-      "status": "poison",
-      "duration": 8,
-      "stat": "physPower",
-      "power": 0.4
-    },
-    {
-      "kind": "status",
-      "status": "exposed",
-      "duration": 8
+      "kind": "spread_status",
+      "status": "poison"
     }
   ],
   "defaultRule": {
@@ -34,9 +25,14 @@
       }
     ],
     "target": {
-      "selector": "all_enemies"
+      "selector": "enemy_most_poison"
     },
-    "targetConditions": []
+    "targetConditions": [
+      {
+        "type": "target_has_status",
+        "status": "poison"
+      }
+    ]
   },
   "priority": 72,
   "order": 917

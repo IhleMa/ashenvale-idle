@@ -26,8 +26,8 @@
             "kind": "status",
             "status": "poison",
             "duration": 8,
-            "stat": "physPower",
-            "power": 0.18
+            "stat": "magPower",
+            "power": 0.63
           }
         }
       ]

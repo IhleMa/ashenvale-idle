@@ -11,7 +11,7 @@
   "branches": [
     {
       "name": "Venomancer",
-      "attrs": ["dex", "vit"],
+      "attrs": ["int", "dex"],
       "abilities": {
         "2": "plague_strike",
         "5": "toxic_cloud"
@@ -21,14 +21,14 @@
           "name": "Virulence",
           "stats": {
             "damagePct": 0.08,
-            "physPowerPct": 0.05
+            "magPowerPct": 0.15
           }
         },
         "8": {
           "name": "Pandemic",
           "stats": {
             "damagePct": 0.15,
-            "physPowerPct": 0.1
+            "magPowerPct": 0.25
           }
         }
       },
@@ -52,8 +52,8 @@
                 "kind": "status",
                 "status": "poison",
                 "duration": 10,
-                "stat": "physPower",
-                "power": 0.25
+                "stat": "magPower",
+                "power": 0.875
               }
             ]
           }
@@ -68,8 +68,8 @@
                 "kind": "status",
                 "status": "poison",
                 "duration": 8,
-                "stat": "physPower",
-                "power": 0.3
+                "stat": "magPower",
+                "power": 1.05
               }
             ]
           }

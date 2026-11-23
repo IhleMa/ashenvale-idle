@@ -88,6 +88,7 @@ export function effText(eff, classId, opts = {}) {
       return t;
     }
     case 'shield': return `${eff.self ? 'shields the caster' : 'shields'} for ${pw(eff.power, eff.stat)} for ${sec(eff.duration)}`;
+    case 'spread_status': return `copies every ${STATUSES[eff.status]?.name || eff.status} stack on the target to all other enemies`;
     case 'interrupt': return 'interrupts the spell it is casting (a Requiem, for example)';
     case 'taunt': return `taunts enemies for ${sec(eff.duration || 0)}`;
     case 'cleanse': return (eff.count || 1) >= 99 ? 'removes all harmful effects' : `removes up to ${eff.count || 1} harmful effect${(eff.count || 1) > 1 ? 's' : ''}`;

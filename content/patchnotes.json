@@ -105,7 +105,11 @@
             "Backstab at rank 3 (Cold Blood): a critical Backstab refunds 15 Energy.",
             "Poison and Bleed have no stack limit anymore (were 5 and 3). Every application is its own stack with its own timer, so stacks build up while you keep applying them and fall off one by one.",
             "Execute reworked: instead of triple damage below 30% health, it now deals 30% more for every Bleed stack on the target — below 15% health at rank 1, 30% at rank 2 and 45% at rank 3. The Assassin's Merciless Execute raises that threshold by 15%.",
-            "Evasion at rank 2 (Slippery): every hit you dodge while Evasion is active restores 5 Energy."
+            "Evasion at rank 2 (Slippery): every hit you dodge while Evasion is active restores 5 Energy.",
+            "Poison now deals magic damage and scales with Magic Power (Rogue, Venomancer, Ranger and the Wildwood set) — about 3.5× the old coefficients to make up for it. Enemy poison is magic damage too.",
+            "Venomancer: the ascendancy branch gives Intelligence instead of Vitality, and Virulence / Pandemic give +15% / +25% Magic Power instead of Physical Power.",
+            "Plaguebringer is now Venom Rush: +12% damage and your poison ticks twice as fast.",
+            "Toxic Cloud reworked: 40 s cooldown, it copies every Poison stack on its target onto all other enemies (no more poison or Expose of its own). Pick whose poison spreads in its behaviour — by default the enemy with the most poison stacks (new target option)."
           ]
         },
         {

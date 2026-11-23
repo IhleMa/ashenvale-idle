@@ -84,6 +84,8 @@ export function migratePlayer(p) {
   while (p.parties.length < CONFIG.party.presets) p.parties.push({ name: `Party ${p.parties.length + 1}`, members: p.heroId ? [p.heroId] : [] });
   for (const ch of Object.values(p.characters)) {
     for (const s of SLOT_IDS) if (!(s in ch.equipment)) ch.equipment[s] = null;
+    // Toxic Cloud rework: it spreads the poison of one enemy now — old "all enemies" behaviours get the new default
+    if (ch.rules?.toxic_cloud && ch.rules.toxic_cloud.target?.selector === 'all_enemies') ch.rules.toxic_cloud = JSON.parse(JSON.stringify(ABILITIES.toxic_cloud.defaultRule));
     // v0.1 → skill tree: old attribute/ability points are refunded as tree points
     if (!ch.tree) {
       ch.tree = { allocated: ['start'] };

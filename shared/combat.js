@@ -41,7 +41,7 @@ export function makeCharacterUnit(ch, { ownerId, ownerName, position, bonuses = 
       allStatsPct: bonuses.allStatsPct || 0,
       dotDamagePct: s.dotDamagePct || 0,
       dotDurationPct: s.dotDurationPct || 0,
-      poisonSpread: s.poisonSpread || 0, // Plaguebringer
+      poisonSpeedPct: s.poisonSpeedPct || 0, // Venom Rush (rogue keystone): your poison ticks faster
     },
     actionTimer: 0.3 + position * 0.25,
     danger: 0,
@@ -231,6 +231,7 @@ function mod(u, key) {
   return v;
 }
 const srcMod = (b, uid, key) => { const u = b.units.find(x => x.uid === uid); return u ? mod(u, key) : 0; };
+const srcBonus = (b, uid, key) => b.units.find(x => x.uid === uid)?.bonuses?.[key] || 0;
 // how many different debuffs this caster has on a unit (Drain Life, the warlock's AI conditions)
 export function ownDebuffKinds(src, tgt) {
   return new Set(tgt.statuses.filter(s => s.src === src.uid && STATUSES[s.id]?.type === 'debuff').map(s => s.id)).size;
@@ -465,10 +466,7 @@ function applyEffect(b, src, tgt, eff, abilityId) {
       // Volatile Mixture: the next element flask lands on every enemy
       const volatile = STATUSES[eff.status]?.element && src.statuses.find(s => STATUSES[s.id]?.volatile);
       if (volatile) src.statuses = src.statuses.filter(s => s !== volatile);
-      // Plaguebringer (Rogue keystone): poisoning a bleeding enemy spreads the poison to every enemy
-      const plague = eff.status === 'poison' && src.bonuses?.poisonSpread && target.statuses.some(s => s.id === 'bleed');
-      if (plague) emit(b, { type: 'proc', src: src.uid, tgt: target.uid, name: 'Plaguebringer' });
-      for (const t of volatile || plague || eff.allEnemies ? enemiesOf(b, src) : [target])
+      for (const t of volatile || eff.allEnemies ? enemiesOf(b, src) : [target])
         for (let i = 0; i < (STATUSES[eff.status]?.stacking === 'independent' ? eff.stacks || 1 : 1); i++) applyStatus(b, src, t, eff.status, dur, v, eff.stacks || 1, eff.extra);
       break;
     }
@@ -500,6 +498,16 @@ function applyEffect(b, src, tgt, eff, abilityId) {
       const gone = new Set(order.slice(0, eff.count || 1));
       for (const s of gone) emit(b, { type: 'cleanse', src: src.uid, tgt: tgt.uid, status: s.id });
       tgt.statuses = tgt.statuses.filter(s => !gone.has(s));
+      break;
+    }
+    // Toxic Cloud: every stack of a status on the target (whoever applied it) is copied onto every other enemy
+    case 'spread_status': {
+      const stacks = tgt.statuses.filter(s => s.id === eff.status);
+      if (!stacks.length) return;
+      const others = b.units.filter(x => x.alive && x !== tgt && x.side === tgt.side);
+      for (const o of others) for (const s of stacks) o.statuses.push({ ...s, tickTimer: C.statusTickInterval });
+      emit(b, { type: 'proc', src: src.uid, tgt: tgt.uid, name: `${stacks.length} ${STATUSES[eff.status]?.name || eff.status} stack${stacks.length > 1 ? 's' : ''} spread to ${others.length} ${others.length === 1 ? 'enemy' : 'enemies'}` });
+      for (const o of others) emit(b, { type: 'status', src: src.uid, tgt: o.uid, status: eff.status });
       break;
     }
     case 'interrupt': {
@@ -761,8 +769,8 @@ function tickStatuses(b, u) {
     s.remaining -= DT;
     const def = STATUSES[s.id];
     if (def.tick) {
-      // the source's own "dotSpeedPct" buff (Dark Pact) makes its damage over time tick faster
-      const speed = def.tick === 'damage' ? 1 + Math.max(0, srcMod(b, s.src, 'dotSpeedPct')) : 1;
+      // the source's own "dotSpeedPct" buff (Dark Pact) makes its damage over time tick faster; Venom Rush its poison
+      const speed = def.tick === 'damage' ? 1 + Math.max(0, srcMod(b, s.src, 'dotSpeedPct')) + (s.id === 'poison' ? srcBonus(b, s.src, 'poisonSpeedPct') : 0) : 1;
       s.tickTimer -= DT * speed;
       if (s.tickTimer <= 0) {
         s.tickTimer += C.statusTickInterval;

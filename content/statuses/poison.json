@@ -2,9 +2,9 @@
   "name": "Poison",
   "type": "debuff",
   "tick": "damage",
-  "school": "physical",
+  "school": "magical",
   "ignoreArmor": true,
-  "description": "Takes physical damage every second. Every application is its own stack with its own timer — no limit.",
+  "description": "Takes magic damage every second (scales with Magic Power). Every application is its own stack with its own timer — no limit.",
   "order": 10,
   "stacking": "independent"
 }

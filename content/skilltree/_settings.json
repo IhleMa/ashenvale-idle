@@ -37,6 +37,6 @@
     "minionMax": ["maximum minions of each kind", "flat"],
     "dotDamagePct": ["damage over time dealt", "pct"],
     "dotDurationPct": ["damage-over-time duration", "pct"],
-    "poisonSpread": ["Poisoning a bleeding enemy spreads the Poison to every enemy", "text"]
+    "poisonSpeedPct": ["faster Poison ticks (more poison damage per second)", "pct"]
   }
 }

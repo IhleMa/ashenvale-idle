@@ -127,6 +127,7 @@ export const SELECTORS = {
   enemy_lowest_hp:     { label: 'Enemy with lowest health', side: 'enemy', pick: pool => one(minBy(pool, e => e.hp)) },
   enemy_highest_hp:    { label: 'Enemy with highest health', side: 'enemy', pick: pool => one(maxBy(pool, e => e.hp)) },
   enemy_highest_threat:{ label: 'Enemy with highest threat', side: 'enemy', pick: (pool, b, u) => one(maxBy(pool, e => threatOf(e, u))) },
+  enemy_most_poison:   { label: 'Enemy with the most poison stacks', side: 'enemy', pick: pool => one(maxBy(pool, e => e.statuses.filter(s => s.id === 'poison').length)) },
   enemy_random:        { label: 'Random enemy', side: 'enemy', pick: (pool, b) => one(pool[Math.floor(b.rng() * pool.length)]) },
   enemy_type:          { label: 'Specific enemy type', side: 'enemy', hasParam: true, pick: (pool, b, u, param) => one(minBy(pool.filter(e => e.tags?.includes(param) || e.defId === param), e => e.position)) },
   all_enemies:         { label: 'All enemies', side: 'enemy', area: true, pick: pool => pool },

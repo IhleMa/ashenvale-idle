@@ -112,7 +112,7 @@ export function computeStats(ch, dyn = null) {
     // damage-over-time bonuses (warlock skill tree)
     dotDamagePct: bonus.dotDamagePct || 0,
     dotDurationPct: bonus.dotDurationPct || 0,
-    poisonSpread: bonus.poisonSpread || 0, // Plaguebringer (rogue keystone)
+    poisonSpeedPct: bonus.poisonSpeedPct || 0, // Venom Rush (rogue keystone): poison ticks faster
     // item affixes (see content/items/_settings.json → affixes)
     ...Object.fromEntries(GEAR_COMBAT.map(k => [k, bonus[k] || 0])),
     damageReduction: bonus.damageReduction || 0,

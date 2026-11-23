@@ -1,4 +1,4 @@
-// Rogue keystones: Assassin's Mark (records damage, explodes on expiry) and Plaguebringer (poison spreads from bleeding targets).
+// Rogue keystones: Assassin's Mark (records damage, explodes on expiry) and Venom Rush (poison ticks twice as fast); Toxic Cloud spreads poison.
 import assert from 'node:assert/strict';
 const { createCharacter } = await import('../shared/character.js');
 const C = await import('../shared/combat.js');
@@ -22,13 +22,13 @@ const battle = (bonus = {}) => {
 const cast = (b, u, id, t) => { for (const eff of ABILITIES[id].effects) C.__test.applyEffect(b, u, t, eff, id); };
 const has = (u, id) => u.statuses.some(s => s.id === id);
 
-// tree: Assassin's Mark is an ability node now, Plaguebringer describes its mechanic
+// tree: Assassin's Mark is an ability node now, Venom Rush describes its mechanic
 {
   const nodes = Object.values(getTree('rogue').nodes);
   assert.ok(nodes.some(x => x.type === 'ability' && x.ability === 'assassins_mark'));
-  const pb = nodes.find(x => x.name === 'Plaguebringer');
-  assert.ok(describeNodeStats(pb.stats).some(t => /spreads the Poison/.test(t)));
-  ok('tree: Assassin\'s Mark ability node, Plaguebringer describes the spread');
+  const pb = nodes.find(x => x.name === 'Venom Rush');
+  assert.ok(describeNodeStats(pb.stats).some(t => /faster Poison ticks/.test(t)));
+  ok('tree: Assassin\'s Mark ability node, Venom Rush describes the faster poison');
 }
 
 // Assassin's Mark
@@ -51,19 +51,35 @@ const has = (u, id) => u.statuses.some(s => s.id === id);
   ok(`mark records ${lost} damage and explodes for ${boom.amount} on expiry`);
 }
 
-// Plaguebringer
+// Venom Rush: poison ticks twice as fast (from this rogue's poison only); poison is magic damage scaling with Magic Power
+{
+  const ticks = bonus => {
+    const { b, me, foes } = battle(bonus);
+    me.loadout = []; me.actionTimer = 1e9;
+    for (const f of foes) { f.loadout = []; f.actionTimer = 1e9; }
+    cast(b, me, 'poison_blade', foes[0]);
+    C.drainEvents(b);
+    let n = 0;
+    while (b.time < 4) { C.stepBattle(b); n += C.drainEvents(b).filter(e => e.type === 'damage' && e.dot === 'poison' && e.tgt === foes[0].uid).length; }
+    return { n, b, foes };
+  };
+  const slow = ticks({}), fast = ticks({ poisonSpeedPct: 1 });
+  assert.ok(fast.n >= slow.n * 2 - 1 && slow.n >= 3, `ticks ${slow.n} → ${fast.n}`);
+  ok(`Venom Rush: poison ticks twice as fast (${slow.n} → ${fast.n} ticks in 4 s)`);
+  assert.equal(ABILITIES.poison_blade.effects.find(e => e.status === 'poison').stat, 'magPower');
+  ok('poison scales with Magic Power and deals magic damage');
+}
+// Toxic Cloud: every poison stack on the chosen enemy is copied to all other enemies
 {
   const { b, me, foes } = battle();
-  cast(b, me, 'rupture', foes[0]);
-  cast(b, me, 'poison_blade', foes[0]);
-  assert.ok(has(foes[0], 'poison') && !has(foes[1], 'poison'), 'no spread without the keystone');
-  const p = battle({ poisonSpread: 1 });
-  cast(p.b, p.me, 'poison_blade', p.foes[0]);
-  assert.ok(!has(p.foes[1], 'poison'), 'no spread when the target is not bleeding');
-  cast(p.b, p.me, 'rupture', p.foes[0]);
-  cast(p.b, p.me, 'poison_blade', p.foes[0]);
-  assert.ok(p.foes.every(f => has(f, 'poison')), 'poison on every enemy');
-  ok('Plaguebringer spreads poison from a bleeding target to every enemy');
+  for (let i = 0; i < 3; i++) cast(b, me, 'poison_blade', foes[0]);
+  cast(b, me, 'toxic_cloud', foes[0]);
+  for (const f of foes) assert.equal(f.statuses.filter(s => s.id === 'poison').length, 3, f.name);
+  assert.equal(ABILITIES.toxic_cloud.cooldown, 40);
+  const { resolveRule } = await import('../shared/rules.js');
+  const t = resolveRule(ABILITIES.toxic_cloud.defaultRule, ABILITIES.toxic_cloud, b, me);
+  assert.ok(t, 'fires when an enemy is poisoned');
+  ok('Toxic Cloud copies all poison stacks of its target (default: the most poisoned enemy) to every other enemy');
 }
 // Expose Weakness rank 3: Opportunist — hits on exposed enemies restore energy
 {
