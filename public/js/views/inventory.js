@@ -1,7 +1,7 @@
 // Inventory panel (shown on the Character page): browse, compare, equip (also by drag & drop), lock and sell loot.
 import { state, chars, bus } from '../state.js';
 import { act } from '../net.js';
-import { esc, fmt, run, itemTooltipHtml, tipAttr, rarityLabel, confirmBox, toast, modal } from '../ui.js';
+import { esc, fmt, run, itemTooltipHtml, tipAttr, rarityLabel, confirmBox, toast, modal, promptBox } from '../ui.js';
 import { itemIcon } from '../assets.js';
 import { CONFIG, rarityIndex } from '/shared/config.js';
 import { SLOTS, canEquip, itemSellValue } from '/shared/data/items.js';
@@ -67,6 +67,29 @@ function applyHighlight(root) {
   const cnt = panel.querySelector('[data-hl-count]');
   if (cnt) cnt.textContent = hlActive() ? `${n} match${n === 1 ? '' : 'es'}` : '';
 }
+// ---- saved filters: slot/rarity/sort + highlight under a name, applied with one click (kept on the account)
+const filterState = () => ({ slot: filterSlot, rarity: filterRarity, sort: sortBy, hl: { text: hl.text, rows: hl.rows.filter(r => r.stat).map(r => ({ ...r })), mode: hl.mode, only: hl.only } });
+const normFilter = f => JSON.stringify([f.slot, f.rarity, f.sort, f.hl.text, f.hl.mode, !!f.hl.only, f.hl.rows.map(r => [r.stat, String(r.min ?? ''), String(r.tier ?? '')])]);
+const sameFilter = (a, b) => normFilter(a) === normFilter(b);
+function presetsHtml(p) {
+  const list = p.settings.invPresets || [];
+  const now = filterState();
+  return `<div class="row gap wrap small inv-presets"><span class="muted">Saved:</span>
+    ${list.map((f, i) => `<span class="inv-preset ${sameFilter({ slot: f.slot, rarity: f.rarity, sort: f.sort, hl: f.hl }, now) ? 'active' : ''}"><button class="btn tiny" data-preset="${i}" ${tipAttr(presetTip(f))}>${esc(f.name)}</button><button class="btn tiny ghost" data-preset-del="${i}" title="Delete">✕</button></span>`).join('') || '<span class="faint">none yet</span>'}
+    ${list.length < 12 ? `<button class="btn tiny ghost" data-preset-save ${tipAttr('Save the current slot, rarity, sorting and highlight as a filter you can apply with one click')}>＋ Save current</button>` : ''}
+    ${list.length || hlActive() || filterSlot !== 'all' || filterRarity !== 'all' ? '<button class="btn tiny ghost" data-preset-reset title="Show everything again">Reset</button>' : ''}
+  </div>`;
+}
+function presetTip(f) {
+  const parts = [];
+  if (f.slot !== 'all') parts.push(f.slot === 'usable' ? 'usable by the selected character' : SLOTS[f.slot]?.label || f.slot);
+  if (f.rarity !== 'all') parts.push(f.rarity === 'special' ? 'uniques & sets' : CONFIG.rarities.find(r => r.id === f.rarity)?.label || f.rarity);
+  if (f.hl.text) parts.push(`“${f.hl.text}”`);
+  for (const r of f.hl.rows) parts.push(`${statLabel(r.stat)}${r.min !== '' ? ` ≥ ${r.min}${PCT_STATS.has(r.stat) ? '%' : ''}` : ''}${r.tier ? ` (T${r.tier}+)` : ''}`);
+  return esc(parts.join(' · ') || 'everything') + (f.hl.only ? '<br><span class="muted">only matches shown</span>' : '');
+}
+async function savePresets(list) { await run(act('set_settings', { invPresets: list })); }
+
 function highlightHtml(items) {
   const n = hlActive() ? items.filter(hlMatch).length : 0;
   return `<div class="hl-bar">
@@ -155,6 +178,7 @@ export function inventoryPanelHtml(ch) {
       <select data-f-rarity><option value="all">All rarities</option><option value="special" ${filterRarity === 'special' ? 'selected' : ''}>Uniques & set items</option>${CONFIG.rarities.map(r => `<option value="${r.id}" ${filterRarity === r.id ? 'selected' : ''}>${esc(r.label)}</option>`).join('')}</select>
       <select data-f-sort>${[['rarity', 'Sort: rarity'], ['level', 'Sort: level'], ['slot', 'Sort: slot']].map(([v, l]) => `<option value="${v}" ${sortBy === v ? 'selected' : ''}>${l}</option>`).join('')}</select>
     </div>
+    ${presetsHtml(p)}
     ${highlightHtml(items)}
     ${p.inventory.length >= CONFIG.inventory.limit ? `<div class="notice small">Inventory full — new loot is ${p.settings.autoLootAction === 'salvage' ? 'salvaged' : 'sold'} automatically. Set up the <a href="#" data-lf-open="filter">loot filter</a> to decide what to keep.</div>` : ''}
     <div class="item-grid">${items.map(i => {
@@ -181,6 +205,30 @@ export function bindInventory(root, rerender, getChar) {
     const t = e.target.closest('[data-item], button');
     if (!t) return;
     const d = t.dataset;
+    if (d.preset) {
+      const f = state.player.settings.invPresets?.[Number(d.preset)];
+      if (!f) return;
+      filterSlot = f.slot; filterRarity = f.rarity; sortBy = f.sort;
+      Object.assign(hl, { text: f.hl.text, rows: f.hl.rows.map(r => ({ ...r })), mode: f.hl.mode, only: f.hl.only });
+      saveHl(); rerender(); return;
+    }
+    if (d.presetDel) {
+      const list = [...(state.player.settings.invPresets || [])];
+      const [f] = list.splice(Number(d.presetDel), 1);
+      if (f && await confirmBox(`Delete the saved filter “${f.name}”?`, 'Delete')) await savePresets(list);
+      return;
+    }
+    if ('presetSave' in d) {
+      const name = await promptBox('Name for this filter', hl.text || (filterSlot !== 'all' ? SLOTS[filterSlot]?.label : '') || '', 'Save');
+      if (!name?.trim()) return;
+      const list = [...(state.player.settings.invPresets || [])];
+      const i = list.findIndex(x => x.name.toLowerCase() === name.trim().toLowerCase());
+      const f = { name: name.trim(), ...filterState() };
+      if (i >= 0) list[i] = f; else list.push(f);
+      await savePresets(list);
+      return;
+    }
+    if ('presetReset' in d) { filterSlot = 'all'; filterRarity = 'all'; Object.assign(hl, { text: '', rows: [], mode: 'all', only: false }); saveHl(); rerender(); return; }
     if ('hlAdd' in d) { if (hl.rows.length < 6) hl.rows.push({ stat: '', min: '', tier: '' }); saveHl(); rerender(); return; }
     if (d.hlDel) { hl.rows.splice(Number(d.hlDel), 1); saveHl(); rerender(); return; }
     if ('hlClear' in d) { Object.assign(hl, { text: '', rows: [], mode: 'all' }); saveHl(); rerender(); return; }

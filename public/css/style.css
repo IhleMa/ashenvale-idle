@@ -1512,3 +1512,9 @@ html.standalone body { padding-bottom: env(safe-area-inset-bottom); padding-left
 .overcap { color: #ff9b6b; font-weight: 600; font-size: .9em; }
 .ability-stats { margin-top: 4px; padding: 4px 6px; border-left: 2px solid #7fb8ff; background: rgba(127, 184, 255, .06); border-radius: 4px; line-height: 1.45; }
 .ability-stats-head { color: #a9cdff; font-weight: 600; }
+.inv-presets { margin-top: 6px; align-items: center; }
+.inv-preset { display: inline-flex; }
+.inv-preset > .btn:first-child { border-top-right-radius: 0; border-bottom-right-radius: 0; }
+.inv-preset > .btn:last-child { border-top-left-radius: 0; border-bottom-left-radius: 0; padding: 0 5px; opacity: .6; }
+.inv-preset > .btn:last-child:hover { opacity: 1; }
+.inv-preset.active > .btn:first-child { border-color: var(--accent); color: var(--accent2); box-shadow: 0 0 0 1px var(--accent); }

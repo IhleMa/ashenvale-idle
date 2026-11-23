@@ -324,6 +324,21 @@ export function setSettings(p, s) {
   if ('autoDevelopHero' in s) p.settings.autoDevelopHero = !!s.autoDevelopHero;
   if ('publicProfile' in s) p.settings.publicProfile = !!s.publicProfile;
   if ('autoLootAction' in s) p.settings.autoLootAction = s.autoLootAction === 'salvage' ? 'salvage' : 'sell';
+  if ('invPresets' in s) p.settings.invPresets = cleanInvPresets(s.invPresets);
+}
+
+// saved inventory filters: name + slot/rarity/sort + highlight (search text and stat rows)
+function cleanInvPresets(list) {
+  if (!Array.isArray(list)) return [];
+  const str = (v, n) => String(v ?? '').slice(0, n);
+  return list.slice(0, 12).map(x => ({
+    name: str(x?.name, 24).trim() || 'Filter',
+    slot: str(x?.slot, 20) || 'all', rarity: str(x?.rarity, 20) || 'all', sort: ['rarity', 'level', 'slot'].includes(x?.sort) ? x.sort : 'rarity',
+    hl: {
+      text: str(x?.hl?.text, 60), mode: x?.hl?.mode === 'any' ? 'any' : 'all', only: !!x?.hl?.only,
+      rows: (Array.isArray(x?.hl?.rows) ? x.hl.rows : []).slice(0, 6).map(r => ({ stat: str(r?.stat, 30), min: r?.min === '' || r?.min == null || !Number.isFinite(+r.min) ? '' : +r.min, tier: /^[1-7]?$/.test(String(r?.tier ?? '')) ? String(r?.tier ?? '') : '' })),
+    },
+  }));
 }
 
 // Adds an item (auto-sell rules & capacity respected). Returns 'kept' | 'sold'
