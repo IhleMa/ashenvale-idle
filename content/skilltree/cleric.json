@@ -30,7 +30,7 @@
     },
     {
       "name": "Purity",
-      "attrs": ["int", "dex"],
+      "attrs": ["int", "crit"],
       "abilities": {},
       "notables": {
         "4": { "name": "Clarity", "stats": { "attackSpeed": 0.12 } },

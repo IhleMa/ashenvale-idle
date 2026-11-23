@@ -11,10 +11,7 @@
   "branches": [
     {
       "name": "Paradox",
-      "attrs": [
-        "int",
-        "dex"
-      ],
+      "attrs": ["int", "crit"],
       "abilities": {
         "2": "collapse",
         "5": "fracture"

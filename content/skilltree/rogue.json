@@ -3,7 +3,7 @@
   "branches": [
     {
       "name": "Venom",
-      "attrs": ["dex", "int"],
+      "attrs": ["dex", "crit"],
       "abilities": { "1": "poison_blade", "5": "rupture" },
       "notables": {
         "4": { "name": "Toxicology", "stats": { "damagePct": 0.06, "physPowerPct": 0.04 } },

@@ -11,10 +11,7 @@
   "branches": [
     {
       "name": "Venomancer",
-      "attrs": [
-        "dex",
-        "int"
-      ],
+      "attrs": ["dex", "vit"],
       "abilities": {
         "2": "plague_strike",
         "5": "toxic_cloud"

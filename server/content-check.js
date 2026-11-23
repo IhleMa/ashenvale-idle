@@ -284,7 +284,7 @@ export function validateContent(C) {
     ref(`${w}.start`, spec.start, abilities, 'ability');
     if ((spec.branches || []).length !== 4) err(`${w}.branches`, 'needs exactly 4 branches');
     (spec.branches || []).forEach((br, i) => {
-      for (const a of br.attrs || []) if (!ATTRS.includes(a)) err(`${w}.branches[${i}].attrs`, `"${a}" is not an attribute`);
+      for (const a of br.attrs || []) if (!ATTRS.includes(a) && !['crit', 'speed'].includes(a)) err(`${w}.branches[${i}].attrs`, `"${a}" is not an attribute (or crit / speed)`);
       for (const a of Object.values(br.abilities || {})) { ref(`${w}.branches[${i}].abilities`, a, abilities, 'ability'); if (abilities[a] && abilities[a].classId !== cls) err(`${w}.branches[${i}].abilities`, `"${a}" belongs to ${abilities[a].classId}`); }
       for (const [r, n] of Object.entries(br.notables || {})) for (const k of Object.keys(n.stats || {})) {
         if (k === 'rank') { for (const a of Object.keys(n.stats.rank)) ref(`${w}.branches[${i}].notables.${r}.stats.rank`, a, abilities, 'ability'); }
@@ -303,7 +303,7 @@ export function validateContent(C) {
     if (!Array.isArray(sc.branches) || !sc.branches.length || sc.branches.length > 2) err(`${w}.branches`, 'needs 1 or 2 skill-tree branches');
     (sc.branches || []).forEach((br, i) => {
       str(`${w}.branches[${i}].name`, br.name);
-      for (const a of br.attrs || []) if (!ATTRS.includes(a)) err(`${w}.branches[${i}].attrs`, `"${a}" is not an attribute`);
+      for (const a of br.attrs || []) if (!ATTRS.includes(a) && !['crit', 'speed'].includes(a)) err(`${w}.branches[${i}].attrs`, `"${a}" is not an attribute (or crit / speed)`);
       if ((br.attrs || []).length !== 2) err(`${w}.branches[${i}].attrs`, 'needs [primary, secondary] attributes');
       for (const a of Object.values(br.abilities || {})) {
         ref(`${w}.branches[${i}].abilities`, a, abilities, 'ability');

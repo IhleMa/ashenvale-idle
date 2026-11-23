@@ -10,10 +10,7 @@
   "branches": [
     {
       "name": "Plaguelord",
-      "attrs": [
-        "int",
-        "dex"
-      ],
+      "attrs": ["int", "vit"],
       "abilities": {
         "2": "plague_swarm",
         "5": "pandemic"

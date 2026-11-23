@@ -21,7 +21,7 @@
     },
     {
       "name": "Wilds",
-      "attrs": ["dex", "int"],
+      "attrs": ["dex", "speed"],
       "abilities": { "1": "serpent_sting" },
       "notables": {
         "4": { "name": "Venomcraft", "stats": { "damagePct": 0.06 } },

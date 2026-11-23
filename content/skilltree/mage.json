@@ -12,7 +12,7 @@
     },
     {
       "name": "Cryomancy",
-      "attrs": ["int", "dex"],
+      "attrs": ["int", "crit"],
       "abilities": { "1": "frost_bolt", "5": "frost_nova" },
       "notables": {
         "4": { "name": "Cold Precision", "stats": { "critChance": 1.04 } },
@@ -21,7 +21,7 @@
     },
     {
       "name": "Arcana",
-      "attrs": ["int", "dex"],
+      "attrs": ["int", "speed"],
       "abilities": { "3": "arcane_missiles", "6": "arcane_power" },
       "notables": {
         "4": { "name": "Arcane Flow", "stats": { "attackSpeed": 0.12 } },

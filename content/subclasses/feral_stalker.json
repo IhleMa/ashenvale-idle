@@ -11,10 +11,7 @@
   "branches": [
     {
       "name": "Feral Stalker",
-      "attrs": [
-        "dex",
-        "str"
-      ],
+      "attrs": ["crit", "str"],
       "abilities": {
         "2": "ferocious_bite",
         "5": "pounce"

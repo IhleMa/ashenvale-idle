@@ -30,10 +30,7 @@
     },
     {
       "name": "Claw",
-      "attrs": [
-        "dex",
-        "str"
-      ],
+      "attrs": ["str", "crit"],
       "abilities": {
         "2": "cat_form",
         "5": "rake"
@@ -82,10 +79,7 @@
     },
     {
       "name": "Wild",
-      "attrs": [
-        "int",
-        "dex"
-      ],
+      "attrs": ["int", "speed"],
       "abilities": {
         "2": "natures_cure"
       },

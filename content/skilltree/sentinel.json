@@ -62,10 +62,7 @@
     },
     {
       "name": "Guardian",
-      "attrs": [
-        "vit",
-        "int"
-      ],
+      "attrs": ["vit", "str"],
       "abilities": {
         "3": "aegis",
         "7": "challenging_shout"

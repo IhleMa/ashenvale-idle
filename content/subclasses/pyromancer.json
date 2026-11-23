@@ -11,10 +11,7 @@
   "branches": [
     {
       "name": "Pyromancer",
-      "attrs": [
-        "int",
-        "dex"
-      ],
+      "attrs": ["int", "crit"],
       "abilities": {
         "2": "inferno",
         "5": "combustion"

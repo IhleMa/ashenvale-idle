@@ -12,7 +12,7 @@
     },
     {
       "name": "Hellfire",
-      "attrs": ["int", "dex"],
+      "attrs": ["int", "crit"],
       "abilities": { "1": "summon_imp", "5": "dark_pact" },
       "notables": {
         "4": { "name": "Kindled Servants", "stats": { "minionDamagePct": 0.2 } },

@@ -3,7 +3,8 @@
 //
 // The layout is GENERATED deterministically from the compact specs below, so it is easy to tweak:
 //   - branches:   4 themed sectors around the centre
-//   - attrs:      [primary, secondary] attribute of the small nodes in that branch
+//   - attrs:      [primary, secondary] theme of the small nodes in that branch: an attribute (str/dex/int/vit) or
+//                 crit / speed (% increased critical chance / attack speed — for classes an attribute wouldn't help)
 //   - abilities:  { ring: abilityId } — ability nodes (ring 1 = closest to the centre)
 //   - notables:   { ring: { name, stats } } — bigger passive nodes (ring 8 = outer keystone)
 // Node ids are stable as long as RINGS and the branch count stay the same (saves reference them).
@@ -20,6 +21,8 @@ import { CONTENT, onContentReload } from '../content.js';
 export const TREE_CONFIG = CONTENT.skilltree.config;
 export const TREE_SPECS = CONTENT.skilltree.specs;
 const ATTR_NAMES = CONTENT.skilltree.attributeNames;
+// branch themes that aren't attributes: crit / speed → [stat, value of a full small node]
+const SMALL_STATS = CONTENT.skilltree.config.smallNodeStats || { crit: ['critChance', 0.08], speed: ['attackSpeed', 0.02] };
 
 // --------------------------------------------------------------------------- generator
 const cache = new Map();
@@ -108,7 +111,9 @@ function buildTree(spec) {
     const node = nodes[id(b, r, i)];
     node.type = 'notable';
     node.name = `${br.name} Mastery`;
-    node.stats = p === s ? { [p + 'Pct']: 0.08 } : { [p + 'Pct']: 0.06, [s + 'Pct']: 0.03 };
+    // attribute % — or, for a crit/speed theme, twice a small node of it
+    const pctOf = (a, f) => (SMALL_STATS[a] ? { [SMALL_STATS[a][0]]: SMALL_STATS[a][1] * 2 * f } : { [a + 'Pct']: 0.08 * f });
+    node.stats = p === s ? pctOf(p, 1) : { ...pctOf(p, 0.75), ...pctOf(s, 0.375) };
   });
 
   // ---- ability mutators (subclass branches): change a base ability, placed near the middle of their ring
@@ -157,9 +162,11 @@ function buildTree(spec) {
     if (n.type !== 'small') continue;
     const [p, s] = spec.branches[n.branch].attrs;
     const k = (n.ring + n.index) % 3;
-    if (k === 2 && p !== s) n.stats = { [p]: Math.ceil(smallNodeValue / 2), [s]: Math.ceil(smallNodeValue / 2) };
-    else n.stats = { [k === 1 ? s : p]: smallNodeValue };
-    n.name = Object.keys(n.stats).map(a => ATTR_NAMES[a]).join(' & ');
+    // a theme is an attribute (flat points) or crit / speed (% increased critical chance / attack speed)
+    const give = (a, half) => (SMALL_STATS[a] ? { [SMALL_STATS[a][0]]: SMALL_STATS[a][1] * (half ? 0.5 : 1) } : { [a]: half ? Math.ceil(smallNodeValue / 2) : smallNodeValue });
+    if (k === 2 && p !== s) n.stats = { ...give(p, true), ...give(s, true) };
+    else n.stats = give(k === 1 ? s : p, false);
+    n.name = (p !== s && k === 2 ? [p, s] : [k === 1 ? s : p]).map(a => ATTR_NAMES[a]).join(' & ');
   }
   for (const n of Object.values(nodes)) { n.links.sort(); if (spec.branches[n.branch]?.subclass) n.subclass = spec.branches[n.branch].subclass; }
   return { nodes, start: 'start', branches: spec.branches.map(b => b.name), radius: rings.length * ringSpacing };

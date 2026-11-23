@@ -29,10 +29,7 @@
     },
     {
       "name": "Velocity",
-      "attrs": [
-        "dex",
-        "int"
-      ],
+      "attrs": ["speed", "int"],
       "abilities": {
         "2": "haste",
         "6": "time_dilation"
@@ -55,10 +52,7 @@
     },
     {
       "name": "Entropy",
-      "attrs": [
-        "int",
-        "dex"
-      ],
+      "attrs": ["int", "crit"],
       "abilities": {
         "3": "accelerate",
         "6": "stasis"

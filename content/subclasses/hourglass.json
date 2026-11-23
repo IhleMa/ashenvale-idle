@@ -11,10 +11,7 @@
   "branches": [
     {
       "name": "Hourglass",
-      "attrs": [
-        "dex",
-        "int"
-      ],
+      "attrs": ["speed", "int"],
       "abilities": {
         "2": "moment_of_clarity",
         "5": "rapid_recall"

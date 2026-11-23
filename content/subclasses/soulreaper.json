@@ -10,10 +10,7 @@
   "branches": [
     {
       "name": "Soulreaper",
-      "attrs": [
-        "int",
-        "dex"
-      ],
+      "attrs": ["int", "crit"],
       "abilities": {
         "2": "soul_harvest",
         "5": "deaths_door"
