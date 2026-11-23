@@ -27,7 +27,7 @@ const has = (u, id) => u.statuses.some(s => s.id === id);
   const nodes = Object.values(getTree('rogue').nodes);
   assert.ok(nodes.some(x => x.type === 'ability' && x.ability === 'assassins_mark'));
   const pb = nodes.find(x => x.name === 'Venom Rush');
-  assert.ok(describeNodeStats(pb.stats).some(t => /faster Poison ticks/.test(t)) && describeNodeStats(pb.stats).some(t => /at least 10 Poison stacks/.test(t)));
+  assert.ok(describeNodeStats(pb.stats).some(t => /faster Poison ticks/.test(t)) && describeNodeStats(pb.stats).some(t => /10 Poison stacks/.test(t)));
   ok('tree: Assassin\'s Mark ability node, Venom Rush describes the faster poison');
 }
 
@@ -66,7 +66,7 @@ const has = (u, id) => u.statuses.some(s => s.id === id);
   const slow = ticks({}), few = ticks({ poisonSpeedPct: 1, poisonSpeedAt: 10 }), fast = ticks({ poisonSpeedPct: 1, poisonSpeedAt: 1 });
   assert.equal(few.n, slow.n, 'below 10 stacks: normal speed');
   assert.ok(fast.n >= slow.n * 2 - 1 && slow.n >= 3, `ticks ${slow.n} → ${fast.n}`);
-  ok(`Venom Rush: poison ticks twice as fast (${slow.n} → ${fast.n} ticks in 4 s), but only from the 10th stack on`);
+  ok(`Venom Rush: poison ticks twice as fast (${slow.n} → ${fast.n} ticks in 4 s), from the 10th stack on, until the poison is gone`);
   {
     const { b, me, foes } = battle({ poisonSpeedPct: 1, poisonSpeedAt: 10 });
     me.loadout = []; me.actionTimer = 1e9;
@@ -76,6 +76,26 @@ const has = (u, id) => u.statuses.some(s => s.id === id);
     let n = 0;
     while (b.time < 4) { C.stepBattle(b); n += C.drainEvents(b).filter(e => e.type === 'damage' && e.dot === 'poison' && e.tgt === foes[0].uid).length; }
     assert.ok(n >= slow.n * 10 * 2 - 10, `10 stacks tick twice as fast (${n})`);
+  }
+  // it keeps going below 10 stacks, and stops once all poison is gone
+  {
+    const { b, me, foes } = battle({ poisonSpeedPct: 1, poisonSpeedAt: 10 });
+    me.loadout = []; me.actionTimer = 1e9;
+    for (const f of foes) { f.loadout = []; f.actionTimer = 1e9; }
+    for (let i = 0; i < 10; i++) cast(b, me, 'poison_blade', foes[0]);
+    C.stepBattle(b);
+    assert.equal(foes[0].venomRush, true);
+    foes[0].statuses = foes[0].statuses.filter(s => s.id !== 'poison').concat(foes[0].statuses.filter(s => s.id === 'poison').slice(0, 2));
+    C.drainEvents(b);
+    let n = 0; const t0 = b.time;
+    while (b.time < t0 + 2) { C.stepBattle(b); n += C.drainEvents(b).filter(e => e.type === 'damage' && e.dot === 'poison' && e.tgt === foes[0].uid).length; }
+    assert.ok(n >= 7, `2 stacks still tick twice as fast (${n} ticks in 2 s)`);
+    while (foes[0].statuses.some(s => s.id === 'poison')) C.stepBattle(b);
+    C.stepBattle(b);
+    assert.equal(foes[0].venomRush, false, 'ends with the last poison');
+    cast(b, me, 'poison_blade', foes[0]);
+    C.stepBattle(b);
+    assert.ok(!foes[0].venomRush, 'a fresh poison starts at normal speed');
   }
   assert.equal(ABILITIES.poison_blade.effects.find(e => e.status === 'poison').stat, 'magPower');
   ok('poison scales with Magic Power and deals magic damage');

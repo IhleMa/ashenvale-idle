@@ -37,7 +37,7 @@
           "items": [
             "Poison now deals magic damage and scales with Magic Power instead of Physical Power (Rogue, Venomancer, Ranger and the Wildwood set), with the same percentages as before — poison is much weaker unless you build Intelligence / Magic Power. Enemy poison is magic damage too.",
             "Venomancer: the ascendancy branch gives Intelligence instead of Vitality, and Virulence / Pandemic give +15% / +25% Magic Power instead of Physical Power.",
-            "Plaguebringer is now Venom Rush: +12% damage, and your poison ticks twice as fast on enemies with at least 10 Poison stacks.",
+            "Plaguebringer is now Venom Rush: +12% damage, and once an enemy has 10 Poison stacks, your poison on it ticks twice as fast until all poison on it is gone.",
             "Toxic Cloud reworked: 40 s cooldown, it copies every Poison stack on its target onto all other enemies (no more poison or Expose of its own). Pick whose poison spreads in its behaviour — by default the enemy with the most poison stacks (new target option).",
             "Fixed: Toxic Flurry (Venomancer) applied only one Poison stack per Shadow Flurry — now every hit applies one."
           ]

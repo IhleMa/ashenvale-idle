@@ -232,11 +232,13 @@ function mod(u, key) {
   return v;
 }
 const srcMod = (b, uid, key) => { const u = b.units.find(x => x.uid === uid); return u ? mod(u, key) : 0; };
-// Venom Rush: the source's poison ticks faster once the target carries enough poison stacks (any caster's)
+// Venom Rush: once the target carries enough poison stacks (any caster's), the source's poison ticks faster —
+// until no poison is left on it (tgt.venomRush, cleared in tickStatuses)
 const venomRush = (b, uid, tgt) => {
   const bon = b.units.find(x => x.uid === uid)?.bonuses;
   if (!bon?.poisonSpeedPct) return 0;
-  return tgt.statuses.filter(s => s.id === 'poison').length >= (bon.poisonSpeedAt || 0) ? bon.poisonSpeedPct : 0;
+  if (!tgt.venomRush && tgt.statuses.filter(s => s.id === 'poison').length >= (bon.poisonSpeedAt || 0)) tgt.venomRush = true;
+  return tgt.venomRush ? bon.poisonSpeedPct : 0;
 };
 // how many different debuffs this caster has on a unit (Drain Life, the warlock's AI conditions)
 export function ownDebuffKinds(src, tgt) {
@@ -797,6 +799,7 @@ function tickStatuses(b, u) {
   // Shield Wall rank 3: when the wall ends, a shield worth part of the damage it prevented
   for (const s of u.statuses) if (s.remaining <= 0 && s.absorbShieldPct && s.prevented > 0 && u.alive) { applyStatus(b, u, u, 'barrier', 8, s.prevented * s.absorbShieldPct, 1); s.prevented = 0; }
   u.statuses = u.statuses.filter(s => s.remaining > 0 && !(STATUSES[s.id].absorb && s.value <= 0));
+  if (u.venomRush && !u.statuses.some(s => s.id === 'poison')) u.venomRush = false; // Venom Rush ends with the last poison
   if (u.statuses.length !== before) emit(b, { type: 'status_end', tgt: u.uid });
   // Assassin's Mark: when the mark runs out, the damage it recorded is dealt again
   for (const s of exploding) {

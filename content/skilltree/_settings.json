@@ -38,6 +38,6 @@
     "dotDamagePct": ["damage over time dealt", "pct"],
     "dotDurationPct": ["damage-over-time duration", "pct"],
     "poisonSpeedPct": ["faster Poison ticks", "pct"],
-    "poisonSpeedAt": ["(only on enemies with at least {v} Poison stacks)", "text"]
+    "poisonSpeedAt": ["(once an enemy has {v} Poison stacks, until all its poison is gone)", "text"]
   }
 }
