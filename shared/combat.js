@@ -438,6 +438,7 @@ function applyEffect(b, src, tgt, eff, abilityId) {
         // critResource: a crit refunds resource (Backstab rank 3)
         if (eff.critResource && src.lastHitCrit && src.resourceDef) src.resource = Math.min(src.resourceMax, src.resource + eff.critResource);
         if (marked && tgt.alive) for (const e of eff.onHitIfStatus.effects || []) applyEffect(b, src, tgt, e, abilityId);
+        if (eff.onHit && tgt.alive) for (const e of eff.onHit) applyEffect(b, src, tgt, e, abilityId); // every hit (Toxic Flurry)
         // life drain: heal the caster for part of the damage (more for each of its own different debuffs on the target)
         if (dealt > 0 && (eff.lifesteal || eff.lifestealPerDebuff) && src.alive) healUnit(b, src, src, dealt * ((eff.lifesteal || 0) + (eff.lifestealPerDebuff || 0) * ownDebuffs), abilityId);
       }

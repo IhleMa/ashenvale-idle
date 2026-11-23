@@ -7,7 +7,7 @@
   "cost": 15,
   "cooldown": 3,
   "target": "enemy",
-  "effects": [{ "kind": "status", "status": "poison", "duration": 12, "stat": "magPower", "power": 0.7, "stacks": 1 }],
+  "effects": [{ "kind": "status", "status": "poison", "duration": 12, "stat": "magPower", "power": 0.2, "stacks": 1 }],
   "defaultRule": {
     "enabled": true,
     "mode": "all",

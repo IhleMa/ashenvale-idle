@@ -4,6 +4,8 @@
 //   cost       -5    → resource cost (never below 0)          cooldown  -2 → seconds (never below 0.5)
 //   hits       +2    → extra hits on its damage effects      duration  +3 → seconds on its statuses/shields/taunts
 //   bonusCrit  +0.04 → added base crit chance on its damage      executeBelow 0.45 → sets the execute threshold
+//   set        { "damage": { "onHit": [...] } } → fields merged into the ability's effects of that kind (onHit: effects
+//                      applied on every hit of a multi-hit damage effect)
 //   effects    [...] → extra effects (same format as ability effects; "once": true = only on the first target,
 //                      "self": true = on the caster)
 import { ABILITIES } from './data/abilities.js';

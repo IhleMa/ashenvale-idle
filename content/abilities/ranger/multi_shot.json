@@ -44,7 +44,7 @@
             "status": "poison",
             "duration": 12,
             "stat": "magPower",
-            "power": 0.7,
+            "power": 0.2,
             "stacks": 1,
             "chance": 0.25
           }

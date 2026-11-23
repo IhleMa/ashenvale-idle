@@ -69,6 +69,20 @@ const has = (u, id) => u.statuses.some(s => s.id === id);
   assert.equal(ABILITIES.poison_blade.effects.find(e => e.status === 'poison').stat, 'magPower');
   ok('poison scales with Magic Power and deals magic damage');
 }
+// Toxic Flurry (Venomancer mutator): every hit of Shadow Flurry applies a poison stack
+{
+  const { applyMutators } = await import('../shared/mutators.js');
+  const { SUBCLASSES } = await import('../shared/data/subclasses.js');
+  const mut = SUBCLASSES.venomancer.branches[0].mutators['7'];
+  const flurry = applyMutators(ABILITIES.shadow_flurry, [mut.changes]);
+  const { b, me, foes } = battle();
+  for (const f of foes) f.dodge = 0;
+  me.stats.hitChance = 1;
+  for (const eff of flurry.effects) C.__test.applyEffect(b, me, foes[0], eff, 'shadow_flurry');
+  const n = foes[0].statuses.filter(s => s.id === 'poison').length;
+  assert.equal(n, flurry.effects[0].hits, `${n} poison stacks from ${flurry.effects[0].hits} hits`);
+  ok(`Toxic Flurry: each of the ${n} hits applies a poison stack`);
+}
 // Toxic Cloud: every poison stack on the chosen enemy is copied to all other enemies
 {
   const { b, me, foes } = battle();

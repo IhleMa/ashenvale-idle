@@ -53,7 +53,7 @@
                 "status": "poison",
                 "duration": 10,
                 "stat": "magPower",
-                "power": 0.875
+                "power": 0.25
               }
             ]
           }
@@ -61,17 +61,21 @@
         "7": {
           "name": "Toxic Flurry",
           "ability": "shadow_flurry",
-          "description": "Shadow Flurry coats each blade in poison.",
+          "description": "Shadow Flurry coats each blade in poison: every hit applies a Poison stack.",
           "changes": {
-            "effects": [
-              {
-                "kind": "status",
-                "status": "poison",
-                "duration": 8,
-                "stat": "magPower",
-                "power": 1.05
+            "set": {
+              "damage": {
+                "onHit": [
+                  {
+                    "kind": "status",
+                    "status": "poison",
+                    "duration": 8,
+                    "stat": "magPower",
+                    "power": 0.3
+                  }
+                ]
               }
-            ]
+            }
           }
         }
       }
