@@ -1,6 +1,19 @@
 {
   "entries": [
     {
+      "id": "2026-11-26",
+      "date": "2026-11-26",
+      "title": "Fight duration and XP per second",
+      "sections": [
+        {
+          "heading": "Interface",
+          "items": [
+            "Recent fights show how long each fight took and the XP per second it gave. Collapsed, the panel's header shows the average XP per second of the listed fights (fight time only, rests between fights don't count)."
+          ]
+        }
+      ]
+    },
+    {
       "id": "2026-11-23",
       "date": "2026-11-23",
       "title": "Pinnacle bosses, group combat everywhere and a poison rework",

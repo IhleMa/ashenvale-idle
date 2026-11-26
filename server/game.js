@@ -738,7 +738,7 @@ export class Game {
     if (fight.kind === 'pinnacle' && won) rank = this.pinnacle.record(fight.bossId, b, players.map(x => ({ id: x.p.id, name: x.p.name })));
     for (const { part, ss, p } of players) {
       const chars = part.chars.map(id => p.characters[id]).filter(Boolean);
-      const summary = { result: b.state, kind: fight.kind, zoneId: fight.zoneId || null, group: fight.group };
+      const summary = { result: b.state, kind: fight.kind, zoneId: fight.zoneId || null, group: fight.group, duration: Math.round(b.time * 10) / 10 };
       if (fight.kind !== 'coop') p.stats.fights++;
       if (fight.kind === 'rift') this.riftRewards(p, chars, fight, summary);
       else if (won) {

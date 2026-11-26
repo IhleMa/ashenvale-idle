@@ -91,7 +91,7 @@ bus.on('msg:bt', m => {
 bus.on('msg:battle_end', m => {
   const b = battles[m.k];
   const s = m.summary;
-  results[m.k].unshift({ ...s, at: Date.now(), title: b?.meta?.title });
+  results[m.k].unshift({ ...s, at: Date.now(), title: b?.meta?.title, duration: s.duration ?? (b ? Math.round(b.time * 10) / 10 : null) });
   results[m.k].length = Math.min(results[m.k].length, 8);
   if (b) {
     b.state = s.result;
@@ -513,6 +513,9 @@ function toggleResults() {
   root?.querySelector('.panel.results')?.classList.toggle('collapsed', !open);
 }
 
+const fmtSecs = t => (t >= 60 ? `${Math.floor(t / 60)}:${String(Math.round(t % 60)).padStart(2, '0')}` : `${t.toFixed(1)}s`);
+const xpRate = (xp, secs) => { const r = xp / secs; return r >= 100 ? fmt(Math.round(r)) : r.toFixed(1); };
+
 function renderResults() {
   const el = root?.querySelector('.results-list');
   if (!el) return;
@@ -520,11 +523,14 @@ function renderResults() {
   const sum = root.querySelector('.results-summary');
   if (sum) {
     const won = list.filter(r => r.result === 'victory').length, last = list[0];
-    sum.innerHTML = list.length ? `last: <b class="${last.result === 'victory' ? 'good' : 'bad'}">${last.result === 'victory' ? 'Victory' : 'Defeat'}</b>${last.result === 'victory' && last.kind !== 'arena' ? ` · <span class="xp-text">+${fmt(last.xp)} XP</span> · <span class="gold-text">+${fmt(last.gold)}g</span>` : ''} · ${won}/${list.length} won` : '';
+    // XP per second over the listed fights (fight time only: rests between fights don't count)
+    const timed = list.filter(r => r.kind !== 'arena' && r.duration > 0);
+    const secs = timed.reduce((n, r) => n + r.duration, 0), xp = timed.reduce((n, r) => n + (r.result === 'victory' ? r.xp || 0 : 0), 0);
+    sum.innerHTML = list.length ? `last: <b class="${last.result === 'victory' ? 'good' : 'bad'}">${last.result === 'victory' ? 'Victory' : 'Defeat'}</b>${last.result === 'victory' && last.kind !== 'arena' ? ` · <span class="xp-text">+${fmt(last.xp)} XP</span> · <span class="gold-text">+${fmt(last.gold)}g</span>` : ''} · ${won}/${list.length} won${secs ? ` · <span class="xp-text" title="Average of these fights (fight time only)">${xpRate(xp, secs)} XP/s</span>` : ''}` : '';
   }
   el.innerHTML = list.length ? list.map(r => `<div class="result-row ${r.result}">
-      <div><b>${r.result === 'victory' ? 'Victory' : 'Defeat'}</b> <span class="muted small">${esc(r.title || '')}</span></div>
-      ${r.kind === 'arena' ? `<div class="small">${r.delta >= 0 ? '+' : ''}${r.delta} arena rating${r.gold ? ` · <span class="gold-text">+${fmt(r.gold)}g</span>` : ''}</div>` : r.result === 'victory' ? `<div class="small"><span class="xp-text">+${fmt(r.xp)} XP</span> · <span class="gold-text">+${fmt(r.gold)}g</span>
+      <div class="row between gap"><span><b>${r.result === 'victory' ? 'Victory' : 'Defeat'}</b> <span class="muted small">${esc(r.title || '')}</span></span>${r.duration > 0 ? `<span class="muted small" title="Fight duration">⏱ ${fmtSecs(r.duration)}</span>` : ''}</div>
+      ${r.kind === 'arena' ? `<div class="small">${r.delta >= 0 ? '+' : ''}${r.delta} arena rating${r.gold ? ` · <span class="gold-text">+${fmt(r.gold)}g</span>` : ''}</div>` : r.result === 'victory' ? `<div class="small"><span class="xp-text">+${fmt(r.xp)} XP</span>${r.duration > 0 ? ` <span class="muted">(${xpRate(r.xp || 0, r.duration)} XP/s)</span>` : ''} · <span class="gold-text">+${fmt(r.gold)}g</span>
         ${(r.items || []).map(i => `<div class="rarity-text rarity-${i.rarity}">${esc(i.name)}</div>`).join('')}
         ${r.sold ? `<div class="muted">${r.sold} item(s) auto-sold/salvaged</div>` : ''}
         ${(r.levelUps || []).map(l => `<div class="lvlup">▲ ${esc(l.name)} → Lv ${l.level}</div>`).join('')}</div>` : ''}
